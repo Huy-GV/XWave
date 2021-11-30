@@ -28,17 +28,29 @@ namespace XWave.Controllers
             _authService = authenticationService;  
         }
 
-        [HttpPost]
+        [HttpPost("register")]
         public async Task<ActionResult<AuthenticationModel>> RegisterAsync(RegisterModel model)
         {
             return await _authService.RegisterAsync(model);
         }
-        [HttpPost]
+        [HttpPost("login")]
         public async Task<ActionResult<AuthenticationModel>> LogInAsync(LogInModel model)
         {
             return await _authService.LogInAsync(model);
         }
-        [HttpGet("user/test")]
+        [HttpGet("test/manager")]
+        [Authorize(Roles ="manager")]
+        public ActionResult<string> TestManager()
+        {
+            return "OK MANAGER WORKS";
+        }
+        [HttpGet("test/staff")]
+        [Authorize(Roles = "staff")]
+        public ActionResult<string> TestStaff()
+        {
+            return "OK STAFF WORKS";
+        }
+        [HttpGet("test")]
         public ActionResult<string> GetUsers()
         {
             return "OK WORKS";

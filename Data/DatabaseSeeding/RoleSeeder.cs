@@ -30,9 +30,9 @@ namespace XWave.Data.DatabaseSeeding
                     roleManager, 
                     new string[] 
                     {
-                        Roles.CustomerRole,
-                        Roles.ManagerRole,
-                        Roles.StaffRole
+                        Roles.Customer,
+                        Roles.Manager,
+                        Roles.Staff
                     }
                 );
 
@@ -53,6 +53,9 @@ namespace XWave.Data.DatabaseSeeding
         }
         private static async Task CreateCustomerAsync(UserManager<ApplicationUser> userManager)
         {
+            if (await userManager.FindByNameAsync("john_customer") != null) 
+                return;
+
             var customer = new ApplicationUser()
             {
                 UserName = "john_customer",
@@ -61,10 +64,13 @@ namespace XWave.Data.DatabaseSeeding
             };
 
             await userManager.CreateAsync(customer, "Password123@@");
-            await userManager.AddToRoleAsync(customer, Roles.CustomerRole);
+            await userManager.AddToRoleAsync(customer, Roles.Customer);
         }
         private static async Task CreateStaffAsync(UserManager<ApplicationUser> userManager)
         {
+            if (await userManager.FindByNameAsync("paul_staff") != null) 
+                return;
+
             var staff = new ApplicationUser()
             {
                 UserName = "paul_staff",
@@ -73,10 +79,13 @@ namespace XWave.Data.DatabaseSeeding
             };
 
             await userManager.CreateAsync(staff, "Password123@@");
-            await userManager.AddToRoleAsync(staff, Roles.StaffRole);
+            await userManager.AddToRoleAsync(staff, Roles.Staff);
         }
         private static async Task CreateManagerAsync(UserManager<ApplicationUser> userManager)
         {
+            if (await userManager.FindByNameAsync("huy_manager") != null) 
+                return;
+            
             var manager = new ApplicationUser()
             {
                 UserName = "huy_manager",
@@ -85,7 +94,7 @@ namespace XWave.Data.DatabaseSeeding
             };
 
             await userManager.CreateAsync(manager, "Password123@@");
-            await userManager.AddToRoleAsync(manager, Roles.ManagerRole);
+            await userManager.AddToRoleAsync(manager, Roles.Manager);
         }
     }
 }

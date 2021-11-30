@@ -52,6 +52,9 @@ namespace XWave.Services
         {
             AuthenticationModel authModel = new();
             JwtSecurityToken jwtSecurityToken = await CreateJwtTokenAsync(user);
+            
+            authModel.IsAuthenticated = true;
+            authModel.Message = "User logged in";
             authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
             authModel.Email = user.Email;
             authModel.UserName = user.UserName;
@@ -85,6 +88,7 @@ namespace XWave.Services
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
             var roles = await _userManager.GetRolesAsync(user);
+
             var roleClaims = new List<Claim>();
             foreach(var role in roles)
             {
@@ -98,7 +102,6 @@ namespace XWave.Services
                 // new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("uid", user.Id)
             }
-
             .Union(userClaims)
             .Union(roleClaims);
 
@@ -124,7 +127,7 @@ namespace XWave.Services
                 Country = "Australia",
             };
             await _userManager.CreateAsync(user, model.Password);
-            await _userManager.AddToRoleAsync(user, Roles.CustomerRole);
+            await _userManager.AddToRoleAsync(user, Roles.Customer);
             return await GetTokenAsync(user);
 
         }
