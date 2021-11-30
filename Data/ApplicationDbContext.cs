@@ -16,6 +16,10 @@ namespace XWave.Data
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
         }
+
+        // public DbSet<Category> Categories;
+        // public DbSet<Discount> Discounts;
+        public DbSet<Product> Products { get; set; }
     }
     //public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
     //{
