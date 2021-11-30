@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31613.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave", "XWave.csproj", "{14472F36-257F-4171-952A-6393E3397680}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{14472F36-257F-4171-952A-6393E3397680}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14472F36-257F-4171-952A-6393E3397680}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14472F36-257F-4171-952A-6393E3397680}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14472F36-257F-4171-952A-6393E3397680}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B014DD62-D137-429F-8CA2-BD73A5267550}
+	EndGlobalSection
+EndGlobal
