@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using XWave.Data;
 
 namespace XWave.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211130111614_Inventory_Product_Merge")]
+    partial class Inventory_Product_Merge
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -212,8 +214,8 @@ namespace XWave.Data.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Description")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -222,7 +224,7 @@ namespace XWave.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Category");
                 });
 
             modelBuilder.Entity("XWave.Models.Discount", b =>
@@ -235,6 +237,9 @@ namespace XWave.Data.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Percentage")
                         .HasColumnType("int");
 
@@ -243,7 +248,7 @@ namespace XWave.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Discounts");
+                    b.ToTable("Discount");
                 });
 
             modelBuilder.Entity("XWave.Models.Product", b =>
@@ -261,6 +266,9 @@ namespace XWave.Data.Migrations
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("InventoryID")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("LastRestock")
                         .HasColumnType("datetime2");

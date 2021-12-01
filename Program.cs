@@ -24,8 +24,10 @@ namespace XWave
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
+                    context.Database.EnsureDeleted();
                     context.Database.Migrate();
                     RoleSeeder.SeedData(services).Wait();
+                    ProductSeeder.SeedData(services);
                 }
                 catch (Exception ex)
                 {

@@ -38,29 +38,29 @@ namespace XWave.Controllers
         {
             return await _authService.LogInAsync(model);
         }
-        // [HttpGet("test/manager")]
-        // [Authorize(Roles ="manager")]
-        // public ActionResult<string> TestManager()
-        // {
-        //     return "OK MANAGER WORKS";
-        // }
-        // [HttpGet("test/staff")]
-        // [Authorize(Roles = "staff")]
-        // public ActionResult<string> TestStaff()
-        // {
-        //     return "OK STAFF WORKS";
-        // }
-        // [HttpGet("test")]
-        // public ActionResult<string> GetUsers()
-        // {
-        //     return "OK WORKS";
-        // }
+        [HttpGet("test/manager")]
+        [Authorize(Roles ="manager")]
+        public ActionResult<string> TestManager()
+        {
+            return "OK MANAGER WORKS";
+        }
+        [HttpGet("test/staff")]
+        [Authorize(Roles = "staff")]
+        public ActionResult<string> TestStaff()
+        {
+            return "OK STAFF WORKS";
+        }
+        [HttpGet("test")]
+        public ActionResult<string> GetUsers()
+        {
+            return "OK WORKS";
+        }
 
-        // [Authorize]
-        // [HttpGet("test/random")]
-        // public ActionResult<string> TestRandom()
-        // {
-        //     return "OK WORKS";
-        // }
+        [Authorize]
+        [HttpGet("test/random")]
+        public ActionResult<string> TestRandom()
+        {
+            return "OK WORKS";
+        }
     }
 }

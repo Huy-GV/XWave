@@ -12,11 +12,13 @@ namespace XWave.Models
         [Required]
         public int Price { get; set; }
         public string ImagePath { get; set; }
-        public int InventoryID { get; set; }
+
+        [Range(0, double.MaxValue, ErrorMessage ="Quantity cannot be negative")]
+        public int Quantity { get; set; }
+        public DateTime LastRestock { get; set; }
         public int? CategoryID { get; set; }
         public int? DiscountID { get; set; }
         //navigation properties
-        public Inventory Inventory { get; set; }
         #nullable enable
         public Category? Category { get; set; }
         public Discount? Discount { get; set; }

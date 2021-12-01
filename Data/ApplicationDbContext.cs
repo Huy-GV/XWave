@@ -13,14 +13,15 @@ namespace XWave.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public ApplicationDbContext(DbContextOptions options) : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
-        // public DbSet<Category> Categories;
-        // public DbSet<Discount> Discounts;
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Discount> Discounts { get; set; }
         public DbSet<Product> Products { get; set; }
     }
+
     //public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
     //{
     //    public ApplicationDbContext(

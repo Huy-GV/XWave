@@ -10,7 +10,14 @@ namespace XWave.Models
         [Required]
         [Range(1, 100, ErrorMessage ="Discount percentage outside valid range")]
         public int Percentage { get; set; }
-        public bool IsActive { get; set; } = false;
+        public bool IsActive 
+        { 
+            get 
+            {
+                var currentDate = DateTime.Now;
+                return currentDate > StartDate && currentDate < EndDate;
+            }   
+        } 
         [Required]
         public DateTime StartDate { get; set; }
         [Required]

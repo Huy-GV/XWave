@@ -65,15 +65,6 @@ namespace XWave
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 
-            //services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
-            //    .AddEntityFrameworkStores<ApplicationDbContext>();
-
-            //services.AddIdentityServer()
-            //    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
-
-            //services.AddAuthentication()
-            //    .AddIdentityServerJwt();
-
             services.AddControllersWithViews();
             services.AddRazorPages();
 
