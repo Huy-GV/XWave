@@ -56,8 +56,9 @@ namespace XWave.Data.DatabaseSeeding
             var customer = new ApplicationUser()
             {
                 UserName = "john_customer",
-                RegistrationDate = DateTime.Now,
-                Country = "Australia"
+                FirstName = "John",
+                LastName = "Applebee",
+                RegistrationDate = DateTime.Now
             };
 
             await userManager.CreateAsync(customer, "Password123@@");
@@ -71,8 +72,9 @@ namespace XWave.Data.DatabaseSeeding
             var staff = new ApplicationUser()
             {
                 UserName = "paul_staff",
+                FirstName = "Paul",
+                LastName = "Applebee",
                 RegistrationDate = DateTime.Now,
-                Country = "Australia"
             };
 
             await userManager.CreateAsync(staff, "Password123@@");
@@ -86,8 +88,9 @@ namespace XWave.Data.DatabaseSeeding
             var manager = new ApplicationUser()
             {
                 UserName = "huy_manager",
-                RegistrationDate = DateTime.Now,
-                Country = "Australia"
+                FirstName = "Huy",
+                LastName = "Applebee",
+                RegistrationDate = DateTime.Now
             };
 
             await userManager.CreateAsync(manager, "Password123@@");

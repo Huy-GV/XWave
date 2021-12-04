@@ -21,10 +21,10 @@ namespace XWave.Data.DatabaseSeeding
                 serviceProvider
                 .GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
-                var dbContext = serviceProvider.GetService<ApplicationDbContext>();
-                CreateCategories(dbContext);
-                CreateDiscounts(dbContext);
-                CreateProducts(dbContext);
+                CreateCategories(context);
+                CreateDiscounts(context);
+                CreateProducts(context);
+                context.Database.CloseConnection();
             }
         }
 
@@ -98,7 +98,6 @@ namespace XWave.Data.DatabaseSeeding
                 },
             };
             dbContext.Products.AddRange(products);
-            
             dbContext.SaveChanges();
         }
         public static void CreateDiscounts(ApplicationDbContext dbContext)

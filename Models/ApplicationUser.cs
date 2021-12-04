@@ -14,11 +14,17 @@ namespace XWave.Models
         [Required]
         [DataType(DataType.Date)]
         public DateTime RegistrationDate { get; set; }
-        [Required]
-        public string Country { get; set; }
         public int? PaymentId { get; set; }
+        [Required]
+        [StringLength(15, MinimumLength = 2)]
+        public string FirstName { get; set; }
+        [Required]
+        [StringLength(25, MinimumLength = 2)]
+        public string LastName { get; set; }
+        public int? CustomerID { get; set; }
+        public Customer? Customer { get; set; }
 
-        // REMOVED FROM TABLE
+        //// REMOVED FROM TABLE
         [NotMapped]
         public override string NormalizedEmail { get; set; }        
         [NotMapped]

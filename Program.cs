@@ -21,21 +21,31 @@ namespace XWave
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<ApplicationDbContext>();
+                context.Database.EnsureDeleted();
+                context.Database.Migrate();
+
                 try
                 {
-                    var context = services.GetRequiredService<ApplicationDbContext>();
-                    context.Database.EnsureDeleted();
-                    context.Database.Migrate();
                     RoleSeeder.SeedData(services).Wait();
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while seeding roles and users");
+                }
+
+                try
+                {
                     ProductSeeder.SeedData(services);
                 }
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred creating the admin role");
+                    logger.LogError(ex, "An error occurred while seeding products");
                 }
+
             }
-            
             
             host.Run();
         }

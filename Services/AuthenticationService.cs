@@ -123,36 +123,35 @@ namespace XWave.Services
         {
             var user = new ApplicationUser
             {
-                UserName = model.Username,
-                Country = "Australia",
+                UserName = model.Username
             };
             await _userManager.CreateAsync(user, model.Password);
             await _userManager.AddToRoleAsync(user, Roles.Customer);
             return await GetTokenAsync(user);
 
         }
-        public bool ValidToken(string token)
-        {
-            var key = Encoding.ASCII.GetBytes(_jwt.Key);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            try
-            {
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
+        // public bool ValidToken(string token)
+        // {
+        //     var key = Encoding.ASCII.GetBytes(_jwt.Key);
+        //     var tokenHandler = new JwtSecurityTokenHandler();
+        //     try
+        //     {
+        //         tokenHandler.ValidateToken(token, new TokenValidationParameters
+        //         {
+        //             ValidateIssuerSigningKey = true,
+        //             IssuerSigningKey = new SymmetricSecurityKey(key),
+        //             ValidateIssuer = false,
+        //             ValidateAudience = false,
+        //             // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
+        //             ClockSkew = TimeSpan.Zero
+        //         }, out SecurityToken validatedToken);
 
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        //         return true;
+        //     }
+        //     catch
+        //     {
+        //         return false;
+        //     }
+        // }
     }
 }

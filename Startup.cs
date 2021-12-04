@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 using XWave.Data;
 using XWave.Models;
 using XWave.Services;
@@ -45,6 +46,16 @@ namespace XWave
                 .AddJwtBearer(options =>
                 {
                     options.RequireHttpsMetadata = false;
+                    //TODO: replace with token key
+                    // options.Events.OnMessageReceived = context =>
+                    // {
+                    //     if (context.Request.Cookies.ContainsKey("X-Access-Token"))
+                    //     {
+                    //         //set the cookie token into the bearer header
+                    //         context.Token = context.Request.Cookies["X-Access-Token"];
+                    //     }
+                    //     return Task.CompletedTask;
+                    // };
                     options.SaveToken = false;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
