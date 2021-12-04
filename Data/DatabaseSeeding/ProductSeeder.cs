@@ -53,10 +53,10 @@ namespace XWave.Data.DatabaseSeeding
             };
 
             dbContext.Database.OpenConnection();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Categories ON") ;
-            dbContext.Categories.AddRange(categories);
+            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Category ON") ;
+            dbContext.Category.AddRange(categories);
             dbContext.SaveChanges();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Categories OFF") ;
+            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Category OFF") ;
 
         }
         public static void CreateProducts(ApplicationDbContext dbContext)
@@ -97,7 +97,7 @@ namespace XWave.Data.DatabaseSeeding
                     CategoryID = 1
                 },
             };
-            dbContext.Products.AddRange(products);
+            dbContext.Product.AddRange(products);
             dbContext.SaveChanges();
         }
         public static void CreateDiscounts(ApplicationDbContext dbContext)
@@ -120,10 +120,10 @@ namespace XWave.Data.DatabaseSeeding
                 }
             };
             dbContext.Database.OpenConnection();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Discounts ON") ;
-            dbContext.Discounts.AddRange(discounts);
+            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Discount ON") ;
+            dbContext.Discount.AddRange(discounts);
             dbContext.SaveChanges();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Discounts OFF") ;
+            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Discount OFF") ;
         }
     }
 }

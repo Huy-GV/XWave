@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
-using XWave.Data.RequestModels;
+using XWave.Data.ViewModels;
 using System.Net;
 
 namespace XWave.Services
@@ -62,7 +62,7 @@ namespace XWave.Services
 
             return authModel;
         }
-        public async Task<AuthenticationModel> LogInAsync(LogInModel model)
+        public async Task<AuthenticationModel> LogInAsync(LogInVM model)
         {
             AuthenticationModel authModel = new();
             var user = await _userManager.FindByNameAsync(model.Username);
@@ -119,7 +119,7 @@ namespace XWave.Services
 
             return jwtSecurityToken;
         }
-        public async Task<AuthenticationModel> RegisterAsync(RegisterModel model)
+        public async Task<AuthenticationModel> RegisterAsync(RegisterVM model)
         {
             var user = new ApplicationUser
             {

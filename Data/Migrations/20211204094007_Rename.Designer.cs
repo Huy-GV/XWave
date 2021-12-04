@@ -10,8 +10,8 @@ using XWave.Data;
 namespace XWave.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211204043418_Order_Related_Models")]
-    partial class Order_Related_Models
+    [Migration("20211204094007_Rename")]
+    partial class Rename
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -235,7 +235,7 @@ namespace XWave.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Category");
                 });
 
             modelBuilder.Entity("XWave.Models.Customer", b =>
@@ -278,7 +278,53 @@ namespace XWave.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Discounts");
+                    b.ToTable("Discount");
+                });
+
+            modelBuilder.Entity("XWave.Models.Order", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CustomerID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CustomerID");
+
+                    b.HasIndex("PaymentID");
+
+                    b.ToTable("Order");
+                });
+
+            modelBuilder.Entity("XWave.Models.OrderDetail", b =>
+                {
+                    b.Property<int>("OrderID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PriceAtOrder")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<long>("Quantity")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("OrderID", "ProductID");
+
+                    b.HasIndex("ProductID");
+
+                    b.ToTable("OrderDetail");
                 });
 
             modelBuilder.Entity("XWave.Models.Payment", b =>
@@ -339,7 +385,7 @@ namespace XWave.Data.Migrations
 
                     b.HasIndex("DiscountID");
 
-                    b.ToTable("Products");
+                    b.ToTable("Product");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -409,6 +455,44 @@ namespace XWave.Data.Migrations
                         .HasForeignKey("PaymentID");
 
                     b.Navigation("Payment");
+                });
+
+            modelBuilder.Entity("XWave.Models.Order", b =>
+                {
+                    b.HasOne("XWave.Models.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XWave.Models.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Payment");
+                });
+
+            modelBuilder.Entity("XWave.Models.OrderDetail", b =>
+                {
+                    b.HasOne("XWave.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XWave.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("XWave.Models.Product", b =>

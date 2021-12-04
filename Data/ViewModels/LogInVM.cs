@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace XWave.Data.RequestModels
+namespace XWave.Data.ViewModels
 {
-    public class LogInModel
+    public class LogInVM
     {
         [Required]
         public string Username { get; set; }

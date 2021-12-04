@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace XWave.Data.RequestModels
+namespace XWave.Data.ViewModels
 {
-    public class RegisterModel
+    public class RegisterVM
     {
         [Required]
         public string FirstName { get; set; }

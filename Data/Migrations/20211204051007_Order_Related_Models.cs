@@ -76,6 +76,59 @@ namespace XWave.Data.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Order",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CustomerID = table.Column<int>(type: "int", nullable: false),
+                    PaymentID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Order", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Order_Customer_CustomerID",
+                        column: x => x.CustomerID,
+                        principalTable: "Customer",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Order_Payment_PaymentID",
+                        column: x => x.PaymentID,
+                        principalTable: "Payment",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderDetail",
+                columns: table => new
+                {
+                    OrderID = table.Column<int>(type: "int", nullable: false),
+                    ProductID = table.Column<int>(type: "int", nullable: false),
+                    PriceAtOrder = table.Column<decimal>(type: "decimal(18,4)", nullable: false),
+                    Quantity = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderDetail", x => new { x.OrderID, x.ProductID });
+                    table.ForeignKey(
+                        name: "FK_OrderDetail_Order_OrderID",
+                        column: x => x.OrderID,
+                        principalTable: "Order",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderDetail_Products_ProductID",
+                        column: x => x.ProductID,
+                        principalTable: "Products",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUsers_CustomerID",
                 table: "AspNetUsers",
@@ -85,6 +138,21 @@ namespace XWave.Data.Migrations
                 name: "IX_Customer_PaymentID",
                 table: "Customer",
                 column: "PaymentID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Order_CustomerID",
+                table: "Order",
+                column: "CustomerID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Order_PaymentID",
+                table: "Order",
+                column: "PaymentID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderDetail_ProductID",
+                table: "OrderDetail",
+                column: "ProductID");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUsers_Customer_CustomerID",
@@ -100,6 +168,12 @@ namespace XWave.Data.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_AspNetUsers_Customer_CustomerID",
                 table: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "OrderDetail");
+
+            migrationBuilder.DropTable(
+                name: "Order");
 
             migrationBuilder.DropTable(
                 name: "Customer");

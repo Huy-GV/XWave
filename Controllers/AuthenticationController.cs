@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
-using XWave.Data.RequestModels ;
+using XWave.Data.ViewModels ;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -29,12 +29,12 @@ namespace XWave.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AuthenticationModel>> RegisterAsync(RegisterModel model)
+        public async Task<ActionResult<AuthenticationModel>> RegisterAsync(RegisterVM model)
         {
             return await _authService.RegisterAsync(model);
         }
         [HttpPost("login")]
-        public async Task<ActionResult<AuthenticationModel>> LogInAsync(LogInModel model)
+        public async Task<ActionResult<AuthenticationModel>> LogInAsync(LogInVM model)
         {
             return await _authService.LogInAsync(model);
         }
