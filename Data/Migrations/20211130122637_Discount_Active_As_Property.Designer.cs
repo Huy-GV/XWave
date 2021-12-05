@@ -9,7 +9,7 @@ using XWave.Data;
 
 namespace XWave.Data.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(XWaveDbContext))]
     [Migration("20211130122637_Discount_Active_As_Property")]
     partial class Discount_Active_As_Property
     {

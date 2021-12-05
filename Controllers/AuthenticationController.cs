@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
-using XWave.Data.ViewModels ;
+using XWave.ViewModels.Authentication ;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;

@@ -9,7 +9,7 @@ using XWave.Data;
 
 namespace XWave.Data.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(XWaveDbContext))]
     [Migration("20211130094808_Product_Category_Discount_Inventory")]
     partial class Product_Category_Discount_Inventory
     {

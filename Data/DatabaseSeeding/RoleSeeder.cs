@@ -16,9 +16,9 @@ namespace XWave.Data.DatabaseSeeding
     {
         public static async Task SeedData(IServiceProvider serviceProvider)
         {
-            using (var context = new ApplicationDbContext(
+            using (var context = new XWaveDbContext(
                     serviceProvider
-                    .GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
+                    .GetRequiredService<DbContextOptions<XWaveDbContext>>()))
             {
                 var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();

@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
-using XWave.Data.ViewModels;
+using XWave.ViewModels.Authentication;
 using System.Net;
 
 namespace XWave.Services

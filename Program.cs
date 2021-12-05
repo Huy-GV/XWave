@@ -21,7 +21,7 @@ namespace XWave
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<ApplicationDbContext>();
+                var context = services.GetRequiredService<XWaveDbContext>();
                 context.Database.EnsureDeleted();
                 context.Database.Migrate();
 

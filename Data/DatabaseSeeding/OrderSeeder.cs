@@ -11,9 +11,9 @@ namespace XWave.Data.DatabaseSeeding
     {
         public static void SeedData(IServiceProvider serviceProvider)
         {
-            using (var context = new ApplicationDbContext(
+            using (var context = new XWaveDbContext(
                 serviceProvider
-                .GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
+                .GetRequiredService<DbContextOptions<XWaveDbContext>>()))
             {
                 CreatePayments(context);
                 CreateCustomers(context);
@@ -23,7 +23,7 @@ namespace XWave.Data.DatabaseSeeding
             }
         }
 
-        private static void CreatePayments(ApplicationDbContext dbContext)
+        private static void CreatePayments(XWaveDbContext dbContext)
         {
             var payments = new List<Payment>()
             {
@@ -49,7 +49,7 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.SaveChanges();
             dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Payment OFF");
         }
-        private static void CreateCustomers(ApplicationDbContext dbContext)
+        private static void CreateCustomers(XWaveDbContext dbContext)
         {
             var customers = new List<Customer>()
             {
@@ -73,7 +73,7 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.SaveChanges();
             dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Customer OFF");
         }
-        private static void CreateOrders(ApplicationDbContext dbContext)
+        private static void CreateOrders(XWaveDbContext dbContext)
         {
             var orders = new List<Order>()
             {
@@ -105,7 +105,7 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.SaveChanges();
             // dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Order OFF");
         }
-        private static void CreateOrderDetail(ApplicationDbContext dbContext)
+        private static void CreateOrderDetail(XWaveDbContext dbContext)
         {
             var orderDetail = new List<OrderDetail>()
             {

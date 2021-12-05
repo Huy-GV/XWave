@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace XWave.Data.ViewModels
+namespace XWave.ViewModels.Authentication
 {
     public class LogInVM
     {

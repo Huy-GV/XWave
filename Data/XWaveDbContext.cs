@@ -11,9 +11,9 @@ using XWave.Models;
 
 namespace XWave.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class XWaveDbContext : IdentityDbContext<ApplicationUser>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        public XWaveDbContext(DbContextOptions<XWaveDbContext> options) : base(options)
         {
         }
 

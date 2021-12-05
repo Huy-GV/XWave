@@ -17,9 +17,9 @@ namespace XWave.Data.DatabaseSeeding
     {
         public static void SeedData(IServiceProvider serviceProvider)
         {
-            using (var context = new ApplicationDbContext(
+            using (var context = new XWaveDbContext(
                 serviceProvider
-                .GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
+                .GetRequiredService<DbContextOptions<XWaveDbContext>>()))
             {
                 CreateCategories(context);
                 CreateDiscounts(context);
@@ -28,7 +28,7 @@ namespace XWave.Data.DatabaseSeeding
             }
         }
 
-        public static void CreateCategories(ApplicationDbContext dbContext)
+        public static void CreateCategories(XWaveDbContext dbContext)
         {
             var categories = new List<Category>()
             {
@@ -59,7 +59,7 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Category OFF") ;
 
         }
-        public static void CreateProducts(ApplicationDbContext dbContext)
+        public static void CreateProducts(XWaveDbContext dbContext)
         {
             var products = new List<Product>()
             {
@@ -100,7 +100,7 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.Product.AddRange(products);
             dbContext.SaveChanges();
         }
-        public static void CreateDiscounts(ApplicationDbContext dbContext)
+        public static void CreateDiscounts(XWaveDbContext dbContext)
         {
             var discounts = new List<Discount>()
             {

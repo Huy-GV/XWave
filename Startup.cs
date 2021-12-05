@@ -34,7 +34,7 @@ namespace XWave
         {
 
             services.Configure<JWT>(Configuration.GetSection("JWT"));
-            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<XWaveDbContext>();
             services.AddScoped<XWave.Services.AuthenticationService>();
 
             services
@@ -71,7 +71,7 @@ namespace XWave
                     };
                 });
 
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<XWaveDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
 
