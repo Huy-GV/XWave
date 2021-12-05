@@ -119,39 +119,32 @@ namespace XWave.Services
 
             return jwtSecurityToken;
         }
-        public async Task<AuthenticationModel> RegisterAsync(RegisterVM model)
+        public async Task<AuthenticationModel> RegisterAsync(RegisterVM model, string role)
         {
             var user = new ApplicationUser
             {
-                UserName = model.Username
+                UserName = model.Username,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                RegistrationDate = DateTime.UtcNow.Date,
             };
-            await _userManager.CreateAsync(user, model.Password);
-            await _userManager.AddToRoleAsync(user, Roles.Customer);
-            return await GetTokenAsync(user);
 
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, role);
+                return await GetTokenAsync(user);
+            }
+
+            return new AuthenticationModel
+            {
+                IsAuthenticated = false,
+                Message = "Invalid username or password",
+                Token = null,
+                UserName = user.UserName,
+                Role = role,
+            };
         }
-        // public bool ValidToken(string token)
-        // {
-        //     var key = Encoding.ASCII.GetBytes(_jwt.Key);
-        //     var tokenHandler = new JwtSecurityTokenHandler();
-        //     try
-        //     {
-        //         tokenHandler.ValidateToken(token, new TokenValidationParameters
-        //         {
-        //             ValidateIssuerSigningKey = true,
-        //             IssuerSigningKey = new SymmetricSecurityKey(key),
-        //             ValidateIssuer = false,
-        //             ValidateAudience = false,
-        //             // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
-        //             ClockSkew = TimeSpan.Zero
-        //         }, out SecurityToken validatedToken);
-
-        //         return true;
-        //     }
-        //     catch
-        //     {
-        //         return false;
-        //     }
-        // }
     }
 }

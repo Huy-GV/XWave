@@ -68,9 +68,9 @@ namespace XWave.Controllers
         // POST api/<ProductController>
         [HttpPost]
         [Authorize(Policy = "StaffOnly")]
-        public async Task<ActionResult> Post([FromBody] ProductVM productVM)
+        public async Task<ActionResult> CreateAsync([FromBody] ProductVM productVM)
         {
-            if (!await ItemExists<Category>(productVM.CategoryID))
+            if (!await ItemExistsAsync<Category>(productVM.CategoryID))
             {
                 return BadRequest($"Category with ID {productVM.CategoryID} does not exist");
             }
@@ -93,7 +93,7 @@ namespace XWave.Controllers
         // PUT api/<ProductController>/5
         [Authorize(Policy = "StaffOnly")]
         [HttpPut("{id}")]
-        public async Task<ActionResult> Put(int id, [FromBody] ProductVM updatedProduct)
+        public async Task<ActionResult> UpdateAsync(int id, [FromBody] ProductVM updatedProduct)
         {
             var product = await DbContext.Product.FindAsync(id);
             if (product == null)
@@ -116,9 +116,9 @@ namespace XWave.Controllers
         // DELETE api/<ProductController>/5
         [Authorize(Policy = "StaffOnly")]
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> DeleteAsync(int id)
         {
-            if (!await ItemExists<Product>(id))
+            if (!await ItemExistsAsync<Product>(id))
             {
                 return NotFound(new { Message = "Product to be deleted not found" });
             }
@@ -128,7 +128,7 @@ namespace XWave.Controllers
             return Ok(new { Message = $"Product with ID {id} deleted" });
         }
 
-        private async Task<bool> ItemExists<T>(int id)
+        private async Task<bool> ItemExistsAsync<T>(int id)
         {
             var entityTypeName = typeof(T).Name;
             switch (entityTypeName)
