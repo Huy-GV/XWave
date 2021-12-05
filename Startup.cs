@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using XWave.Data;
 using XWave.Models;
 using XWave.Services;
+using XWave.Data.Constants;
 
 namespace XWave
 {
@@ -70,6 +71,12 @@ namespace XWave
                             Encoding.UTF8.GetBytes(Configuration["JWT:Key"]))
                     };
                 });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("StaffOnly",
+                    policy => policy.RequireRole(Roles.Staff, Roles.Manager));
+            });
 
             services.AddDbContext<XWaveDbContext>(options =>
                 options.UseSqlServer(

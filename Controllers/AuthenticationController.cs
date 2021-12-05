@@ -29,6 +29,7 @@ namespace XWave.Controllers
         }
 
         [HttpPost("register")]
+        [Authorize(Roles = "manager")]
         public async Task<ActionResult<AuthenticationModel>> RegisterAsync(RegisterVM model)
         {
             return await _authService.RegisterAsync(model);
@@ -59,6 +60,18 @@ namespace XWave.Controllers
         [Authorize]
         [HttpGet("test/random")]
         public ActionResult<string> TestRandom()
+        {
+            return "OK WORKS";
+        }
+        [Authorize(Roles ="customer")]
+        [HttpGet("test/customer")]
+        public ActionResult<string> TestCustomer()
+        {
+            return "OK WORKS";
+        }
+        [Authorize(Policy ="StaffOnly")]
+        [HttpGet("test/staffonly")]
+        public ActionResult<string> StaffOnly()
         {
             return "OK WORKS";
         }

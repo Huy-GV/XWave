@@ -36,7 +36,7 @@ namespace XWave.Controllers
             return Ok(products);
         }
 
-        [HttpGet("admin")]
+        [HttpGet("staff")]
         [Authorize]
         public ActionResult<IEnumerable<Product>> GetAuthorized()
         {
@@ -54,8 +54,8 @@ namespace XWave.Controllers
 
             return Ok(ProductDTO.From(product));
         }
-        [HttpGet("admin/{id}")]
-        [Authorize(Roles ="staff,manager")]
+        [HttpGet("staff/{id}")]
+        [Authorize(Policy ="StaffOnly")]
         public async Task<ActionResult<Product>> GetAuthorized(int id)
         {
             var product = await DbContext.Product.FindAsync(id);
@@ -67,7 +67,7 @@ namespace XWave.Controllers
 
         // POST api/<ProductController>
         [HttpPost]
-        [Authorize(Roles ="staff,manager")]
+        [Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult> Post([FromBody] ProductVM productVM)
         {
             if (!await ItemExists<Category>(productVM.CategoryID))
@@ -91,7 +91,7 @@ namespace XWave.Controllers
 
 
         // PUT api/<ProductController>/5
-        [Authorize(Roles = "staff,manager")]
+        [Authorize(Policy = "StaffOnly")]
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, [FromBody] ProductVM updatedProduct)
         {
@@ -114,7 +114,7 @@ namespace XWave.Controllers
             return BadRequest("An error occured");
         }
         // DELETE api/<ProductController>/5
-        [Authorize(Roles ="staff,manager")]
+        [Authorize(Policy = "StaffOnly")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
