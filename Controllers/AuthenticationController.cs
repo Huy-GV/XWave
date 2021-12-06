@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using XWave.Services;
 using XWave.Data.Constants;
 using XWave.Data;
+using XWave.Models;
+
 namespace XWave.Controllers
 {
 
@@ -30,10 +32,15 @@ namespace XWave.Controllers
         [HttpPost("register/customer")]
         public async Task<ActionResult<AuthenticationModel>> RegisterCustomerAsync(RegisterVM model)
         {
-            //TODO: create a customer profile
             if (ModelState.IsValid)
             {
                 await _authService.RegisterAsync(model, Roles.Customer);
+                var newCustomer = new Customer()
+                {
+                    Country = model.Country,
+                };
+                DbContext.Customer.Add(newCustomer);
+                await DbContext.SaveChangesAsync();
             }
             return Ok(new { Message = "Account created" });
         }
