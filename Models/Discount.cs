@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace XWave.Models
 {
@@ -22,6 +24,6 @@ namespace XWave.Models
         [DataType(DataType.Date)]
         public DateTime StartDate { get; set; }
         [Required]
-        public DateTime EndDate { get; set; } 
+        public DateTime EndDate { get; set; }
     }
 }

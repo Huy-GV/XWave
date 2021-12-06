@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using XWave.Data;
-using XWave.Data.Constants.ResponseTemplate;
+using XWave.Data.Constants;
 using XWave.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860

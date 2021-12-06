@@ -9,7 +9,7 @@ using XWave.Models;
 using XWave.DTOs;
 using Microsoft.EntityFrameworkCore;
 using XWave.ViewModels.Product;
-using XWave.Data.Constants.ResponseTemplate;
+using XWave.Data.Constants;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -31,6 +31,7 @@ namespace XWave.Controllers
         public ActionResult<IEnumerable<ProductDTO>> Get()
         {
             var products = DbContext.Product
+                .Include(p => p.Discount)
                 .Select(product => ProductDTO.From(product))
                 .ToList();
 
@@ -38,10 +39,12 @@ namespace XWave.Controllers
         }
 
         [HttpGet("staff")]
-        [Authorize]
+        //[Authorize]
         public ActionResult<IEnumerable<Product>> GetAuthorized()
         {
-            var products = DbContext.Product.ToList();
+            var products = DbContext.Product
+                .Include(p => p.Discount)
+                .ToList();
             return Ok(products);
         }
 
@@ -56,7 +59,7 @@ namespace XWave.Controllers
             return Ok(ProductDTO.From(product));
         }
         [HttpGet("staff/{id}")]
-        [Authorize(Policy ="StaffOnly")]
+        //[Authorize(Policy ="StaffOnly")]
         public async Task<ActionResult<Product>> GetAuthorized(int id)
         {
             var product = await DbContext.Product.FindAsync(id);

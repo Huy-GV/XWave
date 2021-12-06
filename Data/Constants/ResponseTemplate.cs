@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace XWave.Data.Constants.ResponseTemplate
+namespace XWave.Data.Constants
 {
     public static class ResponseTemplate
     {
