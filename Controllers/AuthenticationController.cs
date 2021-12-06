@@ -60,13 +60,6 @@ namespace XWave.Controllers
             return await _authService.LogInAsync(model);
         }
 
-
-
-
-
-
-
-
         [HttpGet("test/manager")]
         [Authorize(Roles ="manager")]
         public ActionResult<string> TestManager()

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using XWave.Data;
+using XWave.Data.Constants.ResponseTemplate;
 using XWave.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -49,10 +50,8 @@ namespace XWave.Controllers
             {
                 DbContext.Category.Add(newCategory);
                 await DbContext.SaveChangesAsync();
-                return CreatedAtAction(
-                    nameof(CreateAsync),
-                    new { id = newCategory.ID },
-                    newCategory);
+                return Ok(ResponseTemplate
+                    .Created($"https://localhost:5001/api/category/admin/{newCategory.ID}"));
             }
 
             return BadRequest();
@@ -70,10 +69,8 @@ namespace XWave.Controllers
             if (ModelState.IsValid)
             {
                 DbContext.Category.Update(updatedCategory);
-                return CreatedAtAction(
-                    nameof(UpdateAsync),
-                    new { id = category.ID },
-                    updatedCategory);
+                return Ok(ResponseTemplate
+                    .Updated($"https://localhost:5001/api/category/admin/{updatedCategory.ID}"));
             }
 
             return BadRequest();
@@ -98,7 +95,7 @@ namespace XWave.Controllers
                 return BadRequest("Foreign key constraint failed");
             }
 
-            return Ok();
+            return Ok(ResponseTemplate.Deleted(id.ToString(), nameof(Category)));
         }
     }
 }

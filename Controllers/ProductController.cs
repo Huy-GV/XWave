@@ -9,6 +9,7 @@ using XWave.Models;
 using XWave.DTOs;
 using Microsoft.EntityFrameworkCore;
 using XWave.ViewModels.Product;
+using XWave.Data.Constants.ResponseTemplate;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -72,7 +73,7 @@ namespace XWave.Controllers
         {
             if (!await ItemExistsAsync<Category>(productVM.CategoryID))
             {
-                return BadRequest($"Category with ID {productVM.CategoryID} does not exist");
+                return BadRequest();
             }
 
             if (ModelState.IsValid)
@@ -81,12 +82,13 @@ namespace XWave.Controllers
                 var entry = DbContext.Product.Add(newProduct);
                 entry.CurrentValues.SetValues(productVM);
                 await DbContext.SaveChangesAsync();
-                return Ok( new
-                {
-                    Message = $"New product accessible via https://localhost:5001/api/product/admin/{newProduct.ID} for authorized users"
-                });
-            } 
-            return BadRequest("Validation error");
+
+                return Ok(
+                    ResponseTemplate
+                    .Created($"https://localhost:5001/api/product/admin/{newProduct.ID}"));
+            }
+
+            return BadRequest();
         }
 
 
@@ -97,7 +99,7 @@ namespace XWave.Controllers
         {
             var product = await DbContext.Product.FindAsync(id);
             if (product == null)
-                return NotFound(new { Message = "Product not found" });
+                return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -105,10 +107,8 @@ namespace XWave.Controllers
                 entry.State = EntityState.Modified;
                 entry.CurrentValues.SetValues(updatedProduct);
                 await DbContext.SaveChangesAsync();
-                return Ok(new
-                {
-                    Message = $"Updated product accessible via https://localhost:5001/api/product/admin/{product.ID} for authorized users"
-                });
+                return Ok(ResponseTemplate
+                    .Updated($"https://localhost:5001/api/product/admin/{product.ID}"));
             }
 
             return BadRequest("An error occured");
@@ -120,12 +120,12 @@ namespace XWave.Controllers
         {
             if (!await ItemExistsAsync<Product>(id))
             {
-                return NotFound(new { Message = "Product to be deleted not found" });
+                return NotFound();
             }
 
             DbContext.Product.Remove(await DbContext.Product.FindAsync(id));
             DbContext.SaveChanges();
-            return Ok(new { Message = $"Product with ID {id} deleted" });
+            return Ok(ResponseTemplate.Deleted(id.ToString(), nameof(Product)));
         }
 
     }
