@@ -12,20 +12,9 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using XWave.ViewModels.Authentication;
-using System.Net;
 
 namespace XWave.Services
 {
-    public class AuthenticationModel
-    {
-        public string Message { get; set; }
-        public bool IsAuthenticated { get; set; }
-        public string UserName { get; set; }
-        public string Email { get; set; }
-        public string Role { get; set; }
-        public string Token { get; set; }
-    
-    }
     public class JWT
     {
         public string Key { get; set; }
@@ -48,23 +37,22 @@ namespace XWave.Services
             _jwt = jwt.Value;
             _logger = logger;
         }
-        public async Task<AuthenticationModel> GetTokenAsync(ApplicationUser user, string role = null)
+        public async Task<AuthenticationVM> GetTokenAsync(ApplicationUser user, string role = null)
         {
-            AuthenticationModel authModel = new();
+            AuthenticationVM authModel = new();
             JwtSecurityToken jwtSecurityToken = await CreateJwtTokenAsync(user);
             
             authModel.IsAuthenticated = true;
             authModel.Message = "User logged in";
             authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            authModel.Email = user.Email;
             authModel.UserName = user.UserName;
             authModel.Role = role;
 
             return authModel;
         }
-        public async Task<AuthenticationModel> LogInAsync(LogInVM model)
+        public async Task<AuthenticationVM> LogInAsync(LogInVM model)
         {
-            AuthenticationModel authModel = new();
+            AuthenticationVM authModel = new();
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user == null) 
             {
@@ -73,7 +61,8 @@ namespace XWave.Services
                 return authModel;
             }
 
-            var correctPassword = await _userManager.CheckPasswordAsync(user, model.Password);
+            var correctPassword = await _userManager
+                .CheckPasswordAsync(user, model.Password);
             if (!correctPassword)
             {
                 authModel.Message = $"Invalid password for user {model.Username}";
@@ -119,7 +108,7 @@ namespace XWave.Services
 
             return jwtSecurityToken;
         }
-        public async Task<AuthenticationModel> RegisterAsync(RegisterVM model, string role)
+        public async Task<AuthenticationVM> RegisterAsync(RegisterVM model, string role)
         {
             var user = new ApplicationUser
             {
@@ -137,7 +126,7 @@ namespace XWave.Services
                 return await GetTokenAsync(user);
             }
 
-            return new AuthenticationModel
+            return new AuthenticationVM
             {
                 IsAuthenticated = false,
                 Message = "Invalid username or password",

@@ -30,7 +30,7 @@ namespace XWave.Controllers
         }
 
         [HttpPost("register/customer")]
-        public async Task<ActionResult<AuthenticationModel>> RegisterCustomerAsync(RegisterVM model)
+        public async Task<ActionResult<AuthenticationVM>> RegisterCustomerAsync(RegisterVM model)
         {
             if (ModelState.IsValid)
             {
@@ -46,7 +46,7 @@ namespace XWave.Controllers
         }
         [HttpPost("register/staff")]
         [Authorize(Roles = "manager")]
-        public async Task<ActionResult<AuthenticationModel>> RegisterStaffAsync(RegisterVM model)
+        public async Task<ActionResult<AuthenticationVM>> RegisterStaffAsync(RegisterVM model)
         {
             var authModel = await _authService.RegisterAsync(model, Roles.Staff);
             if (!authModel.IsAuthenticated)
@@ -55,7 +55,7 @@ namespace XWave.Controllers
             return Ok(authModel); 
         }
         [HttpPost("login")]
-        public async Task<ActionResult<AuthenticationModel>> LogInAsync(LogInVM model)
+        public async Task<ActionResult<AuthenticationVM>> LogInAsync(LogInVM model)
         {
             return await _authService.LogInAsync(model);
         }
