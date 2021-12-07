@@ -8,7 +8,7 @@ using XWave.Data;
 using XWave.Models;
 using XWave.DTOs;
 using Microsoft.EntityFrameworkCore;
-using XWave.ViewModels.Product;
+using XWave.ViewModels.Management;
 using XWave.Data.Constants;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860

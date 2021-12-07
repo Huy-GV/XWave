@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-namespace XWave.ViewModels.Product
+namespace XWave.ViewModels.Management
 {
     public class ProductVM
     {
