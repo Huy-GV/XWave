@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using XWave.Data;
 
 namespace XWave.Data.Migrations
 {
     [DbContext(typeof(XWaveDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211207001001_Payment_PaymentDetail_Customer")]
+    partial class Payment_PaymentDetail_Customer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -288,20 +290,29 @@ namespace XWave.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<long>("AccountNo")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("CustomerID")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PaymentID")
-                        .HasColumnType("int");
+                    b.Property<long?>("PaymentAccountNo")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PaymentProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Provider")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
                     b.HasIndex("CustomerID");
 
-                    b.HasIndex("PaymentID");
+                    b.HasIndex("PaymentAccountNo", "PaymentProvider");
 
                     b.ToTable("Order");
                 });
@@ -329,25 +340,16 @@ namespace XWave.Data.Migrations
 
             modelBuilder.Entity("XWave.Models.Payment", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
                     b.Property<long>("AccountNo")
                         .HasColumnType("bigint");
-
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Provider")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("ID");
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
 
-                    b.HasIndex("AccountNo", "Provider")
-                        .IsUnique()
-                        .HasFilter("[Provider] IS NOT NULL");
+                    b.HasKey("AccountNo", "Provider");
 
                     b.ToTable("Payment");
                 });
@@ -357,11 +359,20 @@ namespace XWave.Data.Migrations
                     b.Property<int>("CustomerID")
                         .HasColumnType("int");
 
-                    b.Property<int>("PaymentID")
-                        .HasColumnType("int");
+                    b.Property<long>("AccountNo")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Provider")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("LatestPurchase")
                         .HasColumnType("datetime2");
+
+                    b.Property<long?>("PaymentAccountNo")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PaymentProvider")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("PurchaseCount")
                         .HasColumnType("int");
@@ -369,9 +380,9 @@ namespace XWave.Data.Migrations
                     b.Property<DateTime>("Registration")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("CustomerID", "PaymentID");
+                    b.HasKey("CustomerID", "AccountNo", "Provider");
 
-                    b.HasIndex("PaymentID");
+                    b.HasIndex("PaymentAccountNo", "PaymentProvider");
 
                     b.ToTable("PaymentDetail");
                 });
@@ -485,9 +496,7 @@ namespace XWave.Data.Migrations
 
                     b.HasOne("XWave.Models.Payment", "Payment")
                         .WithMany()
-                        .HasForeignKey("PaymentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PaymentAccountNo", "PaymentProvider");
 
                     b.Navigation("Customer");
 
@@ -523,9 +532,7 @@ namespace XWave.Data.Migrations
 
                     b.HasOne("XWave.Models.Payment", "Payment")
                         .WithMany()
-                        .HasForeignKey("PaymentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PaymentAccountNo", "PaymentProvider");
 
                     b.Navigation("Customer");
 

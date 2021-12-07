@@ -19,9 +19,9 @@ namespace XWave.Controllers
             Logger = logger;
         }
 
-        protected async Task<bool> ItemExistsAsync<T>(int id)
+        protected async Task<bool> ItemExistsAsync<EntityType>(int id)
         {
-            var entityTypeName = typeof(T).Name;
+            var entityTypeName = typeof(EntityType).Name;
             switch (entityTypeName)
             {
                 case nameof(Product):

@@ -17,8 +17,9 @@ namespace XWave.Data.DatabaseSeeding
             {
                 CreatePayments(context);
                 CreateCustomers(context);
-                CreateOrders(context);  
+                CreateOrders(context);
                 CreateOrderDetail(context);
+                CreatePaymentDetail(context);
                 context.Database.CloseConnection();
             }
         }
@@ -29,25 +30,24 @@ namespace XWave.Data.DatabaseSeeding
             {
                 new Payment()
                 {
-                    ID = 1,
                     Provider = "mastercard",
+                    AccountNo = 12345678,
                     ExpiryDate = DateTime.Parse("2/5/2023"),
-                    AccountNumber = 12345678
+                    
                 },
                 new Payment()
                 {
-                    ID = 2,
                     Provider = "visa",
+                    AccountNo = 24681357,
                     ExpiryDate = DateTime.Parse("1/2/2023"),
-                    AccountNumber = 24681357
                 },
             };
 
-            dbContext.Database.OpenConnection();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Payment ON");
+            //dbContext.Database.OpenConnection();
+            //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Payment ON");
             dbContext.Payment.AddRange(payments);
             dbContext.SaveChanges();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Payment OFF");
+            //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Payment OFF");
         }
         private static void CreateCustomers(XWaveDbContext dbContext)
         {
@@ -57,13 +57,15 @@ namespace XWave.Data.DatabaseSeeding
                 {
                     ID = 1,
                     Country = "Australia",
-                    PaymentID = 1
+                    PhoneNumber = 12345678,
+                    Address = "02 Main St VIC"
                 },
                 new Customer()
                 {
                     ID = 2,
                     Country = "Australia",
-                    PaymentID = 2
+                    PhoneNumber = 98765432,
+                    Address = "15 Second St VIC"
                 },
             };
 
@@ -79,31 +81,25 @@ namespace XWave.Data.DatabaseSeeding
             {
                 new Order()
                 {
-                    // ID = 1,
                     Date = DateTime.Parse("15/11/2021"),
                     CustomerID = 1,
                     PaymentID = 1
                 },
                 new Order()
                 {
-                    // ID = 2,
                     Date = DateTime.Parse("21/10/2021"),
                     CustomerID = 1,
                     PaymentID = 1
                 },
                 new Order()
                 {
-                    // ID = 3,
                     Date = DateTime.Parse("16/9/2021"),
                     CustomerID = 2,
                     PaymentID = 2
                 }
             };
-            // dbContext.Database.OpenConnection();
-            // dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Order ON");
             dbContext.Order.AddRange(orders);
             dbContext.SaveChanges();
-            // dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Order OFF");
         }
         private static void CreateOrderDetail(XWaveDbContext dbContext)
         {
@@ -131,13 +127,35 @@ namespace XWave.Data.DatabaseSeeding
                     Quantity = 1,
                 },
             };
-            // dbContext.Database.OpenConnection();
-            // dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.OrderDetail ON");
+
             dbContext.OrderDetail.AddRange(orderDetail);
             dbContext.SaveChanges();
-            // dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.OrderDetail OFF");
         }
+        private static void CreatePaymentDetail(XWaveDbContext dbContext)
+        {
+            var paymentDetail = new List<PaymentDetail>()
+            {
+                new PaymentDetail
+                {
+                    PaymentID = 1,
+                    CustomerID = 1,
+                    PurchaseCount = 1,
+                    Registration = DateTime.Parse("2/1/2021"),
+                    LatestPurchase = DateTime.Now
+                },
+                new PaymentDetail
+                {
+                    CustomerID = 2,
+                    PaymentID = 2,
+                    PurchaseCount = 5,
+                    Registration = DateTime.Parse("18/6/2021"),
+                    LatestPurchase = DateTime.Now
+                }
+            };
 
+            dbContext.PaymentDetail.AddRange(paymentDetail);
+            dbContext.SaveChanges();
+        }
 
     }
 }

@@ -8,14 +8,11 @@ namespace XWave.Models
     public class Payment : IValidatableObject
     {
         public int ID { get; set; }
-        [Required]
+        public uint AccountNo { get; set; }
         public string Provider { get; set; }
         [Required]
         [DataType(DataType.Date)]
         public DateTime ExpiryDate { get; set; }
-        [Required]
-        [Range(4,20)]
-        public int AccountNumber { get; set; }
         [NotMapped]
         public readonly string[] ValidProviders = new string[]
         {

@@ -97,12 +97,12 @@ namespace XWave.Controllers
             if (discount == null)
                 return NotFound();
 
+            //set FK to null to avoid FK constraint conflict
             var productsWithDiscount = DbContext.Product
                 .Where(d => d.DiscountID == id)
-                .ToList();
+                .ToList()
+                .Select(p => p.DiscountID = null);
 
-            //set FK to null to avoid FK constraint conflict
-            productsWithDiscount.ForEach(p => p.DiscountID = null);
             DbContext.UpdateRange(productsWithDiscount);
             await DbContext.SaveChangesAsync();
 

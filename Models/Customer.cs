@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.Models
 {
@@ -11,7 +12,10 @@ namespace XWave.Models
         [Required]
         [StringLength(20, MinimumLength = 2)]
         public string Country { get; set; }
-        public int? PaymentID { get; set; }
-        public Payment? Payment { get; set; }
+        [Column(TypeName= "int")]
+        [Range(0, int.MaxValue)]
+        public int PhoneNumber { get; set; }
+        [StringLength(50, MinimumLength = 5)]
+        public string Address { get; set; }
     }
 }

@@ -21,6 +21,7 @@ namespace XWave.Data
         public DbSet<Discount> Discount { get; set; }
         public DbSet<Product> Product { get; set; }
         public DbSet<Payment> Payment { get; set; }
+        public DbSet<PaymentDetail> PaymentDetail { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderDetail> OrderDetail { get; set; }
         public DbSet<Customer> Customer { get; set; }
@@ -29,6 +30,13 @@ namespace XWave.Data
             base.OnModelCreating(builder);
             builder.Entity<OrderDetail>()
                 .HasKey(od => new { od.OrderID, od.ProductID });
+
+            builder.Entity<Payment>()
+                .HasIndex(p => new { p.AccountNo, p.Provider })
+                .IsUnique();
+
+            builder.Entity<PaymentDetail>()
+                .HasKey(pd => new { pd.CustomerID, pd.PaymentID });
         }
     }
 }
