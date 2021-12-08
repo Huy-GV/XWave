@@ -32,6 +32,7 @@ namespace XWave.Controllers
         [HttpPost("register/customer")]
         public async Task<ActionResult<AuthenticationVM>> RegisterCustomerAsync(RegisterVM model)
         {
+            //TODO: edit model to take into account a customer entity
             if (ModelState.IsValid)
             {
                 await _authService.RegisterAsync(model, Roles.Customer);
@@ -57,6 +58,7 @@ namespace XWave.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthenticationVM>> LogInAsync(LogInVM model)
         {
+
             return await _authService.LogInAsync(model);
         }
 

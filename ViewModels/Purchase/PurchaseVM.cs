@@ -13,7 +13,7 @@ namespace XWave.ViewModels.Purchase
     public class PurchaseVM
     {
         public IList<ProductDetail> ProductCart { get; set; }
-        public int CustomerID { get; set; }
+        //public string CustomerID { get; set; }
         public int PaymentID { get; set; }
     }
 }

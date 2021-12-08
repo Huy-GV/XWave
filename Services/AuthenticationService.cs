@@ -4,6 +4,7 @@ using XWave.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 using XWave.Data.Constants;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,6 +13,7 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using XWave.ViewModels.Authentication;
+using XWave.Data;
 
 namespace XWave.Services
 {
@@ -26,20 +28,27 @@ namespace XWave.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<AuthenticationService> _logger;
+        private readonly XWaveDbContext _dbContext;
         private readonly JWT _jwt;
         public AuthenticationService(
             UserManager<ApplicationUser> userManager,
             IOptions<JWT> jwt,
-            ILogger<AuthenticationService> logger
+            ILogger<AuthenticationService> logger,
+            XWaveDbContext dbContext
             ) 
         {
             _userManager = userManager;
             _jwt = jwt.Value;
             _logger = logger;
+            _dbContext = dbContext;
         }
-        public async Task<AuthenticationVM> GetTokenAsync(ApplicationUser user, string role = null)
+        public async Task<AuthenticationVM> GetTokenAsync
+            (ApplicationUser user, 
+            string role = null)
         {
             AuthenticationVM authModel = new();
+
+
             JwtSecurityToken jwtSecurityToken = await CreateJwtTokenAsync(user);
             
             authModel.IsAuthenticated = true;
@@ -77,19 +86,19 @@ namespace XWave.Services
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
             var roles = await _userManager.GetRolesAsync(user);
-
             var roleClaims = new List<Claim>();
             foreach(var role in roles)
             {
                 roleClaims.Add(new Claim(ClaimTypes.Role, role));
             }    
 
+            //TODO: only add when user role is customer
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                // new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("uid", user.Id)
+                new Claim("uid", user.Id),
+                new Claim(CustomClaim.CustomerID, user.Id)
             }
             .Union(userClaims)
             .Union(roleClaims);
@@ -108,6 +117,17 @@ namespace XWave.Services
 
             return jwtSecurityToken;
         }
+        private async Task CreateCustomerAccount(string userID)
+        {
+            _dbContext.Customer.Add(new Customer()
+            {
+                CustomerID = userID,
+                Country = "Australia",
+                PhoneNumber = 98765432,
+                Address = "15 Second St VIC"
+            });
+            await _dbContext.SaveChangesAsync();
+        }
         public async Task<AuthenticationVM> RegisterAsync(RegisterVM model, string role)
         {
             var user = new ApplicationUser
@@ -123,6 +143,10 @@ namespace XWave.Services
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, role);
+                if (role == Roles.Customer)
+                    await CreateCustomerAccount(user.Id);
+
+
                 return await GetTokenAsync(user);
             }
 

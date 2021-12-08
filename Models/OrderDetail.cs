@@ -11,7 +11,7 @@ namespace XWave.Models
         [Column(TypeName = "decimal(18,4)")]
         public decimal PriceAtOrder { get; set; }
         public uint Quantity { get; set; }
-        public Order Order { get; set; }    
-        public Product Product { get; set; }    
+        public Order Order { get; set; }
+        public Product Product { get; set; }
     }
 }

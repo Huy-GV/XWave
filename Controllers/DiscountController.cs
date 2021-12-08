@@ -30,7 +30,6 @@ namespace XWave.Controllers
         [Authorize(Policy = "StaffOnly")]
         public IEnumerable<Discount> Get()
         {
-            //TODO: include products
             return DbContext.Discount.ToList(); ;
         }
         [HttpGet("{id}/product")]
@@ -45,7 +44,7 @@ namespace XWave.Controllers
 
         // GET api/<DiscountController>/5
         [HttpGet("{id}")]
-        [Authorize(Policy ="StaffOnly")]
+        [Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult<Discount>> GetAsync(int id)
         {
             var discount = await DbContext.Discount.SingleOrDefaultAsync(d => d.ID == id);
@@ -57,7 +56,7 @@ namespace XWave.Controllers
 
         // POST api/<DiscountController>
         [HttpPost]
-        [Authorize(Roles ="managers")]
+        [Authorize(Roles = "managers")]
         public async Task<ActionResult> CreateAsync([FromBody] Discount newDiscount)
         {
             if (ModelState.IsValid)

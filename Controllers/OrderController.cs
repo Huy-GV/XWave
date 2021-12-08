@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using XWave.Models;
 using XWave.ViewModels.Purchase;
+using System.Security.Claims;
 
 namespace XWave.Controllers
 {
@@ -23,6 +24,13 @@ namespace XWave.Controllers
         {
 
         }
+        [HttpGet("{id}")]
+        //[Authorize(Policy ="StaffOnly")]
+        public async Task<ActionResult<OrderDetail>> GetOrderAsync(int id)
+        {
+            //TODO: get order, order detail and construct DTO
+            return Ok(await DbContext.OrderDetail.ToListAsync());
+        }
         [HttpGet("detail")]
         //[Authorize(Policy ="StaffOnly")]
         public async Task<ActionResult<OrderDetail>> GetOrderDetailsAsync()
@@ -34,7 +42,7 @@ namespace XWave.Controllers
         public async Task<ActionResult<OrderDetail>> GetOrderDetailAsync(int orderID, int productID)
         {
             OrderDetail orderDetail = await DbContext.OrderDetail
-                    .FirstOrDefaultAsync(od => 
+                    .FirstOrDefaultAsync(od =>
                     od.ProductID == productID && od.OrderID == orderID);
 
             if (orderDetail == null)
@@ -43,18 +51,22 @@ namespace XWave.Controllers
             return Ok(orderDetail);
         }
         [HttpPost]
-        //[Authorize()]
+        [Authorize(Roles ="customer")]
         public async Task<IActionResult> CreateOrder([FromBody] PurchaseVM purchaseVM)
         {
-            //CHECK IF THE REQUEST IS SENT BY THE CORRECT CUSTOMER
 
             using var transaction = DbContext.Database.BeginTransaction();
             string savepoint = "BeforePurchaseConfirmation";
+            string customerID = GetCustomerID();
+
+            if (customerID == string.Empty)
+                return BadRequest();
+
             transaction.CreateSavepoint(savepoint);
             try
             {
                 var customer = await DbContext.Customer
-                    .SingleAsync(c => c.ID == purchaseVM.CustomerID);
+                    .SingleAsync(c => c.CustomerID == customerID);
                 if (customer == null)
                     return NotFound();
 
@@ -66,7 +78,7 @@ namespace XWave.Controllers
                 var order = new Order()
                 {
                     Date = DateTime.Now,
-                    CustomerID = purchaseVM.CustomerID,
+                    CustomerID = customerID,
                     PaymentID = purchaseVM.PaymentID,
                 };
 
@@ -97,24 +109,36 @@ namespace XWave.Controllers
                 await DbContext.SaveChangesAsync();
 
                 AssignOrderID(order.ID, orderDetails);
- 
+
                 DbContext.OrderDetail.AddRange(orderDetails);
                 DbContext.Product.UpdateRange(purchasedProducts);
-                await UpdatePaymentDetailAsync(purchaseVM.PaymentID, purchaseVM.CustomerID);
+                await UpdatePaymentDetailAsync(purchaseVM.PaymentID, customerID);
                 await DbContext.SaveChangesAsync();
 
                 transaction.Commit();
 
                 return Ok(ResponseTemplate
-                    .Created(""));
+                    .Created($"https://localhost:5001/api/order/detail/{order.ID}/pro"));
 
-            } catch (Exception exception)
+            }
+            catch (Exception exception)
             {
                 await transaction.RollbackToSavepointAsync(savepoint);
                 Logger.LogError(exception.Message);
                 //replace with 500 status
                 return StatusCode(500, ResponseTemplate.InternalServerError());
             }
+        }
+        private string GetCustomerID()
+        {
+            var customerID = string.Empty;
+            ClaimsIdentity identity = (ClaimsIdentity)HttpContext.User.Identity;
+            if (identity != null)
+                customerID = identity.FindFirst(CustomClaim.CustomerID).Value;
+
+            Logger.LogCritical($"Customer id in jwt claim: {customerID}");
+            return customerID ?? string.Empty;
+
         }
         private void AssignOrderID(int orderID, List<OrderDetail> orderDetails)
         {
@@ -126,15 +150,15 @@ namespace XWave.Controllers
 
         private async Task UpdatePaymentDetailAsync(
             int paymentID,
-            int customerID)
+            string customerID)
         {
             var paymentDetail = await DbContext.PaymentDetail
-                .SingleAsync(pd => 
+                .SingleAsync(pd =>
                 pd.PaymentID == paymentID && pd.CustomerID == customerID);
 
             paymentDetail.PurchaseCount++;
             paymentDetail.LatestPurchase = DateTime.Now;
-            DbContext.PaymentDetail.Update(paymentDetail);  
+            DbContext.PaymentDetail.Update(paymentDetail);
         }
     }
 }

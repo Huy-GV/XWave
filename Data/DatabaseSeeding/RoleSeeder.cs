@@ -22,7 +22,7 @@ namespace XWave.Data.DatabaseSeeding
             {
                 var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
+                var dbContext = serviceProvider.GetRequiredService<XWaveDbContext>();
                 await CreateRolesAsync(
                     roleManager, 
                     new string[] 
@@ -33,7 +33,7 @@ namespace XWave.Data.DatabaseSeeding
                     }
                 );
 
-                await CreateCustomerAsync(userManager);
+                await CreateCustomersAsync(userManager, dbContext);
                 await CreateStaffAsync(userManager);
                 await CreateManagerAsync(userManager);
             } 
@@ -48,21 +48,49 @@ namespace XWave.Data.DatabaseSeeding
                 }
             }
         }
-        private static async Task CreateCustomerAsync(UserManager<ApplicationUser> userManager)
+        private static async Task CreateCustomersAsync(
+            UserManager<ApplicationUser> userManager,
+            XWaveDbContext dbContext)
         {
-            if (await userManager.FindByNameAsync("john_customer") != null) 
-                return;
-
-            var customer = new ApplicationUser()
+            var customer1 = new ApplicationUser()
             {
                 UserName = "john_customer",
                 FirstName = "John",
                 LastName = "Applebee",
                 RegistrationDate = DateTime.Now
             };
+            var customer2 = new ApplicationUser()
+            {
+                UserName = "jake_customer",
+                FirstName = "Jake",
+                LastName = "Applebee",
+                RegistrationDate = DateTime.Now
+            };
 
-            await userManager.CreateAsync(customer, "Password123@@");
-            await userManager.AddToRoleAsync(customer, Roles.Customer);
+
+            await CreateCustomerAsync(customer1, userManager, dbContext);
+            await CreateCustomerAsync(customer2, userManager, dbContext);
+        }
+        private static async Task CreateCustomerAsync(
+            ApplicationUser user,
+            UserManager<ApplicationUser> userManager,
+            XWaveDbContext dbContext)
+        {
+            var result = await userManager.CreateAsync(user, "Password123@@");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, Roles.Customer);
+                Console.WriteLine($"Username {user.UserName} has id {user.Id}");
+                dbContext.Customer.Add(new Customer()
+                {
+                    CustomerID = user.Id,
+                    Country = "Australia",
+                    PhoneNumber = 98765432,
+                    Address = "15 Second St VIC"
+                });
+                await dbContext.SaveChangesAsync();
+            }
+            
         }
         private static async Task CreateStaffAsync(UserManager<ApplicationUser> userManager)
         {

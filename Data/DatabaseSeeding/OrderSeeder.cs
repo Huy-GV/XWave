@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,12 @@ namespace XWave.Data.DatabaseSeeding
                 serviceProvider
                 .GetRequiredService<DbContextOptions<XWaveDbContext>>()))
             {
+                var userManager = serviceProvider
+                    .GetRequiredService<UserManager<ApplicationUser>>();
                 CreatePayments(context);
-                CreateCustomers(context);
-                CreateOrders(context);
+                CreateOrders(context, userManager).Wait();
                 CreateOrderDetail(context);
-                CreatePaymentDetail(context);
+                CreatePaymentDetail(context, userManager).Wait();
                 context.Database.CloseConnection();
             }
         }
@@ -33,7 +35,7 @@ namespace XWave.Data.DatabaseSeeding
                     Provider = "mastercard",
                     AccountNo = 12345678,
                     ExpiryDate = DateTime.Parse("2/5/2023"),
-                    
+
                 },
                 new Payment()
                 {
@@ -49,52 +51,57 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.SaveChanges();
             //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Payment OFF");
         }
-        private static void CreateCustomers(XWaveDbContext dbContext)
-        {
-            var customers = new List<Customer>()
-            {
-                new Customer()
-                {
-                    ID = 1,
-                    Country = "Australia",
-                    PhoneNumber = 12345678,
-                    Address = "02 Main St VIC"
-                },
-                new Customer()
-                {
-                    ID = 2,
-                    Country = "Australia",
-                    PhoneNumber = 98765432,
-                    Address = "15 Second St VIC"
-                },
-            };
+        //private static void CreateCustomers(XWaveDbContext dbContext)
+        //{
+        //    var customers = new List<Customer>()
+        //    {
+        //        new Customer()
+        //        {
+        //            //ID = 1,
+        //            Country = "Australia",
+        //            PhoneNumber = 12345678,
+        //            Address = "02 Main St VIC"
+        //        },
+        //        new Customer()
+        //        {
+        //            //ID = 2,
+        //            Country = "Australia",
+        //            PhoneNumber = 98765432,
+        //            Address = "15 Second St VIC"
+        //        },
+        //    };
 
-            dbContext.Database.OpenConnection();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Customer ON");
-            dbContext.Customer.AddRange(customers);
-            dbContext.SaveChanges();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Customer OFF");
-        }
-        private static void CreateOrders(XWaveDbContext dbContext)
+        //    //dbContext.Database.OpenConnection();
+        //    //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Customer ON");
+        //    dbContext.Customer.AddRange(customers);
+        //    dbContext.SaveChanges();
+        //    //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Customer OFF");
+        //}
+        private static async Task CreateOrders(
+            XWaveDbContext dbContext, 
+            UserManager<ApplicationUser> userManager)
         {
+            var user1 = await userManager.FindByNameAsync("john_customer");
+            var user2 = await userManager.FindByNameAsync("jake_customer");
+
             var orders = new List<Order>()
             {
                 new Order()
                 {
                     Date = DateTime.Parse("15/11/2021"),
-                    CustomerID = 1,
+                    CustomerID = user1.Id,
                     PaymentID = 1
                 },
                 new Order()
                 {
                     Date = DateTime.Parse("21/10/2021"),
-                    CustomerID = 1,
+                    CustomerID = user1.Id,
                     PaymentID = 1
                 },
                 new Order()
                 {
                     Date = DateTime.Parse("16/9/2021"),
-                    CustomerID = 2,
+                    CustomerID = user2.Id,
                     PaymentID = 2
                 }
             };
@@ -131,21 +138,25 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.OrderDetail.AddRange(orderDetail);
             dbContext.SaveChanges();
         }
-        private static void CreatePaymentDetail(XWaveDbContext dbContext)
+        private static async Task CreatePaymentDetail(
+            XWaveDbContext dbContext,
+            UserManager<ApplicationUser> userManager)
         {
+            var user1 = await userManager.FindByNameAsync("john_customer");
+            var user2 = await userManager.FindByNameAsync("jake_customer");
             var paymentDetail = new List<PaymentDetail>()
             {
                 new PaymentDetail
                 {
                     PaymentID = 1,
-                    CustomerID = 1,
+                    CustomerID =  user1.Id,
                     PurchaseCount = 1,
                     Registration = DateTime.Parse("2/1/2021"),
                     LatestPurchase = DateTime.Now
                 },
                 new PaymentDetail
                 {
-                    CustomerID = 2,
+                    CustomerID = user2.Id,
                     PaymentID = 2,
                     PurchaseCount = 5,
                     Registration = DateTime.Parse("18/6/2021"),

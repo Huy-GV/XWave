@@ -6,8 +6,9 @@ namespace XWave.Models
 {
     public class Customer
     {
-        [Required]
-        public int ID { get; set; }
+        //public int ID { get; set; }
+        [Key]
+        public string CustomerID { get; set; }
         //public string Email { get; set; }
         [Required]
         [StringLength(20, MinimumLength = 2)]

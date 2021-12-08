@@ -21,8 +21,6 @@ namespace XWave.Models
         [Required]
         [StringLength(25, MinimumLength = 2)]
         public string LastName { get; set; }
-        public int? CustomerID { get; set; }
-        public Customer? Customer { get; set; }
 
         //// REMOVED FROM TABLE
         [NotMapped]

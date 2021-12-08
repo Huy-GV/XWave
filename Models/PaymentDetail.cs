@@ -7,7 +7,7 @@ namespace XWave.Models
 {
     public class PaymentDetail
     {
-        public int CustomerID { get; set; }
+        public string CustomerID { get; set; }
         public int PaymentID { get; set; }
         [DataType(DataType.Date)]
         public DateTime Registration { get; set; }
