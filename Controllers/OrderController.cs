@@ -25,9 +25,31 @@ namespace XWave.Controllers
         }
         [HttpGet("detail")]
         //[Authorize(Policy ="StaffOnly")]
-        public async Task<ActionResult<Order>> GetOrderDetailAsync()
+        public async Task<ActionResult<Order>> GetOrderDetailsAsync()
         {
             return Ok(await DbContext.OrderDetail.ToListAsync());
+        }
+        [HttpGet("detail/{orderID}/{productID?}")]
+        //[Authorize(Policy ="StaffOnly")]
+        public async Task<ActionResult<Order>> GetOrderDetailAsync(int orderID, int? productID)
+        {
+            if (orderID == null && productID == null)
+                return BadRequest();
+
+            OrderDetail orderDetail = null;
+            if (orderID != null && productID == null)
+                orderDetail = await DbContext.OrderDetail
+                    .FirstOrDefaultAsync(od => od.OrderID == orderID);
+
+            if (productID != null && orderID != null)
+                orderDetail = await DbContext.OrderDetail
+                    .FirstOrDefaultAsync(od => 
+                    od.ProductID == productID && od.OrderID == orderID);
+
+            if (orderDetail == null)
+                return NotFound();
+
+            return Ok(orderDetail);
         }
         [HttpPost]
         //[Authorize()]
