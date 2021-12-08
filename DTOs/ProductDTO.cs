@@ -5,7 +5,7 @@
         public int ID { get; init; }
         public string Name { get; init; }
         public decimal Price { get; init; }
-        public int Quantity { get; init; }
+        public uint Quantity { get; init; }
         public int? CategoryID { get; init; }
         public DiscountDTO? DiscountDTO { get; init; }
         public static ProductDTO From(Models.Product product)

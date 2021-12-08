@@ -6,7 +6,7 @@ namespace XWave.DTOs
 {
     public class DiscountDTO
     {
-        public int Percentage { get; set; }
+        public uint Percentage { get; set; }
         public bool IsActive { get; set; }
         public DateTime EndDate { get; set; }
         public static DiscountDTO From(Discount discount)

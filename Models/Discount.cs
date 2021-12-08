@@ -11,7 +11,7 @@ namespace XWave.Models
         public int ID { get; set; }
         [Required]
         [Range(1, 100, ErrorMessage ="Discount percentage outside valid range")]
-        public int Percentage { get; set; }
+        public uint Percentage { get; set; }
         public bool IsActive 
         { 
             get 

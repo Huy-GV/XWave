@@ -7,8 +7,7 @@ namespace XWave.ViewModels.Purchase
     public record ProductDetail
     {
         public int ProductID { get; set; }
-        public int Quantity { get; set; } 
-        //TODO: remove this 
+        public uint Quantity { get; set; } 
         public decimal Price { get; set; }
     }
     public class PurchaseVM

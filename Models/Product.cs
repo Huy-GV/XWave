@@ -16,7 +16,7 @@ namespace XWave.Models
         public string ImagePath { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage ="Quantity cannot be negative")]
-        public int Quantity { get; set; }
+        public uint Quantity { get; set; }
         public DateTime LastRestock { get; set; }
         public int CategoryID { get; set; }
         public int? DiscountID { get; set; }

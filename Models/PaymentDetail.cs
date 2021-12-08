@@ -12,7 +12,7 @@ namespace XWave.Models
         [DataType(DataType.Date)]
         public DateTime Registration { get; set; }
         [Range(0, int.MaxValue)]
-        public int PurchaseCount { get; set; }
+        public uint PurchaseCount { get; set; }
         [DataType(DataType.Date)]
         public DateTime LatestPurchase { get; set; }
         //navigation property

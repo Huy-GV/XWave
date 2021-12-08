@@ -20,5 +20,10 @@ namespace XWave.Data.Constants
             Status = "Deleted",
             Message = $"Deleted: {entityName} with ID {title}"
         };
+        public static object InternalServerError() => new
+        {
+            Status = "Failed",
+            Message = $"An error happended with your request"
+        };
     }
 }

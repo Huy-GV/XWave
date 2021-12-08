@@ -36,14 +36,16 @@ namespace XWave.Controllers
             //CHECK IF THE REQUEST IS SENT BY THE CORRECT CUSTOMER
 
             using var transaction = DbContext.Database.BeginTransaction();
+            string savepoint = "BeforePurchaseConfirmation";
+            transaction.CreateSavepoint(savepoint);
             try
             {
-                var customer = DbContext.Customer
+                var customer = await DbContext.Customer
                     .SingleAsync(c => c.ID == purchaseVM.CustomerID);
                 if (customer == null)
                     return NotFound();
 
-                var payment = DbContext.Payment
+                var payment = await DbContext.Payment
                     .SingleAsync(p => p.ID == purchaseVM.PaymentID);
                 if (payment == null)
                     return NotFound();
@@ -56,41 +58,38 @@ namespace XWave.Controllers
                 };
 
                 List<Product> purchasedProducts = new();
-                List<OrderDetail> orderDetailCollection = new();
+                List<OrderDetail> orderDetails = new();
 
                 foreach (var productPurchase in purchaseVM.ProductCart)
                 {
                     var product = await DbContext.Product
                         .SingleOrDefaultAsync(p => p.ID == productPurchase.ProductID);
                     if (product == null)
-                        return NotFound();
+                        return NotFound("Ordered product not found");
                     if (product.Quantity < productPurchase.Quantity)
-                        return BadRequest();
+                        return BadRequest("Quantity exceeded existing stock");
 
                     product.Quantity -= productPurchase.Quantity;
                     purchasedProducts.Add(product);
-                    orderDetailCollection.Add(new OrderDetail
+                    orderDetails.Add(new OrderDetail
                     {
-                        //TODO: fix model to uint
-                        Quantity = (uint)Math.Abs(productPurchase.Quantity),
+                        Quantity = productPurchase.Quantity,
                         ProductID = productPurchase.ProductID,
                         PriceAtOrder = productPurchase.Price,
                     });
-
                 }
 
                 DbContext.Order.Add(order);
+                //call SaveChanges to get the generated ID
                 await DbContext.SaveChangesAsync();
-                foreach (var orderDetail in orderDetailCollection)
-                {
-                    orderDetail.OrderID = order.ID;
-                }
- 
-                DbContext.OrderDetail.AddRange(orderDetailCollection);
-                DbContext.Product.UpdateRange(purchasedProducts);
 
+                AssignOrderID(order.ID, orderDetails);
+ 
+                DbContext.OrderDetail.AddRange(orderDetails);
+                DbContext.Product.UpdateRange(purchasedProducts);
                 await UpdatePaymentDetailAsync(purchaseVM.PaymentID, purchaseVM.CustomerID);
                 await DbContext.SaveChangesAsync();
+
                 transaction.Commit();
 
                 return Ok(ResponseTemplate
@@ -98,9 +97,17 @@ namespace XWave.Controllers
 
             } catch (Exception exception)
             {
-                transaction.Rollback();
+                await transaction.RollbackToSavepointAsync(savepoint);
+                Logger.LogError(exception.Message);
                 //replace with 500 status
-                return BadRequest();
+                return StatusCode(500, ResponseTemplate.InternalServerError());
+            }
+        }
+        private void AssignOrderID(int orderID, List<OrderDetail> orderDetails)
+        {
+            foreach (var orderDetail in orderDetails)
+            {
+                orderDetail.OrderID = orderID;
             }
         }
 
@@ -108,18 +115,13 @@ namespace XWave.Controllers
             int paymentID,
             int customerID)
         {
-            var paymentDetail = await DbContext.PaymentDetail.FirstOrDefaultAsync(pd => pd.PaymentID == paymentID && pd.CustomerID == customerID);
+            var paymentDetail = await DbContext.PaymentDetail
+                .SingleAsync(pd => 
+                pd.PaymentID == paymentID && pd.CustomerID == customerID);
 
             paymentDetail.PurchaseCount++;
             paymentDetail.LatestPurchase = DateTime.Now;
-            DbContext.PaymentDetail.Update(paymentDetail);
-            
-
-            await DbContext.SaveChangesAsync();
-            
+            DbContext.PaymentDetail.Update(paymentDetail);  
         }
-
-
-        //TODO: validate before creating order
     }
 }
