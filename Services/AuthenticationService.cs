@@ -42,20 +42,16 @@ namespace XWave.Services
             _logger = logger;
             _dbContext = dbContext;
         }
-        public async Task<AuthenticationVM> GetTokenAsync
+        private async Task<AuthenticationVM> GetTokenAsync
             (ApplicationUser user, 
-            string role = null)
+            string role)
         {
-            AuthenticationVM authModel = new();
-
-
-            JwtSecurityToken jwtSecurityToken = await CreateJwtTokenAsync(user);
-            
-            authModel.IsAuthenticated = true;
-            authModel.Message = "User logged in";
-            authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            authModel.UserName = user.UserName;
-            authModel.Role = role;
+            var token = await CreateJwtTokenAsync(user, role);
+            AuthenticationVM authModel = new()
+            {
+                IsSuccessful = true,
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+            };
 
             return authModel;
         }
@@ -65,8 +61,7 @@ namespace XWave.Services
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user == null) 
             {
-                authModel.IsAuthenticated = false;
-                authModel.Message = $"User with {model.Username} does not exist";
+                authModel.Error = $"User with {model.Username} does not exist";
                 return authModel;
             }
 
@@ -74,34 +69,40 @@ namespace XWave.Services
                 .CheckPasswordAsync(user, model.Password);
             if (!correctPassword)
             {
-                authModel.Message = $"Invalid password for user {model.Username}";
+                authModel.Error = $"Incorrect password for user {model.Username}";
                 return authModel;
             } else 
             {
+                //TODO: get one role only
                 string role = (await _userManager.GetRolesAsync(user))[0];
                 return await GetTokenAsync(user, role);
             }
         }
-        private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user)
+        private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user, string role)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
-            var roleClaims = new List<Claim>();
-            foreach(var role in roles)
+        
+            IEnumerable<Claim> claims;
+            if (role == Roles.Customer)
             {
-                roleClaims.Add(new Claim(ClaimTypes.Role, role));
-            }    
-
-            //TODO: only add when user role is customer
-            var claims = new[]
+                claims = new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("uid", user.Id),
+                    new Claim(ClaimTypes.Role, role)
+                };
+            } else
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("uid", user.Id),
-                new Claim(CustomClaim.CustomerID, user.Id)
+                claims = new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("uid", user.Id),
+                    new Claim(CustomClaim.CustomerID, user.Id),
+                    new Claim(ClaimTypes.Role, role)
+                };
             }
-            .Union(userClaims)
-            .Union(roleClaims);
 
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
             var signingCredentials = new SigningCredentials(
@@ -111,52 +112,50 @@ namespace XWave.Services
             var jwtSecurityToken = new JwtSecurityToken(
                 issuer: _jwt.Issuer,
                 audience: _jwt.Audience,
-                claims: claims,
+                claims: claims.Union(userClaims),
                 expires: DateTime.UtcNow.AddMinutes(_jwt.DurationInMinutes),
                 signingCredentials: signingCredentials);
 
             return jwtSecurityToken;
         }
-        private async Task CreateCustomerAccount(string userID)
+        private async Task CreateCustomerAccount(string userID, RegisterVM registerVM)
         {
             _dbContext.Customer.Add(new Customer()
             {
                 CustomerID = userID,
-                Country = "Australia",
-                PhoneNumber = 98765432,
-                Address = "15 Second St VIC"
+                Country = registerVM.Country,
+                PhoneNumber = registerVM.PhoneNumber,
+                Address = registerVM.Address,
             });
             await _dbContext.SaveChangesAsync();
         }
-        public async Task<AuthenticationVM> RegisterAsync(RegisterVM model, string role)
+        public async Task<AuthenticationVM> RegisterAsync(RegisterVM registerVM, string role)
         {
             var user = new ApplicationUser
             {
-                UserName = model.Username,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
+                UserName = registerVM.Username,
+                FirstName = registerVM.FirstName,
+                LastName = registerVM.LastName,
                 RegistrationDate = DateTime.UtcNow.Date,
             };
 
-
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(user, registerVM.Password);
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, role);
                 if (role == Roles.Customer)
-                    await CreateCustomerAccount(user.Id);
+                    await CreateCustomerAccount(user.Id, registerVM);
 
-
-                return await GetTokenAsync(user);
+                return await GetTokenAsync(user, role);
             }
+
+            var errorMessage = "";
+            foreach (var error in result.Errors)
+                errorMessage += error.Description;
 
             return new AuthenticationVM
             {
-                IsAuthenticated = false,
-                Message = "Invalid username or password",
-                Token = null,
-                UserName = user.UserName,
-                Role = role,
+                Error = errorMessage,
             };
         }
     }

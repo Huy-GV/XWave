@@ -32,32 +32,34 @@ namespace XWave.Controllers
         [HttpPost("register/customer")]
         public async Task<ActionResult<AuthenticationVM>> RegisterCustomerAsync(RegisterVM model)
         {
-            //TODO: edit model to take into account a customer entity
-            if (ModelState.IsValid)
-            {
-                await _authService.RegisterAsync(model, Roles.Customer);
-                var newCustomer = new Customer()
-                {
-                    Country = model.Country,
-                };
-                DbContext.Customer.Add(newCustomer);
-                await DbContext.SaveChangesAsync();
-            }
-            return Ok(new { Message = "Account created" });
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var authVM = await _authService.RegisterAsync(model, Roles.Customer);
+            if (authVM.IsSuccessful)
+                return Ok(authVM);
+ 
+            return BadRequest(authVM.Error);
+            
         }
         [HttpPost("register/staff")]
         [Authorize(Roles = "manager")]
         public async Task<ActionResult<AuthenticationVM>> RegisterStaffAsync(RegisterVM model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var authModel = await _authService.RegisterAsync(model, Roles.Staff);
-            if (!authModel.IsAuthenticated)
-                return BadRequest(new { authModel.Message});
-            
-            return Ok(authModel); 
+            if (authModel.IsSuccessful)
+                return Ok(authModel);
+
+            return BadRequest(authModel.Error);
         }
         [HttpPost("login")]
         public async Task<ActionResult<AuthenticationVM>> LogInAsync(LogInVM model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             return await _authService.LogInAsync(model);
         }

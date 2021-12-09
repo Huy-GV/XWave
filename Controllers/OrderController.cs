@@ -54,13 +54,12 @@ namespace XWave.Controllers
         [Authorize(Roles ="customer")]
         public async Task<IActionResult> CreateOrder([FromBody] PurchaseVM purchaseVM)
         {
+            string customerID = GetCustomerID();
+            if (customerID == string.Empty)
+                return BadRequest();
 
             using var transaction = DbContext.Database.BeginTransaction();
             string savepoint = "BeforePurchaseConfirmation";
-            string customerID = GetCustomerID();
-
-            if (customerID == string.Empty)
-                return BadRequest();
 
             transaction.CreateSavepoint(savepoint);
             try
