@@ -66,7 +66,7 @@ namespace XWave.Controllers
                 return Ok(ResponseTemplate.Created($"https://localhost:5001/api/discount/{newDiscount.ID}"));
             }
 
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
         // PUT api/<DiscountController>/5
@@ -85,7 +85,7 @@ namespace XWave.Controllers
                     .Updated($"https://localhost:5001/api/discount/{updatedDiscount.ID}"));
             }
 
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
         // DELETE api/<DiscountController>/5

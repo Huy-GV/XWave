@@ -124,7 +124,7 @@ namespace XWave.Controllers
             {
                 await transaction.RollbackToSavepointAsync(savepoint);
                 Logger.LogError(exception.Message);
-                //replace with 500 status
+
                 return StatusCode(500, ResponseTemplate.InternalServerError());
             }
         }
@@ -142,9 +142,8 @@ namespace XWave.Controllers
         private void AssignOrderID(int orderID, List<OrderDetail> orderDetails)
         {
             foreach (var orderDetail in orderDetails)
-            {
                 orderDetail.OrderID = orderID;
-            }
+            
         }
 
         private async Task UpdatePaymentDetailAsync(

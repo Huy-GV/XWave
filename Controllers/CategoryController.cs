@@ -54,7 +54,7 @@ namespace XWave.Controllers
                     .Created($"https://localhost:5001/api/category/admin/{newCategory.ID}"));
             }
 
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
         // PUT api/<CategoryController>/5
@@ -73,7 +73,7 @@ namespace XWave.Controllers
                     .Updated($"https://localhost:5001/api/category/admin/{updatedCategory.ID}"));
             }
 
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
         // DELETE api/<CategoryController>/5

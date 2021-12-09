@@ -91,7 +91,7 @@ namespace XWave.Controllers
                     .Created($"https://localhost:5001/api/product/admin/{newProduct.ID}"));
             }
 
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
 
@@ -114,7 +114,7 @@ namespace XWave.Controllers
                     .Updated($"https://localhost:5001/api/product/admin/{product.ID}"));
             }
 
-            return BadRequest("An error occured");
+            return BadRequest(ModelState);
         }
         // DELETE api/<ProductController>/5
         [Authorize(Policy = "StaffOnly")]
@@ -122,9 +122,7 @@ namespace XWave.Controllers
         public async Task<ActionResult> DeleteAsync(int id)
         {
             if (!await ItemExistsAsync<Product>(id))
-            {
                 return NotFound();
-            }
 
             DbContext.Product.Remove(await DbContext.Product.FindAsync(id));
             DbContext.SaveChanges();
