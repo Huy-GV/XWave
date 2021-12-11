@@ -16,27 +16,25 @@ namespace XWave.Data.DatabaseSeeding
     {
         public static async Task SeedData(IServiceProvider serviceProvider)
         {
-            using (var context = new XWaveDbContext(
+            using var context = new XWaveDbContext(
                     serviceProvider
-                    .GetRequiredService<DbContextOptions<XWaveDbContext>>()))
-            {
-                var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-                var dbContext = serviceProvider.GetRequiredService<XWaveDbContext>();
-                await CreateRolesAsync(
-                    roleManager, 
-                    new string[] 
-                    {
+                    .GetRequiredService<DbContextOptions<XWaveDbContext>>());
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var dbContext = serviceProvider.GetRequiredService<XWaveDbContext>();
+            await CreateRolesAsync(
+                roleManager,
+                new string[]
+                {
                         Roles.Customer,
                         Roles.Manager,
                         Roles.Staff
-                    }
-                );
+                }
+            );
 
-                await CreateCustomersAsync(userManager, dbContext);
-                await CreateStaffAsync(userManager);
-                await CreateManagerAsync(userManager);
-            } 
+            await CreateCustomersAsync(userManager, dbContext);
+            await CreateStaffAsync(userManager);
+            await CreateManagerAsync(userManager);
         }
         private static async Task CreateRolesAsync(RoleManager<IdentityRole> roleManager, string[] roles)
         {
@@ -80,7 +78,6 @@ namespace XWave.Data.DatabaseSeeding
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(user, Roles.Customer);
-                Console.WriteLine($"Username {user.UserName} has id {user.Id}");
                 dbContext.Customer.Add(new Customer()
                 {
                     CustomerID = user.Id,

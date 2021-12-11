@@ -31,6 +31,11 @@ namespace XWave.Data
             builder.Entity<OrderDetail>()
                 .HasKey(od => new { od.OrderID, od.ProductID });
 
+            builder.Entity<OrderDetail>()
+                .HasIndex(od => od.OrderID)
+                .IsUnique(false);
+                
+
             builder.Entity<Payment>()
                 .HasIndex(p => new { p.AccountNo, p.Provider })
                 .IsUnique();

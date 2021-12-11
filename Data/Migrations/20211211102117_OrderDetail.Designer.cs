@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using XWave.Data;
 
 namespace XWave.Data.Migrations
 {
     [DbContext(typeof(XWaveDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211211102117_OrderDetail")]
+    partial class OrderDetail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -315,7 +317,8 @@ namespace XWave.Data.Migrations
 
                     b.HasKey("OrderID", "ProductID");
 
-                    b.HasIndex("OrderID");
+                    b.HasIndex("OrderID")
+                        .IsUnique();
 
                     b.HasIndex("ProductID");
 
@@ -481,8 +484,8 @@ namespace XWave.Data.Migrations
             modelBuilder.Entity("XWave.Models.OrderDetail", b =>
                 {
                     b.HasOne("XWave.Models.Order", "Order")
-                        .WithMany("OrderDetailCollection")
-                        .HasForeignKey("OrderID")
+                        .WithOne("Detail")
+                        .HasForeignKey("XWave.Models.OrderDetail", "OrderID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -535,7 +538,7 @@ namespace XWave.Data.Migrations
 
             modelBuilder.Entity("XWave.Models.Order", b =>
                 {
-                    b.Navigation("OrderDetailCollection");
+                    b.Navigation("Detail");
                 });
 #pragma warning restore 612, 618
         }

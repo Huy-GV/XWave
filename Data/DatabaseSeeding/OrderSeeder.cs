@@ -45,38 +45,9 @@ namespace XWave.Data.DatabaseSeeding
                 },
             };
 
-            //dbContext.Database.OpenConnection();
-            //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Payment ON");
             dbContext.Payment.AddRange(payments);
             dbContext.SaveChanges();
-            //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Payment OFF");
         }
-        //private static void CreateCustomers(XWaveDbContext dbContext)
-        //{
-        //    var customers = new List<Customer>()
-        //    {
-        //        new Customer()
-        //        {
-        //            //ID = 1,
-        //            Country = "Australia",
-        //            PhoneNumber = 12345678,
-        //            Address = "02 Main St VIC"
-        //        },
-        //        new Customer()
-        //        {
-        //            //ID = 2,
-        //            Country = "Australia",
-        //            PhoneNumber = 98765432,
-        //            Address = "15 Second St VIC"
-        //        },
-        //    };
-
-        //    //dbContext.Database.OpenConnection();
-        //    //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Customer ON");
-        //    dbContext.Customer.AddRange(customers);
-        //    dbContext.SaveChanges();
-        //    //dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Customer OFF");
-        //}
         private static async Task CreateOrders(
             XWaveDbContext dbContext, 
             UserManager<ApplicationUser> userManager)
@@ -121,17 +92,38 @@ namespace XWave.Data.DatabaseSeeding
                 },
                 new OrderDetail()
                 {
-                    OrderID = 2,
+                    OrderID = 1,
                     ProductID = 3,
                     PriceAtOrder = 90,
                     Quantity = 2,
                 },
                 new OrderDetail()
                 {
-                    OrderID = 3,
+                    OrderID = 2,
                     ProductID = 4,
                     PriceAtOrder = 1600,
                     Quantity = 1,
+                },
+                new OrderDetail()
+                {
+                    OrderID = 3,
+                    ProductID = 4,
+                    PriceAtOrder = 1600,
+                    Quantity = 4,
+                },
+                new OrderDetail()
+                {
+                    OrderID = 3,
+                    ProductID = 2,
+                    PriceAtOrder = 40,
+                    Quantity = 9,
+                },
+                new OrderDetail()
+                {
+                    OrderID = 3,
+                    ProductID = 3,
+                    PriceAtOrder = 600,
+                    Quantity = 15,
                 },
             };
 

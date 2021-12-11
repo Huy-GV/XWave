@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using XWave.Models;
 using XWave.ViewModels.Purchase;
 using System.Security.Claims;
+using XWave.DTOs;
 
 namespace XWave.Controllers
 {
@@ -24,12 +25,30 @@ namespace XWave.Controllers
         {
 
         }
-        [HttpGet("{id}")]
-        //[Authorize(Policy ="StaffOnly")]
-        public async Task<ActionResult<OrderDetail>> GetOrderAsync(int id)
+        [HttpGet]
+        //[Authorize(Roles = "customer")]
+        public ActionResult<OrderDetail> GetOrders()
         {
             //TODO: get order, order detail and construct DTO
-            return Ok(await DbContext.OrderDetail.ToListAsync());
+            var orders = DbContext.Order
+                .Include(o => o.OrderDetailCollection)
+                .Include(o => o.Payment)
+                .Select(o => new OrderDTO()
+                {
+                    OrderDate = o.Date,
+                    AccountNo = o.Payment.AccountNo,
+                    OrderDetailCollection = o
+                        .OrderDetailCollection
+                        .Select(od => new OrderDetailDTO()
+                        {
+                            Quantity = od.Quantity,
+                            Price = od.PriceAtOrder,
+                            ProductName = od.Product.Name
+                        })
+                })
+                .ToList();
+
+            return Ok(orders);
         }
         [HttpGet("detail")]
         //[Authorize(Policy ="StaffOnly")]
