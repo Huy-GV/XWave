@@ -29,9 +29,10 @@ namespace XWave.Controllers
         //[Authorize(Roles = "customer")]
         public ActionResult<OrderDetail> GetOrders()
         {
-            //TODO: get order, order detail and construct DTO
+            //works without ThenIncludee()
             var orders = DbContext.Order
                 .Include(o => o.OrderDetailCollection)
+                    .ThenInclude(od => od.Product)
                 .Include(o => o.Payment)
                 .Select(o => new OrderDTO()
                 {
