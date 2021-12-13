@@ -12,6 +12,7 @@ using XWave.Models;
 using XWave.ViewModels.Purchase;
 using System.Security.Claims;
 using XWave.DTOs;
+using XWave.Services;
 
 namespace XWave.Controllers
 {
@@ -19,17 +20,19 @@ namespace XWave.Controllers
     [ApiController]
     public class OrderController : AbstractController<OrderController>
     {
+        private readonly AuthenticationService _autService;
         public OrderController(
             XWaveDbContext dbContext,
-            ILogger<OrderController> logger) : base(dbContext, logger)
+            ILogger<OrderController> logger,
+            AuthenticationService authService) : base(dbContext, logger)
         {
-
+            _autService = authService;
         }
         [HttpGet]
         [Authorize(Roles = "customer")]
         public ActionResult<OrderDetail> GetOrders()
         {
-            string customerID = GetCustomerID();
+            string customerID = _autService.GetCustomerID(HttpContext.User.Identity);
             if (customerID == string.Empty)
                 return BadRequest();
 
@@ -79,7 +82,7 @@ namespace XWave.Controllers
         [Authorize(Roles ="customer")]
         public async Task<IActionResult> CreateOrder([FromBody] PurchaseVM purchaseVM)
         {
-            string customerID = GetCustomerID();
+            string customerID = _autService.GetCustomerID(HttpContext.User.Identity);
             if (customerID == string.Empty)
                 return BadRequest();
 

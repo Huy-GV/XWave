@@ -14,6 +14,7 @@ using System.Linq;
 using System.Collections.Generic;
 using XWave.ViewModels.Authentication;
 using XWave.Data;
+using System.Security.Principal;
 
 namespace XWave.Services
 {
@@ -78,6 +79,43 @@ namespace XWave.Services
                 return await GetTokenAsync(user, role);
             }
         }
+        public async Task<AuthenticationVM> RegisterAsync(RegisterVM registerVM, string role)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = registerVM.Username,
+                FirstName = registerVM.FirstName,
+                LastName = registerVM.LastName,
+                RegistrationDate = DateTime.UtcNow.Date,
+            };
+
+            var result = await _userManager.CreateAsync(user, registerVM.Password);
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, role);
+                if (role == Roles.Customer)
+                    await CreateCustomerAccount(user.Id, registerVM);
+
+                return await GetTokenAsync(user, role);
+            }
+
+            var errorMessage = "";
+            foreach (var error in result.Errors)
+                errorMessage += error.Description;
+
+            return new AuthenticationVM
+            {
+                Error = errorMessage,
+            };
+        }
+        public string GetCustomerID(IIdentity identity)
+        {
+            ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
+
+            string customerID = claimsIdentity?.FindFirst(CustomClaim.CustomerID)?.Value;
+            _logger.LogInformation($"Customer id in jwt claim: {customerID}");
+            return customerID ?? string.Empty;
+        }
         private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user, string role)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
@@ -129,34 +167,6 @@ namespace XWave.Services
             });
             await _dbContext.SaveChangesAsync();
         }
-        public async Task<AuthenticationVM> RegisterAsync(RegisterVM registerVM, string role)
-        {
-            var user = new ApplicationUser
-            {
-                UserName = registerVM.Username,
-                FirstName = registerVM.FirstName,
-                LastName = registerVM.LastName,
-                RegistrationDate = DateTime.UtcNow.Date,
-            };
 
-            var result = await _userManager.CreateAsync(user, registerVM.Password);
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, role);
-                if (role == Roles.Customer)
-                    await CreateCustomerAccount(user.Id, registerVM);
-
-                return await GetTokenAsync(user, role);
-            }
-
-            var errorMessage = "";
-            foreach (var error in result.Errors)
-                errorMessage += error.Description;
-
-            return new AuthenticationVM
-            {
-                Error = errorMessage,
-            };
-        }
     }
 }
