@@ -90,24 +90,39 @@ namespace XWave.Controllers
 
         // DELETE api/<DiscountController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles ="manager")]
         public async Task<ActionResult> Delete(int id)
         {
-            var discount = await DbContext.Discount.SingleOrDefaultAsync(d => d.ID == id);
-            if (discount == null)
-                return NotFound();
+            using var transaction = DbContext.Database.BeginTransaction();
+            string savepoint = "BeforeDiscountRemoval";
+            transaction.CreateSavepoint(savepoint);
+            try
+            {
+                var discount = await DbContext.Discount.SingleOrDefaultAsync(d => d.ID == id);
+                if (discount == null)
+                    return NotFound();
 
-            //set FK to null to avoid FK constraint conflict
-            var productsWithDiscount = DbContext.Product
-                .Where(d => d.DiscountID == id)
-                .ToList()
-                .Select(p => p.DiscountID = null);
+                var productsWithDiscount = DbContext.Product
+                    .Where(d => d.DiscountID == id)
+                    .ToList();
 
-            DbContext.UpdateRange(productsWithDiscount);
-            await DbContext.SaveChangesAsync();
+                //begins tracking products to avoid FK constraint errors
+                DbContext.Product.UpdateRange(productsWithDiscount);
 
-            DbContext.Discount.Remove(discount);
-            await DbContext.SaveChangesAsync();
-            return Ok(ResponseTemplate.Deleted(id.ToString(), nameof(Discount)));
+                DbContext.Discount.Remove(discount);
+                await DbContext.SaveChangesAsync();
+
+                transaction.Commit();
+
+                return Ok(ResponseTemplate.Deleted(id.ToString(), nameof(Discount)));
+            } catch (Exception ex)
+            {
+                transaction.RollbackToSavepoint(savepoint);
+                Logger.LogError(ex.Message);
+                Logger.LogError(ex.StackTrace);
+                return StatusCode(500, ResponseTemplate.InternalServerError());
+            }
+
         }
     }
 }
