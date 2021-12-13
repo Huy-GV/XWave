@@ -90,7 +90,8 @@ namespace XWave.Services
                     new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim("uid", user.Id),
-                    new Claim(ClaimTypes.Role, role)
+                    new Claim(ClaimTypes.Role, role),
+                    new Claim(CustomClaim.CustomerID, user.Id)
                 };
             } else
             {
@@ -99,7 +100,6 @@ namespace XWave.Services
                     new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim("uid", user.Id),
-                    new Claim(CustomClaim.CustomerID, user.Id),
                     new Claim(ClaimTypes.Role, role)
                 };
             }

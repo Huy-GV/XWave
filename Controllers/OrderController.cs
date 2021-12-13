@@ -26,14 +26,19 @@ namespace XWave.Controllers
 
         }
         [HttpGet]
-        //[Authorize(Roles = "customer")]
+        [Authorize(Roles = "customer")]
         public ActionResult<OrderDetail> GetOrders()
         {
+            string customerID = GetCustomerID();
+            if (customerID == string.Empty)
+                return BadRequest();
+
             //works without ThenIncludee()
             var orders = DbContext.Order
                 .Include(o => o.OrderDetailCollection)
                     .ThenInclude(od => od.Product)
                 .Include(o => o.Payment)
+                .Where(o => o.CustomerID == customerID)
                 .Select(o => new OrderDTO()
                 {
                     OrderDate = o.Date,
@@ -86,13 +91,9 @@ namespace XWave.Controllers
             {
                 var customer = await DbContext.Customer
                     .SingleAsync(c => c.CustomerID == customerID);
-                if (customer == null)
-                    return NotFound();
 
                 var payment = await DbContext.Payment
                     .SingleAsync(p => p.ID == purchaseVM.PaymentID);
-                if (payment == null)
-                    return NotFound();
 
                 var order = new Order()
                 {
@@ -104,22 +105,28 @@ namespace XWave.Controllers
                 List<Product> purchasedProducts = new();
                 List<OrderDetail> orderDetails = new();
 
-                foreach (var productPurchase in purchaseVM.ProductCart)
+                foreach (var purchasedProduct in purchaseVM.ProductCart)
                 {
                     var product = await DbContext.Product
-                        .SingleOrDefaultAsync(p => p.ID == productPurchase.ProductID);
+                        .Include(p => p.Discount)
+                        .SingleOrDefaultAsync(p => p.ID == purchasedProduct.ProductID);
                     if (product == null)
                         return NotFound("Ordered product not found");
-                    if (product.Quantity < productPurchase.Quantity)
+                    if (product.Quantity < purchasedProduct.Quantity)
                         return BadRequest("Quantity exceeded existing stock");
 
-                    product.Quantity -= productPurchase.Quantity;
+                    //prevent customers from ordering based on incorrect data
+                    if (product.Price != purchasedProduct.DisplayedPrice ||
+                        product.Discount.Percentage != purchasedProduct.DiscountPercentage)
+                        return BadRequest("Conflicting data about product");
+
+                    product.Quantity -= purchasedProduct.Quantity;
                     purchasedProducts.Add(product);
                     orderDetails.Add(new OrderDetail
                     {
-                        Quantity = productPurchase.Quantity,
-                        ProductID = productPurchase.ProductID,
-                        PriceAtOrder = productPurchase.Price,
+                        Quantity = purchasedProduct.Quantity,
+                        ProductID = purchasedProduct.ProductID,
+                        PriceAtOrder = product.Price - product.Price * product.Discount.Percentage / 100,
                     });
                 }
 
@@ -144,6 +151,7 @@ namespace XWave.Controllers
             {
                 await transaction.RollbackToSavepointAsync(savepoint);
                 Logger.LogError(exception.Message);
+                Logger.LogError(exception.StackTrace);
 
                 return StatusCode(500, ResponseTemplate.InternalServerError());
             }
@@ -152,11 +160,11 @@ namespace XWave.Controllers
         {
             var customerID = string.Empty;
             ClaimsIdentity identity = (ClaimsIdentity)HttpContext.User.Identity;
-            if (identity != null)
-                customerID = identity.FindFirst(CustomClaim.CustomerID).Value;
+
+            customerID = identity?.FindFirst(CustomClaim.CustomerID)?.Value;
 
             Logger.LogCritical($"Customer id in jwt claim: {customerID}");
-            return customerID ?? string.Empty;
+            return customerID;
 
         }
         private void AssignOrderID(int orderID, List<OrderDetail> orderDetails)
