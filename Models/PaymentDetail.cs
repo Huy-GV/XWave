@@ -14,7 +14,7 @@ namespace XWave.Models
         [Range(0, int.MaxValue)]
         public uint PurchaseCount { get; set; }
         [DataType(DataType.Date)]
-        public DateTime LatestPurchase { get; set; }
+        public DateTime? LatestPurchase { get; set; }
         //navigation property
         public Customer Customer { get; set; }
         public Payment Payment { get; set; }

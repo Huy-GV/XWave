@@ -21,7 +21,7 @@ namespace XWave.Controllers
             ILogger<CategoryController> logger,
             XWaveDbContext dbContext) : base(dbContext, logger)
         {
-            ;
+            
         }
         // GET: api/<CategoryController>
         [HttpGet]

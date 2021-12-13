@@ -28,6 +28,13 @@ namespace XWave.Models
                     "Only MasterCard, AmericanExpress, and Visa are valid providers",
                     new string[] { nameof(Provider) });
             }
+
+            if (ExpiryDate <= DateTime.Now)
+            {
+                yield return new ValidationResult(
+                    "Account expired on the date of purchase",
+                    new string[] { nameof(ExpiryDate) });
+            }
         }
     }
 }
