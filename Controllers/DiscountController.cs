@@ -102,12 +102,10 @@ namespace XWave.Controllers
                 if (discount == null)
                     return NotFound();
 
+                //start tracking items to avoid FK constraint errors
                 var productsWithDiscount = DbContext.Product
                     .Where(d => d.DiscountID == id)
                     .ToList();
-
-                //begins tracking products to avoid FK constraint errors
-                DbContext.Product.UpdateRange(productsWithDiscount);
 
                 DbContext.Discount.Remove(discount);
                 await DbContext.SaveChangesAsync();
