@@ -93,10 +93,16 @@ namespace XWave.Controllers
             try
             {
                 var customer = await DbContext.Customer
-                    .SingleAsync(c => c.CustomerID == customerID);
+                    .SingleOrDefaultAsync(c => c.CustomerID == customerID);
+
+                if (customer == null)
+                    return NotFound("Customer not found");
 
                 var payment = await DbContext.Payment
-                    .SingleAsync(p => p.ID == purchaseVM.PaymentID);
+                    .SingleOrDefaultAsync(p => p.ID == purchaseVM.PaymentID);
+
+                if (payment == null)
+                    return NotFound("Payment not found");
 
                 var order = new Order()
                 {
@@ -158,17 +164,6 @@ namespace XWave.Controllers
 
                 return StatusCode(500, ResponseTemplate.InternalServerError());
             }
-        }
-        private string GetCustomerID()
-        {
-            var customerID = string.Empty;
-            ClaimsIdentity identity = (ClaimsIdentity)HttpContext.User.Identity;
-
-            customerID = identity?.FindFirst(CustomClaim.CustomerID)?.Value;
-
-            Logger.LogCritical($"Customer id in jwt claim: {customerID}");
-            return customerID;
-
         }
         private void AssignOrderID(int orderID, List<OrderDetail> orderDetails)
         {

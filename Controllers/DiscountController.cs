@@ -92,7 +92,7 @@ namespace XWave.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var discount = await DbContext.Discount.FirstOrDefaultAsync(d => d.ID == id);
+            var discount = await DbContext.Discount.SingleOrDefaultAsync(d => d.ID == id);
             if (discount == null)
                 return NotFound();
 
