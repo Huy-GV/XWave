@@ -35,7 +35,6 @@ namespace XWave.Data
                 .HasIndex(od => od.OrderID)
                 .IsUnique(false);
                 
-
             builder.Entity<Payment>()
                 .HasIndex(p => new { p.AccountNo, p.Provider })
                 .IsUnique();
@@ -49,6 +48,21 @@ namespace XWave.Data
                 .HasForeignKey(p => p.DiscountID)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            //builder.Entity<Discount>()
+            //    .HasOne(d => d.Manager)
+            //    .WithMany()
+            //    .HasForeignKey(d => d.ManagerID);
+
+            builder.Entity<StaffActivityLog>()
+                .HasOne(activityLog => activityLog.StaffUser)
+                .WithMany()
+                .HasForeignKey(activityLog => activityLog.StaffID);
+
+            builder.Entity<StaffActivityLog>()
+                .HasOne(activityLog => activityLog.Activity)
+                .WithMany()
+                .HasForeignKey(activityLog => activityLog.ActivityID);
         }
     }
 }

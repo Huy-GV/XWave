@@ -28,7 +28,7 @@ namespace XWave.Controllers
         {
             _authService = authenticationService;  
         }
-
+        //TODO: attach jwt to cookies in response
         [HttpPost("register/customer")]
         public async Task<ActionResult<AuthenticationVM>> RegisterCustomerAsync(RegisterVM model)
         {

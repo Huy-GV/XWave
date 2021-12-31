@@ -12,9 +12,8 @@ namespace XWave.Models
     public class ApplicationUser : IdentityUser
     {
         [Required]
-        [DataType(DataType.Date)]
+        [Column(TypeName = "datetime")]
         public DateTime RegistrationDate { get; set; }
-        public int? PaymentId { get; set; }
         [Required]
         [StringLength(15, MinimumLength = 2)]
         public string FirstName { get; set; }
