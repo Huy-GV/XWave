@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.Extensions.Options;
 using XWave.Data.Constants;
 using System.Collections.Generic;
+using System.Linq;
+using XWave.Models;
 
 namespace XWave.Data.DatabaseSeeding
 {
@@ -17,15 +19,15 @@ namespace XWave.Data.DatabaseSeeding
     {
         public static void SeedData(IServiceProvider serviceProvider)
         {
-            using (var context = new XWaveDbContext(
+            using var context = new XWaveDbContext(
                 serviceProvider
-                .GetRequiredService<DbContextOptions<XWaveDbContext>>()))
-            {
-                CreateCategories(context);
-                CreateDiscounts(context);
-                CreateProducts(context);
-                context.Database.CloseConnection();
-            }
+                .GetRequiredService<DbContextOptions<XWaveDbContext>>());
+
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            CreateCategories(context);
+            CreateDiscounts(context, userManager);
+            CreateProducts(context);
+            context.Database.CloseConnection();
         }
 
         public static void CreateCategories(XWaveDbContext dbContext)
@@ -102,8 +104,11 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.Product.AddRange(products);
             dbContext.SaveChanges();
         }
-        public static void CreateDiscounts(XWaveDbContext dbContext)
+        public static void CreateDiscounts(
+            XWaveDbContext dbContext,
+            UserManager<ApplicationUser> userManager)
         {
+            var managers = userManager.GetUsersInRoleAsync(Roles.Manager).Result;
             var discounts = new List<Discount>()
             {
                 new Discount()
@@ -111,14 +116,16 @@ namespace XWave.Data.DatabaseSeeding
                     ID = 1,
                     Percentage = 20,
                     StartDate = DateTime.ParseExact("7/1/2021", "d/M/yyyy", null),
-                    EndDate = DateTime.ParseExact("11/2/2021", "d/M/yyyy", null)
+                    EndDate = DateTime.ParseExact("11/2/2021", "d/M/yyyy", null),
+                    ManagerID = managers[0].Id,
                 },
                 new Discount()
                 {
                     ID = 2,
                     Percentage = 35,
                     StartDate = DateTime.ParseExact("17/7/2021", "d/M/yyyy", null),
-                    EndDate = DateTime.ParseExact("25/7/2021", "d/M/yyyy", null)
+                    EndDate = DateTime.ParseExact("25/7/2021", "d/M/yyyy", null),
+                    ManagerID = managers[1].Id,
                 }
             };
             dbContext.Database.OpenConnection();

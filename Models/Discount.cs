@@ -26,8 +26,8 @@ namespace XWave.Models
         [Required]
         [Column(TypeName = "date")]
         public DateTime EndDate { get; set; }
-        //public string ManagerID { get; set; }
-        //public ApplicationUser Manager { get; set; }
+        public string ManagerID { get; set; }
+        public ApplicationUser Manager { get; set; }
         public ICollection<Product> Products { get; set; }
     }
 }

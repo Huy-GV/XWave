@@ -22,22 +22,20 @@ namespace XWave.Data.DatabaseSeeding
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var dbContext = serviceProvider.GetRequiredService<XWaveDbContext>();
-            await CreateRolesAsync(
-                roleManager,
-                new string[]
+            await CreateRolesAsync(roleManager);
+
+            await CreateCustomersAsync(userManager, dbContext);
+            await CreateStaffAsync(userManager);
+            await CreateManagersAsync(userManager);
+        }
+        private static async Task CreateRolesAsync(RoleManager<IdentityRole> roleManager)
+        {
+            var roles = new string[]
                 {
                         Roles.Customer,
                         Roles.Manager,
                         Roles.Staff
-                }
-            );
-
-            await CreateCustomersAsync(userManager, dbContext);
-            await CreateStaffAsync(userManager);
-            await CreateManagerAsync(userManager);
-        }
-        private static async Task CreateRolesAsync(RoleManager<IdentityRole> roleManager, string[] roles)
-        {
+                };
             foreach(var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
@@ -105,12 +103,18 @@ namespace XWave.Data.DatabaseSeeding
             await userManager.CreateAsync(staff, "Password123@@");
             await userManager.AddToRoleAsync(staff, Roles.Staff);
         }
-        private static async Task CreateManagerAsync(UserManager<ApplicationUser> userManager)
+        private static async Task CreateManagersAsync(
+            UserManager<ApplicationUser> userManager)
         {
-            if (await userManager.FindByNameAsync("huy_manager") != null) 
-                return;
-            
-            var manager = new ApplicationUser()
+            var manager1 = new ApplicationUser()
+            {
+                UserName = "gia_manager",
+                FirstName = "Gia",
+                LastName = "Applebee",
+                RegistrationDate = DateTime.Now
+            };
+
+            var manager2 = new ApplicationUser()
             {
                 UserName = "huy_manager",
                 FirstName = "Huy",
@@ -118,6 +122,13 @@ namespace XWave.Data.DatabaseSeeding
                 RegistrationDate = DateTime.Now
             };
 
+            await CreateManagerAsync(manager1, userManager);
+            await CreateManagerAsync(manager2, userManager);
+        }
+        private static async Task CreateManagerAsync(
+            ApplicationUser manager,
+            UserManager<ApplicationUser> userManager)
+        {
             await userManager.CreateAsync(manager, "Password123@@");
             await userManager.AddToRoleAsync(manager, Roles.Manager);
         }

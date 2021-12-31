@@ -49,10 +49,10 @@ namespace XWave.Data
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            //builder.Entity<Discount>()
-            //    .HasOne(d => d.Manager)
-            //    .WithMany()
-            //    .HasForeignKey(d => d.ManagerID);
+            builder.Entity<Discount>()
+                .HasOne(d => d.Manager)
+                .WithMany()
+                .HasForeignKey(d => d.ManagerID);
 
             builder.Entity<StaffActivityLog>()
                 .HasOne(activityLog => activityLog.StaffUser)
