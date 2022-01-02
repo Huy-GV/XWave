@@ -161,7 +161,6 @@ namespace XWave.Controllers
                 await transaction.RollbackToSavepointAsync(savepoint);
                 Logger.LogError(exception.Message);
                 Logger.LogError(exception.StackTrace);
-
                 return StatusCode(500, ResponseTemplate.InternalServerError());
             }
         }

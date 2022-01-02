@@ -66,9 +66,7 @@ namespace XWave.Services
                 return authModel;
             }
 
-            var correctPassword = await _userManager
-                .CheckPasswordAsync(user, model.Password);
-            if (!correctPassword)
+            if (!await _userManager.CheckPasswordAsync(user, model.Password))
             {
                 authModel.Error = $"Incorrect password for user {model.Username}";
                 return authModel;

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.Models
 {
@@ -9,6 +10,7 @@ namespace XWave.Models
         [Required]
         public int ID { get; set; }
         [Required]
+        [Column(TypeName = "datetime")]
         public DateTime Date { get; set; }
         public string CustomerID { get; set; }
         public int PaymentID { get; set; }

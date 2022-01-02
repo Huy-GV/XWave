@@ -27,7 +27,7 @@ namespace XWave
 
                 try
                 {
-                    RoleSeeder.SeedData(services).Wait();
+                    UserSeeder.SeedData(services).Wait();
                 }
                 catch (Exception ex)
                 {
@@ -37,7 +37,7 @@ namespace XWave
 
                 try
                 {
-                    ProductSeeder.SeedData(services);
+                    ProductRelatedDataSeeder.SeedData(services);
                 }
                 catch (Exception ex)
                 {
@@ -46,7 +46,7 @@ namespace XWave
                 }
                 try
                 {
-                    OrderSeeder.SeedData(services);
+                    PurchaseRelatedDataSeeder.SeedData(services);
                 }
                 catch (Exception ex)
                 {

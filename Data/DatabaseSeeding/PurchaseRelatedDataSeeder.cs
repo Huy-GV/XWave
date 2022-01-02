@@ -8,22 +8,20 @@ using XWave.Models;
 
 namespace XWave.Data.DatabaseSeeding
 {
-    public static class OrderSeeder
+    public static class PurchaseRelatedDataSeeder
     {
         public static void SeedData(IServiceProvider serviceProvider)
         {
-            using (var context = new XWaveDbContext(
+            using var context = new XWaveDbContext(
                 serviceProvider
-                .GetRequiredService<DbContextOptions<XWaveDbContext>>()))
-            {
-                var userManager = serviceProvider
-                    .GetRequiredService<UserManager<ApplicationUser>>();
-                CreatePayments(context);
-                CreateOrders(context, userManager).Wait();
-                CreateOrderDetail(context);
-                CreatePaymentDetail(context, userManager).Wait();
-                context.Database.CloseConnection();
-            }
+                .GetRequiredService<DbContextOptions<XWaveDbContext>>());
+            var userManager = serviceProvider
+                .GetRequiredService<UserManager<ApplicationUser>>();
+            CreatePayments(context);
+            CreateOrders(context, userManager).Wait();
+            CreateOrderDetail(context);
+            CreatePaymentDetail(context, userManager).Wait();
+            context.Database.CloseConnection();
         }
 
         private static void CreatePayments(XWaveDbContext dbContext)

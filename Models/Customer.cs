@@ -6,7 +6,6 @@ namespace XWave.Models
 {
     public class Customer
     {
-        //public int ID { get; set; }
         [Key]
         public string CustomerID { get; set; }
         //public string Email { get; set; }

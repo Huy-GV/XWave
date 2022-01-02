@@ -108,7 +108,7 @@ namespace XWave.Controllers
                 {
                     CustomerID = customerID,
                     PaymentID = newPayment.ID,
-                    Registration = System.DateTime.Now,
+                    Registration = DateTime.Now,
                     PurchaseCount = 0,
                     LatestPurchase = null,
                 };

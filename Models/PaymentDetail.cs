@@ -9,7 +9,7 @@ namespace XWave.Models
     {
         public string CustomerID { get; set; }
         public int PaymentID { get; set; }
-        [DataType(DataType.Date)]
+        [Column(TypeName = "datetime")]
         public DateTime Registration { get; set; }
         [Range(0, int.MaxValue)]
         public uint PurchaseCount { get; set; }

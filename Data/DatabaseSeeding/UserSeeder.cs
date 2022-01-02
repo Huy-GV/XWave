@@ -12,7 +12,7 @@ using XWave.Data.Constants;
 
 namespace XWave.Data.DatabaseSeeding
 {
-    public static class RoleSeeder
+    public static class UserSeeder
     {
         public static async Task SeedData(IServiceProvider serviceProvider)
         {
@@ -30,18 +30,12 @@ namespace XWave.Data.DatabaseSeeding
         }
         private static async Task CreateRolesAsync(RoleManager<IdentityRole> roleManager)
         {
-            var roles = new string[]
-                {
-                        Roles.Customer,
-                        Roles.Manager,
-                        Roles.Staff
-                };
+            var roles = new string[]{ Roles.Customer, Roles.Manager, Roles.Staff };
             foreach(var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
-                {
                     await roleManager.CreateAsync(new IdentityRole(role));
-                }
+
             }
         }
         private static async Task CreateCustomersAsync(
