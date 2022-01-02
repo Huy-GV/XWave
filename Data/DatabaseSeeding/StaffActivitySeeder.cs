@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using XWave.Data.Constants;
 using XWave.Models;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace XWave.Data.DatabaseSeeding
 {
@@ -20,10 +21,21 @@ namespace XWave.Data.DatabaseSeeding
                 .GetRequiredService<DbContextOptions<XWaveDbContext>>());
 
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            CreateActivitiesAsync(context, userManager).Wait(); 
-            CreateStaffActivityLogsAsync(context, userManager).Wait();
-
-            context.Database.CloseConnection();
+            try
+            {
+                CreateActivitiesAsync(context, userManager).Wait();
+                CreateStaffActivityLogsAsync(context, userManager).Wait();
+            }
+            catch (Exception ex)
+            {
+                var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred while seeding staff activities");
+                logger.LogError(ex.Message);
+            } finally
+            {
+                context.Database.CloseConnection();
+            }
+            
         }
         private static async Task CreateActivitiesAsync(
             XWaveDbContext dbContext,
@@ -31,10 +43,8 @@ namespace XWave.Data.DatabaseSeeding
         {
             var managers = await userManager.GetUsersInRoleAsync(Roles.Manager);
 
-
-            //TODO: throw instead of return
-            if (managers.Count != 2)
-                return;
+            if (managers.Count < 2)
+                throw new Exception("There are fewer than 2 existing managers");
 
             var activityTypes = new List<Activity>
             {
@@ -72,9 +82,8 @@ namespace XWave.Data.DatabaseSeeding
             var activities = await dbContext.Activity.ToListAsync();
             var staff = await userManager.GetUsersInRoleAsync(Roles.Staff);
 
-            //TODO: throw instead of return
-            if (staff.Count != 1 || activities.Count != 3)
-                return;
+            if (staff.Count < 2 || activities.Count <3)
+                throw new Exception("Insufficient staff or activity");
 
             var logs = new List<StaffActivityLog>
             {
@@ -89,14 +98,14 @@ namespace XWave.Data.DatabaseSeeding
                 {
                     Time = DateTime.Now,
                     Message = "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-                    StaffID = staff[0].Id,
+                    StaffID = staff[1].Id,
                     ActivityID = activities[0].ID
                 },
                 new StaffActivityLog
                 {
                     Time = DateTime.Now,
                     Message = "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    StaffID = staff[0].Id,
+                    StaffID = staff[1].Id,
                     ActivityID = activities[0].ID
                 },
             };

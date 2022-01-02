@@ -9,12 +9,13 @@ using IdentityServer4.EntityFramework.Options;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.Extensions.Options;
 using XWave.Data.Constants;
+using Microsoft.Extensions.Logging;
 
 namespace XWave.Data.DatabaseSeeding
 {
     public static class UserSeeder
     {
-        public static async Task SeedData(IServiceProvider serviceProvider)
+        public static void SeedData(IServiceProvider serviceProvider)
         {
             using var context = new XWaveDbContext(
                     serviceProvider
@@ -22,11 +23,20 @@ namespace XWave.Data.DatabaseSeeding
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var dbContext = serviceProvider.GetRequiredService<XWaveDbContext>();
-            await CreateRolesAsync(roleManager);
+            
+            try
+            {
+                CreateRolesAsync(roleManager).Wait();
+                CreateCustomersAsync(userManager, dbContext).Wait();
+                CreateStaffAsync(userManager).Wait();
+                CreateManagersAsync(userManager).Wait();
+            } catch (Exception ex)
+            {
+                var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred while seeding roles and users");
+                logger.LogError(ex.Message);
+            }
 
-            await CreateCustomersAsync(userManager, dbContext);
-            await CreateStaffAsync(userManager);
-            await CreateManagersAsync(userManager);
         }
         private static async Task CreateRolesAsync(RoleManager<IdentityRole> roleManager)
         {
@@ -81,20 +91,29 @@ namespace XWave.Data.DatabaseSeeding
             }
             
         }
-        //TODO: refactors into 2 methods like managers
         private static async Task CreateStaffAsync(UserManager<ApplicationUser> userManager)
         {
-            if (await userManager.FindByNameAsync("paul_staff") != null) 
-                return;
-
-            var staff = new ApplicationUser()
+            var staff1 = new ApplicationUser()
             {
                 UserName = "paul_staff",
                 FirstName = "Paul",
                 LastName = "Applebee",
                 RegistrationDate = DateTime.Now,
             };
-
+            var staff2 = new ApplicationUser()
+            {
+                UserName = "liz_staff",
+                FirstName = "Elizabeth",
+                LastName = "Applebee",
+                RegistrationDate = DateTime.Now,
+            };
+            await CreateSingleStaffAsync(userManager, staff1);
+            await CreateSingleStaffAsync(userManager, staff2);
+        }
+        private static async Task CreateSingleStaffAsync(
+            UserManager<ApplicationUser> userManager,
+            ApplicationUser staff)
+        {
             await userManager.CreateAsync(staff, "Password123@@");
             await userManager.AddToRoleAsync(staff, Roles.Staff);
         }

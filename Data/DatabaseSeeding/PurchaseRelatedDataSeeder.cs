@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,16 +13,30 @@ namespace XWave.Data.DatabaseSeeding
     {
         public static void SeedData(IServiceProvider serviceProvider)
         {
-            using var context = new XWaveDbContext(
+            using (var context = new XWaveDbContext(
                 serviceProvider
-                .GetRequiredService<DbContextOptions<XWaveDbContext>>());
-            var userManager = serviceProvider
-                .GetRequiredService<UserManager<ApplicationUser>>();
-            CreatePayments(context);
-            CreateOrders(context, userManager).Wait();
-            CreateOrderDetail(context);
-            CreatePaymentDetail(context, userManager).Wait();
-            context.Database.CloseConnection();
+                .GetRequiredService<DbContextOptions<XWaveDbContext>>()))
+            {
+                var userManager = serviceProvider
+                    .GetRequiredService<UserManager<ApplicationUser>>();
+
+                try
+                {
+                    CreatePayments(context);
+                    CreateOrders(context, userManager).Wait();
+                    CreateOrderDetail(context);
+                    CreatePaymentDetail(context, userManager).Wait();
+                } catch (Exception ex)
+                {
+                    var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while seeding purchase data");
+                    logger.LogError(ex.Message);
+                } finally
+                {
+                    context.Database.CloseConnection();
+                }
+
+            }
         }
 
         private static void CreatePayments(XWaveDbContext dbContext)

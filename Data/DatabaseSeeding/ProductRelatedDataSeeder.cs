@@ -12,6 +12,7 @@ using XWave.Data.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using XWave.Models;
+using Microsoft.Extensions.Logging;
 
 namespace XWave.Data.DatabaseSeeding
 {
@@ -24,10 +25,22 @@ namespace XWave.Data.DatabaseSeeding
                 .GetRequiredService<DbContextOptions<XWaveDbContext>>());
 
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            CreateCategories(context);
-            CreateDiscounts(context, userManager);
-            CreateProducts(context);
-            context.Database.CloseConnection();
+
+            try
+            {
+                CreateCategories(context);
+                CreateDiscounts(context, userManager);
+                CreateProducts(context);
+            } catch (Exception ex)
+            {
+                var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred while seeding product data");
+                logger.LogError(ex.Message);
+            } finally
+            {
+                context.Database.CloseConnection();
+            }
+
         }
 
         public static void CreateCategories(XWaveDbContext dbContext)

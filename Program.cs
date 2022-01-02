@@ -25,45 +25,10 @@ namespace XWave
                 context.Database.EnsureDeleted();
                 context.Database.Migrate();
 
-                //TODO: move try catch to respective classes
-                try
-                {
-                    UserSeeder.SeedData(services).Wait();
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding roles and users");
-                }
-
-                try
-                {
-                    ProductRelatedDataSeeder.SeedData(services);
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding product related data");
-                }
-                try
-                {
-                    PurchaseRelatedDataSeeder.SeedData(services);
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding purchase related data");
-                }
-                try
-                {
-                    StaffActivitySeeder.SeedData(services);
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding staff activity related data");
-                }
-
+                UserSeeder.SeedData(services);
+                ProductRelatedDataSeeder.SeedData(services);
+                PurchaseRelatedDataSeeder.SeedData(services);
+                StaffActivitySeeder.SeedData(services);
             }
             
             host.Run();
