@@ -81,6 +81,7 @@ namespace XWave.Data.DatabaseSeeding
             }
             
         }
+        //TODO: refactors into 2 methods like managers
         private static async Task CreateStaffAsync(UserManager<ApplicationUser> userManager)
         {
             if (await userManager.FindByNameAsync("paul_staff") != null) 
@@ -123,6 +124,7 @@ namespace XWave.Data.DatabaseSeeding
             ApplicationUser manager,
             UserManager<ApplicationUser> userManager)
         {
+
             await userManager.CreateAsync(manager, "Password123@@");
             await userManager.AddToRoleAsync(manager, Roles.Manager);
         }
