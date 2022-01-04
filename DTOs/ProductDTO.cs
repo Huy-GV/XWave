@@ -4,6 +4,7 @@
     {
         public int ID { get; init; }
         public string Name { get; init; }
+        public string CategoryName { get; init; }
         public decimal Price { get; init; }
         public uint Quantity { get; init; }
         public int? CategoryID { get; init; }
@@ -21,6 +22,7 @@
                 Price = product.Price,
                 Quantity = product.Quantity,
                 CategoryID = product.CategoryID,
+                CategoryName = product.Category?.Name,
                 DiscountDTO = discountDTO
             };
         }

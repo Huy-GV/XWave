@@ -82,9 +82,9 @@ namespace XWave
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddDatabaseDeveloperPageExceptionFilter();
+            
 
-            services.AddControllersWithViews();
+            services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddRazorPages();
 
             // In production, the React files will be served from this directory
@@ -111,7 +111,7 @@ namespace XWave
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseSpaStaticFiles();
+            //app.UseSpaStaticFiles();
 
             app.UseRouting();
 
@@ -126,15 +126,15 @@ namespace XWave
                 endpoints.MapRazorPages();
             });
 
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
+            //app.UseSpa(spa =>
+            //{
+            //    spa.Options.SourcePath = "ClientApp";
 
-                if (env.IsDevelopment())
-                {
-                    spa.UseReactDevelopmentServer(npmScript: "start");
-                }
-            });
+            //    if (env.IsDevelopment())
+            //    {
+            //        spa.UseReactDevelopmentServer(npmScript: "start");
+            //    }
+            //});
         }
     }
 }

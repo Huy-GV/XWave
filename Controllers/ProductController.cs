@@ -30,21 +30,25 @@ namespace XWave.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<ProductDTO>> Get()
         {
+            //TODO: include category
             var products = DbContext.Product
                 .Include(p => p.Discount)
+                .Include(p => p.Category)
                 .Select(product => ProductDTO.From(product))
                 .ToList();
 
             return Ok(products);
         }
 
-        [HttpGet("staff")]
-        //[Authorize]
-        public ActionResult<IEnumerable<Product>> GetAuthorized()
+        [HttpGet("full-details/{categoryID:int?}")]
+        [Authorize]
+        public ActionResult<IEnumerable<Product>> GetFullDetails(int? categoryID)
         {
-            var products = DbContext.Product
-                .Include(p => p.Discount)
-                .ToList();
+            var products = DbContext.Product.AsEnumerable();
+
+            if (categoryID != null)
+                products = products.Where(p => p.CategoryID == categoryID);
+
             return Ok(products);
         }
 
@@ -52,15 +56,18 @@ namespace XWave.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDTO>> Get(int id)
         {
-            var product = await DbContext.Product.FindAsync(id);
+            var product = await DbContext.Product
+                .Include(p => p.Discount)
+                .SingleOrDefaultAsync(p => p.ID == id);
+
             if (product == null)
                 return NotFound();
 
             return Ok(ProductDTO.From(product));
         }
-        [HttpGet("staff/{id}")]
+        [HttpGet("{id}/full-details")]
         //[Authorize(Policy ="StaffOnly")]
-        public async Task<ActionResult<Product>> GetAuthorized(int id)
+        public async Task<ActionResult<Product>> GetFullDetails(int id)
         {
             var product = await DbContext.Product.FindAsync(id);
             if (product == null)
@@ -86,8 +93,7 @@ namespace XWave.Controllers
                 entry.CurrentValues.SetValues(productVM);
                 await DbContext.SaveChangesAsync();
 
-                return Ok(
-                    ResponseTemplate
+                return Ok(ResponseTemplate
                     .Created($"https://localhost:5001/api/product/admin/{newProduct.ID}"));
             }
 
