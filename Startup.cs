@@ -18,6 +18,7 @@ using XWave.Data;
 using XWave.Models;
 using XWave.Services;
 using XWave.Data.Constants;
+using XWave.ServiceInterfaces;
 
 namespace XWave
 {
@@ -36,7 +37,8 @@ namespace XWave
 
             services.Configure<JWT>(Configuration.GetSection("JWT"));
             services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<XWaveDbContext>();
-            services.AddScoped<XWave.Services.AuthenticationService>();
+            services.AddScoped<Services.AuthenticationService>();
+            services.AddScoped<IStaffActivityService, StaffActivityService>();
 
             services
                 .AddAuthentication(options =>

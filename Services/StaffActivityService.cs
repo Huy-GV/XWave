@@ -49,11 +49,11 @@ namespace XWave.Services
                 _logger.LogError($"Failed to create log: {e.Message}");
             }
         }
-        public async Task<IEnumerable<StaffActivityLog>> GetActivityLogs()
+        public async Task<IEnumerable<StaffActivityLog>> GetActivityLogsAsync()
         {
             return await _dbContext.StaffActivityLog.ToListAsync();
         }
-        public async Task<StaffActivityLog> GetActivityLog(int id)
+        public async Task<StaffActivityLog> GetActivityLogAsync(int id)
         {
             return await _dbContext.StaffActivityLog.FirstOrDefaultAsync(a => a.ID == id);
         }
