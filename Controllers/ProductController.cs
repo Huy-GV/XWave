@@ -41,7 +41,7 @@ namespace XWave.Controllers
         }
 
         [HttpGet("full-details/{categoryID:int?}")]
-        [Authorize]
+        [Authorize(Policy = "StaffOnly")]
         public ActionResult<IEnumerable<Product>> GetFullDetails(int? categoryID)
         {
             var products = DbContext.Product.AsEnumerable();
@@ -81,7 +81,7 @@ namespace XWave.Controllers
         [Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult> CreateAsync([FromBody] ProductVM productVM)
         {
-            if (!await ItemExistsAsync<Category>(productVM.CategoryID))
+            if (!await DbContext.Category.AnyAsync(c => c.ID == productVM.CategoryID))
             {
                 return BadRequest();
             }
@@ -127,7 +127,7 @@ namespace XWave.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAsync(int id)
         {
-            if (!await ItemExistsAsync<Product>(id))
+            if (!await DbContext.Product.AnyAsync(p => p.ID == id))
                 return NotFound();
 
             DbContext.Product.Remove(await DbContext.Product.FindAsync(id));

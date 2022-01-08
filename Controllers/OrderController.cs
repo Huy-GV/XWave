@@ -36,7 +36,7 @@ namespace XWave.Controllers
             if (customerID == string.Empty)
                 return BadRequest();
 
-            //works without ThenIncludee()
+            //works without ThenInclude()
             var orders = DbContext.Order
                 .Include(o => o.OrderDetailCollection)
                     .ThenInclude(od => od.Product)
@@ -126,7 +126,7 @@ namespace XWave.Controllers
 
                     //prevent customers from ordering based on incorrect data
                     if (product.Price != purchasedProduct.DisplayedPrice ||
-                        product.Discount.Percentage != purchasedProduct.DiscountPercentage)
+                        product.Discount.Percentage != purchasedProduct.DisplayedDiscount)
                         return BadRequest("Conflicting data about product");
 
                     product.Quantity -= purchasedProduct.Quantity;
@@ -143,7 +143,7 @@ namespace XWave.Controllers
                 //call SaveChanges to get the generated ID
                 await DbContext.SaveChangesAsync();
 
-                AssignOrderID(order.ID, orderDetails);
+                orderDetails = AssignOrderID(order.ID, orderDetails);
 
                 DbContext.OrderDetail.AddRange(orderDetails);
                 DbContext.Product.UpdateRange(purchasedProducts);
@@ -164,11 +164,12 @@ namespace XWave.Controllers
                 return StatusCode(500, ResponseTemplate.InternalServerError());
             }
         }
-        private void AssignOrderID(int orderID, List<OrderDetail> orderDetails)
+        private List<OrderDetail> AssignOrderID(int orderID, List<OrderDetail> orderDetails)
         {
             foreach (var orderDetail in orderDetails)
                 orderDetail.OrderID = orderID;
             
+            return orderDetails;
         }
 
         private async Task UpdatePaymentDetailAsync(

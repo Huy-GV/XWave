@@ -33,7 +33,7 @@ namespace XWave.Controllers
             return DbContext.Discount.ToList(); ;
         }
         [HttpGet("{id}/product")]
-        //[Authorize(Policy = "StaffOnly")]
+        [Authorize(Policy = "StaffOnly")]
         public async Task<IEnumerable<Product>> GetProductsWithDiscount(int id)
         {
             //no need to include discount at this level
@@ -103,9 +103,7 @@ namespace XWave.Controllers
                     return NotFound();
 
                 //start tracking items to avoid FK constraint errors
-                var productsWithDiscount = DbContext.Product
-                    .Where(d => d.DiscountID == id)
-                    .ToList();
+                await DbContext.Product.Where(d => d.DiscountID == id).ToListAsync();
 
                 DbContext.Discount.Remove(discount);
                 await DbContext.SaveChangesAsync();

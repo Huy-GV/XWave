@@ -18,22 +18,5 @@ namespace XWave.Controllers
             DbContext = dbContext;
             Logger = logger;
         }
-
-        protected async Task<bool> ItemExistsAsync<EntityType>(int id)
-        {
-            var entityTypeName = typeof(EntityType).Name;
-            switch (entityTypeName)
-            {
-                case nameof(Product):
-                    return await DbContext.Product.FindAsync(id) != null;
-                case nameof(Category):
-                    return await DbContext.Category.FindAsync(id) != null;
-                case nameof(Discount):
-                    return await DbContext.Discount.FindAsync(id) != null;
-                default:
-                    Logger.LogError($"Entity with type {entityTypeName} not found");
-                    return false;
-            }
-        }
     }
 }

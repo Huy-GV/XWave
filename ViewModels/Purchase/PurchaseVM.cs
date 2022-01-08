@@ -9,7 +9,7 @@ namespace XWave.ViewModels.Purchase
         public int ProductID { get; set; }
         public uint Quantity { get; set; } 
         public decimal DisplayedPrice { get; set; }
-        public decimal DiscountPercentage { get; set; } = 0;
+        public decimal DisplayedDiscount { get; set; } = 0;
     }
     public class PurchaseVM
     {
