@@ -11,6 +11,7 @@ namespace XWave.Services.Interfaces
     {
         Task<Tuple<bool, string>> CreateOrderAsync(PurchaseVM purchaseVM, string customerID);
         Task<IEnumerable<OrderDTO>> GetAllOrdersAsync(string customerID);
+        Task<OrderDTO> GetOrderByIDAsync(string customerID, int orderID);
         Task<OrderDetail> GetDetailsByOrderIDsAsync(int orderID, int productID);
         Task<IEnumerable<OrderDetail>> GetAllOrderDetailsAsync();
     }

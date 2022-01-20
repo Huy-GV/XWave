@@ -16,9 +16,11 @@ using System.Text;
 using System.Threading.Tasks;
 using XWave.Data;
 using XWave.Models;
-using XWave.Services;
 using XWave.Data.Constants;
-using XWave.ServiceInterfaces;
+using XWave.Service.Interfaces;
+using XWave.Services.Defaults;
+using XWave.Services;
+using XWave.Services.Interfaces;
 
 namespace XWave
 {
@@ -37,8 +39,12 @@ namespace XWave
 
             services.Configure<JWT>(Configuration.GetSection("JWT"));
             services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<XWaveDbContext>();
+            
+            
             services.AddScoped<Services.AuthenticationService>();
             services.AddScoped<IStaffActivityService, StaffActivityService>();
+            services.AddScoped<IOrderService, OrderService>();
+
 
             services
                 .AddAuthentication(options =>

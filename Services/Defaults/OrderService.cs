@@ -14,8 +14,6 @@ namespace XWave.Services.Defaults
 {
     public class OrderService : IOrderService
     {
-        //TODO: remove db context
-        private readonly DbSet<Order> _orderContext;
         private readonly XWaveDbContext _dbContext;
         private readonly ILogger<OrderService> _logger;
         public OrderService(
@@ -24,8 +22,11 @@ namespace XWave.Services.Defaults
         {
             _dbContext = dbContext;
             _logger = logger;
-            //TODO: replace dbcontext with respective sets
-            _orderContext = dbContext.Order;
+        }
+        public async Task<OrderDTO> GetOrderByIDAsync(string customerID, int orderID)
+        {
+            var orderDTOs = await GetAllOrdersAsync(customerID);
+            return orderDTOs.FirstOrDefault(o => o.ID == orderID);
         }
         public async Task<Tuple<bool, string>> CreateOrderAsync(
             PurchaseVM purchaseVM, 
@@ -134,16 +135,17 @@ namespace XWave.Services.Defaults
             return await _dbContext.OrderDetail.ToListAsync();
         }
 
-        Task<IEnumerable<OrderDTO>> IOrderService.GetAllOrdersAsync(string customerID)
+        public Task<IEnumerable<OrderDTO>> GetAllOrdersAsync(string customerID)
         {
             
-            var orderDTOs =  _orderContext
+            var orderDTOs =  _dbContext.Order
                 .Include(o => o.OrderDetailCollection)
                     .ThenInclude(od => od.Product)
                 .Include(o => o.Payment)
                 .Where(o => o.CustomerID == customerID)
                 .Select(o => new OrderDTO()
                 {
+                    ID = o.ID,
                     OrderDate = o.Date,
                     AccountNo = o.Payment.AccountNo,
                     OrderDetailCollection = o
