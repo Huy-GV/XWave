@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using XWave.Data;
 using XWave.Models;
 using XWave.Services.Interfaces;
+using XWave.Services.ResultTemplate;
 
 namespace XWave.Services.Defaults
 {
     public class PaymentService : ServiceBase, IPaymentService
     {
         public PaymentService(XWaveDbContext dbContext) : base(dbContext) { }
-        public async Task<bool> CreatePayment(string customerID, Payment inputPayment)
+        public async Task<ServiceResult> CreatePaymentAsync(string customerID, Payment inputPayment)
         {
             using var transaction = DbContext.Database.BeginTransaction();
             string savepoint = "BeforePaymentCreation";
@@ -26,6 +27,7 @@ namespace XWave.Services.Defaults
                     Provider = inputPayment.Provider,
                     ExpiryDate = inputPayment.ExpiryDate,
                 };
+
                 DbContext.Payment.Add(newPayment);
                 await DbContext.SaveChangesAsync();
 
@@ -42,27 +44,41 @@ namespace XWave.Services.Defaults
                 await DbContext.SaveChangesAsync();
                 transaction.Commit();
 
-                return true;
+                return new ServiceResult
+                {
+                    Succeeded = true,
+                    ResourceID = newPayment.ID.ToString(),
+                };
             }
-            catch
+            catch (Exception ex)
             {
                 transaction.Rollback();
-                return false;
+                return new ServiceResult
+                {
+                    Error = ex.Message,
+                };
             }
         }
 
-        public async Task<bool> DeletePayment(string customerID, int paymentID)
+        public async Task<ServiceResult> DeletePaymentAsync(string customerID, int paymentID)
         {
             if (!CustomerHasPayment(customerID, paymentID))
-                return false;
+                return new ServiceResult()
+                {
+                    Error = $"Payment with ID {paymentID} not found for customer ID {customerID}"
+                };
 
             var deletedPayment = await DbContext.Payment.FindAsync(paymentID);
             DbContext.Remove(deletedPayment);
             await DbContext.SaveChangesAsync();
-            return true;
+            return new ServiceResult()
+            {
+                Succeeded = true,
+                ResourceID = paymentID.ToString(),
+            }; 
         }
 
-        public Task<IEnumerable<PaymentDetail>> GetAllPaymentDetails(string customerID)
+        public Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsAsync(string customerID)
         {
             return Task.FromResult(DbContext.PaymentDetail
                 .Include(pd => pd.Payment)
@@ -70,21 +86,25 @@ namespace XWave.Services.Defaults
                 .AsEnumerable());
         }
 
-        public async Task<bool> UpdatePayment(string customerID, int id, Payment updatedPayment)
+        public async Task<ServiceResult> UpdatePaymentAsync(string customerID, int id, Payment updatedPayment)
         {
             if (!CustomerHasPayment(customerID, id))
-                return false;
+                return new ServiceResult
+                { 
+                    Error = $"No payment with ID {id} found for customer ID {customerID}"
+                };
 
             var payment = await DbContext.Payment.FindAsync(id);
-            if (payment == null)
-                return false;
-
             payment.AccountNo = updatedPayment.AccountNo;
             payment.Provider = updatedPayment.Provider;
             payment.ExpiryDate = updatedPayment.ExpiryDate;
             DbContext.Payment.Update(payment);
             await DbContext.SaveChangesAsync();
-            return true;
+            return new ServiceResult
+            {
+                Succeeded = true,
+                ResourceID = id.ToString(),
+            };
         }
         private bool CustomerHasPayment(string customerID, int paymentID)
         {

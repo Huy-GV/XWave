@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.Models;
+using XWave.Services.ResultTemplate;
 
 namespace XWave.Services.Interfaces
 {
     public interface IPaymentService
     {
-        Task<bool> CreatePayment(string customerID, Payment newPayment);
-        Task<bool> DeletePayment(string customerID, int paymentID);
-        Task<bool> UpdatePayment(string customerID, int paymentID, Payment updatedPayment);
-        Task<IEnumerable<PaymentDetail>> GetAllPaymentDetails(string customerID);
+        Task<ServiceResult> CreatePaymentAsync(string customerID, Payment newPayment);
+        Task<ServiceResult> DeletePaymentAsync(string customerID, int paymentID);
+        Task<ServiceResult> UpdatePaymentAsync(string customerID, int paymentID, Payment updatedPayment);
+        Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsAsync(string customerID);
     }
 }

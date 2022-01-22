@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using XWave.Data.Constants;
 using Microsoft.EntityFrameworkCore;
 using System;
+using XWave.Services.Interfaces;
 
 namespace XWave.Controllers
 {
@@ -22,12 +23,15 @@ namespace XWave.Controllers
     public class PaymentController : AbstractController<PaymentController>
     {
         private readonly AuthenticationService _authService;
+        private readonly IPaymentService _paymentService;
         public PaymentController(
             ILogger<PaymentController> logger,
             XWaveDbContext dbContext,
-            AuthenticationService authService) : base(dbContext, logger)
+            AuthenticationService authService,
+            IPaymentService paymentService) : base(dbContext, logger)
         {
             _authService = authService;
+            _paymentService = paymentService;
         }
         [HttpGet]
         [Authorize(Policy="staffonly")]
@@ -40,26 +44,24 @@ namespace XWave.Controllers
         public ActionResult<IEnumerable<PaymentDetail>> GetByCustomer()
         {
             string customerID = _authService.GetCustomerID(HttpContext.User.Identity);
+            if (customerID == null)
+                return BadRequest();
 
-            return Ok(DbContext.PaymentDetail
-                .Include(pd => pd.Payment)
-                .Where(pd => pd.CustomerID == customerID)
-                .ToList());
+            return Ok(_paymentService.GetAllPaymentDetailsAsync(customerID));
         }
         [HttpPost("delete/{paymentID}")]
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> Delete(int paymentID)
         {
             string customerID = _authService.GetCustomerID(HttpContext.User.Identity);
-            if (!DbContext.PaymentDetail.Any(pd => 
-            pd.PaymentID == paymentID && pd.CustomerID == customerID))
+            
+            var succeeded = await _paymentService.DeletePaymentAsync(customerID, paymentID);
+            
+            if (!succeeded)
             {
                 return BadRequest();
             }
 
-            var deletedPayment = await DbContext.Payment.FindAsync(paymentID);
-            DbContext.Remove(deletedPayment);
-            await DbContext.SaveChangesAsync();
             return Ok(ResponseTemplate.Deleted(paymentID.ToString(), nameof(Payment)));
             
         }
@@ -67,19 +69,18 @@ namespace XWave.Controllers
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> UpdatePaymentAsync(int id, Payment inputPayment)
         {
-            var payment = await DbContext.Payment.FindAsync(id);
-            if (payment == null)
-                return NotFound();
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            payment.AccountNo = inputPayment.AccountNo;
-            payment.Provider = inputPayment.Provider;
-            payment.ExpiryDate = inputPayment.ExpiryDate;
-            DbContext.Payment.Update(payment);
-            await DbContext.SaveChangesAsync();
-            return Ok(ResponseTemplate.Updated($"https://localhost:5001/api/payment/detail/"));
+            string customerID = _authService.GetCustomerID(HttpContext.User.Identity);
+            var succeeded = await _paymentService.UpdatePaymentAsync(customerID, id, inputPayment);
+            if (!succeeded)
+            {
+                return BadRequest();
+            }
+
+
+            return Ok(ResponseTemplate.Updated($"https://localhost:5001/api/payment/detail/{id}"));
         }
         [HttpPost]
         [Authorize(Roles = "customer")]
@@ -88,6 +89,8 @@ namespace XWave.Controllers
             string customerID = _authService.GetCustomerID(HttpContext.User.Identity);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            var result = await _paymentService.CreatePaymentAsync(customerID, inputPayment);
 
             using var transaction = DbContext.Database.BeginTransaction();
             string savepoint = "BeforePaymentCreation";
