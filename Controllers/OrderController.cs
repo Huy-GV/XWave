@@ -81,10 +81,10 @@ namespace XWave.Controllers
             if (customerID == string.Empty)
                 return BadRequest();
 
-            var (succeeded, message) = await _orderService.CreateOrderAsync(purchaseVM, customerID);
+            var result = await _orderService.CreateOrderAsync(purchaseVM, customerID);
 
-            if (!succeeded)
-                return BadRequest(message);
+            if (!result.Succeeded)
+                return BadRequest(result.Error);
 
             return Ok();
         }

@@ -9,6 +9,7 @@ using XWave.DTOs;
 using System;
 using XWave.ViewModels.Purchase;
 using Microsoft.Extensions.Logging;
+using XWave.Services.ResultTemplate;
 
 namespace XWave.Services.Defaults
 {
@@ -28,7 +29,7 @@ namespace XWave.Services.Defaults
             var orderDTOs = await GetAllOrdersAsync(customerID);
             return orderDTOs.FirstOrDefault(o => o.ID == orderID);
         }
-        public async Task<Tuple<bool, string>> CreateOrderAsync(
+        public async Task<ServiceResult> CreateOrderAsync(
             PurchaseVM purchaseVM, 
             string customerID)
         {
@@ -42,13 +43,13 @@ namespace XWave.Services.Defaults
                     .SingleOrDefaultAsync(c => c.CustomerID == customerID);
 
                 if (customer == null)
-                    return Tuple.Create(false, "Customer not found");
+                    return ServiceResult.Failure("Customer not found");
 
                 var payment = await _dbContext.Payment
                     .SingleOrDefaultAsync(p => p.ID == purchaseVM.PaymentID);
 
                 if (payment == null)
-                    return Tuple.Create(false, "Payment not found");
+                    return ServiceResult.Failure("Payment not found");
 
                 var order = new Order()
                 {
@@ -66,15 +67,21 @@ namespace XWave.Services.Defaults
                         .Include(p => p.Discount)
                         .SingleOrDefaultAsync(p => p.ID == purchasedProduct.ProductID);
                     if (product == null)
-                        return Tuple.Create(false, "Ordered product not found");
+                    {
+                        return ServiceResult.Failure("Ordered product not found");
+                    }
 
                     if (product.Quantity < purchasedProduct.Quantity)
-                        return Tuple.Create(false, "Quantity exceeded existing stock");
+                    {
+                        return ServiceResult.Failure("Quantity exceeded existing stock");
+                    }
 
                     //prevent customers from ordering based on incorrect data
                     if (product.Price != purchasedProduct.DisplayedPrice ||
                         product.Discount.Percentage != purchasedProduct.DisplayedDiscount)
-                        return Tuple.Create(false, "Conflicting data about product");
+                    {
+                        return ServiceResult.Failure("Conflicting data about product");
+                    }
 
                     product.Quantity -= purchasedProduct.Quantity;
                     purchasedProducts.Add(product);
@@ -99,15 +106,14 @@ namespace XWave.Services.Defaults
 
                 transaction.Commit();
 
-                return Tuple.Create(false, string.Empty);
+                return ServiceResult.Success(order.ID.ToString());
 
             }
             catch (Exception exception)
             {
                 await transaction.RollbackToSavepointAsync(savepoint);
                 _logger.LogError(exception.Message);
-                _logger.LogError(exception.StackTrace);
-                return Tuple.Create(false, "Unknown error");
+                return ServiceResult.Failure(exception.Message);
             }
         }
         private static List<OrderDetail> AssignOrderID(int orderID, List<OrderDetail> orderDetails)

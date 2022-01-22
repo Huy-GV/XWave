@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.DTOs;
 using XWave.Models;
+using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Purchase;
 
 namespace XWave.Services.Interfaces
 {
     public interface IOrderService
     {
-        Task<Tuple<bool, string>> CreateOrderAsync(PurchaseVM purchaseVM, string customerID);
+        Task<ServiceResult> CreateOrderAsync(PurchaseVM purchaseVM, string customerID);
         Task<IEnumerable<OrderDTO>> GetAllOrdersAsync(string customerID);
         Task<OrderDTO> GetOrderByIDAsync(string customerID, int orderID);
         Task<OrderDetail> GetDetailsByOrderIDsAsync(int orderID, int productID);
