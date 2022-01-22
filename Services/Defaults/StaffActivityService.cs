@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using XWave.ViewModels.Management;
-using XWave.Service.Interfaces;
+using XWave.Services.Interfaces;
 
 namespace XWave.Services.Defaults
 {

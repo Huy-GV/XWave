@@ -5,8 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.Data;
 using XWave.Models;
-using XWave.Services;
-using XWave.Service.Interfaces;
+using XWave.Services.Interfaces;
 
 namespace XWave.Controllers
 {

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using XWave.Models;
 using XWave.ViewModels.Management;
 
-namespace XWave.Service.Interfaces
+namespace XWave.Services.Interfaces
 {
     public interface IStaffActivityService
     {
