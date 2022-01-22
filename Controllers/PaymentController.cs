@@ -14,7 +14,9 @@ using System.Collections.Generic;
 using XWave.Data.Constants;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Net.Http;
 using XWave.Services.Interfaces;
+using System.Net;
 
 namespace XWave.Controllers
 {
@@ -55,11 +57,11 @@ namespace XWave.Controllers
         {
             string customerID = _authService.GetCustomerID(HttpContext.User.Identity);
             
-            var succeeded = await _paymentService.DeletePaymentAsync(customerID, paymentID);
+            var result = await _paymentService.DeletePaymentAsync(customerID, paymentID);
             
-            if (!succeeded)
+            if (!result.Succeeded)
             {
-                return BadRequest();
+                return BadRequest(result.Error);
             }
 
             return Ok(ResponseTemplate.Deleted(paymentID.ToString(), nameof(Payment)));
@@ -73,12 +75,11 @@ namespace XWave.Controllers
                 return BadRequest(ModelState);
 
             string customerID = _authService.GetCustomerID(HttpContext.User.Identity);
-            var succeeded = await _paymentService.UpdatePaymentAsync(customerID, id, inputPayment);
-            if (!succeeded)
+            var result = await _paymentService.UpdatePaymentAsync(customerID, id, inputPayment);
+            if (!result.Succeeded)
             {
-                return BadRequest();
+                return BadRequest(result.Error);
             }
-
 
             return Ok(ResponseTemplate.Updated($"https://localhost:5001/api/payment/detail/{id}"));
         }
@@ -92,43 +93,14 @@ namespace XWave.Controllers
 
             var result = await _paymentService.CreatePaymentAsync(customerID, inputPayment);
 
-            using var transaction = DbContext.Database.BeginTransaction();
-            string savepoint = "BeforePaymentCreation";
-            transaction.CreateSavepoint(savepoint);
-
-            try
-            {
-                var newPayment = new Payment()
-                {
-                    AccountNo = inputPayment.AccountNo,
-                    Provider = inputPayment.Provider,
-                    ExpiryDate = inputPayment.ExpiryDate,
-                };
-                DbContext.Payment.Add(newPayment);
-                await DbContext.SaveChangesAsync();
-
-                var newPaymentDetail = new PaymentDetail()
-                {
-                    CustomerID = customerID,
-                    PaymentID = newPayment.ID,
-                    Registration = DateTime.Now,
-                    PurchaseCount = 0,
-                    LatestPurchase = null,
-                };
-
-                DbContext.PaymentDetail.Add(newPaymentDetail);
-                await DbContext.SaveChangesAsync();
-                transaction.Commit();
-
-                return Ok(ResponseTemplate.Created($"https://localhost:5001/api/payment/detail/"));
-            } catch (Exception exception)
-            {
-                transaction.Rollback();
-                Logger.LogError(exception.Message);
-                Logger.LogError(exception.StackTrace);
-                return StatusCode(500, ResponseTemplate.InternalServerError());
+            if (!result.Succeeded)
+            { 
+                return StatusCode(
+                    (int)HttpStatusCode.InternalServerError, 
+                    ResponseTemplate.InternalServerError(result.Error));
             }
 
+            return Ok(ResponseTemplate.Created($"https://localhost:5001/api/payment/detail/{result.ResourceID}"));
         }
     }
 }
