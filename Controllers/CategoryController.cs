@@ -95,7 +95,7 @@ namespace XWave.Controllers
                 return BadRequest("Foreign key constraint failed");
             }
 
-            return Ok(ResponseTemplate.Deleted(id.ToString(), nameof(Category)));
+            return NoContent();
         }
     }
 }

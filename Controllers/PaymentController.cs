@@ -65,7 +65,7 @@ namespace XWave.Controllers
                 return BadRequest(result.Error);
             }
 
-            return Ok(ResponseTemplate.Deleted(paymentID.ToString(), nameof(Payment)));
+            return NoContent();
             
         }
         [HttpPut("{id}")]

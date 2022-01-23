@@ -9,18 +9,13 @@ using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Management;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace XWave.Services.Defaults
 {
     public class DiscountService : ServiceBase, IDiscountService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        public DiscountService(
-            XWaveDbContext dbContext,
-            UserManager<ApplicationUser> userManager) : base(dbContext) 
-        {
-            _userManager = userManager;
-        }
+        public DiscountService(XWaveDbContext dbContext) : base(dbContext)  { }
         public async Task<ServiceResult> CreateAsync(string managerID, DiscountVM discount)
         {
             var newDiscount = new Discount()
@@ -38,16 +33,32 @@ namespace XWave.Services.Defaults
 
         public async Task<ServiceResult> DeleteAsync(int id)
         {
-            var deletedDiscount = await DbContext.Discount.FindAsync(id);
-            if (deletedDiscount == null)
+            var discount = await DbContext.Discount.FindAsync(id);
+            if (discount == null)
             {
                 return ServiceResult.Failure($"Discount with ID {id} not found");
             }
 
-            DbContext.Discount.Remove(deletedDiscount);
-            await DbContext.SaveChangesAsync();
+            using var transaction = DbContext.Database.BeginTransaction();
+            string savepoint = "BeforeDiscountRemoval";
+            transaction.CreateSavepoint(savepoint);
+            try
+            {
+                //start tracking items to avoid FK constraint errors
+                await DbContext.Product.Where(d => d.DiscountID == id).ToListAsync();
 
-            return ServiceResult.Success();
+                DbContext.Discount.Remove(discount);
+                await DbContext.SaveChangesAsync();
+
+                transaction.Commit();
+
+                return ServiceResult.Success(id.ToString());
+            }
+            catch (Exception ex)
+            {
+                transaction.RollbackToSavepoint(savepoint);
+                return ServiceResult.Failure(ex.Message);
+            }
         }
 
         public async Task<IEnumerable<Discount>> GetAllAsync()

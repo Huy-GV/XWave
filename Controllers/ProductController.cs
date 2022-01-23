@@ -132,7 +132,7 @@ namespace XWave.Controllers
 
             DbContext.Product.Remove(await DbContext.Product.FindAsync(id));
             DbContext.SaveChanges();
-            return Ok(ResponseTemplate.Deleted(id.ToString(), nameof(Product)));
+            return NoContent();
         }
 
     }

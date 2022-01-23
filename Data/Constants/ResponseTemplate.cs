@@ -15,11 +15,6 @@ namespace XWave.Data.Constants
             Status = "Updated",
             Message = $"Location: {url}"
         };
-        public static object Deleted(string title, string entityName) => new
-        {
-            Status = "Deleted",
-            Message = $"Deleted: {entityName} with ID {title}"
-        };
         public static object InternalServerError(string error = "An error happended with your request") => new
         {
             Status = "Failed",
