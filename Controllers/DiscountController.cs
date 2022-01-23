@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using XWave.Data;
 using XWave.Models;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
 using XWave.Data.Constants;
 using XWave.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using XWave.ViewModels.Management;
+using XWave.Services ;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,14 +23,16 @@ namespace XWave.Controllers
     public class DiscountController : AbstractController<DiscountController>
     {
         private readonly IDiscountService _discountService;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AuthenticationService _authenticationService;
         public DiscountController(
             XWaveDbContext dbContext,
             ILogger<DiscountController> logger,
-            IDiscountService discountService
+            IDiscountService discountService,
+            AuthenticationService authService
         ) : base(dbContext, logger)
         {
             _discountService = discountService;
+            _authenticationService = authService;
         }
         // GET: api/<DiscountController>
         [HttpGet]
@@ -62,14 +64,11 @@ namespace XWave.Controllers
         [Authorize(Roles = "managers")]
         public async Task<ActionResult> CreateAsync([FromBody] DiscountVM newDiscount)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return Unauthorized();
-            }
+            //TODO: move the following to auth service
+            var userID = _authenticationService.GetUserID(HttpContext.User.Identity);
             if (ModelState.IsValid)
             {
-                var result = await _discountService.CreateAsync(user.Id, newDiscount);
+                var result = await _discountService.CreateAsync(userID, newDiscount);
                 if (result.Succeeded)
                 {
                     return Ok(ResponseTemplate.Created($"https://localhost:5001/api/discount/{result.ResourceID}"));

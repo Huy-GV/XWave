@@ -106,39 +106,26 @@ namespace XWave.Services
                 Error = errorMessage,
             };
         }
-        public string GetCustomerID(IIdentity identity)
+        public string GetUserID(IIdentity identity)
         {
             ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
-
-            string customerID = claimsIdentity?.FindFirst(CustomClaim.CustomerID)?.Value;
+            string customerID = claimsIdentity?.FindFirst(CustomClaimType.UserID)?.Value ?? string.Empty;
             _logger.LogInformation($"Customer id in jwt claim: {customerID}");
-            return customerID ?? string.Empty;
+            return customerID;
         }
         private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user, string role)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
         
             IEnumerable<Claim> claims;
-            if (role == Roles.Customer)
+            claims = new[]
             {
-                claims = new[]
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim("uid", user.Id),
-                    new Claim(ClaimTypes.Role, role),
-                    new Claim(CustomClaim.CustomerID, user.Id)
-                };
-            } else
-            {
-                claims = new[]
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim("uid", user.Id),
-                    new Claim(ClaimTypes.Role, role)
-                };
-            }
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(CustomClaimType.UserID, user.Id),
+                new Claim(ClaimTypes.Role, role)
+            };
+            
 
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
             var signingCredentials = new SigningCredentials(

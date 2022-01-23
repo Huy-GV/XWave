@@ -45,7 +45,7 @@ namespace XWave.Controllers
         [Authorize(Roles ="customer")]
         public ActionResult<IEnumerable<PaymentDetail>> GetByCustomer()
         {
-            string customerID = _authService.GetCustomerID(HttpContext.User.Identity);
+            string customerID = _authService.GetUserID(HttpContext.User.Identity);
             if (customerID == null)
                 return BadRequest();
 
@@ -56,7 +56,7 @@ namespace XWave.Controllers
         public async Task<ActionResult> Delete(int paymentID)
         {
             //TODO: write a custom authorization attribute for this
-            string customerID = _authService.GetCustomerID(HttpContext.User.Identity);
+            string customerID = _authService.GetUserID(HttpContext.User.Identity);
             
             var result = await _paymentService.DeletePaymentAsync(customerID, paymentID);
             
@@ -75,7 +75,7 @@ namespace XWave.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            string customerID = _authService.GetCustomerID(HttpContext.User.Identity);
+            string customerID = _authService.GetUserID(HttpContext.User.Identity);
             var result = await _paymentService.UpdatePaymentAsync(customerID, id, inputPayment);
             if (!result.Succeeded)
             {
@@ -88,7 +88,7 @@ namespace XWave.Controllers
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> CreatePaymentAsync(Payment inputPayment)
         {
-            string customerID = _authService.GetCustomerID(HttpContext.User.Identity);
+            string customerID = _authService.GetUserID(HttpContext.User.Identity);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
