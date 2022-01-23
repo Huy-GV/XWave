@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using XWave.Services;
 using XWave.Data.Constants;
 using XWave.Data;
+using XWave.Services.Interfaces;
 using XWave.Models;
 
 namespace XWave.Controllers
@@ -18,11 +19,11 @@ namespace XWave.Controllers
     [Route("api/[controller]")]
     public class AuthenticationController : AbstractController<AuthenticationController>
     {
-        private readonly AuthenticationService _authService;
+        private readonly IAuthenticationService _authService;
         public AuthenticationController(
             XWaveDbContext dbContext,
             ILogger<AuthenticationController> logger,
-            AuthenticationService authenticationService
+            IAuthenticationService authenticationService
             
             ) : base (dbContext, logger)
         {
@@ -30,13 +31,13 @@ namespace XWave.Controllers
         }
         //TODO: attach jwt to cookies in response
         [HttpPost("register/customer")]
-        public async Task<ActionResult<AuthenticationVM>> RegisterCustomerAsync(RegisterVM model)
+        public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync(RegisterVM model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var authVM = await _authService.RegisterAsync(model, Roles.Customer);
-            if (authVM.IsSuccessful)
+            if (authVM.Succeeded)
                 return Ok(authVM);
  
             return BadRequest(authVM.Error);
@@ -44,24 +45,24 @@ namespace XWave.Controllers
         }
         [HttpPost("register/staff")]
         [Authorize(Roles = "manager")]
-        public async Task<ActionResult<AuthenticationVM>> RegisterStaffAsync(RegisterVM model)
+        public async Task<ActionResult<AuthenticationResult>> RegisterStaffAsync(RegisterVM model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var authModel = await _authService.RegisterAsync(model, Roles.Staff);
-            if (authModel.IsSuccessful)
+            if (authModel.Succeeded)
                 return Ok(authModel);
 
             return BadRequest(authModel.Error);
         }
         [HttpPost("login")]
-        public async Task<ActionResult<AuthenticationVM>> LogInAsync(LogInVM model)
+        public async Task<ActionResult<AuthenticationResult>> LogInAsync(SignInVM model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return await _authService.LogInAsync(model);
+            return await _authService.SignInAsync(model);
         }
 
         [HttpGet("test/manager")]

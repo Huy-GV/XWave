@@ -40,7 +40,7 @@ namespace XWave
             services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<XWaveDbContext>();
             
             
-            services.AddScoped<Services.AuthenticationService>();
+            services.AddScoped<Services.Interfaces.IAuthenticationService, JwtAuthenticationService>();
 
             services.AddDefaultServices();
 

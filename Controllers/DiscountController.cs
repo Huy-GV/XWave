@@ -23,12 +23,12 @@ namespace XWave.Controllers
     public class DiscountController : AbstractController<DiscountController>
     {
         private readonly IDiscountService _discountService;
-        private readonly AuthenticationService _authenticationService;
+        private readonly IAuthenticationService _authenticationService;
         public DiscountController(
             XWaveDbContext dbContext,
             ILogger<DiscountController> logger,
             IDiscountService discountService,
-            AuthenticationService authService
+            IAuthenticationService authService
         ) : base(dbContext, logger)
         {
             _discountService = discountService;

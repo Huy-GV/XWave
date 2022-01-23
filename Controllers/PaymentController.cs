@@ -24,12 +24,12 @@ namespace XWave.Controllers
     [ApiController]
     public class PaymentController : AbstractController<PaymentController>
     {
-        private readonly AuthenticationService _authService;
+        private readonly IAuthenticationService _authService;
         private readonly IPaymentService _paymentService;
         public PaymentController(
             ILogger<PaymentController> logger,
             XWaveDbContext dbContext,
-            AuthenticationService authService,
+            IAuthenticationService authService,
             IPaymentService paymentService) : base(dbContext, logger)
         {
             _authService = authService;

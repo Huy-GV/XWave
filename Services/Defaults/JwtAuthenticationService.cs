@@ -13,10 +13,11 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using XWave.ViewModels.Authentication;
+using XWave.Services.Interfaces;
 using XWave.Data;
 using System.Security.Principal;
 
-namespace XWave.Services
+namespace XWave.Services.Defaults
 {
     public class JWT
     {
@@ -25,16 +26,16 @@ namespace XWave.Services
         public string Audience { get; set; }
         public double DurationInMinutes { get; set; }
     }
-    public class AuthenticationService
+    public class JwtAuthenticationService : IAuthenticationService
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<AuthenticationService> _logger;
+        private readonly ILogger<JwtAuthenticationService> _logger;
         private readonly XWaveDbContext _dbContext;
         private readonly JWT _jwt;
-        public AuthenticationService(
+        public JwtAuthenticationService(
             UserManager<ApplicationUser> userManager,
             IOptions<JWT> jwt,
-            ILogger<AuthenticationService> logger,
+            ILogger<JwtAuthenticationService> logger,
             XWaveDbContext dbContext
             ) 
         {
@@ -43,22 +44,9 @@ namespace XWave.Services
             _logger = logger;
             _dbContext = dbContext;
         }
-        private async Task<AuthenticationVM> GetTokenAsync
-            (ApplicationUser user, 
-            string role)
+        public async Task<AuthenticationResult> SignInAsync(SignInVM model)
         {
-            var token = await CreateJwtTokenAsync(user, role);
-            AuthenticationVM authModel = new()
-            {
-                IsSuccessful = true,
-                Token = new JwtSecurityTokenHandler().WriteToken(token),
-            };
-
-            return authModel;
-        }
-        public async Task<AuthenticationVM> LogInAsync(LogInVM model)
-        {
-            AuthenticationVM authModel = new();
+            AuthenticationResult authModel = new();
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user == null) 
             {
@@ -77,7 +65,15 @@ namespace XWave.Services
                 return await GetTokenAsync(user, role);
             }
         }
-        public async Task<AuthenticationVM> RegisterAsync(RegisterVM registerVM, string role)
+        public async Task<AuthenticationResult> SignOutAsync(string userID)
+        {
+            return new AuthenticationResult();
+        }
+        public async Task<bool> IsUserInRoleAsync(string userID, string role)
+        {
+            return false;
+        }
+        public async Task<AuthenticationResult> RegisterAsync(RegisterVM registerVM, string role)
         {
             var user = new ApplicationUser
             {
@@ -101,7 +97,7 @@ namespace XWave.Services
             foreach (var error in result.Errors)
                 errorMessage += error.Description;
 
-            return new AuthenticationVM
+            return new AuthenticationResult
             {
                 Error = errorMessage,
             };
@@ -110,7 +106,14 @@ namespace XWave.Services
         {
             ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
             string customerID = claimsIdentity?.FindFirst(CustomClaimType.UserID)?.Value ?? string.Empty;
-            _logger.LogInformation($"Customer id in jwt claim: {customerID}");
+            _logger.LogInformation($"User ID in jwt claim: {customerID}");
+            return customerID;
+        }
+        public string GetUserName(IIdentity identity)
+        {
+            ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
+            string customerID = claimsIdentity?.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
+            _logger.LogInformation($"Username in jwt claim: {customerID}");
             return customerID;
         }
         private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user, string role)
@@ -152,6 +155,18 @@ namespace XWave.Services
             });
             await _dbContext.SaveChangesAsync();
         }
+        private async Task<AuthenticationResult> GetTokenAsync (
+            ApplicationUser user,
+            string role)
+        {
+            var token = await CreateJwtTokenAsync(user, role);
+            AuthenticationResult authModel = new()
+            {
+                Succeeded = true,
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+            };
 
+            return authModel;
+        }
     }
 }

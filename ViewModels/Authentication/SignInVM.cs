@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace XWave.ViewModels.Authentication
 {
-    public class LogInVM
+    public class SignInVM
     {
         [Required]
         public string Username { get; set; }

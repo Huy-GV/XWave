@@ -22,13 +22,13 @@ namespace XWave.Controllers
     [ApiController]
     public class OrderController : AbstractController<OrderController>
     {
-        private readonly AuthenticationService _authService;
+        private readonly IAuthenticationService _authService;
         private readonly IOrderService _orderService;
 
         public OrderController(
             XWaveDbContext dbContext,
             ILogger<OrderController> logger,
-            AuthenticationService authService,
+            IAuthenticationService authService,
             IOrderService orderService) : base(dbContext, logger)
         {
             _authService = authService;

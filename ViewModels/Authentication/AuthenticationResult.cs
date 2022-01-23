@@ -1,9 +1,9 @@
 ﻿namespace XWave.ViewModels.Authentication
 {
-    public class AuthenticationVM
+    public class AuthenticationResult
     {
         public string Error { get; set; } = string.Empty;
-        public bool IsSuccessful { get; set; } = false;
+        public bool Succeeded { get; set; } = false;
         //public string UserName { get; set; }
         //public string Email { get; set; }
         //public string Role { get; set; }
