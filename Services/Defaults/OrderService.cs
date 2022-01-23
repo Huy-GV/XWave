@@ -7,7 +7,7 @@ using XWave.Services.Interfaces;
 using System.Linq;
 using XWave.DTOs;
 using System;
-using XWave.ViewModels.Purchase;
+using XWave.ViewModels.Customer;
 using Microsoft.Extensions.Logging;
 using XWave.Services.ResultTemplate;
 

@@ -55,6 +55,7 @@ namespace XWave.Controllers
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> Delete(int paymentID)
         {
+            //TODO: write a custom authorization attribute for this
             string customerID = _authService.GetCustomerID(HttpContext.User.Identity);
             
             var result = await _paymentService.DeletePaymentAsync(customerID, paymentID);

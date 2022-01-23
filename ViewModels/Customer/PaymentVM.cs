@@ -1,4 +1,4 @@
-﻿namespace XWave.ViewModels.Purchase
+﻿namespace XWave.ViewModels.Customer
 {
     //public class PaymentVM
     //{

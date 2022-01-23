@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using XWave.Models;
-using XWave.ViewModels.Purchase;
+using XWave.ViewModels.Customer;
 using System.Security.Claims;
 using XWave.DTOs;
 using XWave.Services;

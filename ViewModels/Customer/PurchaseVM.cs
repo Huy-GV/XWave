@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 
-namespace XWave.ViewModels.Purchase
+namespace XWave.ViewModels.Customer
 {
     public record ProductDetail
     {

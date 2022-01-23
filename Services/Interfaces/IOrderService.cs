@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using XWave.DTOs;
 using XWave.Models;
 using XWave.Services.ResultTemplate;
-using XWave.ViewModels.Purchase;
+using XWave.ViewModels.Customer;
 
 namespace XWave.Services.Interfaces
 {
