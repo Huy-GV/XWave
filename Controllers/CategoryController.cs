@@ -21,8 +21,7 @@ namespace XWave.Controllers
         private readonly ICategoryService _categoryService;
         public CategoryController(
             ILogger<CategoryController> logger,
-            XWaveDbContext dbContext,
-            ICategoryService categoryService) : base(dbContext, logger)
+            ICategoryService categoryService) : base(logger)
         {
             _categoryService = categoryService;
         }
@@ -30,7 +29,7 @@ namespace XWave.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Category>> Get()
         {
-            return Ok(DbContext.Category.ToList());
+            return Ok(await _categoryService.GetAllCategories());
         }
 
         // GET api/<CategoryController>/5

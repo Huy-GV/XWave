@@ -26,10 +26,9 @@ namespace XWave.Controllers
         private readonly IOrderService _orderService;
 
         public OrderController(
-            XWaveDbContext dbContext,
             ILogger<OrderController> logger,
             IAuthenticationService authService,
-            IOrderService orderService) : base(dbContext, logger)
+            IOrderService orderService) : base(logger)
         {
             _authService = authService;
             _orderService = orderService;

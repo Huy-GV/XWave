@@ -11,7 +11,6 @@ using XWave.ViewModels.Management;
 using Microsoft.EntityFrameworkCore;
 using System;
 
-//TODO: add try catch blocks to operations on db
 namespace XWave.Services.Defaults
 {
     public class DiscountService : ServiceBase, IDiscountService

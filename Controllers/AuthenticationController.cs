@@ -21,11 +21,10 @@ namespace XWave.Controllers
     {
         private readonly IAuthenticationService _authService;
         public AuthenticationController(
-            XWaveDbContext dbContext,
             ILogger<AuthenticationController> logger,
             IAuthenticationService authenticationService
             
-            ) : base (dbContext, logger)
+            ) : base (logger)
         {
             _authService = authenticationService;  
         }

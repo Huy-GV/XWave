@@ -29,7 +29,7 @@ namespace XWave.Controllers
             ILogger<DiscountController> logger,
             IDiscountService discountService,
             IAuthenticationService authService
-        ) : base(dbContext, logger)
+        ) : base(logger)
         {
             _discountService = discountService;
             _authenticationService = authService;

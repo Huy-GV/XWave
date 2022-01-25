@@ -12,6 +12,7 @@ using XWave.Services.Interfaces;
 
 namespace XWave.Services.Defaults
 {
+    //TODO: inherit from service base and apply this service to respective controller
     public class StaffActivityService : IStaffActivityService
     {
         private readonly XWaveDbContext _dbContext;

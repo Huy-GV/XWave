@@ -19,18 +19,19 @@ namespace XWave.Controllers
     [ApiController]
     public class ProductController : AbstractController<ProductController>
     {
+        private readonly XWaveDbContext DbContext;
         public ProductController(
             XWaveDbContext dbContext,
             ILogger<ProductController> logger
-            ) : base(dbContext, logger)
+            ) : base(logger)
         {
-
+            //TODO: write a service for this
+            DbContext = dbContext;
         }
         // GET: api/<ProductController>
         [HttpGet]
         public ActionResult<IEnumerable<ProductDTO>> Get()
         {
-            //TODO: include category
             var products = DbContext.Product
                 .Include(p => p.Discount)
                 .Include(p => p.Category)

@@ -13,6 +13,7 @@ namespace XWave.Services
             services.AddScoped<IStaffActivityService, StaffActivityService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<ICategoryService, CategoryService>();
         }
     }
 }

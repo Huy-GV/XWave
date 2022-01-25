@@ -16,11 +16,9 @@ namespace XWave.Controllers
     {
         private readonly IStaffActivityService _staffActivityService;
         private readonly ILogger<StaffActivityLogController> _logger;
-        //TODO: redundant dbContext
         public StaffActivityLogController(
-            XWaveDbContext dbContext,
             IStaffActivityService staffActivityService,
-            ILogger<StaffActivityLogController> logger) : base(dbContext, logger)
+            ILogger<StaffActivityLogController> logger) : base(logger)
         {
             _staffActivityService = staffActivityService;
         }
