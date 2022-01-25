@@ -63,19 +63,28 @@ namespace XWave.Services.Defaults
         public async Task<ServiceResult> DeletePaymentAsync(string customerID, int paymentID)
         {
             if (!CustomerHasPayment(customerID, paymentID))
+            {
                 return new ServiceResult()
                 {
                     Error = $"Payment with ID {paymentID} not found for customer ID {customerID}"
                 };
+            }
 
-            var deletedPayment = await DbContext.Payment.FindAsync(paymentID);
-            DbContext.Remove(deletedPayment);
-            await DbContext.SaveChangesAsync();
-            return new ServiceResult()
+            try
             {
-                Succeeded = true,
-                ResourceID = paymentID.ToString(),
-            }; 
+                var deletedPayment = await DbContext.Payment.FindAsync(paymentID);
+                DbContext.Remove(deletedPayment);
+                await DbContext.SaveChangesAsync();
+                return new ServiceResult()
+                {
+                    Succeeded = true,
+                    ResourceID = paymentID.ToString(),
+                };
+            } catch (Exception ex)
+            {
+                return ServiceResult.Failure(ex.Message);
+            }
+
         }
 
         public Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsAsync(string customerID)
@@ -89,22 +98,31 @@ namespace XWave.Services.Defaults
         public async Task<ServiceResult> UpdatePaymentAsync(string customerID, int id, Payment updatedPayment)
         {
             if (!CustomerHasPayment(customerID, id))
+            {
                 return new ServiceResult
-                { 
+                {
                     Error = $"No payment with ID {id} found for customer ID {customerID}"
                 };
-
-            var payment = await DbContext.Payment.FindAsync(id);
-            payment.AccountNo = updatedPayment.AccountNo;
-            payment.Provider = updatedPayment.Provider;
-            payment.ExpiryDate = updatedPayment.ExpiryDate;
-            DbContext.Payment.Update(payment);
-            await DbContext.SaveChangesAsync();
-            return new ServiceResult
+            }
+                
+            try
             {
-                Succeeded = true,
-                ResourceID = id.ToString(),
-            };
+                var payment = await DbContext.Payment.FindAsync(id);
+                payment.AccountNo = updatedPayment.AccountNo;
+                payment.Provider = updatedPayment.Provider;
+                payment.ExpiryDate = updatedPayment.ExpiryDate;
+                DbContext.Payment.Update(payment);
+                await DbContext.SaveChangesAsync();
+                return new ServiceResult
+                {
+                    Succeeded = true,
+                    ResourceID = id.ToString(),
+                };
+            } catch (Exception ex)
+            {
+                return ServiceResult.Failure(ex.Message);
+            }
+
         }
         private bool CustomerHasPayment(string customerID, int paymentID)
         {

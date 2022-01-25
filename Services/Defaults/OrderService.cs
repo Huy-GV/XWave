@@ -43,14 +43,19 @@ namespace XWave.Services.Defaults
                     .SingleOrDefaultAsync(c => c.CustomerID == customerID);
 
                 if (customer == null)
+                {
                     return ServiceResult.Failure("Customer not found");
+                }
+                    
 
                 var payment = await _dbContext.Payment
                     .SingleOrDefaultAsync(p => p.ID == purchaseVM.PaymentID);
 
                 if (payment == null)
+                {
                     return ServiceResult.Failure("Payment not found");
-
+                }
+                    
                 var order = new Order()
                 {
                     Date = DateTime.Now,
@@ -119,8 +124,10 @@ namespace XWave.Services.Defaults
         private static List<OrderDetail> AssignOrderID(int orderID, List<OrderDetail> orderDetails)
         {
             foreach (var orderDetail in orderDetails)
+            {
                 orderDetail.OrderID = orderID;
-
+            }
+                
             return orderDetails;
         }
 
