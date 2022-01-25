@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using XWave.Data;
 using XWave.Data.Constants;
 using XWave.Models;
+using XWave.Services.Interfaces;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -17,11 +18,13 @@ namespace XWave.Controllers
     [ApiController]
     public class CategoryController : AbstractController<CategoryController>
     {
+        private readonly ICategoryService _categoryService;
         public CategoryController(
             ILogger<CategoryController> logger,
-            XWaveDbContext dbContext) : base(dbContext, logger)
+            XWaveDbContext dbContext,
+            ICategoryService categoryService) : base(dbContext, logger)
         {
-            
+            _categoryService = categoryService;
         }
         // GET: api/<CategoryController>
         [HttpGet]
@@ -32,13 +35,9 @@ namespace XWave.Controllers
 
         // GET api/<CategoryController>/5
         [HttpGet("{id}")]
-        public ActionResult<Category> Get(int id)
+        public async Task<ActionResult<Category>> Get(int id)
         {
-            var category = DbContext.Category.FirstOrDefault(category => category.ID == id);
-            if (category == null)
-                return NotFound();
-
-            return Ok(category);
+            return Ok(await _categoryService.GetCategoryByID(id));
         }
 
         // POST api/<CategoryController>
@@ -48,10 +47,9 @@ namespace XWave.Controllers
         {
             if (ModelState.IsValid)
             {
-                DbContext.Category.Add(newCategory);
-                await DbContext.SaveChangesAsync();
+                var result = await _categoryService.CreateCategory(newCategory);
                 return Ok(ResponseTemplate
-                    .Created($"https://localhost:5001/api/category/admin/{newCategory.ID}"));
+                    .Created($"https://localhost:5001/api/category/admin/{result.ResourceID}"));
             }
 
             return BadRequest(ModelState);
@@ -62,15 +60,22 @@ namespace XWave.Controllers
         [Authorize(Roles = "manager")]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] Category updatedCategory)
         {
-            var category = await DbContext.Category.FindAsync(id);
+            var category = await _categoryService.GetCategoryByID(id);
             if (category == null)
+            {
                 return NotFound();
+            }
 
             if (ModelState.IsValid)
             {
-                DbContext.Category.Update(updatedCategory);
-                return Ok(ResponseTemplate
-                    .Updated($"https://localhost:5001/api/category/admin/{updatedCategory.ID}"));
+                var result = await _categoryService.UpdateCategory(id, updatedCategory);
+                if (result.Succeeded)
+                {
+                    return Ok(ResponseTemplate
+                    .Updated($"https://localhost:5001/api/category/admin/{result.ResourceID}"));
+                }
+
+                return BadRequest(result.Error);
             }
 
             return BadRequest(ModelState);
@@ -81,21 +86,19 @@ namespace XWave.Controllers
         [Authorize(Roles ="manager")]
         public async Task<ActionResult> Delete(int id)
         {
-            var category = await DbContext.Category.FindAsync(id);
+            var category = await _categoryService.GetCategoryByID(id);
             if (category == null)
+            {
                 return NotFound();
-
-            try
-            {
-                DbContext.Category.Remove(category);
-                await DbContext.SaveChangesAsync();
-            } catch (Exception e)
-            {
-                Logger.LogError($"Error deleting a category: {e}");
-                return BadRequest("Foreign key constraint failed");
             }
 
-            return NoContent();
+            var result = await _categoryService.DeleteCategory(id);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+
+            return BadRequest(result.Error);
         }
     }
 }
