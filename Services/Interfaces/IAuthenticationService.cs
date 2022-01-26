@@ -1,6 +1,7 @@
 ﻿using System.Security.Principal;
 using System.Threading.Tasks;
 using XWave.ViewModels.Authentication;
+using XWave.Services.ResultTemplate;
 
 namespace XWave.Services.Interfaces
 {

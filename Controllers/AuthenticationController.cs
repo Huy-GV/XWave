@@ -11,6 +11,7 @@ using XWave.Data.Constants;
 using XWave.Data;
 using XWave.Services.Interfaces;
 using XWave.Models;
+using XWave.Services.ResultTemplate;
 
 namespace XWave.Controllers
 {
@@ -62,42 +63,6 @@ namespace XWave.Controllers
                 return BadRequest(ModelState);
 
             return await _authService.SignInAsync(model);
-        }
-
-        [HttpGet("test/manager")]
-        [Authorize(Roles ="manager")]
-        public ActionResult<string> TestManager()
-        {
-            return "OK MANAGER WORKS";
-        }
-        [HttpGet("test/staff")]
-        [Authorize(Roles = "staff")]
-        public ActionResult<string> TestStaff()
-        {
-            return "OK STAFF WORKS";
-        }
-        [HttpGet("test")]
-        public ActionResult<string> GetUsers()
-        {
-            return "OK WORKS";
-        }
-        [Authorize]
-        [HttpGet("test/random")]
-        public ActionResult<string> TestRandom()
-        {
-            return "OK WORKS";
-        }
-        [Authorize(Roles ="customer")]
-        [HttpGet("test/customer")]
-        public ActionResult<string> TestCustomer()
-        {
-            return "OK WORKS";
-        }
-        [Authorize(Policy ="StaffOnly")]
-        [HttpGet("test/staffonly")]
-        public ActionResult<string> StaffOnly()
-        {
-            return "OK WORKS";
         }
     }
 }

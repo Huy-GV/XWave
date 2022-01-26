@@ -13,6 +13,7 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using XWave.ViewModels.Authentication;
+using XWave.Services.ResultTemplate;
 using XWave.Services.Interfaces;
 using XWave.Data;
 using System.Security.Principal;
@@ -71,7 +72,8 @@ namespace XWave.Services.Defaults
         }
         public async Task<bool> IsUserInRoleAsync(string userID, string role)
         {
-            return false;
+            var user = await _userManager.FindByIdAsync(userID);
+            return user == null ? false : await _userManager.IsInRoleAsync(user, role);
         }
         public async Task<AuthenticationResult> RegisterAsync(RegisterVM registerVM, string role)
         {
@@ -95,7 +97,10 @@ namespace XWave.Services.Defaults
 
             var errorMessage = "";
             foreach (var error in result.Errors)
-                errorMessage += error.Description;
+            {
+                errorMessage += $"{error.Description}\n";
+            }
+                
 
             return new AuthenticationResult
             {
@@ -160,13 +165,13 @@ namespace XWave.Services.Defaults
             string role)
         {
             var token = await CreateJwtTokenAsync(user, role);
-            AuthenticationResult authModel = new()
+            AuthenticationResult result = new()
             {
                 Succeeded = true,
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
             };
 
-            return authModel;
+            return result;
         }
     }
 }
