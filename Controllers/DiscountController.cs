@@ -46,9 +46,7 @@ namespace XWave.Controllers
         public async Task<IEnumerable<Product>> GetProductsWithDiscount(int id)
         {
             //no need to include discount at this level
-            return await DbContext.Product
-                .Where(p => p.DiscountID == id)
-                .ToListAsync(); ;
+            return await _discountService.GetProductsByDiscountID(id);
         }
 
         // GET api/<DiscountController>/5

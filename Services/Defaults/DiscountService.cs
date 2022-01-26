@@ -30,6 +30,12 @@ namespace XWave.Services.Defaults
             await DbContext.SaveChangesAsync();
             return ServiceResult.Success(newDiscount.ID.ToString());
         }
+        public async Task<IEnumerable<Product>> GetProductsByDiscountID(int discountID)
+        {
+            return await DbContext.Product
+                .Where(p => p.DiscountID == discountID)
+                .ToListAsync();
+        }
 
         public async Task<ServiceResult> DeleteAsync(int id)
         {
