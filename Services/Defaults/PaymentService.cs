@@ -87,11 +87,17 @@ namespace XWave.Services.Defaults
 
         }
 
-        public Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsAsync(string customerID)
+        public Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsForCustomerAsync(string customerID)
         {
             return Task.FromResult(DbContext.PaymentDetail
                 .Include(pd => pd.Payment)
                 .Where(pd => pd.CustomerID == customerID)
+                .AsEnumerable());
+        }
+        public Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsForStaffAsync()
+        {
+            return Task.FromResult(DbContext.PaymentDetail
+                .Include(pd => pd.Payment)
                 .AsEnumerable());
         }
 

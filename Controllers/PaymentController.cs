@@ -36,11 +36,11 @@ namespace XWave.Controllers
         }
         [HttpGet]
         [Authorize(Policy="staffonly")]
-        public ActionResult Get()
+        public async Task<ActionResult> Get()
         {
-            return Ok(DbContext.PaymentDetail.ToList());
+            return Ok(await _paymentService.GetAllPaymentDetailsForStaffAsync());
         }
-        [HttpGet("detail")]
+        [HttpGet("details")]
         [Authorize(Roles ="customer")]
         public ActionResult<IEnumerable<PaymentDetail>> GetByCustomer()
         {
@@ -48,7 +48,7 @@ namespace XWave.Controllers
             if (customerID == null)
                 return BadRequest();
 
-            return Ok(_paymentService.GetAllPaymentDetailsAsync(customerID));
+            return Ok(_paymentService.GetAllPaymentDetailsForCustomerAsync(customerID));
         }
         [HttpPost("delete/{paymentID}")]
         [Authorize(Roles = "customer")]
@@ -80,7 +80,7 @@ namespace XWave.Controllers
                 return BadRequest(result.Error);
             }
 
-            return Ok(ResponseTemplate.Updated($"https://localhost:5001/api/payment/detail/{id}"));
+            return Ok(ResponseTemplate.Updated($"https://localhost:5001/api/payment/details/{id}"));
         }
         [HttpPost]
         [Authorize(Roles = "customer")]
@@ -99,7 +99,7 @@ namespace XWave.Controllers
                     ResponseTemplate.InternalServerError(result.Error));
             }
 
-            return Ok(ResponseTemplate.Created($"https://localhost:5001/api/payment/detail/{result.ResourceID}"));
+            return Ok(ResponseTemplate.Created($"https://localhost:5001/api/payment/details/{result.ResourceID}"));
         }
     }
 }

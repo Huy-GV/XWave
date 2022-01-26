@@ -10,6 +10,7 @@ using XWave.DTOs;
 using Microsoft.EntityFrameworkCore;
 using XWave.ViewModels.Management;
 using XWave.Data.Constants;
+using XWave.Services.Interfaces;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,62 +20,39 @@ namespace XWave.Controllers
     [ApiController]
     public class ProductController : AbstractController<ProductController>
     {
-        private readonly XWaveDbContext DbContext;
+        private readonly IProductService _productService;
         public ProductController(
-            XWaveDbContext dbContext,
-            ILogger<ProductController> logger
+            ILogger<ProductController> logger,
+            IProductService productService
             ) : base(logger)
         {
-            //TODO: write a service for this
-            DbContext = dbContext;
+            _productService = productService;
         }
         // GET: api/<ProductController>
-        [HttpGet]
-        public ActionResult<IEnumerable<ProductDTO>> Get()
+        [HttpGet("customers/{categoryID:int?}")]
+        public ActionResult<IEnumerable<ProductDTO>> GetForCustomers(int? categoryID)
         {
-            var products = DbContext.Product
-                .Include(p => p.Discount)
-                .Include(p => p.Category)
-                .Select(product => ProductDTO.From(product))
-                .ToList();
-
-            return Ok(products);
+            return Ok(_productService.GetAllProductsForCustomers(categoryID));
         }
 
-        [HttpGet("full-details/{categoryID:int?}")]
+        [HttpGet("staff/{categoryID:int?}")]
         [Authorize(Policy = "StaffOnly")]
-        public ActionResult<IEnumerable<Product>> GetFullDetails(int? categoryID)
+        public async Task<ActionResult<IEnumerable<Product>>> GetForStaff(int? categoryID)
         {
-            var products = DbContext.Product.AsEnumerable();
-
-            if (categoryID != null)
-                products = products.Where(p => p.CategoryID == categoryID);
-
-            return Ok(products);
+            return Ok(await _productService.GetAllProductsForStaff(categoryID));
         }
 
         // GET api/<ProductController>/5
-        [HttpGet("{id}")]
+        [HttpGet("customers/{id}")]
         public async Task<ActionResult<ProductDTO>> Get(int id)
         {
-            var product = await DbContext.Product
-                .Include(p => p.Discount)
-                .SingleOrDefaultAsync(p => p.ID == id);
-
-            if (product == null)
-                return NotFound();
-
-            return Ok(ProductDTO.From(product));
+            return Ok(await _productService.GetProductByIDForCustomers(id));
         }
-        [HttpGet("{id}/full-details")]
-        //[Authorize(Policy ="StaffOnly")]
-        public async Task<ActionResult<Product>> GetFullDetails(int id)
+        [HttpGet("staff/{id}")]
+        [Authorize(Policy ="StaffOnly")]
+        public async Task<ActionResult<Product>> GetByIDForStaff(int id)
         {
-            var product = await DbContext.Product.FindAsync(id);
-            if (product == null)
-                return NotFound();
-
-            return Ok(product);
+            return Ok(await _productService.GetAllProductsForStaff(id));
         }
 
         // POST api/<ProductController>
@@ -82,43 +60,42 @@ namespace XWave.Controllers
         [Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult> CreateAsync([FromBody] ProductVM productVM)
         {
-            if (!await DbContext.Category.AnyAsync(c => c.ID == productVM.CategoryID))
-            {
-                return BadRequest();
-            }
-
             if (ModelState.IsValid)
             {
-                Product newProduct = new();
-                var entry = DbContext.Product.Add(newProduct);
-                entry.CurrentValues.SetValues(productVM);
-                await DbContext.SaveChangesAsync();
+                var result = await _productService.CreateProduct(productVM);
+                if (result.Succeeded)
+                {
+                    return Ok(ResponseTemplate
+                    .Created($"https://localhost:5001/api/product/staff/{result.ResourceID}"));
+                }
 
-                return Ok(ResponseTemplate
-                    .Created($"https://localhost:5001/api/product/admin/{newProduct.ID}"));
+                return BadRequest(result.Error);
             }
 
             return BadRequest(ModelState);
         }
-
 
         // PUT api/<ProductController>/5
         [Authorize(Policy = "StaffOnly")]
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] ProductVM updatedProduct)
         {
-            var product = await DbContext.Product.FindAsync(id);
+            var product = await _productService.GetProductByIDForStaff(id);
             if (product == null)
+            {
                 return NotFound();
+            }
 
             if (ModelState.IsValid)
             {
-                var entry = DbContext.Attach(product);
-                entry.State = EntityState.Modified;
-                entry.CurrentValues.SetValues(updatedProduct);
-                await DbContext.SaveChangesAsync();
-                return Ok(ResponseTemplate
-                    .Updated($"https://localhost:5001/api/product/admin/{product.ID}"));
+                var result = await _productService.UpdateProduct(id, updatedProduct);
+                if (result.Succeeded)
+                {
+                    return Ok(ResponseTemplate
+                    .Created($"https://localhost:5001/api/product/staff/{result.ResourceID}"));
+                }
+
+                return BadRequest(result.Error);
             }
 
             return BadRequest(ModelState);
@@ -128,12 +105,18 @@ namespace XWave.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAsync(int id)
         {
-            if (!await DbContext.Product.AnyAsync(p => p.ID == id))
+            var product = await _productService.GetProductByIDForStaff(id);
+            if (product == null)
+            {
                 return NotFound();
+            }
+            var result = await _productService.DeleteProduct(id);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
 
-            DbContext.Product.Remove(await DbContext.Product.FindAsync(id));
-            DbContext.SaveChanges();
-            return NoContent();
+            return BadRequest(result.Error);
         }
 
     }

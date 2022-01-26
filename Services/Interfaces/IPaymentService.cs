@@ -11,6 +11,7 @@ namespace XWave.Services.Interfaces
         Task<ServiceResult> CreatePaymentAsync(string customerID, Payment newPayment);
         Task<ServiceResult> DeletePaymentAsync(string customerID, int paymentID);
         Task<ServiceResult> UpdatePaymentAsync(string customerID, int paymentID, Payment updatedPayment);
-        Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsAsync(string customerID);
+        Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsForCustomerAsync(string customerID);
+        Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsForStaffAsync();
     }
 }
