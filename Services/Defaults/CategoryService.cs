@@ -13,14 +13,14 @@ namespace XWave.Services.Defaults
     public class CategoryService : ServiceBase, ICategoryService
     {
         public CategoryService(XWaveDbContext dbContext) : base(dbContext) { }
-        public async Task<ServiceResult> CreateCategory(Category category)
+        public async Task<ServiceResult> CreateCategoryAsync(Category category)
         {
             DbContext.Category.Add(category);
             await DbContext.SaveChangesAsync();
             return ServiceResult.Success(category.ID.ToString());
         }
 
-        public async Task<ServiceResult> DeleteCategory(int id)
+        public async Task<ServiceResult> DeleteCategoryAsync(int id)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace XWave.Services.Defaults
             return await DbContext.Category.FindAsync(id);
         }
 
-        public async Task<ServiceResult> UpdateCategory(int id, Category updatedCategory)
+        public async Task<ServiceResult> UpdateCategoryAsync(int id, Category updatedCategory)
         {
             try
             {

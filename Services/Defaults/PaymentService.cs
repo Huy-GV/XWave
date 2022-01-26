@@ -62,14 +62,6 @@ namespace XWave.Services.Defaults
 
         public async Task<ServiceResult> DeletePaymentAsync(string customerID, int paymentID)
         {
-            if (!CustomerHasPayment(customerID, paymentID))
-            {
-                return new ServiceResult()
-                {
-                    Error = $"Payment with ID {paymentID} not found for customer ID {customerID}"
-                };
-            }
-
             try
             {
                 var deletedPayment = await DbContext.Payment.FindAsync(paymentID);
@@ -103,14 +95,6 @@ namespace XWave.Services.Defaults
 
         public async Task<ServiceResult> UpdatePaymentAsync(string customerID, int id, Payment updatedPayment)
         {
-            if (!CustomerHasPayment(customerID, id))
-            {
-                return new ServiceResult
-                {
-                    Error = $"No payment with ID {id} found for customer ID {customerID}"
-                };
-            }
-                
             try
             {
                 var payment = await DbContext.Payment.FindAsync(id);
@@ -130,10 +114,10 @@ namespace XWave.Services.Defaults
             }
 
         }
-        private bool CustomerHasPayment(string customerID, int paymentID)
+        public Task<bool> CustomerHasPayment(string customerID, int paymentID)
         {
-            return DbContext.PaymentDetail.Any(
-                pd => pd.CustomerID == customerID && pd.PaymentID == paymentID);
+            return Task.FromResult(DbContext.PaymentDetail.Any(
+                pd => pd.CustomerID == customerID && pd.PaymentID == paymentID));
         }
     }
 }

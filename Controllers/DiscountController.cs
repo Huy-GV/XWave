@@ -85,7 +85,7 @@ namespace XWave.Controllers
         {
             if (await _discountService.GetAsync(id) == null)
             {
-                return NotFound();
+                return BadRequest(ResponseTemplate.NonExistentResource());
             }
 
             if (ModelState.IsValid)
@@ -107,6 +107,11 @@ namespace XWave.Controllers
         [Authorize(Roles ="manager")]
         public async Task<ActionResult> Delete(int id)
         {
+            if (await _discountService.GetAsync(id) == null)
+            {
+                return BadRequest(ResponseTemplate.NonExistentResource());
+            }
+
             var result = await _discountService.DeleteAsync(id);
             if (result.Succeeded)
             {

@@ -55,7 +55,11 @@ namespace XWave.Controllers
         public async Task<ActionResult> Delete(int paymentID)
         {
             string customerID = _authService.GetUserID(HttpContext.User.Identity);
-            
+            if (! await _paymentService.CustomerHasPayment(customerID, paymentID))
+            {
+                return BadRequest(ResponseTemplate.NonExistentResource());
+            }
+
             var result = await _paymentService.DeletePaymentAsync(customerID, paymentID);
             
             if (!result.Succeeded)
@@ -71,9 +75,15 @@ namespace XWave.Controllers
         public async Task<ActionResult> UpdatePaymentAsync(int id, Payment inputPayment)
         {
             if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
-
+            }
+                
             string customerID = _authService.GetUserID(HttpContext.User.Identity);
+            if (!await _paymentService.CustomerHasPayment(customerID, id))
+            {
+                return BadRequest(ResponseTemplate.NonExistentResource());
+            }
             var result = await _paymentService.UpdatePaymentAsync(customerID, id, inputPayment);
             if (!result.Succeeded)
             {

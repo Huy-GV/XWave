@@ -27,7 +27,7 @@ namespace XWave.Controllers
         }
         // GET: api/<CategoryController>
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> Get()
+        public async Task<ActionResult<IEnumerable<Category>>> Get()
         {
             return Ok(await _categoryService.GetAllCategories());
         }
@@ -46,7 +46,7 @@ namespace XWave.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _categoryService.CreateCategory(newCategory);
+                var result = await _categoryService.CreateCategoryAsync(newCategory);
                 return Ok(ResponseTemplate
                     .Created($"https://localhost:5001/api/category/admin/{result.ResourceID}"));
             }
@@ -62,12 +62,12 @@ namespace XWave.Controllers
             var category = await _categoryService.GetCategoryByID(id);
             if (category == null)
             {
-                return NotFound();
+                return BadRequest(ResponseTemplate.NonExistentResource());
             }
 
             if (ModelState.IsValid)
             {
-                var result = await _categoryService.UpdateCategory(id, updatedCategory);
+                var result = await _categoryService.UpdateCategoryAsync(id, updatedCategory);
                 if (result.Succeeded)
                 {
                     return Ok(ResponseTemplate
@@ -88,10 +88,10 @@ namespace XWave.Controllers
             var category = await _categoryService.GetCategoryByID(id);
             if (category == null)
             {
-                return NotFound();
+                return BadRequest(ResponseTemplate.NonExistentResource());
             }
 
-            var result = await _categoryService.DeleteCategory(id);
+            var result = await _categoryService.DeleteCategoryAsync(id);
             if (result.Succeeded)
             {
                 return NoContent();

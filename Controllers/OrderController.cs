@@ -49,11 +49,11 @@ namespace XWave.Controllers
         {
             string customerID = _authService.GetUserID(HttpContext.User.Identity);
             if (customerID == string.Empty)
+            {
                 return BadRequest();
+            }
 
             var orderDTO = await _orderService.GetOrderByIDAsync(customerID, id);
-            if (orderDTO == null)
-                return NotFound();
 
             return Ok(orderDTO);
         }
@@ -69,9 +69,6 @@ namespace XWave.Controllers
         {
             OrderDetail orderDetail = await _orderService.GetDetailsByOrderIDsAsync(orderID, productID);
 
-            if (orderDetail == null)
-                return NotFound();
-
             return Ok(orderDetail);
         }
         [HttpPost]
@@ -80,13 +77,17 @@ namespace XWave.Controllers
         {
             string customerID = _authService.GetUserID(HttpContext.User.Identity);
             if (customerID == string.Empty)
+            {
                 return BadRequest();
-
+            }
+                
             var result = await _orderService.CreateOrderAsync(purchaseVM, customerID);
 
             if (!result.Succeeded)
+            {
                 return BadRequest(result.Error);
-
+            }
+            
             return Ok();
         }
     }

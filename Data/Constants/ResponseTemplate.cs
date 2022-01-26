@@ -20,5 +20,10 @@ namespace XWave.Data.Constants
             Status = "Failed",
             Message = error
         };
+        public static object NonExistentResource() => new
+        {
+            Status = "Aborted",
+            Message = "Operation on an non-existent resource failed"
+        };
     }
 }

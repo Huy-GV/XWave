@@ -62,7 +62,7 @@ namespace XWave.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _productService.CreateProduct(productVM);
+                var result = await _productService.CreateProductAsync(productVM);
                 if (result.Succeeded)
                 {
                     return Ok(ResponseTemplate
@@ -83,12 +83,12 @@ namespace XWave.Controllers
             var product = await _productService.GetProductByIDForStaff(id);
             if (product == null)
             {
-                return NotFound();
+                return BadRequest(ResponseTemplate.NonExistentResource());
             }
 
             if (ModelState.IsValid)
             {
-                var result = await _productService.UpdateProduct(id, updatedProduct);
+                var result = await _productService.UpdateProductAsync(id, updatedProduct);
                 if (result.Succeeded)
                 {
                     return Ok(ResponseTemplate
@@ -108,9 +108,9 @@ namespace XWave.Controllers
             var product = await _productService.GetProductByIDForStaff(id);
             if (product == null)
             {
-                return NotFound();
+                return BadRequest(ResponseTemplate.NonExistentResource());
             }
-            var result = await _productService.DeleteProduct(id);
+            var result = await _productService.DeleteProductAsync(id);
             if (result.Succeeded)
             {
                 return NoContent();

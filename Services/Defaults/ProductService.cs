@@ -16,7 +16,7 @@ namespace XWave.Services.Defaults
     {
         public ProductService(XWaveDbContext dbContext) : base(dbContext) { }
 
-        public async Task<ServiceResult> CreateProduct(ProductVM productVM)
+        public async Task<ServiceResult> CreateProductAsync(ProductVM productVM)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public async Task<ServiceResult> DeleteProduct(int id)
+        public async Task<ServiceResult> DeleteProductAsync(int id)
         {
             try
             {
@@ -96,7 +96,7 @@ namespace XWave.Services.Defaults
                     .SingleOrDefaultAsync(p => p.ID == id);
         }
 
-        public async Task<ServiceResult> UpdateProduct(int id, ProductVM updatedProduct)
+        public async Task<ServiceResult> UpdateProductAsync(int id, ProductVM updatedProduct)
         {
             try
             {
