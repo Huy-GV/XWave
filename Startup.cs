@@ -37,7 +37,9 @@ namespace XWave
         {
 
             services.Configure<JWT>(Configuration.GetSection("JWT"));
-            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<XWaveDbContext>();
+            services
+                .AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<XWaveDbContext>();
             
             
             services.AddScoped<Services.Interfaces.IAuthenticationService, JwtAuthenticationService>();
@@ -54,16 +56,16 @@ namespace XWave
                 .AddJwtBearer(options =>
                 {
                     options.RequireHttpsMetadata = false;
-                    //TODO: replace with token key
-                    // options.Events.OnMessageReceived = context =>
-                    // {
-                    //     if (context.Request.Cookies.ContainsKey("X-Access-Token"))
-                    //     {
-                    //         //set the cookie token into the bearer header
-                    //         context.Token = context.Request.Cookies["X-Access-Token"];
-                    //     }
-                    //     return Task.CompletedTask;
-                    // };
+                    options.Events.OnMessageReceived = context =>
+                    {
+                        // accommodate clients without cookies
+                         if (string.IsNullOrEmpty(context.Token) 
+                             && context.Request.Cookies.ContainsKey("JwtToken"))
+                         {
+                             context.Token = context.Request.Cookies["JwtToken"];
+                         }
+                         return Task.CompletedTask;
+                    };
                     options.SaveToken = false;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
