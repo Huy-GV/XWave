@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace XWave.Models
 {
     //TODO: add another ID field to be set by the user
-    public class Product
+    public class Product : IEntity
     {
         public int ID { get; set; }
         [Required]

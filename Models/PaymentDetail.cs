@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.Models
 {
-    public class PaymentDetail
+    public class PaymentDetail : IEntity
     {
         public string CustomerID { get; set; }
         public int PaymentID { get; set; }

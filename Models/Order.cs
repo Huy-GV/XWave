@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.Models
 {
-    public class Order
+    public class Order : IEntity
     {
         [Required]
         public int ID { get; set; }

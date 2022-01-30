@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace XWave.Models
 {
-    public class Discount
+    public class Discount : IEntity
     {
         public int ID { get; set; }
         [Required]

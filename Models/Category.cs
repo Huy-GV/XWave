@@ -4,7 +4,7 @@ using System;
 
 namespace XWave.Models
 {
-    public class Category
+    public class Category : IEntity
     {
         public int ID { get; set; }
         [Required]
