@@ -26,7 +26,6 @@ namespace XWave.Data
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderDetail> OrderDetail { get; set; }
         public DbSet<Customer> Customer { get; set; }
-        public DbSet<Activity> Activity { get; set; }
         public DbSet<ActivityLog> StaffActivityLog { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
