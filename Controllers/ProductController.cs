@@ -20,18 +20,21 @@ namespace XWave.Controllers
     [ApiController]
     public class ProductController : AbstractController<ProductController>
     {
+        private readonly IAuthenticationService _authenticationService;
         private readonly IProductService _productService;
         public ProductController(
             ILogger<ProductController> logger,
-            IProductService productService
-            ) : base(logger)
+            IProductService productService,
+            IAuthenticationService authenticationService) : base(logger)
         {
             _productService = productService;
+            _authenticationService = authenticationService;
         }
         // GET: api/<ProductController>
         [HttpGet("customers/{categoryID:int?}")]
         public ActionResult<IEnumerable<ProductDTO>> GetForCustomers(int? categoryID)
         {
+            
             return Ok(_productService.GetAllProductsForCustomers(categoryID));
         }
 
@@ -60,9 +63,11 @@ namespace XWave.Controllers
         [Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult> CreateAsync([FromBody] ProductVM productVM)
         {
+
+            var staffID = _authenticationService.GetUserID(HttpContext.User.Identity); 
             if (ModelState.IsValid)
             {
-                var result = await _productService.CreateProductAsync(productVM);
+                var result = await _productService.CreateProductAsync(staffID, productVM);
                 if (result.Succeeded)
                 {
                     return Ok(ResponseTemplate
@@ -88,7 +93,8 @@ namespace XWave.Controllers
 
             if (ModelState.IsValid)
             {
-                var result = await _productService.UpdateProductAsync(id, updatedProduct);
+                var staffID = _authenticationService.GetUserID(HttpContext.User.Identity);
+                var result = await _productService.UpdateProductAsync(staffID, id, updatedProduct);
                 if (result.Succeeded)
                 {
                     return Ok(ResponseTemplate
@@ -110,7 +116,8 @@ namespace XWave.Controllers
             {
                 return BadRequest(ResponseTemplate.NonExistentResource());
             }
-            var result = await _productService.DeleteProductAsync(id);
+            var staffID = _authenticationService.GetUserID(HttpContext.User.Identity);
+            var result = await _productService.DeleteProductAsync(staffID, id);
             if (result.Succeeded)
             {
                 return NoContent();

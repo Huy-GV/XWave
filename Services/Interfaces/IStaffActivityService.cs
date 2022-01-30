@@ -7,8 +7,8 @@ namespace XWave.Services.Interfaces
 {
     public interface IStaffActivityService
     {
-        Task CreateLog(StaffActivityLogVM logVM, string staffID);
-        Task<StaffActivityLog> GetActivityLogAsync(int id);
-        Task<IEnumerable<StaffActivityLog>> GetActivityLogsAsync();
+        Task CreateLog<T>(string staffID, ActionType actionType) where T : IEntity;
+        Task<ActivityLog> GetActivityLogAsync(int id);
+        Task<IEnumerable<ActivityLog>> GetActivityLogsAsync();
     }
 }

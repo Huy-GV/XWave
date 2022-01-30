@@ -15,7 +15,13 @@ namespace XWave.Services.Defaults
 {
     public class DiscountService : ServiceBase, IDiscountService
     {
-        public DiscountService(XWaveDbContext dbContext) : base(dbContext)  { }
+        private readonly IStaffActivityService _staffActivityService;
+        public DiscountService(
+            XWaveDbContext dbContext,
+            IStaffActivityService staffActivityService) : base(dbContext)  
+        {
+            _staffActivityService = staffActivityService;
+        }
         public async Task<ServiceResult> CreateAsync(string managerID, DiscountVM discount)
         {
             var newDiscount = new Discount()
@@ -28,6 +34,7 @@ namespace XWave.Services.Defaults
 
             DbContext.Add(newDiscount);
             await DbContext.SaveChangesAsync();
+            await _staffActivityService.CreateLog<Discount>(managerID, ActionType.Create);
             return ServiceResult.Success(newDiscount.ID.ToString());
         }
         public async Task<IEnumerable<Product>> GetProductsByDiscountID(int discountID)
@@ -37,7 +44,7 @@ namespace XWave.Services.Defaults
                 .ToListAsync();
         }
 
-        public async Task<ServiceResult> DeleteAsync(int id)
+        public async Task<ServiceResult> DeleteAsync(string managerID, int id)
         {
             var discount = await DbContext.Discount.FindAsync(id);
             if (discount == null)
@@ -57,7 +64,7 @@ namespace XWave.Services.Defaults
                 await DbContext.SaveChangesAsync();
 
                 transaction.Commit();
-
+                await _staffActivityService.CreateLog<Discount>(managerID, ActionType.Delete);
                 return ServiceResult.Success(id.ToString());
             }
             catch (Exception ex)
@@ -77,7 +84,7 @@ namespace XWave.Services.Defaults
             return await DbContext.Discount.FindAsync(id);
         }
 
-        public async Task<ServiceResult> UpdateAsync(int id, DiscountVM updatedDiscount)
+        public async Task<ServiceResult> UpdateAsync(string managerID, int id, DiscountVM updatedDiscount)
         {
             var discount = await DbContext.Discount.FindAsync(id);
             if (discount == null)
@@ -89,6 +96,7 @@ namespace XWave.Services.Defaults
             entry.State = EntityState.Modified;
             entry.CurrentValues.SetValues(updatedDiscount);
             await DbContext.SaveChangesAsync();
+            await _staffActivityService.CreateLog<Discount>(managerID, ActionType.Modify);
 
             return ServiceResult.Success(id.ToString());
         }

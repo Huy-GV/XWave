@@ -85,31 +85,31 @@ namespace XWave.Data.DatabaseSeeding
             if (staff.Count < 2 || activities.Count <3)
                 throw new Exception("Insufficient staff or activity");
 
-            var logs = new List<StaffActivityLog>
-            {
-                new StaffActivityLog
-                {
-                    Time = DateTime.Now,
-                    Message = "Lorem ipsum dolor sed ema dislem bill loss. ",
-                    StaffID = staff[0].Id,
-                    ActivityID = activities[0].ID
-                },
-                new StaffActivityLog
-                {
-                    Time = DateTime.Now,
-                    Message = "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-                    StaffID = staff[1].Id,
-                    ActivityID = activities[0].ID
-                },
-                new StaffActivityLog
-                {
-                    Time = DateTime.Now,
-                    Message = "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                    StaffID = staff[1].Id,
-                    ActivityID = activities[0].ID
-                },
-            };
-            dbContext.StaffActivityLog.AddRange(logs);
+            //var logs = new List<ActivityLog>
+            //{
+            //    new ActivityLog
+            //    {
+            //        Time = DateTime.Now,
+            //        Message = "Lorem ipsum dolor sed ema dislem bill loss. ",
+            //        StaffID = staff[0].Id,
+            //        ActivityID = activities[0].ID
+            //    },
+            //    new ActivityLog
+            //    {
+            //        Time = DateTime.Now,
+            //        Message = "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+            //        StaffID = staff[1].Id,
+            //        ActivityID = activities[0].ID
+            //    },
+            //    new ActivityLog
+            //    {
+            //        Time = DateTime.Now,
+            //        Message = "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            //        StaffID = staff[1].Id,
+            //        ActivityID = activities[0].ID
+            //    },
+            //};
+            //dbContext.StaffActivityLog.AddRange(logs);
             dbContext.SaveChanges();
         }
     }

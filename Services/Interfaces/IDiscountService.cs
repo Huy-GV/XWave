@@ -12,7 +12,7 @@ namespace XWave.Services.Interfaces
         Task<Discount> GetAsync(int id);
         Task<IEnumerable<Product>> GetProductsByDiscountID(int id);
         Task<ServiceResult> CreateAsync(string managerID, DiscountVM discount);
-        Task<ServiceResult> UpdateAsync(int id, DiscountVM discount);
-        Task<ServiceResult> DeleteAsync(int id);
+        Task<ServiceResult> UpdateAsync(string managerID, int id, DiscountVM discount);
+        Task<ServiceResult> DeleteAsync(string managerID, int id);
     }
 }

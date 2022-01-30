@@ -12,21 +12,37 @@ namespace XWave.Services.Defaults
 {
     public class CategoryService : ServiceBase, ICategoryService
     {
-        public CategoryService(XWaveDbContext dbContext) : base(dbContext) { }
-        public async Task<ServiceResult> CreateCategoryAsync(Category category)
+        private readonly IStaffActivityService _staffActivityService;
+        public CategoryService(
+            XWaveDbContext dbContext,
+            IStaffActivityService staffActivityService) : base(dbContext)
+        { 
+            _staffActivityService = staffActivityService;
+        }
+        public async Task<ServiceResult> CreateCategoryAsync(string managerID, Category category)
         {
-            DbContext.Category.Add(category);
-            await DbContext.SaveChangesAsync();
-            return ServiceResult.Success(category.ID.ToString());
+            try
+            {
+                DbContext.Category.Add(category);
+                await DbContext.SaveChangesAsync();
+                await _staffActivityService.CreateLog<Category>(managerID, ActionType.Create);
+                return ServiceResult.Success(category.ID.ToString());
+            }
+            catch (Exception e)
+            {
+                return ServiceResult.Failure(e.Message);
+            }
+
         }
 
-        public async Task<ServiceResult> DeleteCategoryAsync(int id)
+        public async Task<ServiceResult> DeleteCategoryAsync(string managerID, int id)
         {
             try
             {
                 var category = await DbContext.Category.FindAsync(id);
                 DbContext.Category.Remove(category);
                 await DbContext.SaveChangesAsync();
+                await _staffActivityService.CreateLog<Category>(managerID, ActionType.Delete);
                 return ServiceResult.Success();
             }
             catch (Exception e)
@@ -44,7 +60,7 @@ namespace XWave.Services.Defaults
             return await DbContext.Category.FindAsync(id);
         }
 
-        public async Task<ServiceResult> UpdateCategoryAsync(int id, Category updatedCategory)
+        public async Task<ServiceResult> UpdateCategoryAsync(string managerID, int id, Category updatedCategory)
         {
             try
             {
@@ -53,6 +69,7 @@ namespace XWave.Services.Defaults
                 category.Name = updatedCategory.Name;
                 DbContext.Category.Update(category);
                 await DbContext.SaveChangesAsync();
+                await _staffActivityService.CreateLog<Category>(managerID, ActionType.Modify);
                 return ServiceResult.Success();
             }
             catch (Exception e)

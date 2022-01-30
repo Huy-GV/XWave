@@ -90,7 +90,8 @@ namespace XWave.Controllers
 
             if (ModelState.IsValid)
             {
-                var result = await _discountService.UpdateAsync(id, updatedDiscount);
+                var managerID = _authenticationService.GetUserID(HttpContext.User.Identity);
+                var result = await _discountService.UpdateAsync(managerID, id, updatedDiscount);
                 if (result.Succeeded)
                 {
                     return Ok(ResponseTemplate.Updated($"https://localhost:5001/api/discount/{result.ResourceID}"));
@@ -111,8 +112,8 @@ namespace XWave.Controllers
             {
                 return BadRequest(ResponseTemplate.NonExistentResource());
             }
-
-            var result = await _discountService.DeleteAsync(id);
+            var managerID = _authenticationService.GetUserID(HttpContext.User.Identity);
+            var result = await _discountService.DeleteAsync(managerID, id);
             if (result.Succeeded)
             {
                 return NoContent();

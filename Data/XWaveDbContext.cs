@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace XWave.Data
         public DbSet<OrderDetail> OrderDetail { get; set; }
         public DbSet<Customer> Customer { get; set; }
         public DbSet<Activity> Activity { get; set; }
-        public DbSet<StaffActivityLog> StaffActivityLog { get; set; }
+        public DbSet<ActivityLog> StaffActivityLog { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -56,15 +57,14 @@ namespace XWave.Data
                 .WithMany()
                 .HasForeignKey(d => d.ManagerID);
 
-            builder.Entity<StaffActivityLog>()
+            builder.Entity<ActivityLog>()
                 .HasOne(activityLog => activityLog.StaffUser)
                 .WithMany()
                 .HasForeignKey(activityLog => activityLog.StaffID);
 
-            builder.Entity<StaffActivityLog>()
-                .HasOne(activityLog => activityLog.Activity)
-                .WithMany()
-                .HasForeignKey(activityLog => activityLog.ActivityID);
+            builder.Entity<ActivityLog>()
+                .Property(a => a.ActionType)
+                .HasConversion(new EnumToStringConverter<ActionType>());
         }
     }
 }
