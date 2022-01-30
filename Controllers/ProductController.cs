@@ -31,31 +31,46 @@ namespace XWave.Controllers
             _authenticationService = authenticationService;
         }
         // GET: api/<ProductController>
-        [HttpGet("customers/{categoryID:int?}")]
-        public ActionResult<IEnumerable<ProductDTO>> GetForCustomers(int? categoryID)
-        {
+        //TODO: add filter by a query
+        //[HttpGet("customers/{categoryID:int?}")]
+        //public ActionResult<IEnumerable<ProductDTO>> GetForCustomers(int? categoryID)
+        //{
             
-            return Ok(_productService.GetAllProductsForCustomers(categoryID));
+        //    return Ok(_productService.GetAllProductsForCustomers(categoryID));
+        //}
+
+        //[HttpGet("staff/{categoryID:int?}")]
+        //[Authorize(Policy = "StaffOnly")]
+        //public async Task<ActionResult<IEnumerable<Product>>> GetForStaff(int? categoryID)
+        //{
+        //    return Ok(await _productService.GetAllProductsForStaff(categoryID));
+        //}
+
+        [HttpGet("customers")]
+        public ActionResult<IEnumerable<ProductDTO>> GetForCustomers()
+        {
+
+            return Ok(_productService.GetAllProductsForCustomers(null));
         }
 
-        [HttpGet("staff/{categoryID:int?}")]
+        [HttpGet("staff")]
         [Authorize(Policy = "StaffOnly")]
-        public async Task<ActionResult<IEnumerable<Product>>> GetForStaff(int? categoryID)
+        public async Task<ActionResult<IEnumerable<Product>>> GetForStaff()
         {
-            return Ok(await _productService.GetAllProductsForStaff(categoryID));
+            return Ok(await _productService.GetAllProductsForStaff(null));
         }
 
         // GET api/<ProductController>/5
-        [HttpGet("customers/{id}")]
+        [HttpGet("customers/{id:int}")]
         public async Task<ActionResult<ProductDTO>> Get(int id)
         {
             return Ok(await _productService.GetProductByIDForCustomers(id));
         }
-        [HttpGet("staff/{id}")]
+        [HttpGet("staff/{id:int}")]
         [Authorize(Policy ="StaffOnly")]
         public async Task<ActionResult<Product>> GetByIDForStaff(int id)
         {
-            return Ok(await _productService.GetAllProductsForStaff(id));
+            return Ok(await _productService.GetProductByIDForStaff(id));
         }
 
         // POST api/<ProductController>
