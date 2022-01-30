@@ -42,7 +42,6 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure(ex.Message);
             }
         }
-        //TODO: add staff ID to all services related to management
         public async Task<ServiceResult> DeleteProductAsync(string staffID, int id)
         {
             try
@@ -71,22 +70,21 @@ namespace XWave.Services.Defaults
                 productDTOs : FilterByCategory(categoryID.Value, productDTOs));
         }
 
-        public async Task<IEnumerable<Product>> GetAllProductsForStaff(int? categoryID = null)
+        public Task<IEnumerable<Product>> GetAllProductsForStaff(int? categoryID = null)
         {
+            
             var products = DbContext.Product.AsEnumerable();
-            return categoryID == null ? products : FilterByCategory(categoryID.Value, products);
+            var result = categoryID == null ? products : FilterByCategory(categoryID.Value, products);
+            return Task.FromResult(result);
         }
-        private IEnumerable<T> FilterByCategory<T>(int categoryID, IEnumerable<T> source)
+        private static IEnumerable<T> FilterByCategory<T>(int categoryID, IEnumerable<T> source)
         {
-            switch (source)
+            return source switch
             {
-                case IEnumerable<Product> products:
-                    return products.Where(p => p.CategoryID == categoryID) as IEnumerable<T>;
-                case IEnumerable<ProductDTO> productDTOs:
-                    return productDTOs.Where(p => p.CategoryID == categoryID) as IEnumerable<T>;
-                default:
-                    throw new ArgumentException("Generic must be Product or ProductDTO");
-            }
+                IEnumerable<Product> products => products.Where(p => p.CategoryID == categoryID) as IEnumerable<T>,
+                IEnumerable<ProductDTO> productDTOs => productDTOs.Where(p => p.CategoryID == categoryID) as IEnumerable<T>,
+                _ => throw new ArgumentException("Generic must be Product or ProductDTO"),
+            };
         }
 
         public async Task<ProductDTO> GetProductByIDForCustomers(int id)

@@ -19,7 +19,6 @@ namespace XWave.Models
         public DateTime Time { get; set; }
         [Required]
         [StringLength(200, MinimumLength =5)]
-        //TODO: add a check for entity type
         public string EntityType { get; set; }
         public string StaffID { get; set; }
         public ActionType ActionType { get; set; }

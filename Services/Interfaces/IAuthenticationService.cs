@@ -7,7 +7,6 @@ namespace XWave.Services.Interfaces
 {
     public interface IAuthenticationService
     {
-        //TODO: merge into 1 and return a tuple instead
         public string GetUserID(IIdentity itentity);
         public string GetUserName(IIdentity itentity);
         public Task<AuthenticationResult> SignInAsync(SignInVM signInVM);
