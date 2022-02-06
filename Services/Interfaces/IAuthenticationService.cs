@@ -7,8 +7,8 @@ namespace XWave.Services.Interfaces
 {
     public interface IAuthenticationService
     {
-        public string GetUserID(IIdentity itentity);
-        public string GetUserName(IIdentity itentity);
+        public string GetUserID(IIdentity identity);
+        public string GetUserName(IIdentity identity);
         public Task<AuthenticationResult> SignInAsync(SignInVM signInVM);
         public Task<AuthenticationResult> RegisterAsync(RegisterVM registerVM, string role);
         public Task<AuthenticationResult> SignOutAsync(string username);

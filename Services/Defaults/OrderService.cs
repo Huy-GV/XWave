@@ -46,8 +46,7 @@ namespace XWave.Services.Defaults
                 {
                     return ServiceResult.Failure("Customer not found");
                 }
-                    
-
+                 
                 var payment = await _dbContext.Payment
                     .SingleOrDefaultAsync(p => p.ID == purchaseVM.PaymentID);
 

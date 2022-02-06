@@ -9,45 +9,42 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using XWave.ViewModels.Management;
 using XWave.Services.Interfaces;
+using XWave.Services.ResultTemplate;
 
 namespace XWave.Services.Defaults
 {
-    //TODO: inherit from service base and apply this service to respective controller
-    public class StaffActivityService : IStaffActivityService
+    public class StaffActivityService : ServiceBase, IStaffActivityService
     {
-        private readonly XWaveDbContext _dbContext;
-        private readonly ILogger<StaffActivityService> _logger;
-        public StaffActivityService(
-            XWaveDbContext dbContext)
-        { 
-            _dbContext = dbContext;
-        }
-        public async Task CreateLog<T>(string staffID, ActionType actionType) where T : IEntity
+        public StaffActivityService(XWaveDbContext dbContext) : base(dbContext) {  }
+        public async Task<ServiceResult> CreateLog<T>(string staffID, ActionType actionType) where T : IEntity
         {
+            //TODO: return service result
             try
             {
-                _dbContext.StaffActivityLog.Add(new ActivityLog
-                { 
+                var newLog = new ActivityLog
+                {
                     ActionType = actionType,
                     Time = DateTime.Now,
                     StaffID = staffID,
                     EntityType = typeof(T).Name
-                });
+                };
+                DbContext.StaffActivityLog.Add(newLog);
+                await DbContext.SaveChangesAsync();
 
-                await _dbContext.SaveChangesAsync();
+                return ServiceResult.Success(newLog.ID.ToString());
             } 
             catch(Exception e)
             {
-                _logger.LogError($"Failed to create log: {e.Message}");
+                return ServiceResult.Failure(e.Message);
             }
         }
         public async Task<IEnumerable<ActivityLog>> GetActivityLogsAsync()
         {
-            return await _dbContext.StaffActivityLog.ToListAsync();
+            return await DbContext.StaffActivityLog.ToListAsync();
         }
         public async Task<ActivityLog> GetActivityLogAsync(int id)
         {
-            return await _dbContext.StaffActivityLog.FirstOrDefaultAsync(a => a.ID == id);
+            return await DbContext.StaffActivityLog.FirstOrDefaultAsync(a => a.ID == id);
         }
     }
 }

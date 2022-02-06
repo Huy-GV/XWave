@@ -34,7 +34,7 @@ namespace XWave.Controllers
             _orderService = orderService;
         }
         [HttpGet]
-        //[Authorize(Roles = "customer")]
+        [Authorize(Roles = "customer")]
         public async Task<ActionResult<OrderDetail>> GetOrdersAsync()
         {
             string customerID = _authService.GetUserID(HttpContext.User.Identity);
