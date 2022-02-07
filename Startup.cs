@@ -20,6 +20,8 @@ using XWave.Data.Constants;
 using XWave.Services;
 using XWave.Services.Defaults;
 using XWave.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Diagnostics;
 
 namespace XWave
 {
@@ -46,7 +48,6 @@ namespace XWave
 
             services.AddDefaultServices();
 
-
             services
                 .AddAuthentication(options =>
                 {
@@ -55,17 +56,22 @@ namespace XWave
                 })
                 .AddJwtBearer(options =>
                 {
-                    options.RequireHttpsMetadata = false;
-                    options.Events.OnMessageReceived = context =>
+                    options.RequireHttpsMetadata = true;
+                    options.Events = new JwtBearerEvents()
                     {
-                        // accommodate clients without cookies
-                         if (string.IsNullOrEmpty(context.Token) 
-                             && context.Request.Cookies.ContainsKey("JwtToken"))
-                         {
-                             context.Token = context.Request.Cookies["JwtToken"];
-                         }
-                         return Task.CompletedTask;
+                        OnMessageReceived = context =>
+                        {
+                            // accommodate clients without cookies
+                            if (string.IsNullOrEmpty(context.Token)
+                                && context.Request.Cookies.ContainsKey("XWaveJwt"))
+                            {
+                                Debug.WriteLine(context.Request.Cookies["XWaveJwt"]);
+                                context.Token = context.Request.Cookies["XWaveJwt"];
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
+
                     options.SaveToken = false;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
