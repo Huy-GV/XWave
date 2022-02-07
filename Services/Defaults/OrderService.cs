@@ -82,7 +82,7 @@ namespace XWave.Services.Defaults
 
                     //prevent customers from ordering based on incorrect data
                     if (product.Price != purchasedProduct.DisplayedPrice ||
-                        product.Discount.Percentage != purchasedProduct.DisplayedDiscount)
+                        product.Discount?.Percentage != purchasedProduct.DisplayedDiscount)
                     {
                         return ServiceResult.Failure("Conflicting data about product");
                     }

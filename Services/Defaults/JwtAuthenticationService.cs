@@ -20,6 +20,7 @@ using System.Security.Principal;
 
 namespace XWave.Services.Defaults
 {
+    // TODO: refactor this
     public class JWT
     {
         public string Key { get; set; }
@@ -107,14 +108,14 @@ namespace XWave.Services.Defaults
                 Error = errorMessage,
             };
         }
-        public string GetUserID(IIdentity identity)
+        public string GetUserID(IIdentity? identity)
         {
             ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
             string customerID = claimsIdentity?.FindFirst(CustomClaimType.UserID)?.Value ?? string.Empty;
             _logger.LogInformation($"User ID in jwt claim: {customerID}");
             return customerID;
         }
-        public string GetUserName(IIdentity identity)
+        public string GetUserName(IIdentity? identity)
         {
             ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
             string customerID = claimsIdentity?.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
