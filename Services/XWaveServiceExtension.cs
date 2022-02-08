@@ -6,7 +6,7 @@ namespace XWave.Services
 {
     public static class XWaveServiceExtension
     {
-        public static void AddDefaultServices(this IServiceCollection services)
+        public static void AddDefaultXWaveServices(this IServiceCollection services)
         {
             //TODO: move all service registration here
 

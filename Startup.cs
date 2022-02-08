@@ -19,9 +19,8 @@ using XWave.Models;
 using XWave.Data.Constants;
 using XWave.Services;
 using XWave.Services.Defaults;
-using XWave.Services.Interfaces;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Diagnostics;
+using XWave.Configuration;
 
 namespace XWave
 {
@@ -39,14 +38,15 @@ namespace XWave
         {
 
             services.Configure<JWT>(Configuration.GetSection("JWT"));
+            services.Configure<JwtCookie>(Configuration.GetSection("JwtCookie"));
+
             services
                 .AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<XWaveDbContext>();
             
             
             services.AddScoped<Services.Interfaces.IAuthenticationService, JwtAuthenticationService>();
-
-            services.AddDefaultServices();
+            services.AddDefaultXWaveServices();
 
             services
                 .AddAuthentication(options =>
@@ -61,12 +61,13 @@ namespace XWave
                     {
                         OnMessageReceived = context =>
                         {
+                            var cookieName = Configuration["JwtCookie:Name"];
                             // accommodate clients without cookies
                             if (string.IsNullOrEmpty(context.Token)
-                                && context.Request.Cookies.ContainsKey("XWaveJwt"))
+                                && context.Request.Cookies.ContainsKey(cookieName))
                             {
-                                Debug.WriteLine(context.Request.Cookies["XWaveJwt"]);
-                                context.Token = context.Request.Cookies["XWaveJwt"];
+                                Debug.WriteLine(context.Request.Cookies[cookieName]);
+                                context.Token = context.Request.Cookies[cookieName];
                             }
                             return Task.CompletedTask;
                         }

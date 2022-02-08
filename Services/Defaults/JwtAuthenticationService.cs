@@ -69,7 +69,7 @@ namespace XWave.Services.Defaults
         }
         public async Task<AuthenticationResult> SignOutAsync(string userID)
         {
-            return new AuthenticationResult();
+            return new AuthenticationResult() { Token = string.Empty };
         }
         public async Task<bool> IsUserInRoleAsync(string userID, string role)
         {
