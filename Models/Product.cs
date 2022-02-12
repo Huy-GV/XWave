@@ -14,7 +14,7 @@ namespace XWave.Models
         [Required]
         [Column(TypeName = "decimal(18,4)")]
         public decimal Price { get; set; }
-        public string ImagePath { get; set; }
+        //public string ImagePath { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage ="Quantity cannot be negative")]
         public uint Quantity { get; set; }

@@ -31,34 +31,18 @@ namespace XWave.Controllers
             _authenticationHelper = authenticationHelper;
             _productService = productService;
         }
-        // GET: api/<ProductController>
-        //TODO: add filter by a query
-        //[HttpGet("customers/{categoryID:int?}")]
-        //public ActionResult<IEnumerable<ProductDTO>> GetForCustomers(int? categoryID)
-        //{
-            
-        //    return Ok(_productService.GetAllProductsForCustomers(categoryID));
-        //}
-
-        //[HttpGet("staff/{categoryID:int?}")]
-        //[Authorize(Policy = "StaffOnly")]
-        //public async Task<ActionResult<IEnumerable<Product>>> GetForStaff(int? categoryID)
-        //{
-        //    return Ok(await _productService.GetAllProductsForStaff(categoryID));
-        //}
 
         [HttpGet("customers")]
-        public ActionResult<IEnumerable<ProductDTO>> GetForCustomers()
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetForCustomersAsync()
         {
-
-            return Ok(_productService.GetAllProductsForCustomers(null));
+            return Ok(await _productService.GetAllProductsForCustomers());
         }
 
         [HttpGet("staff")]
         [Authorize(Policy = "StaffOnly")]
-        public async Task<ActionResult<IEnumerable<Product>>> GetForStaff()
+        public async Task<ActionResult<IEnumerable<StaffProductDTO>>> GetForStaff()
         {
-            return Ok(await _productService.GetAllProductsForStaff(null));
+            return Ok(await _productService.GetAllProductsForStaff());
         }
 
         // GET api/<ProductController>/5
@@ -68,8 +52,8 @@ namespace XWave.Controllers
             return Ok(await _productService.GetProductByIDForCustomers(id));
         }
         [HttpGet("staff/{id:int}")]
-        [Authorize(Policy ="StaffOnly")]
-        public async Task<ActionResult<Product>> GetByIDForStaff(int id)
+        //[Authorize(Policy ="StaffOnly")]
+        public async Task<ActionResult<StaffProductDTO>> GetByIDForStaff(int id)
         {
             return Ok(await _productService.GetProductByIDForStaff(id));
         }

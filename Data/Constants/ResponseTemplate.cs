@@ -15,10 +15,12 @@ namespace XWave.Data.Constants
             Status = "Updated",
             Message = $"Location: {url}"
         };
+        //TODO: use this to return errors to users
+
         public static object InternalServerError(string error = "An error happended with your request") => new
         {
-            Status = "Failed",
-            Message = error
+            Status = "Operation Failed",
+            Message = $"Error: {error}"
         };
         public static object NonExistentResource() => new
         {
