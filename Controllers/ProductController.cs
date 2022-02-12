@@ -70,11 +70,11 @@ namespace XWave.Controllers
                 var result = await _productService.CreateProductAsync(staffID, productViewModel);
                 if (result.Succeeded)
                 {
-                    return Ok(ResponseTemplate
+                    return Ok(XWaveResponse
                     .Created($"https://localhost:5001/api/product/staff/{result.ResourceID}"));
                 }
 
-                return BadRequest(result.Error);
+                return BadRequest(XWaveResponse.Failed(result.Error));
             }
 
             return BadRequest(ModelState);
@@ -88,7 +88,7 @@ namespace XWave.Controllers
             var product = await _productService.GetProductByIDForStaff(id);
             if (product == null)
             {
-                return BadRequest(ResponseTemplate.NonExistentResource());
+                return BadRequest(XWaveResponse.NonExistentResource());
             }
 
             if (ModelState.IsValid)
@@ -97,11 +97,11 @@ namespace XWave.Controllers
                 var result = await _productService.UpdateProductAsync(staffID, id, updatedProduct);
                 if (result.Succeeded)
                 {
-                    return Ok(ResponseTemplate
+                    return Ok(XWaveResponse
                     .Created($"https://localhost:5001/api/product/staff/{result.ResourceID}"));
                 }
 
-                return BadRequest(result.Error);
+                return BadRequest(XWaveResponse.Failed(result.Error));
             }
 
             return BadRequest(ModelState);
@@ -114,7 +114,7 @@ namespace XWave.Controllers
             var product = await _productService.GetProductByIDForStaff(id);
             if (product == null)
             {
-                return BadRequest(ResponseTemplate.NonExistentResource());
+                return BadRequest(XWaveResponse.NonExistentResource());
             }
             var staffID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             var result = await _productService.DeleteProductAsync(staffID, id);
@@ -123,7 +123,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return BadRequest(result.Error);
+            return BadRequest(XWaveResponse.Failed(result.Error));
         }
 
     }

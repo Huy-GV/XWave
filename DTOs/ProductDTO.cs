@@ -2,7 +2,6 @@
 
 namespace XWave.DTOs
 {
-    //TODO: remove all methods from DTO and use a mapper library
     public class ProductDTO
     {
         public int ID { get; init; }

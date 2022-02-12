@@ -7,6 +7,7 @@ using XWave.ViewModels.Customer;
 using XWave.DTOs;
 using XWave.Helpers;
 using XWave.Services.Interfaces;
+using XWave.Data.Constants;
 
 namespace XWave.Controllers
 {
@@ -76,7 +77,7 @@ namespace XWave.Controllers
 
             if (!result.Succeeded)
             {
-                return BadRequest(result.Error);
+                return BadRequest(XWaveResponse.Failed(result.Error));
             }
             
             return Ok();

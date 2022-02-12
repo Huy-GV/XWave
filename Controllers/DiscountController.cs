@@ -62,10 +62,10 @@ namespace XWave.Controllers
                 var result = await _discountService.CreateAsync(userID, newDiscount);
                 if (result.Succeeded)
                 {
-                    return Ok(ResponseTemplate.Created($"https://localhost:5001/api/discount/{result.ResourceID}"));
+                    return Ok(XWaveResponse.Created($"https://localhost:5001/api/discount/{result.ResourceID}"));
                 }
 
-                return BadRequest(result.Error);
+                return BadRequest(XWaveResponse.Failed(result.Error));
             }
 
             return BadRequest(ModelState);
@@ -78,7 +78,7 @@ namespace XWave.Controllers
         {
             if (await _discountService.GetAsync(id) == null)
             {
-                return BadRequest(ResponseTemplate.NonExistentResource());
+                return BadRequest(XWaveResponse.NonExistentResource());
             }
 
             if (ModelState.IsValid)
@@ -87,10 +87,10 @@ namespace XWave.Controllers
                 var result = await _discountService.UpdateAsync(managerID, id, updatedDiscount);
                 if (result.Succeeded)
                 {
-                    return Ok(ResponseTemplate.Updated($"https://localhost:5001/api/discount/{result.ResourceID}"));
+                    return Ok(XWaveResponse.Updated($"https://localhost:5001/api/discount/{result.ResourceID}"));
                 }
 
-                return BadRequest(result.Error);
+                return BadRequest(XWaveResponse.Failed(result.Error));
             }
 
             return BadRequest(ModelState);
@@ -103,7 +103,7 @@ namespace XWave.Controllers
         {
             if (await _discountService.GetAsync(id) == null)
             {
-                return BadRequest(ResponseTemplate.NonExistentResource());
+                return BadRequest(XWaveResponse.NonExistentResource());
             }
             var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             var result = await _discountService.DeleteAsync(managerID, id);
@@ -112,7 +112,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return BadRequest(result.Error);
+            return BadRequest(XWaveResponse.Failed(result.Error));
         }
     }
 }

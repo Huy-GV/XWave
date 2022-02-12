@@ -58,7 +58,7 @@ namespace XWave.Controllers
             string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             if (! await _paymentService.CustomerHasPayment(customerID, paymentID))
             {
-                return BadRequest(ResponseTemplate.NonExistentResource());
+                return BadRequest(XWaveResponse.NonExistentResource());
             }
 
             var result = await _paymentService.DeletePaymentAsync(customerID, paymentID);
@@ -83,7 +83,7 @@ namespace XWave.Controllers
             string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             if (!await _paymentService.CustomerHasPayment(customerID, id))
             {
-                return BadRequest(ResponseTemplate.NonExistentResource());
+                return BadRequest(XWaveResponse.NonExistentResource());
             }
             var result = await _paymentService.UpdatePaymentAsync(customerID, id, inputPayment);
             if (!result.Succeeded)
@@ -91,7 +91,7 @@ namespace XWave.Controllers
                 return BadRequest(result.Error);
             }
 
-            return Ok(ResponseTemplate.Updated($"https://localhost:5001/api/payment/details/{id}"));
+            return Ok(XWaveResponse.Updated($"https://localhost:5001/api/payment/details/{id}"));
         }
         [HttpPost]
         [Authorize(Roles = "customer")]
@@ -107,10 +107,10 @@ namespace XWave.Controllers
             { 
                 return StatusCode(
                     (int)HttpStatusCode.InternalServerError, 
-                    ResponseTemplate.InternalServerError(result.Error));
+                    XWaveResponse.Failed(result.Error));
             }
 
-            return Ok(ResponseTemplate.Created($"https://localhost:5001/api/payment/details/{result.ResourceID}"));
+            return Ok(XWaveResponse.Created($"https://localhost:5001/api/payment/details/{result.ResourceID}"));
         }
     }
 }

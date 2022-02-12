@@ -49,7 +49,7 @@ namespace XWave.Controllers
             {
                 var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
                 var result = await _categoryService.CreateCategoryAsync(managerID, newCategory);
-                return Ok(ResponseTemplate
+                return Ok(XWaveResponse
                     .Created($"https://localhost:5001/api/category/admin/{result.ResourceID}"));
             }
 
@@ -64,7 +64,7 @@ namespace XWave.Controllers
             var category = await _categoryService.GetCategoryByID(id);
             if (category == null)
             {
-                return BadRequest(ResponseTemplate.NonExistentResource());
+                return BadRequest(XWaveResponse.NonExistentResource());
             }
 
             if (ModelState.IsValid)
@@ -73,11 +73,11 @@ namespace XWave.Controllers
                 var result = await _categoryService.UpdateCategoryAsync(managerID, id, updatedCategory);
                 if (result.Succeeded)
                 {
-                    return Ok(ResponseTemplate
+                    return Ok(XWaveResponse
                     .Updated($"https://localhost:5001/api/category/admin/{result.ResourceID}"));
                 }
 
-                return BadRequest(result.Error);
+                return BadRequest(XWaveResponse.Failed(result.Error));
             }
 
             return BadRequest(ModelState);
@@ -91,7 +91,7 @@ namespace XWave.Controllers
             var category = await _categoryService.GetCategoryByID(id);
             if (category == null)
             {
-                return BadRequest(ResponseTemplate.NonExistentResource());
+                return BadRequest(XWaveResponse.NonExistentResource());
             }
             var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             var result = await _categoryService.DeleteCategoryAsync(managerID, id);
@@ -100,7 +100,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return BadRequest(result.Error);
+            return BadRequest(XWaveResponse.Failed(result.Error));
         }
     }
 }
