@@ -9,14 +9,5 @@ namespace XWave.DTOs
         public uint Percentage { get; set; }
         public bool IsActive { get; set; }
         public DateTime EndDate { get; set; }
-        public static DiscountDTO From(Discount discount)
-        {
-            return new DiscountDTO
-            {
-                Percentage = discount.Percentage,
-                IsActive = discount.IsActive,
-                EndDate = discount.EndDate,
-            };
-        }
     }
 }

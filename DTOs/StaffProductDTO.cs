@@ -1,16 +1,17 @@
 ﻿using System;
+using XWave.Models;
 
 namespace XWave.DTOs
 {
-    //TODO: remove all methods from DTO and use a mapper library
-    public class ProductDTO
+    public class StaffProductDTO
     {
         public int ID { get; init; }
-        public string Name { get; init; }
+        public string ProductName { get; init; }
         public string CategoryName { get; init; }
         public decimal Price { get; init; }
         public uint Quantity { get; init; }
+        public DateTime LatestRestock { get; set; }
         public int CategoryID { get; init; }
-        public DiscountDTO? Discount { get; init; }
+        public StaffDiscountDTO? Discount { get; init; }
     }
 }

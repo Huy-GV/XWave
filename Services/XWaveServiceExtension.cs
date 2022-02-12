@@ -21,6 +21,7 @@ namespace XWave.Services
         public static void AddDefaultHelpers(this IServiceCollection services)
         {
             services.AddTransient<AuthenticationHelper>();
+            services.AddTransient<ProductHelper>();
         }
     }
 }

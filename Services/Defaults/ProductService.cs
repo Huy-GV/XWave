@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using XWave.Data;
 using XWave.DTOs;
+using XWave.Helpers;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
@@ -15,10 +16,13 @@ namespace XWave.Services.Defaults
     public class ProductService : ServiceBase, IProductService
     {
         private readonly IStaffActivityService _staffActivityService;
+        private readonly ProductHelper _productHelper;
         public ProductService(
             XWaveDbContext dbContext,
-            IStaffActivityService staffActivityService) : base(dbContext) 
+            IStaffActivityService staffActivityService,
+            ProductHelper productHelper) : base(dbContext) 
         { 
+            _productHelper = productHelper;
             _staffActivityService = staffActivityService;
         }
 
@@ -35,7 +39,12 @@ namespace XWave.Services.Defaults
                 var entry = DbContext.Product.Add(newProduct);
                 entry.CurrentValues.SetValues(productViewModel);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.CreateLog<Product>(staffID, ActionType.Create);
+                var result = await _staffActivityService.CreateLog<Product>(staffID, ActionType.Create);
+                if (!result.Succeeded)
+                {
+                    throw new Exception(result.Error);
+                }
+
                 return ServiceResult.Success(newProduct.ID.ToString());
             } catch (Exception ex)
             {
@@ -57,50 +66,48 @@ namespace XWave.Services.Defaults
 
         }
 
-        public Task<IEnumerable<ProductDTO>> GetAllProductsForCustomers(int? categoryID = null)
+        public Task<IEnumerable<ProductDTO>> GetAllProductsForCustomers()
         {
-
             var productDTOs = DbContext.Product
                 .Include(p => p.Discount)
                 .Include(p => p.Category)
-                .Select(product => ProductDTO.From(product))
+                .Select(p => _productHelper.CreateCustomerProductDTO(p))
                 .AsEnumerable();
 
-            return Task.FromResult(categoryID == null ? 
-                productDTOs : FilterByCategory(categoryID.Value, productDTOs));
+            return Task.FromResult(productDTOs);
         }
 
-        public Task<IEnumerable<Product>> GetAllProductsForStaff(int? categoryID = null)
+        public Task<IEnumerable<StaffProductDTO>> GetAllProductsForStaff()
         {
             
-            var products = DbContext.Product.AsEnumerable();
-            var result = categoryID == null ? products : FilterByCategory(categoryID.Value, products);
-            return Task.FromResult(result);
-        }
-        private static IEnumerable<T> FilterByCategory<T>(int categoryID, IEnumerable<T> source)
-        {
-            return source switch
-            {
-                IEnumerable<Product> products => products.Where(p => p.CategoryID == categoryID) as IEnumerable<T>,
-                IEnumerable<ProductDTO> productDTOs => productDTOs.Where(p => p.CategoryID == categoryID) as IEnumerable<T>,
-                _ => throw new ArgumentException("Generic must be Product or ProductDTO"),
-            };
+            var products = DbContext.Product
+                .Include(p => p.Discount)
+                    .ThenInclude(d => d.Manager)
+                .Include(p => p.Category)
+                .Select(p => _productHelper.CreateStaffProductDTO(p))
+                .AsEnumerable();
+            
+            return Task.FromResult(products);
         }
 
         public async Task<ProductDTO> GetProductByIDForCustomers(int id)
         {
-            var products = await DbContext.Product
+            var product = await DbContext.Product
                 .Include(p => p.Discount)
                 .SingleOrDefaultAsync(p => p.ID == id);
 
-            return ProductDTO.From(products);
+            return _productHelper.CreateCustomerProductDTO(product);
         }
 
-        public async Task<Product> GetProductByIDForStaff(int id)
+        public async Task<StaffProductDTO> GetProductByIDForStaff(int id)
         {
-            return await DbContext.Product
-                    .Include(p => p.Discount)
-                    .SingleOrDefaultAsync(p => p.ID == id);
+            var productDTO = await DbContext.Product
+                        .Include(p => p.Discount)
+                        .Include(p => p.Category)
+                        .Select(p => _productHelper.CreateStaffProductDTO(p))
+                        .FirstOrDefaultAsync(p => p.ID == id);
+
+            return productDTO;
         }
 
         public async Task<ServiceResult> UpdateProductAsync(string staffID, int id, ProductViewModel updatedProduct)

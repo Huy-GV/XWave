@@ -15,10 +15,15 @@ namespace XWave.Services.Defaults
 {
     public class StaffActivityService : ServiceBase, IStaffActivityService
     {
-        public StaffActivityService(XWaveDbContext dbContext) : base(dbContext) {  }
+        private readonly ILogger _logger;
+        public StaffActivityService(
+            XWaveDbContext dbContext,
+            ILogger<StaffActivityService> logger) : base(dbContext) 
+        {  
+            _logger = logger;
+        }
         public async Task<ServiceResult> CreateLog<T>(string staffID, ActionType actionType) where T : IEntity
         {
-            //TODO: return service result
             try
             {
                 var newLog = new ActivityLog
@@ -31,10 +36,12 @@ namespace XWave.Services.Defaults
                 DbContext.StaffActivityLog.Add(newLog);
                 await DbContext.SaveChangesAsync();
 
+                _logger.LogInformation($"Staff ID {staffID} created entity of type {newLog.EntityType}");
                 return ServiceResult.Success(newLog.ID.ToString());
             } 
             catch(Exception e)
             {
+                _logger.LogError($"Failed to log activiy create for staff ID {staffID}");
                 return ServiceResult.Failure(e.Message);
             }
         }

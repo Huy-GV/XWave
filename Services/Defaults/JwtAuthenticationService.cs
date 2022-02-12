@@ -120,7 +120,6 @@ namespace XWave.Services.Defaults
                 new Claim(CustomClaimType.UserID, user.Id),
                 new Claim(ClaimTypes.Role, role)
             };
-            
 
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
             var signingCredentials = new SigningCredentials(
