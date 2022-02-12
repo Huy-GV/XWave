@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using XWave.Data;
 using XWave.Data.Constants;
+using XWave.Helpers;
 using XWave.Models;
 using XWave.Services.Interfaces;
 
@@ -19,14 +17,14 @@ namespace XWave.Controllers
     public class CategoryController : AbstractController<CategoryController>
     {
         private readonly ICategoryService _categoryService;
-        private readonly IAuthenticationService _authenticationService;
+        private readonly AuthenticationHelper _authenticationHelper;
         public CategoryController(
             ILogger<CategoryController> logger,
             ICategoryService categoryService,
-            IAuthenticationService authenticationService) : base(logger)
+            AuthenticationHelper authenticationHelper) : base(logger)
         {
+            _authenticationHelper = authenticationHelper;
             _categoryService = categoryService;
-            _authenticationService = authenticationService;
         }
         // GET: api/<CategoryController>
         [HttpGet]
@@ -49,7 +47,7 @@ namespace XWave.Controllers
         {
             if (ModelState.IsValid)
             {
-                var managerID = _authenticationService.GetUserID(HttpContext.User.Identity);
+                var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
                 var result = await _categoryService.CreateCategoryAsync(managerID, newCategory);
                 return Ok(ResponseTemplate
                     .Created($"https://localhost:5001/api/category/admin/{result.ResourceID}"));
@@ -71,7 +69,7 @@ namespace XWave.Controllers
 
             if (ModelState.IsValid)
             {
-                var managerID = _authenticationService.GetUserID(HttpContext.User.Identity);
+                var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
                 var result = await _categoryService.UpdateCategoryAsync(managerID, id, updatedCategory);
                 if (result.Succeeded)
                 {
@@ -95,7 +93,7 @@ namespace XWave.Controllers
             {
                 return BadRequest(ResponseTemplate.NonExistentResource());
             }
-            var managerID = _authenticationService.GetUserID(HttpContext.User.Identity);
+            var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             var result = await _categoryService.DeleteCategoryAsync(managerID, id);
             if (result.Succeeded)
             {

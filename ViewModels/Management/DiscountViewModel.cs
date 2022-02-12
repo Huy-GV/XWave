@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
+//TODO: move all validation to view models
 namespace XWave.ViewModels.Management
 {
-    public class DiscountVM
+    public class DiscountViewModel
     {
         [Required]
         [Range(1, 100, ErrorMessage = "Discount percentage outside valid range")]

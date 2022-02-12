@@ -30,7 +30,7 @@ namespace XWave.Services.Defaults
             return orderDTOs.FirstOrDefault(o => o.ID == orderID);
         }
         public async Task<ServiceResult> CreateOrderAsync(
-            PurchaseVM purchaseVM, 
+            PurchaseViewModel purchaseViewModel, 
             string customerID)
         {
             using var transaction = _dbContext.Database.BeginTransaction();
@@ -48,7 +48,7 @@ namespace XWave.Services.Defaults
                 }
                  
                 var payment = await _dbContext.Payment
-                    .SingleOrDefaultAsync(p => p.ID == purchaseVM.PaymentID);
+                    .SingleOrDefaultAsync(p => p.ID == purchaseViewModel.PaymentID);
 
                 if (payment == null)
                 {
@@ -59,13 +59,13 @@ namespace XWave.Services.Defaults
                 {
                     Date = DateTime.Now,
                     CustomerID = customerID,
-                    PaymentID = purchaseVM.PaymentID,
+                    PaymentID = purchaseViewModel.PaymentID,
                 };
 
                 List<Product> purchasedProducts = new();
                 List<OrderDetail> orderDetails = new();
 
-                foreach (var purchasedProduct in purchaseVM.ProductCart)
+                foreach (var purchasedProduct in purchaseViewModel.ProductCart)
                 {
                     var product = await _dbContext.Product
                         .Include(p => p.Discount)
@@ -105,7 +105,7 @@ namespace XWave.Services.Defaults
 
                 _dbContext.OrderDetail.AddRange(orderDetails);
                 _dbContext.Product.UpdateRange(purchasedProducts);
-                await UpdatePaymentDetailAsync(purchaseVM.PaymentID, customerID);
+                await UpdatePaymentDetailAsync(purchaseViewModel.PaymentID, customerID);
                 await _dbContext.SaveChangesAsync();
 
                 transaction.Commit();

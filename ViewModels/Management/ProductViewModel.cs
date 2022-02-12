@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.ViewModels.Management
 {
-    public class ProductVM
+    public class ProductViewModel
     {
         [Required]
         [StringLength(15, MinimumLength = 2)]

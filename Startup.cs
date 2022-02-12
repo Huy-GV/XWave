@@ -46,7 +46,9 @@ namespace XWave
             
             
             services.AddScoped<Services.Interfaces.IAuthenticationService, JwtAuthenticationService>();
+            
             services.AddDefaultXWaveServices();
+            services.AddDefaultHelpers();
 
             services
                 .AddAuthentication(options =>

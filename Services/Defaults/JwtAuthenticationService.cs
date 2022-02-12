@@ -46,7 +46,7 @@ namespace XWave.Services.Defaults
             _logger = logger;
             _dbContext = dbContext;
         }
-        public async Task<AuthenticationResult> SignInAsync(SignInVM model)
+        public async Task<AuthenticationResult> SignInAsync(SignInUserViewModel model)
         {
             AuthenticationResult authModel = new();
             var user = await _userManager.FindByNameAsync(model.Username);
@@ -76,22 +76,22 @@ namespace XWave.Services.Defaults
             var user = await _userManager.FindByIdAsync(userID);
             return user == null ? false : await _userManager.IsInRoleAsync(user, role);
         }
-        public async Task<AuthenticationResult> RegisterAsync(RegisterVM registerVM, string role)
+        public async Task<AuthenticationResult> RegisterAsync(RegisterUserViewModel registerViewModel, string role)
         {
             var user = new ApplicationUser
             {
-                UserName = registerVM.Username,
-                FirstName = registerVM.FirstName,
-                LastName = registerVM.LastName,
+                UserName = registerViewModel.Username,
+                FirstName = registerViewModel.FirstName,
+                LastName = registerViewModel.LastName,
                 RegistrationDate = DateTime.UtcNow.Date,
             };
 
-            var result = await _userManager.CreateAsync(user, registerVM.Password);
+            var result = await _userManager.CreateAsync(user, registerViewModel.Password);
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, role);
                 if (role == Roles.Customer)
-                    await CreateCustomerAccount(user.Id, registerVM);
+                    await CreateCustomerAccount(user.Id, registerViewModel);
 
                 return await GetTokenAsync(user, role);
             }
@@ -107,20 +107,6 @@ namespace XWave.Services.Defaults
             {
                 Error = errorMessage,
             };
-        }
-        public string GetUserID(IIdentity? identity)
-        {
-            ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
-            string customerID = claimsIdentity?.FindFirst(CustomClaimType.UserID)?.Value ?? string.Empty;
-            _logger.LogInformation($"User ID in jwt claim: {customerID}");
-            return customerID;
-        }
-        public string GetUserName(IIdentity? identity)
-        {
-            ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
-            string customerID = claimsIdentity?.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
-            _logger.LogInformation($"Username in jwt claim: {customerID}");
-            return customerID;
         }
         private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user, string role)
         {
@@ -150,14 +136,14 @@ namespace XWave.Services.Defaults
 
             return jwtSecurityToken;
         }
-        private async Task CreateCustomerAccount(string userID, RegisterVM registerVM)
+        private async Task CreateCustomerAccount(string userID, RegisterUserViewModel registerViewModel)
         {
             _dbContext.Customer.Add(new Customer()
             {
                 CustomerID = userID,
-                Country = registerVM.Country,
-                PhoneNumber = registerVM.PhoneNumber,
-                Address = registerVM.Address,
+                Country = registerViewModel.Country,
+                PhoneNumber = registerViewModel.PhoneNumber,
+                Address = registerViewModel.Address,
             });
             await _dbContext.SaveChangesAsync();
         }

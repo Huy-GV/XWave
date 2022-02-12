@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Net.Http;
 using XWave.Services.Interfaces;
+using XWave.Helpers;
 using System.Net;
 
 namespace XWave.Controllers
@@ -24,15 +25,15 @@ namespace XWave.Controllers
     [ApiController]
     public class PaymentController : AbstractController<PaymentController>
     {
-        private readonly IAuthenticationService _authService;
         private readonly IPaymentService _paymentService;
+        private readonly AuthenticationHelper _authenticationHelper;
         public PaymentController(
             ILogger<PaymentController> logger,
-            IAuthenticationService authService,
-            IPaymentService paymentService) : base(logger)
+            IPaymentService paymentService,
+            AuthenticationHelper authenticationHelper) : base(logger)
         {
-            _authService = authService;
             _paymentService = paymentService;
+            _authenticationHelper = authenticationHelper;
         }
         [HttpGet]
         [Authorize(Policy="staffonly")]
@@ -44,7 +45,7 @@ namespace XWave.Controllers
         [Authorize(Roles ="customer")]
         public ActionResult<IEnumerable<PaymentDetail>> GetByCustomer()
         {
-            string customerID = _authService.GetUserID(HttpContext.User.Identity);
+            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             if (customerID == null)
                 return BadRequest();
 
@@ -54,7 +55,7 @@ namespace XWave.Controllers
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> Delete(int paymentID)
         {
-            string customerID = _authService.GetUserID(HttpContext.User.Identity);
+            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             if (! await _paymentService.CustomerHasPayment(customerID, paymentID))
             {
                 return BadRequest(ResponseTemplate.NonExistentResource());
@@ -79,7 +80,7 @@ namespace XWave.Controllers
                 return BadRequest(ModelState);
             }
                 
-            string customerID = _authService.GetUserID(HttpContext.User.Identity);
+            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             if (!await _paymentService.CustomerHasPayment(customerID, id))
             {
                 return BadRequest(ResponseTemplate.NonExistentResource());
@@ -96,7 +97,7 @@ namespace XWave.Controllers
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> CreatePaymentAsync(Payment inputPayment)
         {
-            string customerID = _authService.GetUserID(HttpContext.User.Identity);
+            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 

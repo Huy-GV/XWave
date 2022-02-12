@@ -22,7 +22,7 @@ namespace XWave.Services.Defaults
         {
             _staffActivityService = staffActivityService;
         }
-        public async Task<ServiceResult> CreateAsync(string managerID, DiscountVM discount)
+        public async Task<ServiceResult> CreateAsync(string managerID, DiscountViewModel discount)
         {
             var newDiscount = new Discount()
             {
@@ -84,7 +84,7 @@ namespace XWave.Services.Defaults
             return await DbContext.Discount.FindAsync(id);
         }
 
-        public async Task<ServiceResult> UpdateAsync(string managerID, int id, DiscountVM updatedDiscount)
+        public async Task<ServiceResult> UpdateAsync(string managerID, int id, DiscountViewModel updatedDiscount)
         {
             var discount = await DbContext.Discount.FindAsync(id);
             if (discount == null)

@@ -1,9 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using XWave.Data;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
-using XWave.Models;
 
 namespace XWave.Controllers
 {

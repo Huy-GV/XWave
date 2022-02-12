@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using XWave.Helpers;
 using XWave.Services.Defaults;
 using XWave.Services.Interfaces;
 
@@ -16,6 +17,10 @@ namespace XWave.Services
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IDiscountService, DiscountService>();
+        }
+        public static void AddDefaultHelpers(this IServiceCollection services)
+        {
+            services.AddTransient<AuthenticationHelper>();
         }
     }
 }

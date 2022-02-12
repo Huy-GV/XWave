@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using XWave.ViewModels.Management;
 using XWave.Data.Constants;
 using XWave.Services.Interfaces;
+using XWave.Helpers;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,15 +21,15 @@ namespace XWave.Controllers
     [ApiController]
     public class ProductController : AbstractController<ProductController>
     {
-        private readonly IAuthenticationService _authenticationService;
         private readonly IProductService _productService;
+        private readonly AuthenticationHelper _authenticationHelper;
         public ProductController(
             ILogger<ProductController> logger,
             IProductService productService,
-            IAuthenticationService authenticationService) : base(logger)
+            AuthenticationHelper authenticationHelper) : base(logger)
         {
+            _authenticationHelper = authenticationHelper;
             _productService = productService;
-            _authenticationService = authenticationService;
         }
         // GET: api/<ProductController>
         //TODO: add filter by a query
@@ -76,13 +77,13 @@ namespace XWave.Controllers
         // POST api/<ProductController>
         [HttpPost]
         [Authorize(Policy = "StaffOnly")]
-        public async Task<ActionResult> CreateAsync([FromBody] ProductVM productVM)
+        public async Task<ActionResult> CreateAsync([FromBody] ProductViewModel productViewModel)
         {
 
-            var staffID = _authenticationService.GetUserID(HttpContext.User.Identity); 
+            var staffID = _authenticationHelper.GetUserID(HttpContext.User.Identity); 
             if (ModelState.IsValid)
             {
-                var result = await _productService.CreateProductAsync(staffID, productVM);
+                var result = await _productService.CreateProductAsync(staffID, productViewModel);
                 if (result.Succeeded)
                 {
                     return Ok(ResponseTemplate
@@ -98,7 +99,7 @@ namespace XWave.Controllers
         // PUT api/<ProductController>/5
         [Authorize(Policy = "StaffOnly")]
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateAsync(int id, [FromBody] ProductVM updatedProduct)
+        public async Task<ActionResult> UpdateAsync(int id, [FromBody] ProductViewModel updatedProduct)
         {
             var product = await _productService.GetProductByIDForStaff(id);
             if (product == null)
@@ -108,7 +109,7 @@ namespace XWave.Controllers
 
             if (ModelState.IsValid)
             {
-                var staffID = _authenticationService.GetUserID(HttpContext.User.Identity);
+                var staffID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
                 var result = await _productService.UpdateProductAsync(staffID, id, updatedProduct);
                 if (result.Succeeded)
                 {
@@ -131,7 +132,7 @@ namespace XWave.Controllers
             {
                 return BadRequest(ResponseTemplate.NonExistentResource());
             }
-            var staffID = _authenticationService.GetUserID(HttpContext.User.Identity);
+            var staffID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             var result = await _productService.DeleteProductAsync(staffID, id);
             if (result.Succeeded)
             {

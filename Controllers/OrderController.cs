@@ -1,20 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using XWave.Data;
-using XWave.Data.Constants;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using XWave.Models;
 using XWave.ViewModels.Customer;
-using System.Security.Claims;
 using XWave.DTOs;
-using XWave.Services;
+using XWave.Helpers;
 using XWave.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
 
 namespace XWave.Controllers
 {
@@ -22,22 +14,21 @@ namespace XWave.Controllers
     [ApiController]
     public class OrderController : AbstractController<OrderController>
     {
-        private readonly IAuthenticationService _authService;
         private readonly IOrderService _orderService;
-
+        private readonly AuthenticationHelper _authenticationHelper;
         public OrderController(
             ILogger<OrderController> logger,
-            IAuthenticationService authService,
-            IOrderService orderService) : base(logger)
+            IOrderService orderService,
+            AuthenticationHelper authenticationHelper) : base(logger)
         {
-            _authService = authService;
             _orderService = orderService;
+            _authenticationHelper = authenticationHelper;   
         }
         [HttpGet]
         [Authorize(Roles = "customer")]
         public async Task<ActionResult<OrderDetail>> GetOrdersAsync()
         {
-            string customerID = _authService.GetUserID(HttpContext.User.Identity);
+            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             if (customerID == string.Empty)
                 return BadRequest();
 
@@ -47,7 +38,7 @@ namespace XWave.Controllers
         [Authorize(Roles = "customer")]
         public async Task<ActionResult<OrderDTO>> GetOrderByID(int id)
         {
-            string customerID = _authService.GetUserID(HttpContext.User.Identity);
+            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             if (customerID == string.Empty)
             {
                 return BadRequest();
@@ -73,15 +64,15 @@ namespace XWave.Controllers
         }
         [HttpPost]
         [Authorize(Roles ="customer")]
-        public async Task<IActionResult> CreateOrder([FromBody] PurchaseVM purchaseVM)
+        public async Task<IActionResult> CreateOrder([FromBody] PurchaseViewModel purchaseViewModel)
         {
-            string customerID = _authService.GetUserID(HttpContext.User.Identity);
+            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             if (customerID == string.Empty)
             {
                 return BadRequest();
             }
                 
-            var result = await _orderService.CreateOrderAsync(purchaseVM, customerID);
+            var result = await _orderService.CreateOrderAsync(purchaseViewModel, customerID);
 
             if (!result.Succeeded)
             {

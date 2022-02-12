@@ -1,18 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
-using XWave.Data;
 using XWave.Models;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using XWave.Data.Constants;
 using XWave.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using XWave.ViewModels.Management;
-using XWave.Services ;
+using XWave.Helpers;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,16 +18,14 @@ namespace XWave.Controllers
     public class DiscountController : AbstractController<DiscountController>
     {
         private readonly IDiscountService _discountService;
-        private readonly IAuthenticationService _authenticationService;
+        private readonly AuthenticationHelper _authenticationHelper;
         public DiscountController(
-            XWaveDbContext dbContext,
             ILogger<DiscountController> logger,
             IDiscountService discountService,
-            IAuthenticationService authService
-        ) : base(logger)
+            AuthenticationHelper authenticationHelper) : base(logger)
         {
             _discountService = discountService;
-            _authenticationService = authService;
+            _authenticationHelper = authenticationHelper;
         }
         // GET: api/<DiscountController>
         [HttpGet]
@@ -60,10 +53,10 @@ namespace XWave.Controllers
         // POST api/<DiscountController>
         [HttpPost]
         [Authorize(Roles = "managers")]
-        public async Task<ActionResult> CreateAsync([FromBody] DiscountVM newDiscount)
+        public async Task<ActionResult> CreateAsync([FromBody] DiscountViewModel newDiscount)
         {
             //TODO: move the following to auth service
-            var userID = _authenticationService.GetUserID(HttpContext.User.Identity);
+            var userID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             if (ModelState.IsValid)
             {
                 var result = await _discountService.CreateAsync(userID, newDiscount);
@@ -81,7 +74,7 @@ namespace XWave.Controllers
         // PUT api/<DiscountController>/5
         [HttpPut("{id}")]
         [Authorize(Roles = "managers")]
-        public async Task<ActionResult> UpdateAsync(int id, [FromBody] DiscountVM updatedDiscount)
+        public async Task<ActionResult> UpdateAsync(int id, [FromBody] DiscountViewModel updatedDiscount)
         {
             if (await _discountService.GetAsync(id) == null)
             {
@@ -90,7 +83,7 @@ namespace XWave.Controllers
 
             if (ModelState.IsValid)
             {
-                var managerID = _authenticationService.GetUserID(HttpContext.User.Identity);
+                var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
                 var result = await _discountService.UpdateAsync(managerID, id, updatedDiscount);
                 if (result.Succeeded)
                 {
@@ -112,7 +105,7 @@ namespace XWave.Controllers
             {
                 return BadRequest(ResponseTemplate.NonExistentResource());
             }
-            var managerID = _authenticationService.GetUserID(HttpContext.User.Identity);
+            var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             var result = await _discountService.DeleteAsync(managerID, id);
             if (result.Succeeded)
             {

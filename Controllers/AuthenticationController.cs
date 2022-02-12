@@ -36,22 +36,22 @@ namespace XWave.Controllers
         }
         //TODO: attach jwt to cookies in response
         [HttpPost("register/customer")]
-        public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync(RegisterVM model)
+        public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync(RegisterUserViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var authVM = await _authService.RegisterAsync(model, Roles.Customer);
-            if (authVM.Succeeded)
+            var authViewModel = await _authService.RegisterAsync(model, Roles.Customer);
+            if (authViewModel.Succeeded)
             {
-                return Ok(authVM);
+                return Ok(authViewModel);
             }
                 
-            return BadRequest(authVM.Error); 
+            return BadRequest(authViewModel.Error); 
         }
         [HttpPost("register/staff")]
         [Authorize(Roles = "manager")]
-        public async Task<ActionResult<AuthenticationResult>> RegisterStaffAsync(RegisterVM model)
+        public async Task<ActionResult<AuthenticationResult>> RegisterStaffAsync(RegisterUserViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -63,7 +63,7 @@ namespace XWave.Controllers
             return BadRequest(authModel.Error);
         }
         [HttpPost("login")]
-        public async Task<ActionResult<AuthenticationResult>> LogInAsync(SignInVM model)
+        public async Task<ActionResult<AuthenticationResult>> LogInAsync(SignInUserViewModel model)
         {
             if (!ModelState.IsValid)
             {

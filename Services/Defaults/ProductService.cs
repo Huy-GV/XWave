@@ -22,18 +22,18 @@ namespace XWave.Services.Defaults
             _staffActivityService = staffActivityService;
         }
 
-        public async Task<ServiceResult> CreateProductAsync(string staffID, ProductVM productVM)
+        public async Task<ServiceResult> CreateProductAsync(string staffID, ProductViewModel productViewModel)
         {
             try
             {
-                if (!await DbContext.Category.AnyAsync(c => c.ID == productVM.CategoryID))
+                if (!await DbContext.Category.AnyAsync(c => c.ID == productViewModel.CategoryID))
                 {
                     return ServiceResult.Failure("Category not found");
                 }
 
                 Product newProduct = new();
                 var entry = DbContext.Product.Add(newProduct);
-                entry.CurrentValues.SetValues(productVM);
+                entry.CurrentValues.SetValues(productViewModel);
                 await DbContext.SaveChangesAsync();
                 await _staffActivityService.CreateLog<Product>(staffID, ActionType.Create);
                 return ServiceResult.Success(newProduct.ID.ToString());
@@ -103,7 +103,7 @@ namespace XWave.Services.Defaults
                     .SingleOrDefaultAsync(p => p.ID == id);
         }
 
-        public async Task<ServiceResult> UpdateProductAsync(string staffID, int id, ProductVM updatedProduct)
+        public async Task<ServiceResult> UpdateProductAsync(string staffID, int id, ProductViewModel updatedProduct)
         {
             try
             {

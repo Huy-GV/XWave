@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.ViewModels.Authentication
 {
-    public class RegisterVM
+    public class RegisterUserViewModel
     {
         [Required]
         public string FirstName { get; set; }
