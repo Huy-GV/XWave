@@ -25,7 +25,7 @@ namespace XWave.Services.Defaults
             {
                 DbContext.Category.Add(category);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.CreateLog<Category>(managerID, ActionType.Create);
+                await _staffActivityService.CreateLog<Category>(managerID, OperationType.Create);
                 return ServiceResult.Success(category.ID.ToString());
             }
             catch (Exception e)
@@ -42,7 +42,7 @@ namespace XWave.Services.Defaults
                 var category = await DbContext.Category.FindAsync(id);
                 DbContext.Category.Remove(category);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.CreateLog<Category>(managerID, ActionType.Delete);
+                await _staffActivityService.CreateLog<Category>(managerID, OperationType.Delete);
                 return ServiceResult.Success();
             }
             catch (Exception e)
@@ -69,7 +69,7 @@ namespace XWave.Services.Defaults
                 category.Name = updatedCategory.Name;
                 DbContext.Category.Update(category);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.CreateLog<Category>(managerID, ActionType.Modify);
+                await _staffActivityService.CreateLog<Category>(managerID, OperationType.Modify);
                 return ServiceResult.Success();
             }
             catch (Exception e)

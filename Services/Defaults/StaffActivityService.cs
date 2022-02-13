@@ -22,13 +22,13 @@ namespace XWave.Services.Defaults
         {  
             _logger = logger;
         }
-        public async Task<ServiceResult> CreateLog<T>(string staffID, ActionType actionType) where T : IEntity
+        public async Task<ServiceResult> CreateLog<T>(string staffID, OperationType operation) where T : IEntity
         {
             try
             {
                 var newLog = new ActivityLog
                 {
-                    ActionType = actionType,
+                    OperationType = operation,
                     Time = DateTime.Now,
                     StaffID = staffID,
                     EntityType = typeof(T).Name

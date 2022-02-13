@@ -12,7 +12,7 @@ namespace XWave.Controllers
 {
 
     [ApiController]
-    [Route("api/staff-activity")]
+    [Route("api/activity-log")]
     [Authorize(Roles ="manager")]
     public class ActivityLogController : AbstractController<ActivityLogController>
     {

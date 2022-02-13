@@ -34,7 +34,7 @@ namespace XWave.Services.Defaults
 
             DbContext.Add(newDiscount);
             await DbContext.SaveChangesAsync();
-            await _staffActivityService.CreateLog<Discount>(managerID, ActionType.Create);
+            await _staffActivityService.CreateLog<Discount>(managerID, OperationType.Create);
             return ServiceResult.Success(newDiscount.ID.ToString());
         }
         public async Task<IEnumerable<Product>> GetProductsByDiscountID(int discountID)
@@ -64,7 +64,7 @@ namespace XWave.Services.Defaults
                 await DbContext.SaveChangesAsync();
 
                 transaction.Commit();
-                await _staffActivityService.CreateLog<Discount>(managerID, ActionType.Delete);
+                await _staffActivityService.CreateLog<Discount>(managerID, OperationType.Delete);
                 return ServiceResult.Success(id.ToString());
             }
             catch (Exception ex)
@@ -96,7 +96,7 @@ namespace XWave.Services.Defaults
             entry.State = EntityState.Modified;
             entry.CurrentValues.SetValues(updatedDiscount);
             await DbContext.SaveChangesAsync();
-            await _staffActivityService.CreateLog<Discount>(managerID, ActionType.Modify);
+            await _staffActivityService.CreateLog<Discount>(managerID, OperationType.Modify);
 
             return ServiceResult.Success(id.ToString());
         }

@@ -62,8 +62,8 @@ namespace XWave.Data
                 .HasForeignKey(activityLog => activityLog.StaffID);
 
             builder.Entity<ActivityLog>()
-                .Property(a => a.ActionType)
-                .HasConversion(new EnumToStringConverter<ActionType>());
+                .Property(a => a.OperationType)
+                .HasConversion(new EnumToStringConverter<OperationType>());
         }
     }
 }

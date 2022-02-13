@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json.Converters;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using System.Text.Json.Serialization;
 
 namespace XWave.Models
 {
-    public enum ActionType
+    public enum OperationType
     { 
         Create,
         Modify,
@@ -21,7 +22,8 @@ namespace XWave.Models
         [StringLength(200, MinimumLength =5)]
         public string EntityType { get; set; }
         public string StaffID { get; set; }
-        public ActionType ActionType { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public OperationType OperationType { get; set; }
         public ApplicationUser StaffUser { get; set; }
     }
 }

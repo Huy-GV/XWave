@@ -40,7 +40,7 @@ namespace XWave.Services.Defaults
                 var entry = DbContext.Product.Add(newProduct);
                 entry.CurrentValues.SetValues(productViewModel);
                 await DbContext.SaveChangesAsync();
-                var result = await _staffActivityService.CreateLog<Product>(staffID, ActionType.Create);
+                var result = await _staffActivityService.CreateLog<Product>(staffID, OperationType.Create);
                 if (!result.Succeeded)
                 {
                     throw new Exception(result.Error);
@@ -58,7 +58,7 @@ namespace XWave.Services.Defaults
             {
                 DbContext.Product.Remove(await DbContext.Product.FindAsync(id));
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.CreateLog<Product>(staffID, ActionType.Delete);
+                await _staffActivityService.CreateLog<Product>(staffID, OperationType.Delete);
                 return ServiceResult.Success();
             } catch (Exception ex)
             {
@@ -120,7 +120,7 @@ namespace XWave.Services.Defaults
                 entry.State = EntityState.Modified;
                 entry.CurrentValues.SetValues(updatedProduct);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.CreateLog<Product>(staffID, ActionType.Modify);
+                await _staffActivityService.CreateLog<Product>(staffID, OperationType.Modify);
                 return ServiceResult.Success(id.ToString());
             } catch (Exception ex)
             {

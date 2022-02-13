@@ -57,14 +57,20 @@ namespace XWave.Data.DatabaseSeeding
                 UserName = "john_customer",
                 FirstName = "John",
                 LastName = "Applebee",
-                RegistrationDate = DateTime.Now
+                RegistrationDate = DateTime.Now,
+                PhoneNumber = "98765432",
+                Address = "2 Mian St VIC",
+                Nationality = "Australian"
             };
             var customer2 = new ApplicationUser()
             {
                 UserName = "jake_customer",
                 FirstName = "Jake",
                 LastName = "Applebee",
-                RegistrationDate = DateTime.Now
+                RegistrationDate = DateTime.Now,
+                PhoneNumber = "98765432",
+                Address = "15 Second St VIC",
+                Nationality = "Australian"
             };
 
 
@@ -84,8 +90,6 @@ namespace XWave.Data.DatabaseSeeding
                 {
                     CustomerID = user.Id,
                     Country = "Australia",
-                    PhoneNumber = 98765432,
-                    Address = "15 Second St VIC"
                 });
                 await dbContext.SaveChangesAsync();
             }
@@ -99,6 +103,9 @@ namespace XWave.Data.DatabaseSeeding
                 FirstName = "Paul",
                 LastName = "Applebee",
                 RegistrationDate = DateTime.Now,
+                PhoneNumber = "98765432",
+                Address = "15 Second St VIC",
+                Nationality = "Australian"
             };
             var staff2 = new ApplicationUser()
             {
@@ -106,6 +113,9 @@ namespace XWave.Data.DatabaseSeeding
                 FirstName = "Elizabeth",
                 LastName = "Applebee",
                 RegistrationDate = DateTime.Now,
+                PhoneNumber = "98765432",
+                Address = "15 Second St VIC",
+                Nationality = "Australian"
             };
             await CreateSingleStaffAsync(userManager, staff1);
             await CreateSingleStaffAsync(userManager, staff2);
@@ -125,7 +135,10 @@ namespace XWave.Data.DatabaseSeeding
                 UserName = "gia_manager",
                 FirstName = "Gia",
                 LastName = "Applebee",
-                RegistrationDate = DateTime.Now
+                RegistrationDate = DateTime.Now,
+                PhoneNumber = "98765432",
+                Address = "15 Second St VIC",
+                Nationality = "Australian"
             };
 
             var manager2 = new ApplicationUser()
@@ -133,7 +146,10 @@ namespace XWave.Data.DatabaseSeeding
                 UserName = "huy_manager",
                 FirstName = "Huy",
                 LastName = "Applebee",
-                RegistrationDate = DateTime.Now
+                RegistrationDate = DateTime.Now,
+                PhoneNumber = "98765432",
+                Address = "15 Second St VIC",
+                Nationality = "Australian"
             };
 
             await CreateManagerAsync(manager1, userManager);

@@ -22,7 +22,7 @@ namespace XWave.Controllers
         {
             return Ok(await _staffAccountService.GetAllStaffAccounts());
         }
-        [HttpGet("{id:string}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<StaffAccountDTO>> GetStaffAccountByID(string id)
         {
             return Ok(await _staffAccountService.GetStaffAccountByID(id));

@@ -143,8 +143,8 @@ namespace XWave.Services.Defaults
             {
                 CustomerID = userID,
                 Country = registerViewModel.Country,
-                PhoneNumber = registerViewModel.PhoneNumber,
-                Address = registerViewModel.Address,
+                //PhoneNumber = registerViewModel.PhoneNumber,
+                //Address = registerViewModel.Address,
             });
             await _dbContext.SaveChangesAsync();
         }
