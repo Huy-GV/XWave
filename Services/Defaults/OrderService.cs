@@ -5,11 +5,12 @@ using XWave.Models;
 using XWave.Data;
 using XWave.Services.Interfaces;
 using System.Linq;
-using XWave.DTOs;
+using XWave.DTOs.Customers;
 using System;
-using XWave.ViewModels.Customer;
+using XWave.ViewModels.Customers;
 using Microsoft.Extensions.Logging;
 using XWave.Services.ResultTemplate;
+using XWave.DTOs.Customers;
 
 namespace XWave.Services.Defaults
 {

@@ -1,4 +1,4 @@
-﻿namespace XWave.DTOs
+﻿namespace XWave.DTOs.Customers
 {
     public class OrderDetailDTO
     {

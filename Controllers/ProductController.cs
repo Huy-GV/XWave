@@ -12,6 +12,8 @@ using XWave.ViewModels.Management;
 using XWave.Data.Constants;
 using XWave.Services.Interfaces;
 using XWave.Helpers;
+using XWave.DTOs.Customers;
+using XWave.DTOs.Management;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -70,11 +72,10 @@ namespace XWave.Controllers
                 var result = await _productService.CreateProductAsync(staffID, productViewModel);
                 if (result.Succeeded)
                 {
-                    return Ok(XWaveResponse
-                    .Created($"https://localhost:5001/api/product/staff/{result.ResourceID}"));
+                    return XWaveCreated($"https://localhost:5001/api/product/staff/{result.ResourceID}");
                 }
 
-                return BadRequest(XWaveResponse.Failed(result.Error));
+                return XWaveBadRequest(result.Error);
             }
 
             return BadRequest(ModelState);
@@ -97,11 +98,10 @@ namespace XWave.Controllers
                 var result = await _productService.UpdateProductAsync(staffID, id, updatedProduct);
                 if (result.Succeeded)
                 {
-                    return Ok(XWaveResponse
-                    .Created($"https://localhost:5001/api/product/staff/{result.ResourceID}"));
+                    return XWaveCreated($"https://localhost:5001/api/product/staff/{result.ResourceID}");
                 }
 
-                return BadRequest(XWaveResponse.Failed(result.Error));
+                return XWaveBadRequest(result.Error);
             }
 
             return BadRequest(ModelState);
@@ -123,7 +123,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return BadRequest(XWaveResponse.Failed(result.Error));
+            return XWaveBadRequest(result.Error);
         }
 
     }

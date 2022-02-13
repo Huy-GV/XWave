@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.DTOs;
+using XWave.DTOs.Customers;
+using XWave.DTOs.Management;
 using XWave.Models;
 using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Management;

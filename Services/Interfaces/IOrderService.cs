@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.DTOs;
+using XWave.DTOs.Customers;
 using XWave.Models;
 using XWave.Services.ResultTemplate;
-using XWave.ViewModels.Customer;
+using XWave.ViewModels.Customers;
 
 namespace XWave.Services.Interfaces
 {

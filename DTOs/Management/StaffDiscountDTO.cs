@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace XWave.DTOs
+namespace XWave.DTOs.Management
 {
     public class StaffDiscountDTO
     {

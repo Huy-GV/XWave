@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using XWave.Models;
 
-namespace XWave.DTOs
+namespace XWave.DTOs.Customers
 {
     public class DiscountDTO
     {

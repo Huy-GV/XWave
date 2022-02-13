@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using XWave.Data.Constants;
 
 namespace XWave.Controllers
 {
@@ -9,6 +10,18 @@ namespace XWave.Controllers
         public AbstractController(ILogger<T> logger)
         {
             Logger = logger;
+        }
+        public ActionResult XWaveCreated(string url)
+        {
+            return Ok(XWaveResponse.Created(url));
+        }
+        public ActionResult XWaveBadRequest(string error)
+        {
+            return Ok(XWaveResponse.Failed(error));
+        }
+        public ActionResult XWaveUpdated(string url)
+        {
+            return Ok(XWaveResponse.Updated(url));
         }
     }
 }

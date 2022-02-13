@@ -91,8 +91,10 @@ namespace XWave.Services.Defaults
             {
                 await _userManager.AddToRoleAsync(user, role);
                 if (role == Roles.Customer)
+                {
                     await CreateCustomerAccount(user.Id, registerViewModel);
-
+                }
+                 
                 return await GetTokenAsync(user, role);
             }
 

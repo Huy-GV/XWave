@@ -47,7 +47,9 @@ namespace XWave.Controllers
         {
             string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             if (customerID == null)
-                return BadRequest();
+            {
+                return XWaveBadRequest("Customer ID is empty");
+            }
 
             return Ok(_paymentService.GetAllPaymentDetailsForCustomerAsync(customerID));
         }
@@ -65,7 +67,7 @@ namespace XWave.Controllers
             
             if (!result.Succeeded)
             {
-                return BadRequest(result.Error);
+                return XWaveBadRequest(result.Error);
             }
 
             return NoContent();
@@ -88,7 +90,7 @@ namespace XWave.Controllers
             var result = await _paymentService.UpdatePaymentAsync(customerID, id, inputPayment);
             if (!result.Succeeded)
             {
-                return BadRequest(result.Error);
+                return XWaveBadRequest(result.Error);
             }
 
             return Ok(XWaveResponse.Updated($"https://localhost:5001/api/payment/details/{id}"));
@@ -105,9 +107,7 @@ namespace XWave.Controllers
 
             if (!result.Succeeded)
             { 
-                return StatusCode(
-                    (int)HttpStatusCode.InternalServerError, 
-                    XWaveResponse.Failed(result.Error));
+                return XWaveBadRequest(result.Error);
             }
 
             return Ok(XWaveResponse.Created($"https://localhost:5001/api/payment/details/{result.ResourceID}"));

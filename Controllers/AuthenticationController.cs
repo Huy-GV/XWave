@@ -39,15 +39,17 @@ namespace XWave.Controllers
         public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync(RegisterUserViewModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var authViewModel = await _authService.RegisterAsync(model, Roles.Customer);
-            if (authViewModel.Succeeded)
             {
-                return Ok(authViewModel);
+                return BadRequest(ModelState);
+            }
+              
+            var result = await _authService.RegisterAsync(model, Roles.Customer);
+            if (result.Succeeded)
+            {
+                return Ok(result);
             }
                 
-            return BadRequest(authViewModel.Error); 
+            return XWaveBadRequest(result.Error); 
         }
         [HttpPost("register/staff")]
         [Authorize(Roles = "manager")]
@@ -56,11 +58,13 @@ namespace XWave.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var authModel = await _authService.RegisterAsync(model, Roles.Staff);
-            if (authModel.Succeeded)
-                return Ok(authModel);
-
-            return BadRequest(authModel.Error);
+            var result = await _authService.RegisterAsync(model, Roles.Staff);
+            if (result.Succeeded)
+            {
+                return Ok(result);
+            }
+                
+            return XWaveBadRequest(result.Error);
         }
         [HttpPost("login")]
         public async Task<ActionResult<AuthenticationResult>> LogInAsync(SignInUserViewModel model)

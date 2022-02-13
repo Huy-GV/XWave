@@ -14,12 +14,12 @@ namespace XWave.Controllers
     [ApiController]
     [Route("api/staff-activity")]
     [Authorize(Roles ="manager")]
-    public class StaffActivityLogController : AbstractController<StaffActivityLogController>
+    public class ActivityLogController : AbstractController<ActivityLogController>
     {
         private readonly IStaffActivityService _staffActivityService;
-        public StaffActivityLogController(
+        public ActivityLogController(
             IStaffActivityService staffActivityService,
-            ILogger<StaffActivityLogController> logger) : base(logger)
+            ILogger<ActivityLogController> logger) : base(logger)
         {
             _staffActivityService = staffActivityService;
         }

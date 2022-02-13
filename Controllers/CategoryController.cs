@@ -49,8 +49,7 @@ namespace XWave.Controllers
             {
                 var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
                 var result = await _categoryService.CreateCategoryAsync(managerID, newCategory);
-                return Ok(XWaveResponse
-                    .Created($"https://localhost:5001/api/category/admin/{result.ResourceID}"));
+                return XWaveCreated($"https://localhost:5001/api/category/admin/{result.ResourceID}");
             }
 
             return BadRequest(ModelState);
@@ -73,11 +72,10 @@ namespace XWave.Controllers
                 var result = await _categoryService.UpdateCategoryAsync(managerID, id, updatedCategory);
                 if (result.Succeeded)
                 {
-                    return Ok(XWaveResponse
-                    .Updated($"https://localhost:5001/api/category/admin/{result.ResourceID}"));
+                    return XWaveUpdated($"https://localhost:5001/api/category/admin/{result.ResourceID}");
                 }
 
-                return BadRequest(XWaveResponse.Failed(result.Error));
+                return XWaveBadRequest(result.Error);
             }
 
             return BadRequest(ModelState);
@@ -93,6 +91,7 @@ namespace XWave.Controllers
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
+
             var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
             var result = await _categoryService.DeleteCategoryAsync(managerID, id);
             if (result.Succeeded)
@@ -100,7 +99,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return BadRequest(XWaveResponse.Failed(result.Error));
+            return XWaveBadRequest(result.Error);
         }
     }
 }

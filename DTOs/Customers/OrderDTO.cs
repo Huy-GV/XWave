@@ -2,7 +2,7 @@
 using System;
 using XWave.Models;
 
-namespace XWave.DTOs
+namespace XWave.DTOs.Customers
 {
     public class OrderDTO
     {

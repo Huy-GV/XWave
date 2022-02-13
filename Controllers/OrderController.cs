@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using XWave.Models;
-using XWave.ViewModels.Customer;
-using XWave.DTOs;
+using XWave.ViewModels.Customers;
+using XWave.DTOs.Customers;
 using XWave.Helpers;
 using XWave.Services.Interfaces;
 using XWave.Data.Constants;
@@ -30,19 +30,21 @@ namespace XWave.Controllers
         public async Task<ActionResult<OrderDetail>> GetOrdersAsync()
         {
             string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
-            if (customerID == string.Empty)
-                return BadRequest();
-
-            return Ok(_orderService.GetAllOrdersAsync(customerID).Result);
+            if (string.IsNullOrEmpty(customerID))
+            {
+                return BadRequest(XWaveResponse.Failed("Customer ID not found"));
+            }
+                
+            return Ok(await _orderService.GetAllOrdersAsync(customerID));
         }
         [HttpGet("{id:int}")]
         [Authorize(Roles = "customer")]
         public async Task<ActionResult<OrderDTO>> GetOrderByID(int id)
         {
             string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
-            if (customerID == string.Empty)
+            if (string.IsNullOrEmpty(customerID))
             {
-                return BadRequest();
+                return BadRequest(XWaveResponse.Failed("Customer ID not found"));
             }
 
             var orderDTO = await _orderService.GetOrderByIDAsync(customerID, id);
@@ -68,16 +70,16 @@ namespace XWave.Controllers
         public async Task<IActionResult> CreateOrder([FromBody] PurchaseViewModel purchaseViewModel)
         {
             string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
-            if (customerID == string.Empty)
+            if (string.IsNullOrEmpty(customerID))
             {
-                return BadRequest();
+                return XWaveBadRequest("Customer ID not found");
             }
-                
+
             var result = await _orderService.CreateOrderAsync(purchaseViewModel, customerID);
 
             if (!result.Succeeded)
             {
-                return BadRequest(XWaveResponse.Failed(result.Error));
+                return XWaveBadRequest(result.Error);
             }
             
             return Ok();

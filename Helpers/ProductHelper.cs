@@ -1,5 +1,6 @@
 ﻿using System;
-using XWave.DTOs;
+using XWave.DTOs.Customers;
+using XWave.DTOs.Management;
 using XWave.Models;
 
 namespace XWave.Helpers
