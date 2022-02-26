@@ -8,7 +8,7 @@ namespace XWave.DTOs.Customers
     {
         public  IEnumerable<OrderDetailDTO> OrderDetailCollection { get; set; }   
         public DateTime OrderDate { get; set; }
-        public uint AccountNo { get; set; }
+        public string AccountNo { get; set; }
         public int ID { get; set; }
     }
 }

@@ -53,21 +53,21 @@ namespace XWave.Data.DatabaseSeeding
                 new ActivityLog
                 {
                     Time = DateTime.Now,
-                    StaffID = staff[0].Id,
+                    StaffId = staff[0].Id,
                     EntityType = typeof(Product).Name,
                     OperationType = OperationType.Create,
                 },
                 new ActivityLog
                 {
                     Time = DateTime.Now,
-                    StaffID = staff[1].Id,
+                    StaffId = staff[1].Id,
                     EntityType = typeof(Product).Name,
                     OperationType = OperationType.Modify,
                 },
                 new ActivityLog
                 {
                     Time = DateTime.Now,
-                    StaffID = managers[0].Id,
+                    StaffId = managers[0].Id,
                     EntityType = typeof(Product).Name,
                     OperationType = OperationType.Delete,
                 },

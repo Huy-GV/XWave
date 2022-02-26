@@ -30,14 +30,14 @@ namespace XWave.Services.Defaults
                 {
                     OperationType = operation,
                     Time = DateTime.Now,
-                    StaffID = staffID,
+                    StaffId = staffID,
                     EntityType = typeof(T).Name
                 };
                 DbContext.StaffActivityLog.Add(newLog);
                 await DbContext.SaveChangesAsync();
 
                 _logger.LogInformation($"Staff ID {staffID} created entity of type {newLog.EntityType}");
-                return ServiceResult.Success(newLog.ID.ToString());
+                return ServiceResult.Success(newLog.Id.ToString());
             } 
             catch(Exception e)
             {
@@ -51,7 +51,7 @@ namespace XWave.Services.Defaults
         }
         public async Task<ActivityLog> GetActivityLogAsync(int id)
         {
-            return await DbContext.StaffActivityLog.FirstOrDefaultAsync(a => a.ID == id);
+            return await DbContext.StaffActivityLog.FirstOrDefaultAsync(a => a.Id == id);
         }
     }
 }

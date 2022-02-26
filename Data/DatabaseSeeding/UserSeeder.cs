@@ -88,8 +88,7 @@ namespace XWave.Data.DatabaseSeeding
                 await userManager.AddToRoleAsync(user, Roles.Customer);
                 dbContext.Customer.Add(new Customer()
                 {
-                    CustomerID = user.Id,
-                    Country = "Australia",
+                    CustomerId = user.Id,
                 });
                 await dbContext.SaveChangesAsync();
             }

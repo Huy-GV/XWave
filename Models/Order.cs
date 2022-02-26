@@ -8,14 +8,14 @@ namespace XWave.Models
     public class Order : IEntity
     {
         [Required]
-        public int ID { get; set; }
+        public int Id { get; set; }
         [Required]
         [Column(TypeName = "datetime")]
         public DateTime Date { get; set; }
-        public string CustomerID { get; set; }
-        public int PaymentID { get; set; }
+        public string CustomerId { get; set; }
+        public int PaymentAccountId { get; set; }
         public Customer Customer { get; set; }
-        public Payment Payment { get; set; }
+        public PaymentAccount Payment { get; set; }
         public ICollection<OrderDetail> OrderDetailCollection { get; set; }
     }
 }

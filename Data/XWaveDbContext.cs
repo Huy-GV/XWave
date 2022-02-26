@@ -1,13 +1,6 @@
-﻿using IdentityServer4.EntityFramework.Options;
-using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using XWave.Models;
 
 namespace XWave.Data
@@ -21,8 +14,8 @@ namespace XWave.Data
         public DbSet<Category> Category { get; set; }
         public DbSet<Discount> Discount { get; set; }
         public DbSet<Product> Product { get; set; }
-        public DbSet<Payment> Payment { get; set; }
-        public DbSet<PaymentDetail> PaymentDetail { get; set; }
+        public DbSet<PaymentAccount> Payment { get; set; }
+        public DbSet<TransactionDetails> PaymentDetail { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderDetail> OrderDetail { get; set; }
         public DbSet<Customer> Customer { get; set; }
@@ -31,18 +24,22 @@ namespace XWave.Data
         {
             base.OnModelCreating(builder);
             builder.Entity<OrderDetail>()
-                .HasKey(od => new { od.OrderID, od.ProductID });
+                .HasKey(od => new { od.OrderId, od.ProductId });
 
             builder.Entity<OrderDetail>()
-                .HasIndex(od => od.OrderID)
+                .HasIndex(od => od.OrderId)
                 .IsUnique(false);
                 
-            builder.Entity<Payment>()
+            builder.Entity<PaymentAccount>()
                 .HasIndex(p => new { p.AccountNo, p.Provider })
                 .IsUnique();
 
-            builder.Entity<PaymentDetail>()
-                .HasKey(pd => new { pd.CustomerID, pd.PaymentID });
+            builder.Entity<TransactionDetails>()
+                .HasKey(pd => new { pd.CustomerId, pd.PaymentAccountId });
+
+            builder.Entity<TransactionDetails>()
+                .Property(td => td.TransactionType)
+                .HasConversion(new EnumToStringConverter<TransactionType>());
 
             builder.Entity<Product>()
                 .HasOne(p => p.Discount)
@@ -54,16 +51,26 @@ namespace XWave.Data
             builder.Entity<Discount>()
                 .HasOne(d => d.Manager)
                 .WithMany()
-                .HasForeignKey(d => d.ManagerID);
+                .HasForeignKey(d => d.ManagerId);
 
             builder.Entity<ActivityLog>()
                 .HasOne(activityLog => activityLog.StaffUser)
                 .WithMany()
-                .HasForeignKey(activityLog => activityLog.StaffID);
+                .HasForeignKey(activityLog => activityLog.StaffId);
 
             builder.Entity<ActivityLog>()
                 .Property(a => a.OperationType)
                 .HasConversion(new EnumToStringConverter<OperationType>());
+
+            builder.Entity<Staff>()
+                .HasOne<ApplicationUser>()
+                .WithOne()
+                .HasForeignKey<Staff>(s => s.StaffId);
+
+            builder.Entity<Customer>()
+                .HasOne<ApplicationUser>()
+                .WithOne()
+                .HasForeignKey<Customer>(c => c.CustomerId);
         }
     }
 }

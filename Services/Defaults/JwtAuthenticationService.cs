@@ -141,8 +141,7 @@ namespace XWave.Services.Defaults
         {
             _dbContext.Customer.Add(new Customer()
             {
-                CustomerID = userID,
-                Country = registerViewModel.Country,
+                CustomerId = userID,
                 //PhoneNumber = registerViewModel.PhoneNumber,
                 //Address = registerViewModel.Address,
             });

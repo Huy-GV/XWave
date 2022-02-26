@@ -8,7 +8,7 @@ namespace XWave.Models
 {
     public class Discount : IEntity
     {
-        public int ID { get; set; }
+        public int Id { get; set; }
         [Required]
         [Range(1, 100, ErrorMessage ="Discount percentage outside valid range")]
         public uint Percentage { get; set; }
@@ -18,7 +18,7 @@ namespace XWave.Models
         [Required]
         [Column(TypeName = "date")]
         public DateTime EndDate { get; set; }
-        public string ManagerID { get; set; }
+        public string ManagerId { get; set; }
         public ApplicationUser Manager { get; set; }
         public ICollection<Product> Products { get; set; }
     }

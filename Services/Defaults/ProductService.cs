@@ -31,7 +31,7 @@ namespace XWave.Services.Defaults
         {
             try
             {
-                if (!await DbContext.Category.AnyAsync(c => c.ID == productViewModel.CategoryID))
+                if (!await DbContext.Category.AnyAsync(c => c.Id == productViewModel.CategoryID))
                 {
                     return ServiceResult.Failure("Category not found");
                 }
@@ -46,7 +46,7 @@ namespace XWave.Services.Defaults
                     throw new Exception(result.Error);
                 }
 
-                return ServiceResult.Success(newProduct.ID.ToString());
+                return ServiceResult.Success(newProduct.Id.ToString());
             } catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
@@ -95,7 +95,7 @@ namespace XWave.Services.Defaults
         {
             var product = await DbContext.Product
                 .Include(p => p.Discount)
-                .SingleOrDefaultAsync(p => p.ID == id);
+                .SingleOrDefaultAsync(p => p.Id == id);
 
             return _productHelper.CreateCustomerProductDTO(product);
         }

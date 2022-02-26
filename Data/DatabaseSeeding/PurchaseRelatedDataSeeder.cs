@@ -41,19 +41,19 @@ namespace XWave.Data.DatabaseSeeding
 
         private static void CreatePayments(XWaveDbContext dbContext)
         {
-            var payments = new List<Payment>()
+            var payments = new List<PaymentAccount>()
             {
-                new Payment()
+                new PaymentAccount()
                 {
                     Provider = "mastercard",
-                    AccountNo = 12345678,
+                    AccountNo = "12345678",
                     ExpiryDate = DateTime.Parse("2/5/2023"),
 
                 },
-                new Payment()
+                new PaymentAccount()
                 {
                     Provider = "visa",
-                    AccountNo = 24681357,
+                    AccountNo = "24681357",
                     ExpiryDate = DateTime.Parse("1/2/2023"),
                 },
             };
@@ -73,20 +73,20 @@ namespace XWave.Data.DatabaseSeeding
                 new Order()
                 {
                     Date = DateTime.Parse("15/11/2021"),
-                    CustomerID = user1.Id,
-                    PaymentID = 1
+                    CustomerId = user1.Id,
+                    PaymentAccountId = 1
                 },
                 new Order()
                 {
                     Date = DateTime.Parse("21/10/2021"),
-                    CustomerID = user1.Id,
-                    PaymentID = 1
+                    CustomerId = user1.Id,
+                    PaymentAccountId = 1
                 },
                 new Order()
                 {
                     Date = DateTime.Parse("16/9/2021"),
-                    CustomerID = user2.Id,
-                    PaymentID = 2
+                    CustomerId = user2.Id,
+                    PaymentAccountId = 2
                 }
             };
             dbContext.Order.AddRange(orders);
@@ -98,43 +98,43 @@ namespace XWave.Data.DatabaseSeeding
             {
                 new OrderDetail()
                 {
-                    OrderID = 1,
-                    ProductID = 1,
+                    OrderId = 1,
+                    ProductId = 1,
                     PriceAtOrder = 200,
                     Quantity = 1,
                 },
                 new OrderDetail()
                 {
-                    OrderID = 1,
-                    ProductID = 3,
+                    OrderId = 1,
+                    ProductId = 3,
                     PriceAtOrder = 90,
                     Quantity = 2,
                 },
                 new OrderDetail()
                 {
-                    OrderID = 2,
-                    ProductID = 4,
+                    OrderId = 2,
+                    ProductId = 4,
                     PriceAtOrder = 1600,
                     Quantity = 1,
                 },
                 new OrderDetail()
                 {
-                    OrderID = 3,
-                    ProductID = 4,
+                    OrderId = 3,
+                    ProductId = 4,
                     PriceAtOrder = 1600,
                     Quantity = 4,
                 },
                 new OrderDetail()
                 {
-                    OrderID = 3,
-                    ProductID = 2,
+                    OrderId = 3,
+                    ProductId = 2,
                     PriceAtOrder = 40,
                     Quantity = 9,
                 },
                 new OrderDetail()
                 {
-                    OrderID = 3,
-                    ProductID = 3,
+                    OrderId = 3,
+                    ProductId = 3,
                     PriceAtOrder = 600,
                     Quantity = 15,
                 },
@@ -149,20 +149,20 @@ namespace XWave.Data.DatabaseSeeding
         {
             var user1 = await userManager.FindByNameAsync("john_customer");
             var user2 = await userManager.FindByNameAsync("jake_customer");
-            var paymentDetail = new List<PaymentDetail>()
+            var paymentDetail = new List<TransactionDetails>()
             {
-                new PaymentDetail
+                new TransactionDetails
                 {
-                    PaymentID = 1,
-                    CustomerID =  user1.Id,
+                    PaymentAccountId = 1,
+                    CustomerId =  user1.Id,
                     PurchaseCount = 1,
                     Registration = DateTime.Parse("2/1/2021"),
                     LatestPurchase = DateTime.Now
                 },
-                new PaymentDetail
+                new TransactionDetails
                 {
-                    CustomerID = user2.Id,
-                    PaymentID = 2,
+                    CustomerId = user2.Id,
+                    PaymentAccountId = 2,
                     PurchaseCount = 5,
                     Registration = DateTime.Parse("18/6/2021"),
                     LatestPurchase = DateTime.Now

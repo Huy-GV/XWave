@@ -49,19 +49,19 @@ namespace XWave.Data.DatabaseSeeding
             {
                 new Category()
                 {
-                    ID = 1,
+                    Id = 1,
                     Name = "GPU Cards",
                     Description = "Graphics processing units"
                 },
                 new Category()
                 {
-                    ID = 2,
+                    Id = 2,
                     Name = "Storages",
                     Description = "Hard drives, used to store data"
                 },
                 new Category()
                 {
-                    ID = 3,
+                    Id = 3,
                     Name = "Monitors",
                     Description = "Used to display the user interface"
                 },
@@ -126,19 +126,19 @@ namespace XWave.Data.DatabaseSeeding
             {
                 new Discount()
                 {
-                    ID = 1,
+                    Id = 1,
                     Percentage = 20,
                     StartDate = DateTime.ParseExact("7/1/2021", "d/M/yyyy", null),
                     EndDate = DateTime.ParseExact("11/2/2021", "d/M/yyyy", null),
-                    ManagerID = managers[0].Id,
+                    ManagerId = managers[0].Id,
                 },
                 new Discount()
                 {
-                    ID = 2,
+                    Id = 2,
                     Percentage = 35,
                     StartDate = DateTime.ParseExact("17/7/2021", "d/M/yyyy", null),
                     EndDate = DateTime.ParseExact("25/7/2021", "d/M/yyyy", null),
-                    ManagerID = managers[1].Id,
+                    ManagerId = managers[1].Id,
                 }
             };
             dbContext.Database.OpenConnection();

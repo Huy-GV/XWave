@@ -4,12 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.Models
 {
-    public class Customer
+    public class Customer : IEntity
     {
-        [Key]
-        public string CustomerID { get; set; }
+        public string CustomerId { get; set; }
         [Required]
-        [StringLength(20, MinimumLength = 2)]
-        public string Country { get; set; }
+        [StringLength(100, MinimumLength = 1)]
+        public string BillingAddress { get; set; }
     }
 }

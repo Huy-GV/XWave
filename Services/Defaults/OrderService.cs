@@ -41,7 +41,7 @@ namespace XWave.Services.Defaults
             try
             {
                 var customer = await _dbContext.Customer
-                    .SingleOrDefaultAsync(c => c.CustomerID == customerID);
+                    .SingleOrDefaultAsync(c => c.CustomerId == customerID);
 
                 if (customer == null)
                 {
@@ -49,7 +49,7 @@ namespace XWave.Services.Defaults
                 }
                  
                 var payment = await _dbContext.Payment
-                    .SingleOrDefaultAsync(p => p.ID == purchaseViewModel.PaymentID);
+                    .SingleOrDefaultAsync(p => p.Id == purchaseViewModel.PaymentID);
 
                 if (payment == null)
                 {
@@ -59,8 +59,8 @@ namespace XWave.Services.Defaults
                 var order = new Order()
                 {
                     Date = DateTime.Now,
-                    CustomerID = customerID,
-                    PaymentID = purchaseViewModel.PaymentID,
+                    CustomerId = customerID,
+                    PaymentAccountId = purchaseViewModel.PaymentID,
                 };
 
                 List<Product> purchasedProducts = new();
@@ -70,7 +70,7 @@ namespace XWave.Services.Defaults
                 {
                     var product = await _dbContext.Product
                         .Include(p => p.Discount)
-                        .SingleOrDefaultAsync(p => p.ID == purchasedProduct.ProductID);
+                        .SingleOrDefaultAsync(p => p.Id == purchasedProduct.ProductID);
                     if (product == null)
                     {
                         return ServiceResult.Failure("Ordered product not found");
@@ -93,7 +93,7 @@ namespace XWave.Services.Defaults
                     orderDetails.Add(new OrderDetail
                     {
                         Quantity = purchasedProduct.Quantity,
-                        ProductID = purchasedProduct.ProductID,
+                        ProductId = purchasedProduct.ProductID,
                         PriceAtOrder = product.Price - product.Price * product.Discount.Percentage / 100,
                     });
                 }
@@ -102,7 +102,7 @@ namespace XWave.Services.Defaults
                 //call SaveChanges to get the generated ID
                 await _dbContext.SaveChangesAsync();
 
-                orderDetails = AssignOrderID(order.ID, orderDetails);
+                orderDetails = AssignOrderID(order.Id, orderDetails);
 
                 _dbContext.OrderDetail.AddRange(orderDetails);
                 _dbContext.Product.UpdateRange(purchasedProducts);
@@ -111,7 +111,7 @@ namespace XWave.Services.Defaults
 
                 transaction.Commit();
 
-                return ServiceResult.Success(order.ID.ToString());
+                return ServiceResult.Success(order.Id.ToString());
 
             }
             catch (Exception exception)
@@ -125,7 +125,7 @@ namespace XWave.Services.Defaults
         {
             foreach (var orderDetail in orderDetails)
             {
-                orderDetail.OrderID = orderID;
+                orderDetail.OrderId = orderID;
             }
                 
             return orderDetails;
@@ -136,7 +136,7 @@ namespace XWave.Services.Defaults
             string customerID)
         {
             var paymentDetail = await _dbContext.PaymentDetail.SingleAsync(
-                pd => pd.PaymentID == paymentID && pd.CustomerID == customerID);
+                pd => pd.PaymentAccountId == paymentID && pd.CustomerId == customerID);
 
             paymentDetail.PurchaseCount++;
             paymentDetail.LatestPurchase = DateTime.Now;
@@ -155,10 +155,10 @@ namespace XWave.Services.Defaults
                 .Include(o => o.OrderDetailCollection)
                     .ThenInclude(od => od.Product)
                 .Include(o => o.Payment)
-                .Where(o => o.CustomerID == customerID)
+                .Where(o => o.CustomerId == customerID)
                 .Select(o => new OrderDTO()
                 {
-                    ID = o.ID,
+                    ID = o.Id,
                     OrderDate = o.Date,
                     AccountNo = o.Payment.AccountNo,
                     OrderDetailCollection = o
@@ -178,7 +178,7 @@ namespace XWave.Services.Defaults
         public async Task<OrderDetail> GetDetailsByOrderIDsAsync(int orderID, int productID)
         {
             return await _dbContext.OrderDetail.FirstOrDefaultAsync(
-                od => od.ProductID == productID && od.OrderID == orderID);
+                od => od.ProductId == productID && od.OrderId == orderID);
 
         }
     }

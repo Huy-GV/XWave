@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.Models
 {
-    public class Payment : IEntity, IValidatableObject
+    public class PaymentAccount : IEntity, IValidatableObject
     {
-        public int ID { get; set; }
-        public uint AccountNo { get; set; }
+        public int Id { get; set; }
+        public string AccountNo { get; set; }
         public string Provider { get; set; }
         [Required]
         [DataType(DataType.Date)]

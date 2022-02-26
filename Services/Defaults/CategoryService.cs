@@ -26,7 +26,7 @@ namespace XWave.Services.Defaults
                 DbContext.Category.Add(category);
                 await DbContext.SaveChangesAsync();
                 await _staffActivityService.CreateLog<Category>(managerID, OperationType.Create);
-                return ServiceResult.Success(category.ID.ToString());
+                return ServiceResult.Success(category.Id.ToString());
             }
             catch (Exception e)
             {

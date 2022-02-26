@@ -29,13 +29,13 @@ namespace XWave.Services.Defaults
                 EndDate = discount.EndDate,
                 StartDate = discount.StartDate,
                 Percentage = discount.Percentage,
-                ManagerID = managerID
+                ManagerId = managerID
             };
 
             DbContext.Add(newDiscount);
             await DbContext.SaveChangesAsync();
             await _staffActivityService.CreateLog<Discount>(managerID, OperationType.Create);
-            return ServiceResult.Success(newDiscount.ID.ToString());
+            return ServiceResult.Success(newDiscount.Id.ToString());
         }
         public async Task<IEnumerable<Product>> GetProductsByDiscountID(int discountID)
         {

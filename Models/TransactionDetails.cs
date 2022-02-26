@@ -2,21 +2,29 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace XWave.Models
 {
-    public class PaymentDetail : IEntity
+    public enum TransactionType
+    { 
+        Purchase,
+        Refund,
+        Salary
+    }
+    public class TransactionDetails : IEntity
     {
-        public string CustomerID { get; set; }
-        public int PaymentID { get; set; }
+        public string CustomerId { get; set; }
+        public int PaymentAccountId { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime Registration { get; set; }
         [Range(0, int.MaxValue)]
         public uint PurchaseCount { get; set; }
         [DataType(DataType.Date)]
         public DateTime? LatestPurchase { get; set; }
-        //navigation property
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public TransactionType TransactionType { get; set; }
         public Customer Customer { get; set; }
-        public Payment Payment { get; set; }
+        public PaymentAccount Payment { get; set; }
     }
 }

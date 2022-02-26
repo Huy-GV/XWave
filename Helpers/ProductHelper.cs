@@ -17,12 +17,12 @@ namespace XWave.Helpers
             var staffDiscountDTO = CreateStaffDiscountDTO(product);
             return new StaffProductDTO
             {
-                ID = product.ID,
+                ID = product.Id,
                 ProductName = product.Name,
                 CategoryName = product.Category.Name,
                 Price = product.Price,
                 Quantity = product.Quantity,
-                CategoryID = product.Category.ID,
+                CategoryID = product.Category.Id,
                 LatestRestock = product.LastRestock,
                 Discount = staffDiscountDTO
             };
@@ -37,7 +37,7 @@ namespace XWave.Helpers
 
             return new ProductDTO()
             {
-                ID = product.ID,
+                ID = product.Id,
                 Name = product.Name,
                 Price = product.Price,
                 Quantity = product.Quantity,
@@ -69,7 +69,7 @@ namespace XWave.Helpers
             {
                 return new StaffDiscountDTO()
                 {
-                    ManagerID = product.Discount.ManagerID,
+                    ManagerID = product.Discount.ManagerId,
                     ManagerName = product.Discount.Manager.UserName,
                     StartDate = product.Discount.StartDate,
                     EndDate = product.Discount.EndDate,

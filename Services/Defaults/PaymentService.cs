@@ -13,7 +13,7 @@ namespace XWave.Services.Defaults
     public class PaymentService : ServiceBase, IPaymentService
     {
         public PaymentService(XWaveDbContext dbContext) : base(dbContext) { }
-        public async Task<ServiceResult> CreatePaymentAsync(string customerID, Payment inputPayment)
+        public async Task<ServiceResult> CreatePaymentAsync(string customerID, PaymentAccount inputPayment)
         {
             using var transaction = DbContext.Database.BeginTransaction();
             string savepoint = "BeforePaymentCreation";
@@ -21,7 +21,7 @@ namespace XWave.Services.Defaults
 
             try
             {
-                var newPayment = new Payment()
+                var newPayment = new PaymentAccount()
                 {
                     AccountNo = inputPayment.AccountNo,
                     Provider = inputPayment.Provider,
@@ -31,10 +31,10 @@ namespace XWave.Services.Defaults
                 DbContext.Payment.Add(newPayment);
                 await DbContext.SaveChangesAsync();
 
-                var newPaymentDetail = new PaymentDetail()
+                var newPaymentDetail = new TransactionDetails()
                 {
-                    CustomerID = customerID,
-                    PaymentID = newPayment.ID,
+                    CustomerId = customerID,
+                    PaymentAccountId = newPayment.Id,
                     Registration = DateTime.Now,
                     PurchaseCount = 0,
                     LatestPurchase = null,
@@ -47,7 +47,7 @@ namespace XWave.Services.Defaults
                 return new ServiceResult
                 {
                     Succeeded = true,
-                    ResourceID = newPayment.ID.ToString(),
+                    ResourceID = newPayment.Id.ToString(),
                 };
             }
             catch (Exception ex)
@@ -79,21 +79,21 @@ namespace XWave.Services.Defaults
 
         }
 
-        public Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsForCustomerAsync(string customerID)
+        public Task<IEnumerable<TransactionDetails>> GetAllPaymentDetailsForCustomerAsync(string customerID)
         {
             return Task.FromResult(DbContext.PaymentDetail
                 .Include(pd => pd.Payment)
-                .Where(pd => pd.CustomerID == customerID)
+                .Where(pd => pd.CustomerId == customerID)
                 .AsEnumerable());
         }
-        public Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsForStaffAsync()
+        public Task<IEnumerable<TransactionDetails>> GetAllPaymentDetailsForStaffAsync()
         {
             return Task.FromResult(DbContext.PaymentDetail
                 .Include(pd => pd.Payment)
                 .AsEnumerable());
         }
 
-        public async Task<ServiceResult> UpdatePaymentAsync(string customerID, int id, Payment updatedPayment)
+        public async Task<ServiceResult> UpdatePaymentAsync(string customerID, int id, PaymentAccount updatedPayment)
         {
             try
             {
@@ -117,7 +117,7 @@ namespace XWave.Services.Defaults
         public Task<bool> CustomerHasPayment(string customerID, int paymentID)
         {
             return Task.FromResult(DbContext.PaymentDetail.Any(
-                pd => pd.CustomerID == customerID && pd.PaymentID == paymentID));
+                pd => pd.CustomerId == customerID && pd.PaymentAccountId == paymentID));
         }
     }
 }

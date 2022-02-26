@@ -5,8 +5,8 @@ namespace XWave.Models
 {
     public class OrderDetail : IEntity
     {
-        public int OrderID { get; set; }
-        public int ProductID { get; set; }
+        public int OrderId { get; set; }
+        public int ProductId { get; set; }
         [Required]
         [Column(TypeName = "decimal(18,4)")]
         public decimal PriceAtOrder { get; set; }
