@@ -30,11 +30,11 @@ namespace XWave.Data.DatabaseSeeding
                 var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                 logger.LogError(ex, "An error occurred while seeding staff activities");
                 logger.LogError(ex.Message);
-            } finally
+            } 
+            finally
             {
                 context.Database.CloseConnection();
             }
-            
         }
         private static async Task CreateStaffActivityLogsAsync(
             XWaveDbContext dbContext,
@@ -72,6 +72,7 @@ namespace XWave.Data.DatabaseSeeding
                     OperationType = OperationType.Delete,
                 },
             };
+
             dbContext.StaffActivityLog.AddRange(logs);
             dbContext.SaveChanges();
         }

@@ -105,6 +105,7 @@ namespace XWave.Controllers
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
+
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var result = await _discountService.DeleteAsync(managerId, id);
             if (result.Succeeded)

@@ -31,11 +31,11 @@ namespace XWave.Data.DatabaseSeeding
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "An error occurred while seeding purchase data");
                     logger.LogError(ex.Message);
-                } finally
+                } 
+                finally
                 {
                     context.Database.CloseConnection();
                 }
-
             }
         }
 
@@ -89,6 +89,7 @@ namespace XWave.Data.DatabaseSeeding
                     PaymentAccountId = 2
                 }
             };
+
             dbContext.Order.AddRange(orders);
             dbContext.SaveChanges();
         }

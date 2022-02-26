@@ -65,11 +65,13 @@ namespace XWave.Services.Defaults
 
                 transaction.Commit();
                 await _staffActivityService.CreateLog<Discount>(managerID, OperationType.Delete);
+
                 return ServiceResult.Success(id.ToString());
             }
             catch (Exception ex)
             {
                 transaction.RollbackToSavepoint(savepoint);
+
                 return ServiceResult.Failure(ex.Message);
             }
         }

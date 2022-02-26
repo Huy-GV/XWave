@@ -47,7 +47,8 @@ namespace XWave.Services.Defaults
                 }
 
                 return ServiceResult.Success(newProduct.Id.ToString());
-            } catch (Exception ex)
+            } 
+            catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
             }
@@ -60,11 +61,11 @@ namespace XWave.Services.Defaults
                 await DbContext.SaveChangesAsync();
                 await _staffActivityService.CreateLog<Product>(staffId, OperationType.Delete);
                 return ServiceResult.Success();
-            } catch (Exception ex)
+            } 
+            catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
             }
-
         }
 
         public Task<IEnumerable<ProductDto>> GetAllProductsForCustomers()
@@ -111,7 +112,10 @@ namespace XWave.Services.Defaults
             return productDto;
         }
 
-        public async Task<ServiceResult> UpdateProductAsync(string staffId, int id, ProductViewModel updatedProduct)
+        public async Task<ServiceResult> UpdateProductAsync(
+            string staffId, 
+            int id, 
+            ProductViewModel updatedProduct)
         {
             try
             {
@@ -122,7 +126,8 @@ namespace XWave.Services.Defaults
                 await DbContext.SaveChangesAsync();
                 await _staffActivityService.CreateLog<Product>(staffId, OperationType.Modify);
                 return ServiceResult.Success(id.ToString());
-            } catch (Exception ex)
+            } 
+            catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
             }

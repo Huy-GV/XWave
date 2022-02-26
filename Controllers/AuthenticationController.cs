@@ -73,6 +73,7 @@ namespace XWave.Controllers
             {
                 return BadRequest(ModelState);
             }
+
             var result = await _authService.SignInAsync(model);
             if (result.Succeeded)
             {

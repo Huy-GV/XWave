@@ -74,7 +74,6 @@ namespace XWave.Services.Defaults
                 accountDTOs.Add(accountDTO);
             }
 
-
             return Task.FromResult<IEnumerable<StaffAccountDto>>(accountDTOs);
         }
     }

@@ -31,16 +31,17 @@ namespace XWave.Data.DatabaseSeeding
                 CreateCategories(context);
                 CreateDiscounts(context, userManager);
                 CreateProducts(context);
-            } catch (Exception ex)
+            } 
+            catch (Exception ex)
             {
                 var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                 logger.LogError(ex, "An error occurred while seeding product data");
                 logger.LogError(ex.Message);
-            } finally
+            } 
+            finally
             {
                 context.Database.CloseConnection();
             }
-
         }
 
         public static void CreateCategories(XWaveDbContext dbContext)
@@ -114,6 +115,7 @@ namespace XWave.Data.DatabaseSeeding
                     DiscountId = 2
                 },
             };
+
             dbContext.Product.AddRange(products);
             dbContext.SaveChanges();
         }
@@ -141,6 +143,7 @@ namespace XWave.Data.DatabaseSeeding
                     ManagerId = managers[1].Id,
                 }
             };
+
             dbContext.Database.OpenConnection();
             dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Discount ON") ;
             dbContext.Discount.AddRange(discounts);

@@ -108,7 +108,6 @@ namespace XWave.Services.Defaults
                 _dbContext.Product.UpdateRange(purchasedProducts);
                 await UpdateTransactionDetailsAsync(purchaseViewModel.PaymentId, customerId);
                 await _dbContext.SaveChangesAsync();
-
                 transaction.Commit();
 
                 return ServiceResult.Success(order.Id.ToString());
@@ -118,6 +117,7 @@ namespace XWave.Services.Defaults
             {
                 await transaction.RollbackToSavepointAsync(savepoint);
                 _logger.LogError(exception.Message);
+
                 return ServiceResult.Failure(exception.Message);
             }
         }
@@ -180,7 +180,6 @@ namespace XWave.Services.Defaults
         {
             return await _dbContext.OrderDetail.FirstOrDefaultAsync(
                 od => od.ProductId == productId && od.OrderId == orderId);
-
         }
     }
 }
