@@ -29,7 +29,7 @@ namespace XWave.Controllers
         [Authorize(Roles = "customer")]
         public async Task<ActionResult<OrderDetail>> GetOrdersAsync()
         {
-            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
+            string customerID = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (string.IsNullOrEmpty(customerID))
             {
                 return BadRequest(XWaveResponse.Failed("Customer ID not found"));
@@ -39,15 +39,15 @@ namespace XWave.Controllers
         }
         [HttpGet("{id:int}")]
         [Authorize(Roles = "customer")]
-        public async Task<ActionResult<OrderDTO>> GetOrderByID(int id)
+        public async Task<ActionResult<OrderDto>> GetOrderByID(int id)
         {
-            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
+            string customerID = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (string.IsNullOrEmpty(customerID))
             {
                 return BadRequest(XWaveResponse.Failed("Customer ID not found"));
             }
 
-            var orderDTO = await _orderService.GetOrderByIDAsync(customerID, id);
+            var orderDTO = await _orderService.GetOrderByIdAsync(customerID, id);
 
             return Ok(orderDTO);
         }
@@ -61,7 +61,7 @@ namespace XWave.Controllers
         [Authorize(Policy ="StaffOnly")]
         public async Task<ActionResult<OrderDetail>> GetOrderDetailAsync(int orderID, int productID)
         {
-            OrderDetail orderDetail = await _orderService.GetDetailsByOrderIDsAsync(orderID, productID);
+            OrderDetail orderDetail = await _orderService.GetDetailsByOrderIdsAsync(orderID, productID);
 
             return Ok(orderDetail);
         }
@@ -69,7 +69,7 @@ namespace XWave.Controllers
         [Authorize(Roles ="customer")]
         public async Task<IActionResult> CreateOrder([FromBody] PurchaseViewModel purchaseViewModel)
         {
-            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
+            string customerID = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (string.IsNullOrEmpty(customerID))
             {
                 return XWaveBadRequest("Customer ID not found");

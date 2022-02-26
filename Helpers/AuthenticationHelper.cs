@@ -12,10 +12,10 @@ namespace XWave.Helpers
         {
             _logger = logger;
         }
-        public string GetUserID(IIdentity? identity)
+        public string GetUserId(IIdentity? identity)
         {
             ClaimsIdentity? claimsIdentity = identity as ClaimsIdentity;
-            string userID = claimsIdentity?.FindFirst(CustomClaimType.UserID)?.Value ?? string.Empty;
+            string userID = claimsIdentity?.FindFirst(CustomClaimType.UserId)?.Value ?? string.Empty;
             
             return userID;
         }

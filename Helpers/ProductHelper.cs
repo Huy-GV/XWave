@@ -7,7 +7,7 @@ namespace XWave.Helpers
 {
     public class ProductHelper
     {
-        public StaffProductDTO? CreateStaffProductDTO(Product? product)
+        public StaffProductDto? CreateStaffProductDTO(Product? product)
         {
             if (product == null)
             {
@@ -15,45 +15,45 @@ namespace XWave.Helpers
             }
 
             var staffDiscountDTO = CreateStaffDiscountDTO(product);
-            return new StaffProductDTO
+            return new StaffProductDto
             {
-                ID = product.Id,
+                Id = product.Id,
                 ProductName = product.Name,
                 CategoryName = product.Category.Name,
                 Price = product.Price,
                 Quantity = product.Quantity,
-                CategoryID = product.Category.Id,
+                CategoryId = product.Category.Id,
                 LatestRestock = product.LastRestock,
                 Discount = staffDiscountDTO
             };
         }
-        public ProductDTO? CreateCustomerProductDTO(Product? product)
+        public ProductDto? CreateCustomerProductDTO(Product? product)
         {
             if (product == null)
             {
                 return null;
             }
-            DiscountDTO? discountDTO = CreateCustomerDiscountDTO(product);
+            DiscountDto? discountDTO = CreateCustomerDiscountDTO(product);
 
-            return new ProductDTO()
+            return new ProductDto()
             {
-                ID = product.Id,
+                Id = product.Id,
                 Name = product.Name,
                 Price = product.Price,
                 Quantity = product.Quantity,
-                CategoryID = product.CategoryID,
+                CategoryId = product.CategoryId,
                 CategoryName = product.Category.Name,
                 Discount = discountDTO
             };
         }
-        private DiscountDTO? CreateCustomerDiscountDTO(Product product)
+        private DiscountDto? CreateCustomerDiscountDTO(Product product)
         {
             if (product.Discount != null)
             {
                 var currentDate = DateTime.Now;
                 var isActive = product.Discount.StartDate < currentDate && product.Discount.EndDate > currentDate;
 
-                return new DiscountDTO
+                return new DiscountDto
                 {
                     Percentage = product.Discount.Percentage,
                     IsActive = isActive,
@@ -63,13 +63,13 @@ namespace XWave.Helpers
 
             return null;
         }
-        private StaffDiscountDTO? CreateStaffDiscountDTO(Product product)
+        private StaffDiscountDto? CreateStaffDiscountDTO(Product product)
         {
             if (product.Discount != null)
             {
-                return new StaffDiscountDTO()
+                return new StaffDiscountDto()
                 {
-                    ManagerID = product.Discount.ManagerId,
+                    ManagerId = product.Discount.ManagerId,
                     ManagerName = product.Discount.Manager.UserName,
                     StartDate = product.Discount.StartDate,
                     EndDate = product.Discount.EndDate,

@@ -10,7 +10,8 @@ namespace XWave.Models
     { 
         Purchase,
         Refund,
-        Salary
+        Salary,
+        PaymentAccountRegistration
     }
     public class TransactionDetails : IEntity
     {
@@ -21,7 +22,7 @@ namespace XWave.Models
         [Range(0, int.MaxValue)]
         public uint PurchaseCount { get; set; }
         [DataType(DataType.Date)]
-        public DateTime? LatestPurchase { get; set; }
+        public DateTime? LatestPurchase { get; set; } = null;
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public TransactionType TransactionType { get; set; }
         public Customer Customer { get; set; }

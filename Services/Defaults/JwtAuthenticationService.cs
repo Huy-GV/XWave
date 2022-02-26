@@ -67,13 +67,13 @@ namespace XWave.Services.Defaults
                 return await GetTokenAsync(user, role);
             }
         }
-        public async Task<AuthenticationResult> SignOutAsync(string userID)
+        public async Task<AuthenticationResult> SignOutAsync(string userId)
         {
             return new AuthenticationResult() { Token = string.Empty };
         }
-        public async Task<bool> IsUserInRoleAsync(string userID, string role)
+        public async Task<bool> IsUserInRoleAsync(string userId, string role)
         {
-            var user = await _userManager.FindByIdAsync(userID);
+            var user = await _userManager.FindByIdAsync(userId);
             return user == null ? false : await _userManager.IsInRoleAsync(user, role);
         }
         public async Task<AuthenticationResult> RegisterAsync(RegisterUserViewModel registerViewModel, string role)
@@ -119,7 +119,7 @@ namespace XWave.Services.Defaults
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(CustomClaimType.UserID, user.Id),
+                new Claim(CustomClaimType.UserId, user.Id),
                 new Claim(ClaimTypes.Role, role)
             };
 
@@ -137,11 +137,11 @@ namespace XWave.Services.Defaults
 
             return jwtSecurityToken;
         }
-        private async Task CreateCustomerAccount(string userID, RegisterUserViewModel registerViewModel)
+        private async Task CreateCustomerAccount(string userId, RegisterUserViewModel registerViewModel)
         {
             _dbContext.Customer.Add(new Customer()
             {
-                CustomerId = userID,
+                CustomerId = userId,
                 //PhoneNumber = registerViewModel.PhoneNumber,
                 //Address = registerViewModel.Address,
             });

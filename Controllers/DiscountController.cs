@@ -39,7 +39,7 @@ namespace XWave.Controllers
         public async Task<IEnumerable<Product>> GetProductsWithDiscount(int id)
         {
             //no need to include discount at this level
-            return await _discountService.GetProductsByDiscountID(id);
+            return await _discountService.GetProductsByDiscountId(id);
         }
 
         // GET api/<DiscountController>/5
@@ -56,13 +56,13 @@ namespace XWave.Controllers
         public async Task<ActionResult> CreateAsync([FromBody] DiscountViewModel newDiscount)
         {
             //TODO: move the following to auth service
-            var userID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
+            var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (ModelState.IsValid)
             {
-                var result = await _discountService.CreateAsync(userID, newDiscount);
+                var result = await _discountService.CreateAsync(userId, newDiscount);
                 if (result.Succeeded)
                 {
-                    return XWaveCreated($"https://localhost:5001/api/discount/{result.ResourceID}");
+                    return XWaveCreated($"https://localhost:5001/api/discount/{result.ResourceId}");
                 }
 
                 return XWaveBadRequest(result.Error);
@@ -83,11 +83,11 @@ namespace XWave.Controllers
 
             if (ModelState.IsValid)
             {
-                var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
-                var result = await _discountService.UpdateAsync(managerID, id, updatedDiscount);
+                var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+                var result = await _discountService.UpdateAsync(managerId, id, updatedDiscount);
                 if (result.Succeeded)
                 {
-                    return XWaveUpdated($"https://localhost:5001/api/discount/{result.ResourceID}");
+                    return XWaveUpdated($"https://localhost:5001/api/discount/{result.ResourceId}");
                 }
 
                 return XWaveBadRequest(result.Error);
@@ -105,8 +105,8 @@ namespace XWave.Controllers
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
-            var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
-            var result = await _discountService.DeleteAsync(managerID, id);
+            var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _discountService.DeleteAsync(managerId, id);
             if (result.Succeeded)
             {
                 return NoContent();

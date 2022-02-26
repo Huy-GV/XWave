@@ -44,7 +44,7 @@ namespace XWave.Data
             builder.Entity<Product>()
                 .HasOne(p => p.Discount)
                 .WithMany(d => d.Products)
-                .HasForeignKey(p => p.DiscountID)
+                .HasForeignKey(p => p.DiscountId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.NoAction);
 

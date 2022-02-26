@@ -10,6 +10,6 @@ namespace XWave.Services.Interfaces
         public Task<AuthenticationResult> SignInAsync(SignInUserViewModel signInViewModel);
         public Task<AuthenticationResult> RegisterAsync(RegisterUserViewModel registerViewModel, string role);
         public Task<AuthenticationResult> SignOutAsync(string username);
-        public Task<bool> IsUserInRoleAsync(string userID, string role);
+        public Task<bool> IsUserInRoleAsync(string userId, string role);
     }
 }

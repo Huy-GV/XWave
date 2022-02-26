@@ -13,7 +13,7 @@ namespace XWave.Services.Defaults
     public class PaymentService : ServiceBase, IPaymentService
     {
         public PaymentService(XWaveDbContext dbContext) : base(dbContext) { }
-        public async Task<ServiceResult> CreatePaymentAsync(string customerID, PaymentAccount inputPayment)
+        public async Task<ServiceResult> CreatePaymentAsync(string customerId, PaymentAccount inputPayment)
         {
             using var transaction = DbContext.Database.BeginTransaction();
             string savepoint = "BeforePaymentCreation";
@@ -31,28 +31,29 @@ namespace XWave.Services.Defaults
                 DbContext.Payment.Add(newPayment);
                 await DbContext.SaveChangesAsync();
 
-                var newPaymentDetail = new TransactionDetails()
+                var newTransactionDetails = new TransactionDetails()
                 {
-                    CustomerId = customerID,
+                    CustomerId = customerId,
                     PaymentAccountId = newPayment.Id,
                     Registration = DateTime.Now,
                     PurchaseCount = 0,
-                    LatestPurchase = null,
+                    TransactionType = TransactionType.PaymentAccountRegistration
                 };
 
-                DbContext.PaymentDetail.Add(newPaymentDetail);
+                DbContext.PaymentDetail.Add(newTransactionDetails);
                 await DbContext.SaveChangesAsync();
                 transaction.Commit();
 
                 return new ServiceResult
                 {
                     Succeeded = true,
-                    ResourceID = newPayment.Id.ToString(),
+                    ResourceId = newPayment.Id.ToString(),
                 };
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
+
                 return new ServiceResult
                 {
                     Error = ex.Message,
@@ -60,30 +61,32 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public async Task<ServiceResult> DeletePaymentAsync(string customerID, int paymentID)
+        public async Task<ServiceResult> DeletePaymentAsync(string customer
+            , int paymentId)
         {
             try
             {
-                var deletedPayment = await DbContext.Payment.FindAsync(paymentID);
+                var deletedPayment = await DbContext.Payment.FindAsync(paymentId);
                 DbContext.Remove(deletedPayment);
                 await DbContext.SaveChangesAsync();
+
                 return new ServiceResult()
                 {
                     Succeeded = true,
-                    ResourceID = paymentID.ToString(),
+                    ResourceId = paymentId.ToString(),
                 };
-            } catch (Exception ex)
+            } 
+            catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
             }
-
         }
 
-        public Task<IEnumerable<TransactionDetails>> GetAllPaymentDetailsForCustomerAsync(string customerID)
+        public Task<IEnumerable<TransactionDetails>> GetAllPaymentDetailsForCustomerAsync(string customerId)
         {
             return Task.FromResult(DbContext.PaymentDetail
                 .Include(pd => pd.Payment)
-                .Where(pd => pd.CustomerId == customerID)
+                .Where(pd => pd.CustomerId == customerId)
                 .AsEnumerable());
         }
         public Task<IEnumerable<TransactionDetails>> GetAllPaymentDetailsForStaffAsync()
@@ -93,7 +96,10 @@ namespace XWave.Services.Defaults
                 .AsEnumerable());
         }
 
-        public async Task<ServiceResult> UpdatePaymentAsync(string customerID, int id, PaymentAccount updatedPayment)
+        public async Task<ServiceResult> UpdatePaymentAsync(
+            string customerId, 
+            int id, 
+            PaymentAccount updatedPayment)
         {
             try
             {
@@ -103,21 +109,23 @@ namespace XWave.Services.Defaults
                 payment.ExpiryDate = updatedPayment.ExpiryDate;
                 DbContext.Payment.Update(payment);
                 await DbContext.SaveChangesAsync();
+
                 return new ServiceResult
                 {
                     Succeeded = true,
-                    ResourceID = id.ToString(),
+                    ResourceId = id.ToString(),
                 };
-            } catch (Exception ex)
+            } 
+            catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
             }
 
         }
-        public Task<bool> CustomerHasPayment(string customerID, int paymentID)
+        public Task<bool> CustomerHasPayment(string customerId, int paymentId)
         {
             return Task.FromResult(DbContext.PaymentDetail.Any(
-                pd => pd.CustomerId == customerID && pd.PaymentAccountId == paymentID));
+                pd => pd.CustomerId == customerId && pd.PaymentAccountId == paymentId));
         }
     }
 }

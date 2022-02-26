@@ -8,8 +8,8 @@ namespace XWave.Services.Interfaces
 {
     public interface IStaffAccountService
     {
-        public Task<StaffAccountDTO> GetStaffAccountByID(string id);
-        public Task<IEnumerable<StaffAccountDTO>> GetAllStaffAccounts();
+        public Task<StaffAccountDto> GetStaffAccountById(string id);
+        public Task<IEnumerable<StaffAccountDto>> GetAllStaffAccounts();
         public Task<ServiceResult> CreateStaffAccount(RegisterUserViewModel registerUserViewModel);
         //public Task<ServiceResult> UpdateStaffAccount(RegisterUserViewModel registerUserViewModel);
         //public Task<ServiceResult> DeleteStaffAccount(RegisterUserViewModel registerUserViewModel);

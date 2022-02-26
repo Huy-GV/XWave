@@ -1,8 +1,7 @@
 ﻿namespace XWave.DTOs.Customers
 {
-    public class OrderDetailDTO
+    public class OrderDetailDto
     {
-
         public uint Quantity { get; set; }
         public decimal Price { get; set; }
         public decimal Total { get => Quantity * Price;  }

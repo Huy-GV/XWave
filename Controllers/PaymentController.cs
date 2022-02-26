@@ -45,25 +45,25 @@ namespace XWave.Controllers
         [Authorize(Roles ="customer")]
         public ActionResult<IEnumerable<TransactionDetails>> GetByCustomer()
         {
-            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
-            if (customerID == null)
+            string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            if (customerId == null)
             {
-                return XWaveBadRequest("Customer ID is empty");
+                return XWaveBadRequest("Customer Id is empty");
             }
 
-            return Ok(_paymentService.GetAllPaymentDetailsForCustomerAsync(customerID));
+            return Ok(_paymentService.GetAllPaymentDetailsForCustomerAsync(customerId));
         }
-        [HttpPost("delete/{paymentID}")]
+        [HttpPost("delete/{paymentId}")]
         [Authorize(Roles = "customer")]
-        public async Task<ActionResult> Delete(int paymentID)
+        public async Task<ActionResult> Delete(int paymentId)
         {
-            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
-            if (! await _paymentService.CustomerHasPayment(customerID, paymentID))
+            string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            if (! await _paymentService.CustomerHasPayment(customerId, paymentId))
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
-            var result = await _paymentService.DeletePaymentAsync(customerID, paymentID);
+            var result = await _paymentService.DeletePaymentAsync(customerId, paymentId);
             
             if (!result.Succeeded)
             {
@@ -82,12 +82,12 @@ namespace XWave.Controllers
                 return BadRequest(ModelState);
             }
                 
-            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
-            if (!await _paymentService.CustomerHasPayment(customerID, id))
+            string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            if (!await _paymentService.CustomerHasPayment(customerId, id))
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
-            var result = await _paymentService.UpdatePaymentAsync(customerID, id, inputPayment);
+            var result = await _paymentService.UpdatePaymentAsync(customerId, id, inputPayment);
             if (!result.Succeeded)
             {
                 return XWaveBadRequest(result.Error);
@@ -99,18 +99,18 @@ namespace XWave.Controllers
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> CreatePaymentAsync(PaymentAccount inputPayment)
         {
-            string customerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
+            string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _paymentService.CreatePaymentAsync(customerID, inputPayment);
+            var result = await _paymentService.CreatePaymentAsync(customerId, inputPayment);
 
             if (!result.Succeeded)
             { 
                 return XWaveBadRequest(result.Error);
             }
 
-            return Ok(XWaveResponse.Created($"https://localhost:5001/api/payment/details/{result.ResourceID}"));
+            return Ok(XWaveResponse.Created($"https://localhost:5001/api/payment/details/{result.ResourceId}"));
         }
     }
 }

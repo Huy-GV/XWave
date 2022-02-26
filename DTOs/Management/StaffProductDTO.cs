@@ -3,15 +3,15 @@ using XWave.Models;
 
 namespace XWave.DTOs.Management
 {
-    public class StaffProductDTO
+    public class StaffProductDto
     {
-        public int ID { get; init; }
+        public int Id { get; init; }
         public string ProductName { get; init; }
         public string CategoryName { get; init; }
         public decimal Price { get; init; }
         public uint Quantity { get; init; }
         public DateTime LatestRestock { get; set; }
-        public int CategoryID { get; init; }
-        public StaffDiscountDTO? Discount { get; init; }
+        public int CategoryId { get; init; }
+        public StaffDiscountDto? Discount { get; init; }
     }
 }

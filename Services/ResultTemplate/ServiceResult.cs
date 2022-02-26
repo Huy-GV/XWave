@@ -4,7 +4,7 @@
     {
         public bool Succeeded { get; init; } = false;
         public string Error { get; init; }  = string.Empty;
-        public string ResourceID { get; init; } = string.Empty;
+        public string ResourceId { get; init; } = string.Empty;
         public static ServiceResult Failure(string error) 
         {
             return new ServiceResult { Error = error };
@@ -13,7 +13,7 @@
         {
             return new ServiceResult 
             { 
-                ResourceID = id,
+                ResourceId = id,
                 Succeeded = true,
             };
         }

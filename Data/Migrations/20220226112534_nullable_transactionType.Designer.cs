@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using XWave.Data;
 
 namespace XWave.Data.Migrations
 {
     [DbContext(typeof(XWaveDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220226112534_nullable_transactionType")]
+    partial class nullable_transactionType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -396,10 +398,10 @@ namespace XWave.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int>("CategoryID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DiscountId")
+                    b.Property<int?>("DiscountID")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("LastRestock")
@@ -418,9 +420,9 @@ namespace XWave.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("CategoryID");
 
-                    b.HasIndex("DiscountId");
+                    b.HasIndex("DiscountID");
 
                     b.ToTable("Product");
                 });
@@ -471,7 +473,6 @@ namespace XWave.Data.Migrations
                         .HasColumnType("datetime");
 
                     b.Property<string>("TransactionType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("CustomerId", "PaymentAccountId");
@@ -605,13 +606,13 @@ namespace XWave.Data.Migrations
                 {
                     b.HasOne("XWave.Models.Category", "Category")
                         .WithMany()
-                        .HasForeignKey("CategoryId")
+                        .HasForeignKey("CategoryID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("XWave.Models.Discount", "Discount")
                         .WithMany("Products")
-                        .HasForeignKey("DiscountId")
+                        .HasForeignKey("DiscountID")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Category");

@@ -11,10 +11,10 @@ namespace XWave.Services.Interfaces
 {
     public interface IOrderService
     {
-        Task<ServiceResult> CreateOrderAsync(PurchaseViewModel purchaseViewModel, string customerID);
-        Task<IEnumerable<OrderDTO>> GetAllOrdersAsync(string customerID);
-        Task<OrderDTO> GetOrderByIDAsync(string customerID, int orderID);
-        Task<OrderDetail> GetDetailsByOrderIDsAsync(int orderID, int productID);
+        Task<ServiceResult> CreateOrderAsync(PurchaseViewModel purchaseViewModel, string customerId);
+        Task<IEnumerable<OrderDto>> GetAllOrdersAsync(string customerId);
+        Task<OrderDto> GetOrderByIdAsync(string customerId, int orderId);
+        Task<OrderDetail> GetDetailsByOrderIdsAsync(int orderId, int productId);
         Task<IEnumerable<OrderDetail>> GetAllOrderDetailsAsync();
     }
 }

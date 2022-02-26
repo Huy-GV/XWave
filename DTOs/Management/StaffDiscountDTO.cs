@@ -2,9 +2,9 @@
 
 namespace XWave.DTOs.Management
 {
-    public class StaffDiscountDTO
+    public class StaffDiscountDto
     {
-        public string ManagerID { get; set; }
+        public string ManagerId { get; set; }
         public string ManagerName { get; set; } 
         public uint Percentage { get; set; }
         public bool IsActive => EndDate > StartDate;

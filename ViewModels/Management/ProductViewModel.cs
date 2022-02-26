@@ -17,6 +17,6 @@ namespace XWave.ViewModels.Management
 
         [Range(0, double.MaxValue, ErrorMessage = "Quantity cannot be negative")]
         public uint Quantity { get; set; }
-        public int CategoryID { get; set; }
+        public int CategoryId { get; set; }
     }
 }

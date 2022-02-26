@@ -18,14 +18,14 @@ namespace XWave.Controllers
             _staffAccountService = staffAccountService;
         }
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<StaffAccountDTO>>> GetStaffAccounts()
+        public async Task<ActionResult<IEnumerable<StaffAccountDto>>> GetStaffAccounts()
         {
             return Ok(await _staffAccountService.GetAllStaffAccounts());
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<StaffAccountDTO>> GetStaffAccountByID(string id)
+        public async Task<ActionResult<StaffAccountDto>> GetStaffAccountByID(string id)
         {
-            return Ok(await _staffAccountService.GetStaffAccountByID(id));
+            return Ok(await _staffAccountService.GetStaffAccountById(id));
         }
     }
 }

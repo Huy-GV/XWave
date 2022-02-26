@@ -157,7 +157,8 @@ namespace XWave.Data.DatabaseSeeding
                     CustomerId =  user1.Id,
                     PurchaseCount = 1,
                     Registration = DateTime.Parse("2/1/2021"),
-                    LatestPurchase = DateTime.Now
+                    LatestPurchase = DateTime.Now,
+                    TransactionType = TransactionType.Purchase
                 },
                 new TransactionDetails
                 {
@@ -165,7 +166,8 @@ namespace XWave.Data.DatabaseSeeding
                     PaymentAccountId = 2,
                     PurchaseCount = 5,
                     Registration = DateTime.Parse("18/6/2021"),
-                    LatestPurchase = DateTime.Now
+                    LatestPurchase = DateTime.Now,
+                    TransactionType = TransactionType.Purchase
                 }
             };
 

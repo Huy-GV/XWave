@@ -4,11 +4,11 @@ using XWave.Models;
 
 namespace XWave.DTOs.Customers
 {
-    public class OrderDTO
+    public class OrderDto
     {
-        public  IEnumerable<OrderDetailDTO> OrderDetailCollection { get; set; }   
+        public  IEnumerable<OrderDetailDto> OrderDetailCollection { get; set; }   
         public DateTime OrderDate { get; set; }
         public string AccountNo { get; set; }
-        public int ID { get; set; }
+        public int Id { get; set; }
     }
 }

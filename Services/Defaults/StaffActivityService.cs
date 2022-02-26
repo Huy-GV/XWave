@@ -22,7 +22,7 @@ namespace XWave.Services.Defaults
         {  
             _logger = logger;
         }
-        public async Task<ServiceResult> CreateLog<T>(string staffID, OperationType operation) where T : IEntity
+        public async Task<ServiceResult> CreateLog<T>(string staffId, OperationType operation) where T : IEntity
         {
             try
             {
@@ -30,18 +30,18 @@ namespace XWave.Services.Defaults
                 {
                     OperationType = operation,
                     Time = DateTime.Now,
-                    StaffId = staffID,
+                    StaffId = staffId,
                     EntityType = typeof(T).Name
                 };
                 DbContext.StaffActivityLog.Add(newLog);
                 await DbContext.SaveChangesAsync();
 
-                _logger.LogInformation($"Staff ID {staffID} created entity of type {newLog.EntityType}");
+                _logger.LogInformation($"Staff ID {staffId} created entity of type {newLog.EntityType}");
                 return ServiceResult.Success(newLog.Id.ToString());
             } 
             catch(Exception e)
             {
-                _logger.LogError($"Failed to log activiy create for staff ID {staffID}");
+                _logger.LogError($"Failed to log activiy create for staff ID {staffId}");
                 return ServiceResult.Failure(e.Message);
             }
         }

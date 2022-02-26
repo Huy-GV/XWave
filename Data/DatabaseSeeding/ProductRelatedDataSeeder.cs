@@ -84,7 +84,7 @@ namespace XWave.Data.DatabaseSeeding
                     Price = 200,
                     Quantity = 150,
                     LastRestock = DateTime.Parse("2/2/2020"),
-                    CategoryID = 3
+                    CategoryId = 3
                 },
                 new Product() 
                 {
@@ -92,8 +92,8 @@ namespace XWave.Data.DatabaseSeeding
                     Price = 80,
                     Quantity = 70,
                     LastRestock = DateTime.Parse("14/9/2021"),
-                    CategoryID = 2,
-                    DiscountID = 2
+                    CategoryId = 2,
+                    DiscountId = 2
                 },
                 new Product() 
                 {
@@ -101,8 +101,8 @@ namespace XWave.Data.DatabaseSeeding
                     Price = 160,
                     Quantity = 200,
                     LastRestock = DateTime.Parse("3/12/2021"),
-                    CategoryID = 2,
-                    DiscountID = 1
+                    CategoryId = 2,
+                    DiscountId = 1
                 },
                 new Product() 
                 {
@@ -110,8 +110,8 @@ namespace XWave.Data.DatabaseSeeding
                     Price = 1800,
                     Quantity = 10,
                     LastRestock = DateTime.Parse("11/10/2021"),
-                    CategoryID = 1,
-                    DiscountID = 2
+                    CategoryId = 1,
+                    DiscountId = 2
                 },
             };
             dbContext.Product.AddRange(products);

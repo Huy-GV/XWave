@@ -2,6 +2,6 @@
 {
     public class CustomClaimType
     {
-        public static string UserID => "customerID";
+        public static string UserId => "customerId";
     }
 }

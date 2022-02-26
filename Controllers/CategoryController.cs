@@ -8,7 +8,7 @@ using XWave.Helpers;
 using XWave.Models;
 using XWave.Services.Interfaces;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkId=397860
 
 namespace XWave.Controllers
 {
@@ -37,7 +37,7 @@ namespace XWave.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Category>> Get(int id)
         {
-            return Ok(await _categoryService.GetCategoryByID(id));
+            return Ok(await _categoryService.GetCategoryById(id));
         }
 
         // POST api/<CategoryController>
@@ -47,9 +47,9 @@ namespace XWave.Controllers
         {
             if (ModelState.IsValid)
             {
-                var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
-                var result = await _categoryService.CreateCategoryAsync(managerID, newCategory);
-                return XWaveCreated($"https://localhost:5001/api/category/admin/{result.ResourceID}");
+                var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+                var result = await _categoryService.CreateCategoryAsync(managerId, newCategory);
+                return XWaveCreated($"https://localhost:5001/api/category/admin/{result.ResourceId}");
             }
 
             return BadRequest(ModelState);
@@ -60,7 +60,7 @@ namespace XWave.Controllers
         [Authorize(Roles = "manager")]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] Category updatedCategory)
         {
-            var category = await _categoryService.GetCategoryByID(id);
+            var category = await _categoryService.GetCategoryById(id);
             if (category == null)
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
@@ -68,11 +68,11 @@ namespace XWave.Controllers
 
             if (ModelState.IsValid)
             {
-                var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
-                var result = await _categoryService.UpdateCategoryAsync(managerID, id, updatedCategory);
+                var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+                var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
                 if (result.Succeeded)
                 {
-                    return XWaveUpdated($"https://localhost:5001/api/category/admin/{result.ResourceID}");
+                    return XWaveUpdated($"https://localhost:5001/api/category/admin/{result.ResourceId}");
                 }
 
                 return XWaveBadRequest(result.Error);
@@ -86,14 +86,14 @@ namespace XWave.Controllers
         [Authorize(Roles ="manager")]
         public async Task<ActionResult> Delete(int id)
         {
-            var category = await _categoryService.GetCategoryByID(id);
+            var category = await _categoryService.GetCategoryById(id);
             if (category == null)
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
-            var managerID = _authenticationHelper.GetUserID(HttpContext.User.Identity);
-            var result = await _categoryService.DeleteCategoryAsync(managerID, id);
+            var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _categoryService.DeleteCategoryAsync(managerId, id);
             if (result.Succeeded)
             {
                 return NoContent();

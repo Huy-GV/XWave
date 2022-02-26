@@ -37,10 +37,10 @@ namespace XWave.Services.Defaults
             await _staffActivityService.CreateLog<Discount>(managerID, OperationType.Create);
             return ServiceResult.Success(newDiscount.Id.ToString());
         }
-        public async Task<IEnumerable<Product>> GetProductsByDiscountID(int discountID)
+        public async Task<IEnumerable<Product>> GetProductsByDiscountId(int discountID)
         {
             return await DbContext.Product
-                .Where(p => p.DiscountID == discountID)
+                .Where(p => p.DiscountId == discountID)
                 .ToListAsync();
         }
 
@@ -58,7 +58,7 @@ namespace XWave.Services.Defaults
             try
             {
                 //start tracking items to avoid FK constraint errors
-                await DbContext.Product.Where(d => d.DiscountID == id).ToListAsync();
+                await DbContext.Product.Where(d => d.DiscountId == id).ToListAsync();
 
                 DbContext.Discount.Remove(discount);
                 await DbContext.SaveChangesAsync();

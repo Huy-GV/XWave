@@ -19,11 +19,11 @@ namespace XWave.Models
         [Range(0, double.MaxValue, ErrorMessage ="Quantity cannot be negative")]
         public uint Quantity { get; set; }
         public DateTime LastRestock { get; set; }
-        public int CategoryID { get; set; }
-        public int? DiscountID { get; set; }
+        public int CategoryId { get; set; }
+        public int? DiscountId { get; set; }
         //navigation properties
         public Category Category { get; set; }
-        [ForeignKey("DiscountID")]
+        [ForeignKey("DiscountId")]
         public Discount? Discount { get; set; }
     }
 }

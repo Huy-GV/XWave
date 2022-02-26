@@ -2,14 +2,14 @@
 
 namespace XWave.DTOs.Customers
 {
-    public class ProductDTO
+    public class ProductDto
     {
-        public int ID { get; init; }
+        public int Id { get; init; }
         public string Name { get; init; }
         public string CategoryName { get; init; }
         public decimal Price { get; init; }
         public uint Quantity { get; init; }
-        public int CategoryID { get; init; }
-        public DiscountDTO? Discount { get; init; }
+        public int CategoryId { get; init; }
+        public DiscountDto? Discount { get; init; }
     }
 }

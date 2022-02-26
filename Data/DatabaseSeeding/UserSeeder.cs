@@ -89,6 +89,7 @@ namespace XWave.Data.DatabaseSeeding
                 dbContext.Customer.Add(new Customer()
                 {
                     CustomerId = user.Id,
+                    BillingAddress = "2 Main St, Sydney"
                 });
                 await dbContext.SaveChangesAsync();
             }

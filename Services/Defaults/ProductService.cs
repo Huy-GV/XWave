@@ -27,11 +27,11 @@ namespace XWave.Services.Defaults
             _staffActivityService = staffActivityService;
         }
 
-        public async Task<ServiceResult> CreateProductAsync(string staffID, ProductViewModel productViewModel)
+        public async Task<ServiceResult> CreateProductAsync(string staffId, ProductViewModel productViewModel)
         {
             try
             {
-                if (!await DbContext.Category.AnyAsync(c => c.Id == productViewModel.CategoryID))
+                if (!await DbContext.Category.AnyAsync(c => c.Id == productViewModel.CategoryId))
                 {
                     return ServiceResult.Failure("Category not found");
                 }
@@ -40,7 +40,7 @@ namespace XWave.Services.Defaults
                 var entry = DbContext.Product.Add(newProduct);
                 entry.CurrentValues.SetValues(productViewModel);
                 await DbContext.SaveChangesAsync();
-                var result = await _staffActivityService.CreateLog<Product>(staffID, OperationType.Create);
+                var result = await _staffActivityService.CreateLog<Product>(staffId, OperationType.Create);
                 if (!result.Succeeded)
                 {
                     throw new Exception(result.Error);
@@ -52,13 +52,13 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure(ex.Message);
             }
         }
-        public async Task<ServiceResult> DeleteProductAsync(string staffID, int id)
+        public async Task<ServiceResult> DeleteProductAsync(string staffId, int productId)
         {
             try
             {
-                DbContext.Product.Remove(await DbContext.Product.FindAsync(id));
+                DbContext.Product.Remove(await DbContext.Product.FindAsync(productId));
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.CreateLog<Product>(staffID, OperationType.Delete);
+                await _staffActivityService.CreateLog<Product>(staffId, OperationType.Delete);
                 return ServiceResult.Success();
             } catch (Exception ex)
             {
@@ -67,18 +67,18 @@ namespace XWave.Services.Defaults
 
         }
 
-        public Task<IEnumerable<ProductDTO>> GetAllProductsForCustomers()
+        public Task<IEnumerable<ProductDto>> GetAllProductsForCustomers()
         {
-            var productDTOs = DbContext.Product
+            var productDtos = DbContext.Product
                 .Include(p => p.Discount)
                 .Include(p => p.Category)
                 .Select(p => _productHelper.CreateCustomerProductDTO(p))
                 .AsEnumerable();
 
-            return Task.FromResult(productDTOs);
+            return Task.FromResult(productDtos);
         }
 
-        public Task<IEnumerable<StaffProductDTO>> GetAllProductsForStaff()
+        public Task<IEnumerable<StaffProductDto>> GetAllProductsForStaff()
         {
             
             var products = DbContext.Product
@@ -91,7 +91,7 @@ namespace XWave.Services.Defaults
             return Task.FromResult(products);
         }
 
-        public async Task<ProductDTO> GetProductByIDForCustomers(int id)
+        public async Task<ProductDto> GetProductByIdForCustomers(int id)
         {
             var product = await DbContext.Product
                 .Include(p => p.Discount)
@@ -100,18 +100,18 @@ namespace XWave.Services.Defaults
             return _productHelper.CreateCustomerProductDTO(product);
         }
 
-        public async Task<StaffProductDTO> GetProductByIDForStaff(int id)
+        public async Task<StaffProductDto> GetProductByIdForStaff(int id)
         {
-            var productDTO = await DbContext.Product
+            var productDto = await DbContext.Product
                         .Include(p => p.Discount)
                         .Include(p => p.Category)
                         .Select(p => _productHelper.CreateStaffProductDTO(p))
-                        .FirstOrDefaultAsync(p => p.ID == id);
+                        .FirstOrDefaultAsync(p => p.Id == id);
 
-            return productDTO;
+            return productDto;
         }
 
-        public async Task<ServiceResult> UpdateProductAsync(string staffID, int id, ProductViewModel updatedProduct)
+        public async Task<ServiceResult> UpdateProductAsync(string staffId, int id, ProductViewModel updatedProduct)
         {
             try
             {
@@ -120,7 +120,7 @@ namespace XWave.Services.Defaults
                 entry.State = EntityState.Modified;
                 entry.CurrentValues.SetValues(updatedProduct);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.CreateLog<Product>(staffID, OperationType.Modify);
+                await _staffActivityService.CreateLog<Product>(staffId, OperationType.Modify);
                 return ServiceResult.Success(id.ToString());
             } catch (Exception ex)
             {

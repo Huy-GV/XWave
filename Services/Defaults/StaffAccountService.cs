@@ -40,14 +40,14 @@ namespace XWave.Services.Defaults
             return ServiceResult.Failure("Failed to register user");
         }
 
-        public async Task<StaffAccountDTO> GetStaffAccountByID(string id)
+        public async Task<StaffAccountDto> GetStaffAccountById(string id)
         {
             var staffUser = await _userManager.FindByIdAsync(id);
             if (staffUser != null)
             {
-                var accountDTO = new StaffAccountDTO
+                var accountDTO = new StaffAccountDto
                 {
-                    AccountID = staffUser.Id,
+                    AccountId = staffUser.Id,
                     FullName = $"{staffUser.FirstName} {staffUser.LastName}",
                     RegistrationDate = staffUser.RegistrationDate
                 };
@@ -58,15 +58,15 @@ namespace XWave.Services.Defaults
             return null;
         }
 
-        public Task<IEnumerable<StaffAccountDTO>> GetAllStaffAccounts()
+        public Task<IEnumerable<StaffAccountDto>> GetAllStaffAccounts()
         {
             var staffUsers = _userManager.Users.ToList();
-            var accountDTOs = new List<StaffAccountDTO>();
+            var accountDTOs = new List<StaffAccountDto>();
             foreach (var user in staffUsers)
             {
-                var accountDTO = new StaffAccountDTO
+                var accountDTO = new StaffAccountDto
                 {
-                    AccountID = user.Id,
+                    AccountId = user.Id,
                     FullName = $"{user.FirstName} {user.LastName}",
                     RegistrationDate = user.RegistrationDate
                 };
@@ -75,7 +75,7 @@ namespace XWave.Services.Defaults
             }
 
 
-            return Task.FromResult<IEnumerable<StaffAccountDTO>>(accountDTOs);
+            return Task.FromResult<IEnumerable<StaffAccountDto>>(accountDTOs);
         }
     }
 }
