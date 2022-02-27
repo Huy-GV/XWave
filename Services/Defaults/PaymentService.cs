@@ -85,6 +85,7 @@ namespace XWave.Services.Defaults
         public Task<IEnumerable<TransactionDetails>> GetAllPaymentDetailsForCustomerAsync(string customerId)
         {
             return Task.FromResult(DbContext.PaymentDetail
+                .AsNoTracking()
                 .Include(pd => pd.Payment)
                 .Where(pd => pd.CustomerId == customerId)
                 .AsEnumerable());
@@ -92,6 +93,7 @@ namespace XWave.Services.Defaults
         public Task<IEnumerable<TransactionDetails>> GetAllPaymentDetailsForStaffAsync()
         {
             return Task.FromResult(DbContext.PaymentDetail
+                .AsNoTracking()
                 .Include(pd => pd.Payment)
                 .AsEnumerable());
         }

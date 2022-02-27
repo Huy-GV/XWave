@@ -47,11 +47,13 @@ namespace XWave.Services.Defaults
         }
         public async Task<IEnumerable<ActivityLog>> GetActivityLogsAsync()
         {
-            return await DbContext.StaffActivityLog.ToListAsync();
+            return await DbContext.StaffActivityLog.AsNoTracking().ToListAsync();
         }
         public async Task<ActivityLog> GetActivityLogAsync(int id)
         {
-            return await DbContext.StaffActivityLog.FirstOrDefaultAsync(a => a.Id == id);
+            return await DbContext.StaffActivityLog
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == id);
         }
     }
 }

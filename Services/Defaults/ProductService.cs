@@ -71,6 +71,7 @@ namespace XWave.Services.Defaults
         public Task<IEnumerable<ProductDto>> GetAllProductsForCustomers()
         {
             var productDtos = DbContext.Product
+                .AsNoTracking()
                 .Include(p => p.Discount)
                 .Include(p => p.Category)
                 .Select(p => _productHelper.CreateCustomerProductDTO(p))
@@ -83,6 +84,7 @@ namespace XWave.Services.Defaults
         {
             
             var products = DbContext.Product
+                .AsNoTracking()
                 .Include(p => p.Discount)
                     .ThenInclude(d => d.Manager)
                 .Include(p => p.Category)
@@ -95,6 +97,7 @@ namespace XWave.Services.Defaults
         public async Task<ProductDto> GetProductByIdForCustomers(int id)
         {
             var product = await DbContext.Product
+                .AsNoTracking()
                 .Include(p => p.Discount)
                 .SingleOrDefaultAsync(p => p.Id == id);
 
@@ -104,10 +107,11 @@ namespace XWave.Services.Defaults
         public async Task<StaffProductDto> GetProductByIdForStaff(int id)
         {
             var productDto = await DbContext.Product
-                        .Include(p => p.Discount)
-                        .Include(p => p.Category)
-                        .Select(p => _productHelper.CreateStaffProductDTO(p))
-                        .FirstOrDefaultAsync(p => p.Id == id);
+                .AsNoTracking()
+                .Include(p => p.Discount)
+                .Include(p => p.Category)
+                .Select(p => _productHelper.CreateStaffProductDTO(p))
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             return productDto;
         }

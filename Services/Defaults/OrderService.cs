@@ -152,7 +152,8 @@ namespace XWave.Services.Defaults
         public Task<IEnumerable<OrderDto>> GetAllOrdersAsync(string customerId)
         {
             
-            var orderDTOs =  _dbContext.Order
+            var orderDtos =  _dbContext.Order
+                .AsNoTracking()
                 .Include(o => o.OrderDetailCollection)
                     .ThenInclude(od => od.Product)
                 .Include(o => o.Payment)
@@ -173,7 +174,7 @@ namespace XWave.Services.Defaults
                 })
                 .AsEnumerable();
 
-            return Task.FromResult(orderDTOs);
+            return Task.FromResult(orderDtos);
         }
 
         public async Task<OrderDetail> GetDetailsByOrderIdsAsync(int orderId, int productId)
