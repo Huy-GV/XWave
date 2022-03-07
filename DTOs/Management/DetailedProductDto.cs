@@ -3,7 +3,7 @@ using XWave.Models;
 
 namespace XWave.DTOs.Management
 {
-    public class StaffProductDto
+    public class DetailedProductDto
     {
         public int Id { get; init; }
         public string ProductName { get; init; }
@@ -12,6 +12,6 @@ namespace XWave.DTOs.Management
         public uint Quantity { get; init; }
         public DateTime LatestRestock { get; set; }
         public int CategoryId { get; init; }
-        public StaffDiscountDto? Discount { get; init; }
+        public DetailedDiscountDto? Discount { get; init; }
     }
 }

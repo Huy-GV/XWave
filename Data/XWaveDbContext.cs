@@ -15,18 +15,18 @@ namespace XWave.Data
         public DbSet<Discount> Discount { get; set; }
         public DbSet<Product> Product { get; set; }
         public DbSet<PaymentAccount> Payment { get; set; }
-        public DbSet<TransactionDetails> PaymentDetail { get; set; }
+        public DbSet<TransactionDetails> TransactionDetails { get; set; }
         public DbSet<Order> Order { get; set; }
-        public DbSet<OrderDetail> OrderDetail { get; set; }
+        public DbSet<OrderDetails> OrderDetails { get; set; }
         public DbSet<Customer> Customer { get; set; }
-        public DbSet<ActivityLog> StaffActivityLog { get; set; }
+        public DbSet<Activity> Activity { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<OrderDetail>()
+            builder.Entity<OrderDetails>()
                 .HasKey(od => new { od.OrderId, od.ProductId });
 
-            builder.Entity<OrderDetail>()
+            builder.Entity<OrderDetails>()
                 .HasIndex(od => od.OrderId)
                 .IsUnique(false);
                 
@@ -53,12 +53,12 @@ namespace XWave.Data
                 .WithMany()
                 .HasForeignKey(d => d.ManagerId);
 
-            builder.Entity<ActivityLog>()
+            builder.Entity<Activity>()
                 .HasOne(activityLog => activityLog.StaffUser)
                 .WithMany()
                 .HasForeignKey(activityLog => activityLog.StaffId);
 
-            builder.Entity<ActivityLog>()
+            builder.Entity<Activity>()
                 .Property(a => a.OperationType)
                 .HasConversion(new EnumToStringConverter<OperationType>());
 

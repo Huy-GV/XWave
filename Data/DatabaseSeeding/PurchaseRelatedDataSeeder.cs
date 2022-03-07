@@ -95,44 +95,44 @@ namespace XWave.Data.DatabaseSeeding
         }
         private static void CreateOrderDetail(XWaveDbContext dbContext)
         {
-            var orderDetail = new List<OrderDetail>()
+            var orderDetail = new List<OrderDetails>()
             {
-                new OrderDetail()
+                new OrderDetails()
                 {
                     OrderId = 1,
                     ProductId = 1,
                     PriceAtOrder = 200,
                     Quantity = 1,
                 },
-                new OrderDetail()
+                new OrderDetails()
                 {
                     OrderId = 1,
                     ProductId = 3,
                     PriceAtOrder = 90,
                     Quantity = 2,
                 },
-                new OrderDetail()
+                new OrderDetails()
                 {
                     OrderId = 2,
                     ProductId = 4,
                     PriceAtOrder = 1600,
                     Quantity = 1,
                 },
-                new OrderDetail()
+                new OrderDetails()
                 {
                     OrderId = 3,
                     ProductId = 4,
                     PriceAtOrder = 1600,
                     Quantity = 4,
                 },
-                new OrderDetail()
+                new OrderDetails()
                 {
                     OrderId = 3,
                     ProductId = 2,
                     PriceAtOrder = 40,
                     Quantity = 9,
                 },
-                new OrderDetail()
+                new OrderDetails()
                 {
                     OrderId = 3,
                     ProductId = 3,
@@ -141,7 +141,7 @@ namespace XWave.Data.DatabaseSeeding
                 },
             };
 
-            dbContext.OrderDetail.AddRange(orderDetail);
+            dbContext.OrderDetails.AddRange(orderDetail);
             dbContext.SaveChanges();
         }
         private static async Task CreatePaymentDetail(
@@ -172,7 +172,7 @@ namespace XWave.Data.DatabaseSeeding
                 }
             };
 
-            dbContext.PaymentDetail.AddRange(paymentDetail);
+            dbContext.TransactionDetails.AddRange(paymentDetail);
             dbContext.SaveChanges();
         }
 

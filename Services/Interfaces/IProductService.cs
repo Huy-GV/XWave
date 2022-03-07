@@ -12,9 +12,9 @@ namespace XWave.Services.Interfaces
     public interface IProductService
     {
         Task<IEnumerable<ProductDto>> GetAllProductsForCustomers();
-        Task<IEnumerable<StaffProductDto>> GetAllProductsForStaff();
+        Task<IEnumerable<DetailedProductDto>> GetAllProductsForStaff();
         Task<ProductDto> GetProductByIdForCustomers(int id);
-        Task<StaffProductDto> GetProductByIdForStaff(int id);
+        Task<DetailedProductDto> GetProductByIdForStaff(int id);
         Task<ServiceResult> CreateProductAsync(string staffId, ProductViewModel productViewModel);
         Task<ServiceResult> UpdateProductAsync(string staffId, int id, ProductViewModel productViewModel);
         Task<ServiceResult> DeleteProductAsync(string staffId, int id);

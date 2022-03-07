@@ -12,7 +12,7 @@ namespace XWave.Controllers
     [Authorize(Roles ="manager")]
     public class StaffAccountController : Controller
     {
-        private IStaffAccountService _staffAccountService;
+        private readonly IStaffAccountService _staffAccountService;
         public StaffAccountController(IStaffAccountService staffAccountService)
         {
             _staffAccountService = staffAccountService;

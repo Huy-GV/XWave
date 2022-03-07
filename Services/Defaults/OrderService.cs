@@ -64,7 +64,7 @@ namespace XWave.Services.Defaults
                 };
 
                 List<Product> purchasedProducts = new();
-                List<OrderDetail> orderDetails = new();
+                List<OrderDetails> orderDetails = new();
 
                 foreach (var purchasedProduct in purchaseViewModel.ProductCart)
                 {
@@ -90,7 +90,7 @@ namespace XWave.Services.Defaults
 
                     product.Quantity -= purchasedProduct.Quantity;
                     purchasedProducts.Add(product);
-                    orderDetails.Add(new OrderDetail
+                    orderDetails.Add(new OrderDetails
                     {
                         Quantity = purchasedProduct.Quantity,
                         ProductId = purchasedProduct.ProductId,
@@ -104,7 +104,7 @@ namespace XWave.Services.Defaults
 
                 orderDetails = AssignOrderId(order.Id, orderDetails);
 
-                _dbContext.OrderDetail.AddRange(orderDetails);
+                _dbContext.OrderDetails.AddRange(orderDetails);
                 _dbContext.Product.UpdateRange(purchasedProducts);
                 await UpdateTransactionDetailsAsync(purchaseViewModel.PaymentId, customerId);
                 await _dbContext.SaveChangesAsync();
@@ -121,7 +121,7 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure(exception.Message);
             }
         }
-        private static List<OrderDetail> AssignOrderId(int orderId, List<OrderDetail> orderDetails)
+        private static List<OrderDetails> AssignOrderId(int orderId, List<OrderDetails> orderDetails)
         {
             foreach (var orderDetail in orderDetails)
             {
@@ -135,18 +135,18 @@ namespace XWave.Services.Defaults
             int paymentId,
             string customerId)
         {
-            var transactionDetails = await _dbContext.PaymentDetail.SingleAsync(
+            var transactionDetails = await _dbContext.TransactionDetails.SingleAsync(
                 pd => pd.PaymentAccountId == paymentId && pd.CustomerId == customerId);
 
             transactionDetails.PurchaseCount++;
             transactionDetails.LatestPurchase = DateTime.Now;
             transactionDetails.TransactionType = TransactionType.Purchase;
-            _dbContext.PaymentDetail.Update(transactionDetails);
+            _dbContext.TransactionDetails.Update(transactionDetails);
         }
 
-        public async Task<IEnumerable<OrderDetail>> GetAllOrderDetailsAsync()
+        public async Task<IEnumerable<OrderDetails>> GetAllOrderDetailsAsync()
         {
-            return await _dbContext.OrderDetail.ToListAsync();
+            return await _dbContext.OrderDetails.ToListAsync();
         }
 
         public Task<IEnumerable<OrderDto>> GetAllOrdersAsync(string customerId)
@@ -163,7 +163,7 @@ namespace XWave.Services.Defaults
                     Id = o.Id,
                     OrderDate = o.Date,
                     AccountNo = o.Payment.AccountNo,
-                    OrderDetailCollection = o
+                    Details = o
                         .OrderDetailCollection
                         .Select(od => new OrderDetailDto()
                         {
@@ -177,9 +177,9 @@ namespace XWave.Services.Defaults
             return Task.FromResult(orderDtos);
         }
 
-        public async Task<OrderDetail> GetDetailsByOrderIdsAsync(int orderId, int productId)
+        public async Task<OrderDetails> GetOrderDetailsByIdAsync(int orderId, int productId)
         {
-            return await _dbContext.OrderDetail.FirstOrDefaultAsync(
+            return await _dbContext.OrderDetails.FirstOrDefaultAsync(
                 od => od.ProductId == productId && od.OrderId == orderId);
         }
     }

@@ -25,7 +25,7 @@ namespace XWave.Models
         [StringLength(20, MinimumLength = 1)]
         public string Nationality { get; set; }
 
-        // REMOVED FROM TABLE
+        #region REMOVED FROM TABLE
         [NotMapped]
         public override string NormalizedEmail { get; set; }        
         [NotMapped]
@@ -42,5 +42,6 @@ namespace XWave.Models
         public override bool TwoFactorEnabled { get; set; }
         [NotMapped]
         public override bool PhoneNumberConfirmed { get; set; }
+        #endregion
     }
 }

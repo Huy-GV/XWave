@@ -40,7 +40,7 @@ namespace XWave.Services.Defaults
             return ServiceResult.Failure("Failed to register user");
         }
 
-        public async Task<StaffAccountDto> GetStaffAccountById(string id)
+        public async Task<StaffAccountDto?> GetStaffAccountById(string id)
         {
             var staffUser = await _userManager.FindByIdAsync(id);
             if (staffUser != null)

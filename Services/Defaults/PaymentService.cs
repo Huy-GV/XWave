@@ -40,7 +40,7 @@ namespace XWave.Services.Defaults
                     TransactionType = TransactionType.PaymentAccountRegistration
                 };
 
-                DbContext.PaymentDetail.Add(newTransactionDetails);
+                DbContext.TransactionDetails.Add(newTransactionDetails);
                 await DbContext.SaveChangesAsync();
                 transaction.Commit();
 
@@ -82,17 +82,17 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public Task<IEnumerable<TransactionDetails>> GetAllPaymentDetailsForCustomerAsync(string customerId)
+        public Task<IEnumerable<TransactionDetails>> GetAllTransactionDetailsForCustomersAsync(string customerId)
         {
-            return Task.FromResult(DbContext.PaymentDetail
+            return Task.FromResult(DbContext.TransactionDetails
                 .AsNoTracking()
                 .Include(pd => pd.Payment)
                 .Where(pd => pd.CustomerId == customerId)
                 .AsEnumerable());
         }
-        public Task<IEnumerable<TransactionDetails>> GetAllPaymentDetailsForStaffAsync()
+        public Task<IEnumerable<TransactionDetails>> GetAllTransactionDetailsForStaffAsync()
         {
-            return Task.FromResult(DbContext.PaymentDetail
+            return Task.FromResult(DbContext.TransactionDetails
                 .AsNoTracking()
                 .Include(pd => pd.Payment)
                 .AsEnumerable());
@@ -126,8 +126,8 @@ namespace XWave.Services.Defaults
         }
         public Task<bool> CustomerHasPayment(string customerId, int paymentId)
         {
-            return Task.FromResult(DbContext.PaymentDetail.Any(
-                pd => pd.CustomerId == customerId && pd.PaymentAccountId == paymentId));
+            return Task.FromResult(DbContext.TransactionDetails.Any(
+                td => td.CustomerId == customerId && td.PaymentAccountId == paymentId));
         }
     }
 }

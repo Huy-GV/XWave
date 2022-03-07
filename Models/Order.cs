@@ -16,6 +16,6 @@ namespace XWave.Models
         public int PaymentAccountId { get; set; }
         public Customer Customer { get; set; }
         public PaymentAccount Payment { get; set; }
-        public ICollection<OrderDetail> OrderDetailCollection { get; set; }
+        public ICollection<OrderDetails> OrderDetailCollection { get; set; }
     }
 }

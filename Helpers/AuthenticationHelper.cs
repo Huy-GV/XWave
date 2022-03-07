@@ -15,15 +15,16 @@ namespace XWave.Helpers
         public string GetUserId(IIdentity? identity)
         {
             ClaimsIdentity? claimsIdentity = identity as ClaimsIdentity;
-            string userID = claimsIdentity?.FindFirst(CustomClaimType.UserId)?.Value ?? string.Empty;
+            string userId = claimsIdentity?.FindFirst(CustomClaimType.UserId)?.Value ?? string.Empty;
             
-            return userID;
+            return userId;
         }
         public string GetUserName(IIdentity? identity)
         {
             ClaimsIdentity? claimsIdentity = identity as ClaimsIdentity;
-            string customerID = claimsIdentity?.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
-            return customerID;
+            var customerId = claimsIdentity?.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
+            
+            return customerId;
         }
     }
 }

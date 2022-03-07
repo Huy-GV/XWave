@@ -27,7 +27,7 @@ namespace XWave.Controllers
         }
         [HttpGet]
         [Authorize(Roles = "customer")]
-        public async Task<ActionResult<OrderDetail>> GetOrdersAsync()
+        public async Task<ActionResult<OrderDetails>> GetOrdersAsync()
         {
             string customerID = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (string.IsNullOrEmpty(customerID))
@@ -53,15 +53,15 @@ namespace XWave.Controllers
         }
         [HttpGet("detail")]
         //[Authorize(Policy ="StaffOnly")]
-        public async Task<ActionResult<OrderDetail>> GetOrderDetailsAsync()
+        public async Task<ActionResult<OrderDetails>> GetOrderDetailsAsync()
         {
             return Ok(await _orderService.GetAllOrderDetailsAsync());
         }
         [HttpGet("detail/{orderID}/{productID}")]
         [Authorize(Policy ="StaffOnly")]
-        public async Task<ActionResult<OrderDetail>> GetOrderDetailAsync(int orderID, int productID)
+        public async Task<ActionResult<OrderDetails>> GetOrderDetailAsync(int orderID, int productID)
         {
-            OrderDetail orderDetail = await _orderService.GetDetailsByOrderIdsAsync(orderID, productID);
+            OrderDetails orderDetail = await _orderService.GetOrderDetailsByIdAsync(orderID, productID);
 
             return Ok(orderDetail);
         }

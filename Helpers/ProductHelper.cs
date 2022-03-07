@@ -7,15 +7,11 @@ namespace XWave.Helpers
 {
     public class ProductHelper
     {
-        public StaffProductDto? CreateStaffProductDTO(Product? product)
+        public DetailedProductDto CreateDetailedProductDto(Product product)
         {
-            if (product == null)
-            {
-                return null;
-            }
+            var staffDiscountDTO = CreateDetailedDiscountDto(product);
 
-            var staffDiscountDTO = CreateStaffDiscountDTO(product);
-            return new StaffProductDto
+            return new DetailedProductDto
             {
                 Id = product.Id,
                 ProductName = product.Name,
@@ -27,13 +23,9 @@ namespace XWave.Helpers
                 Discount = staffDiscountDTO
             };
         }
-        public ProductDto? CreateCustomerProductDTO(Product? product)
+        public ProductDto CreateCustomerProductDTO(Product product)
         {
-            if (product == null)
-            {
-                return null;
-            }
-            DiscountDto? discountDTO = CreateCustomerDiscountDTO(product);
+            var discountDTO = CreateCustomerDiscountDto(product);
 
             return new ProductDto()
             {
@@ -46,7 +38,7 @@ namespace XWave.Helpers
                 Discount = discountDTO
             };
         }
-        private DiscountDto? CreateCustomerDiscountDTO(Product product)
+        private DiscountDto? CreateCustomerDiscountDto(Product product)
         {
             if (product.Discount != null)
             {
@@ -63,13 +55,12 @@ namespace XWave.Helpers
 
             return null;
         }
-        private StaffDiscountDto? CreateStaffDiscountDTO(Product product)
+        private DetailedDiscountDto? CreateDetailedDiscountDto(Product product)
         {
             if (product.Discount != null)
             {
-                return new StaffDiscountDto()
+                return new DetailedDiscountDto()
                 {
-                    ManagerId = product.Discount.ManagerId,
                     ManagerName = product.Discount.Manager.UserName,
                     StartDate = product.Discount.StartDate,
                     EndDate = product.Discount.EndDate,

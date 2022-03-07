@@ -42,7 +42,7 @@ namespace XWave.Controllers
 
         [HttpGet("staff")]
         [Authorize(Policy = "StaffOnly")]
-        public async Task<ActionResult<IEnumerable<StaffProductDto>>> GetForStaff()
+        public async Task<ActionResult<IEnumerable<DetailedProductDto>>> GetForStaff()
         {
             return Ok(await _productService.GetAllProductsForStaff());
         }
@@ -55,7 +55,7 @@ namespace XWave.Controllers
         }
         [HttpGet("staff/{id:int}")]
         //[Authorize(Policy ="StaffOnly")]
-        public async Task<ActionResult<StaffProductDto>> GetByIdForStaff(int id)
+        public async Task<ActionResult<DetailedProductDto>> GetByIdForStaff(int id)
         {
             return Ok(await _productService.GetProductByIdForStaff(id));
         }

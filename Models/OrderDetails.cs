@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.Models
 {
-    public class OrderDetail : IEntity
+    public class OrderDetails : IEntity
     {
         public int OrderId { get; set; }
         public int ProductId { get; set; }

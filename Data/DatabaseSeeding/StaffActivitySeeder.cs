@@ -48,23 +48,23 @@ namespace XWave.Data.DatabaseSeeding
                 throw new Exception("Insufficient staff or manager");
             }
 
-            var logs = new List<ActivityLog>
+            var logs = new List<Activity>
             {
-                new ActivityLog
+                new Activity
                 {
                     Time = DateTime.Now,
                     StaffId = staff[0].Id,
                     EntityType = typeof(Product).Name,
                     OperationType = OperationType.Create,
                 },
-                new ActivityLog
+                new Activity
                 {
                     Time = DateTime.Now,
                     StaffId = staff[1].Id,
                     EntityType = typeof(Product).Name,
                     OperationType = OperationType.Modify,
                 },
-                new ActivityLog
+                new Activity
                 {
                     Time = DateTime.Now,
                     StaffId = managers[0].Id,
@@ -73,7 +73,7 @@ namespace XWave.Data.DatabaseSeeding
                 },
             };
 
-            dbContext.StaffActivityLog.AddRange(logs);
+            dbContext.Activity.AddRange(logs);
             dbContext.SaveChanges();
         }
     }

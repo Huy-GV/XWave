@@ -10,26 +10,25 @@ using XWave.Services.Interfaces;
 
 namespace XWave.Controllers
 {
-
     [ApiController]
     [Route("api/activity-log")]
-    //[Authorize(Roles ="manager")]
-    public class ActivityLogController : AbstractController<ActivityLogController>
+    [Authorize(Roles ="manager")]
+    public class ActivityController : AbstractController<ActivityController>
     {
         private readonly IStaffActivityService _staffActivityService;
-        public ActivityLogController(
+        public ActivityController(
             IStaffActivityService staffActivityService,
-            ILogger<ActivityLogController> logger) : base(logger)
+            ILogger<ActivityController> logger) : base(logger)
         {
             _staffActivityService = staffActivityService;
         }
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ActivityLog>>> Get()
+        public async Task<ActionResult<IEnumerable<Activity>>> Get()
         {
             return Ok(await _staffActivityService.GetActivityLogsAsync());
         }
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<ActivityLog>> Get(int id)
+        public async Task<ActionResult<Activity>> Get(int id)
         {
             return Ok(await _staffActivityService.GetActivityLogAsync(id));
         }

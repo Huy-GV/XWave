@@ -12,7 +12,7 @@ namespace XWave.Models
         Modify,
         Delete
     }
-    public class ActivityLog : IEntity
+    public class Activity : IEntity
     {
         public int Id { get; set; }
         [Required]
