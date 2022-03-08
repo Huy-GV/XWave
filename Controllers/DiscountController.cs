@@ -55,7 +55,6 @@ namespace XWave.Controllers
         [Authorize(Roles = "managers")]
         public async Task<ActionResult> CreateAsync([FromBody] DiscountViewModel newDiscount)
         {
-            //TODO: move the following to auth service
             var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (ModelState.IsValid)
             {

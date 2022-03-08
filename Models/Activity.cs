@@ -24,6 +24,7 @@ namespace XWave.Models
         public string StaffId { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public OperationType OperationType { get; set; }
+        [JsonIgnore]
         public ApplicationUser StaffUser { get; set; }
     }
 }

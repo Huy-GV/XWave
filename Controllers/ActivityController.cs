@@ -11,7 +11,7 @@ using XWave.Services.Interfaces;
 namespace XWave.Controllers
 {
     [ApiController]
-    [Route("api/activity-log")]
+    [Route("api/activity")]
     [Authorize(Roles ="manager")]
     public class ActivityController : AbstractController<ActivityController>
     {
