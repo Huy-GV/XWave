@@ -7,13 +7,14 @@ using XWave.Data;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
+using XWave.ViewModels.Customer;
 
 namespace XWave.Services.Defaults
 {
     public class PaymentService : ServiceBase, IPaymentService
     {
         public PaymentService(XWaveDbContext dbContext) : base(dbContext) { }
-        public async Task<ServiceResult> CreatePaymentAsync(string customerId, PaymentAccount inputPayment)
+        public async Task<ServiceResult> CreatePaymentAsync(string customerId, PaymentAccountViewModel inputPayment)
         {
             using var transaction = DbContext.Database.BeginTransaction();
             string savepoint = "BeforePaymentCreation";
@@ -23,12 +24,12 @@ namespace XWave.Services.Defaults
             {
                 var newPayment = new PaymentAccount()
                 {
-                    AccountNo = inputPayment.AccountNo,
+                    AccountNumber = inputPayment.AccountNumber,
                     Provider = inputPayment.Provider,
                     ExpiryDate = inputPayment.ExpiryDate,
                 };
 
-                DbContext.Payment.Add(newPayment);
+                DbContext.PaymentAccount.Add(newPayment);
                 await DbContext.SaveChangesAsync();
 
                 var newTransactionDetails = new TransactionDetails()
@@ -61,12 +62,11 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public async Task<ServiceResult> DeletePaymentAsync(string customer
-            , int paymentId)
+        public async Task<ServiceResult> DeletePaymentAsync(string customer, int paymentId)
         {
             try
             {
-                var deletedPayment = await DbContext.Payment.FindAsync(paymentId);
+                var deletedPayment = await DbContext.PaymentAccount.FindAsync(paymentId);
                 DbContext.Remove(deletedPayment);
                 await DbContext.SaveChangesAsync();
 
@@ -100,16 +100,16 @@ namespace XWave.Services.Defaults
 
         public async Task<ServiceResult> UpdatePaymentAsync(
             string customerId, 
-            int id, 
-            PaymentAccount updatedPayment)
+            int id,
+            PaymentAccountViewModel updatedPayment)
         {
             try
             {
-                var payment = await DbContext.Payment.FindAsync(id);
-                payment.AccountNo = updatedPayment.AccountNo;
-                payment.Provider = updatedPayment.Provider;
-                payment.ExpiryDate = updatedPayment.ExpiryDate;
-                DbContext.Payment.Update(payment);
+                var payment = await DbContext.PaymentAccount.FindAsync(id);
+                var entry = DbContext.Attach(payment);
+                entry.State = EntityState.Modified;
+                entry.CurrentValues.SetValues(updatedPayment);
+                DbContext.PaymentAccount.Update(payment);
                 await DbContext.SaveChangesAsync();
 
                 return new ServiceResult

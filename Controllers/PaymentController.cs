@@ -18,6 +18,7 @@ using System.Net.Http;
 using XWave.Services.Interfaces;
 using XWave.Helpers;
 using System.Net;
+using XWave.ViewModels.Customer;
 
 namespace XWave.Controllers
 {
@@ -75,7 +76,7 @@ namespace XWave.Controllers
         }
         [HttpPut("{id}")]
         [Authorize(Roles = "customer")]
-        public async Task<ActionResult> UpdatePaymentAsync(int id, PaymentAccount inputPayment)
+        public async Task<ActionResult> UpdatePaymentAsync(int id, PaymentAccountViewModel inputPayment)
         {
             if (!ModelState.IsValid)
             {
@@ -97,12 +98,14 @@ namespace XWave.Controllers
         }
         [HttpPost]
         [Authorize(Roles = "customer")]
-        public async Task<ActionResult> CreatePaymentAsync(PaymentAccount inputPayment)
+        public async Task<ActionResult> CreatePaymentAsync(PaymentAccountViewModel inputPayment)
         {
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
-
+            }
+                
             var result = await _paymentService.CreatePaymentAsync(customerId, inputPayment);
 
             if (!result.Succeeded)

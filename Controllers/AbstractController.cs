@@ -17,7 +17,7 @@ namespace XWave.Controllers
         }
         public ActionResult XWaveBadRequest(string error)
         {
-            return Ok(XWaveResponse.Failed(error));
+            return BadRequest(XWaveResponse.Failed(error));
         }
         public ActionResult XWaveUpdated(string url)
         {
