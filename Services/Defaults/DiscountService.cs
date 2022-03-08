@@ -22,19 +22,14 @@ namespace XWave.Services.Defaults
         {
             _staffActivityService = staffActivityService;
         }
-        public async Task<ServiceResult> CreateAsync(string managerID, DiscountViewModel discount)
+        public async Task<ServiceResult> CreateAsync(string managerId, DiscountViewModel discountViewModel)
         {
-            var newDiscount = new Discount()
-            {
-                EndDate = discount.EndDate,
-                StartDate = discount.StartDate,
-                Percentage = discount.Percentage,
-                ManagerId = managerID
-            };
-
-            DbContext.Add(newDiscount);
+            var newDiscount = new Discount() { ManagerId = managerId };
+            var entry = DbContext.Add(newDiscount);
+            entry.CurrentValues.SetValues(discountViewModel);
             await DbContext.SaveChangesAsync();
-            await _staffActivityService.CreateLog<Discount>(managerID, OperationType.Create);
+            await _staffActivityService.CreateLog<Discount>(managerId, OperationType.Create);
+
             return ServiceResult.Success(newDiscount.Id.ToString());
         }
         public async Task<IEnumerable<Product>> GetProductsByDiscountId(int discountID)
@@ -86,7 +81,7 @@ namespace XWave.Services.Defaults
             return await DbContext.Discount.FindAsync(id);
         }
 
-        public async Task<ServiceResult> UpdateAsync(string managerID, int id, DiscountViewModel updatedDiscount)
+        public async Task<ServiceResult> UpdateAsync(string managerID, int id, DiscountViewModel updatedDiscountViewModel)
         {
             var discount = await DbContext.Discount.FindAsync(id);
             if (discount == null)
@@ -94,9 +89,8 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure("Not found");
             }
 
-            var entry = DbContext.Attach(discount);
-            entry.State = EntityState.Modified;
-            entry.CurrentValues.SetValues(updatedDiscount);
+            var entry = DbContext.Discount.Update(discount);
+            entry.CurrentValues.SetValues(updatedDiscountViewModel);
             await DbContext.SaveChangesAsync();
             await _staffActivityService.CreateLog<Discount>(managerID, OperationType.Modify);
 

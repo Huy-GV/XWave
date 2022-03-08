@@ -36,7 +36,7 @@ namespace XWave.Services.Defaults
                     return ServiceResult.Failure("Category not found");
                 }
 
-                Product newProduct = new();
+                var newProduct = new Product();
                 var entry = DbContext.Product.Add(newProduct);
                 entry.CurrentValues.SetValues(productViewModel);
                 await DbContext.SaveChangesAsync();
@@ -119,14 +119,13 @@ namespace XWave.Services.Defaults
         public async Task<ServiceResult> UpdateProductAsync(
             string staffId, 
             int id, 
-            ProductViewModel updatedProduct)
+            ProductViewModel updatedProductViewModel)
         {
             try
             {
                 var product = await DbContext.Product.FindAsync(id);
-                var entry = DbContext.Attach(product);
-                entry.State = EntityState.Modified;
-                entry.CurrentValues.SetValues(updatedProduct);
+                var entry = DbContext.Update(product);
+                entry.CurrentValues.SetValues(updatedProductViewModel);
                 await DbContext.SaveChangesAsync();
                 await _staffActivityService.CreateLog<Product>(staffId, OperationType.Modify);
                 return ServiceResult.Success(id.ToString());

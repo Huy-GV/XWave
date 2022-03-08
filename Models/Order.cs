@@ -9,6 +9,7 @@ namespace XWave.Models
     {
         [Required]
         public int Id { get; set; }
+        // todo: add default value for Date
         [Required]
         [Column(TypeName = "datetime")]
         public DateTime Date { get; set; }

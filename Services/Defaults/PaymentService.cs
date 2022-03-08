@@ -106,8 +106,7 @@ namespace XWave.Services.Defaults
             try
             {
                 var payment = await DbContext.PaymentAccount.FindAsync(id);
-                var entry = DbContext.Attach(payment);
-                entry.State = EntityState.Modified;
+                var entry = DbContext.Update(payment);
                 entry.CurrentValues.SetValues(updatedPayment);
                 DbContext.PaymentAccount.Update(payment);
                 await DbContext.SaveChangesAsync();
