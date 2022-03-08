@@ -14,7 +14,7 @@ namespace XWave.Data
         public DbSet<Category> Category { get; set; }
         public DbSet<Discount> Discount { get; set; }
         public DbSet<Product> Product { get; set; }
-        public DbSet<PaymentAccount> Payment { get; set; }
+        public DbSet<PaymentAccount> PaymentAccount { get; set; }
         public DbSet<TransactionDetails> TransactionDetails { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderDetails> OrderDetails { get; set; }
@@ -31,7 +31,7 @@ namespace XWave.Data
                 .IsUnique(false);
                 
             builder.Entity<PaymentAccount>()
-                .HasIndex(p => new { p.AccountNo, p.Provider })
+                .HasIndex(p => new { p.AccountNumber, p.Provider })
                 .IsUnique();
 
             builder.Entity<TransactionDetails>()

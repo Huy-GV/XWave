@@ -48,7 +48,7 @@ namespace XWave.Services.Defaults
                     return ServiceResult.Failure("Customer not found");
                 }
                  
-                var payment = await _dbContext.Payment
+                var payment = await _dbContext.PaymentAccount
                     .SingleOrDefaultAsync(p => p.Id == purchaseViewModel.PaymentId);
 
                 if (payment == null)
@@ -162,7 +162,7 @@ namespace XWave.Services.Defaults
                 {
                     Id = o.Id,
                     OrderDate = o.Date,
-                    AccountNo = o.Payment.AccountNo,
+                    AccountNo = o.Payment.AccountNumber,
                     Details = o
                         .OrderDetailCollection
                         .Select(od => new OrderDetailDto()

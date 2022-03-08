@@ -46,19 +46,19 @@ namespace XWave.Data.DatabaseSeeding
                 new PaymentAccount()
                 {
                     Provider = "mastercard",
-                    AccountNo = "12345678",
+                    AccountNumber = "12345678",
                     ExpiryDate = DateTime.Parse("2/5/2023"),
 
                 },
                 new PaymentAccount()
                 {
                     Provider = "visa",
-                    AccountNo = "24681357",
+                    AccountNumber = "24681357",
                     ExpiryDate = DateTime.Parse("1/2/2023"),
                 },
             };
 
-            dbContext.Payment.AddRange(payments);
+            dbContext.PaymentAccount.AddRange(payments);
             dbContext.SaveChanges();
         }
         private static async Task CreateOrders(
