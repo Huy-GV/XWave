@@ -37,7 +37,7 @@ namespace XWave
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.Configure<JWT>(Configuration.GetSection("JWT"));
+            services.Configure<Jwt>(Configuration.GetSection("Jwt"));
             services.Configure<JwtCookie>(Configuration.GetSection("JwtCookie"));
 
             services

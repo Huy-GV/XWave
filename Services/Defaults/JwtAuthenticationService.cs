@@ -17,29 +17,21 @@ using XWave.Services.ResultTemplate;
 using XWave.Services.Interfaces;
 using XWave.Data;
 using System.Security.Principal;
+using XWave.Configuration;
 
 namespace XWave.Services.Defaults
 {
-    // TODO: refactor this
-    public class JWT
-    {
-        public string Key { get; set; }
-        public string Issuer { get; set; }
-        public string Audience { get; set; }
-        public double DurationInMinutes { get; set; }
-    }
     public class JwtAuthenticationService : IAuthenticationService
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<JwtAuthenticationService> _logger;
         private readonly XWaveDbContext _dbContext;
-        private readonly JWT _jwt;
+        private readonly Jwt _jwt;
         public JwtAuthenticationService(
             UserManager<ApplicationUser> userManager,
-            IOptions<JWT> jwt,
+            IOptions<Jwt> jwt,
             ILogger<JwtAuthenticationService> logger,
-            XWaveDbContext dbContext
-            ) 
+            XWaveDbContext dbContext) 
         {
             _userManager = userManager;
             _jwt = jwt.Value;
@@ -62,14 +54,13 @@ namespace XWave.Services.Defaults
                 return authModel;
             } else 
             {
-                //TODO: get one role only
-                string role = (await _userManager.GetRolesAsync(user))[0];
+                string role = (await _userManager.GetRolesAsync(user)).First();
                 return await GetTokenAsync(user, role);
             }
         }
-        public async Task<AuthenticationResult> SignOutAsync(string userId)
+        public Task<AuthenticationResult> SignOutAsync(string userId)
         {
-            return new AuthenticationResult() { Token = string.Empty };
+            return Task.FromResult(new AuthenticationResult() { Token = string.Empty });
         }
         public async Task<bool> IsUserInRoleAsync(string userId, string role)
         {
