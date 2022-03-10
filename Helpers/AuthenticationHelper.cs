@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Security.Claims;
 using System.Security.Principal;
 using XWave.Data.Constants;
@@ -25,6 +27,15 @@ namespace XWave.Helpers
             var customerId = claimsIdentity?.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
             
             return customerId;
+        }
+        public CookieOptions CreateCookieOptions(int durationInDays, bool isSecure = true, bool isHttpOnly = true)
+        {
+            return new CookieOptions
+            {
+                Expires = DateTime.UtcNow.AddDays(durationInDays),
+                Secure = isSecure,
+                HttpOnly = isHttpOnly
+            };
         }
     }
 }

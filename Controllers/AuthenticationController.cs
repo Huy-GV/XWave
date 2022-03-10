@@ -16,6 +16,7 @@ using XWave.Models;
 using XWave.Services.ResultTemplate;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
+using XWave.Helpers;
 
 namespace XWave.Controllers
 {
@@ -25,14 +26,17 @@ namespace XWave.Controllers
     public class AuthenticationController : AbstractController<AuthenticationController>
     {
         private readonly IAuthenticationService _authService;
+        private readonly AuthenticationHelper _authenticationHelper;
         private readonly JwtCookie _jwtCookieConfig;
         public AuthenticationController(
             ILogger<AuthenticationController> logger,
             IAuthenticationService authenticationService,
+            AuthenticationHelper authenticationHelper,
             IOptions<JwtCookie> jwtCookieOptions) : base (logger)
         {
             _jwtCookieConfig = jwtCookieOptions.Value;
-            _authService = authenticationService;  
+            _authService = authenticationService;
+            _authenticationHelper = authenticationHelper;
         }
         //TODO: attach jwt to cookies in response
         [HttpPost("register/customer")]
@@ -46,6 +50,12 @@ namespace XWave.Controllers
             var result = await _authService.RegisterAsync(model, Roles.Customer);
             if (result.Succeeded)
             {
+                if (Request.Cookies.ContainsKey(_jwtCookieConfig.Name))
+                {
+                    Response.Cookies.Delete(_jwtCookieConfig.Name);
+                }
+                var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
+                Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
                 return Ok(result);
             }
                 
@@ -81,19 +91,14 @@ namespace XWave.Controllers
                 {
                     Response.Cookies.Delete(_jwtCookieConfig.Name);
                 }
-                var cookieOptions = new CookieOptions
-                {
-                    Expires = DateTime.UtcNow.AddDays(_jwtCookieConfig.DurationInDays),
-                    Secure = true,
-                    HttpOnly = true,
-                };
+                var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
                 Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
             }
 
             return Ok(result);
         }
         [HttpPost]
-        public async Task<ActionResult> SignOutAsync()
+        public ActionResult SignOutAsync()
         {
             if (Request.Cookies.ContainsKey(_jwtCookieConfig.Name))
             {
