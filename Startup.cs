@@ -68,9 +68,9 @@ namespace XWave
                             if (string.IsNullOrEmpty(context.Token)
                                 && context.Request.Cookies.ContainsKey(cookieName))
                             {
-                                Debug.WriteLine(context.Request.Cookies[cookieName]);
                                 context.Token = context.Request.Cookies[cookieName];
                             }
+
                             return Task.CompletedTask;
                         }
                     };

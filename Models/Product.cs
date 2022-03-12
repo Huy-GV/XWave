@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.Models
 {
-    //TODO: add another ID field to be set by the user
     public class Product : IEntity
     {
+        // change to string and allow manual input
         public int Id { get; set; }
         [Required]
         [StringLength(15, MinimumLength = 2)]

@@ -18,7 +18,7 @@ namespace XWave.Data
         public DbSet<TransactionDetails> TransactionDetails { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderDetails> OrderDetails { get; set; }
-        public DbSet<Customer> Customer { get; set; }
+        public DbSet<CustomerAccount> Customer { get; set; }
         public DbSet<Activity> Activity { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -62,15 +62,23 @@ namespace XWave.Data
                 .Property(a => a.OperationType)
                 .HasConversion(new EnumToStringConverter<OperationType>());
 
-            builder.Entity<Staff>()
+            builder.Entity<StaffAccount>()
                 .HasOne<ApplicationUser>()
                 .WithOne()
-                .HasForeignKey<Staff>(s => s.StaffId);
+                .HasForeignKey<StaffAccount>(s => s.StaffId)
+                .OnDelete(DeleteBehavior.NoAction);
 
-            builder.Entity<Customer>()
+            builder.Entity<StaffAccount>()
+                .HasOne(sa => sa.CreatorManager)
+                .WithMany()
+                .HasForeignKey(s => s.CreatorManagerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<CustomerAccount>()
                 .HasOne<ApplicationUser>()
                 .WithOne()
-                .HasForeignKey<Customer>(c => c.CustomerId);
+                .HasForeignKey<CustomerAccount>(c => c.CustomerId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

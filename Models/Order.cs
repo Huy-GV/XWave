@@ -15,7 +15,7 @@ namespace XWave.Models
         public DateTime Date { get; set; }
         public string CustomerId { get; set; }
         public int PaymentAccountId { get; set; }
-        public Customer Customer { get; set; }
+        public CustomerAccount Customer { get; set; }
         public PaymentAccount Payment { get; set; }
         public ICollection<OrderDetails> OrderDetailCollection { get; set; }
     }

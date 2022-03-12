@@ -21,22 +21,18 @@ using XWave.Configuration;
 
 namespace XWave.Services.Defaults
 {
-    public class JwtAuthenticationService : IAuthenticationService
+    public class JwtAuthenticationService : ServiceBase, IAuthenticationService
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<JwtAuthenticationService> _logger;
-        private readonly XWaveDbContext _dbContext;
         private readonly Jwt _jwt;
         public JwtAuthenticationService(
             UserManager<ApplicationUser> userManager,
             IOptions<Jwt> jwt,
             ILogger<JwtAuthenticationService> logger,
-            XWaveDbContext dbContext) 
+            XWaveDbContext dbContext) : base(dbContext)
         {
             _userManager = userManager;
             _jwt = jwt.Value;
-            _logger = logger;
-            _dbContext = dbContext;
         }
         public async Task<AuthenticationResult> SignInAsync(SignInUserViewModel model)
         {
@@ -130,13 +126,13 @@ namespace XWave.Services.Defaults
         }
         private async Task CreateCustomerAccount(string userId, RegisterUserViewModel registerViewModel)
         {
-            _dbContext.Customer.Add(new Customer()
+            DbContext.Customer.Add(new CustomerAccount()
             {
                 CustomerId = userId,
                 //PhoneNumber = registerViewModel.PhoneNumber,
                 //Address = registerViewModel.Address,
             });
-            await _dbContext.SaveChangesAsync();
+            await DbContext.SaveChangesAsync();
         }
         private async Task<AuthenticationResult> GetTokenAsync (
             ApplicationUser user,

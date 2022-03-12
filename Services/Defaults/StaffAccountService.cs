@@ -21,6 +21,7 @@ namespace XWave.Services.Defaults
         {
             _userManager = userManager;
         }
+        // todo: rewrite this and add update functionality 
         public async Task<ServiceResult> CreateStaffAccount(RegisterUserViewModel registerUserViewModel)
         {
             var user = new ApplicationUser

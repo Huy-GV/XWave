@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.Models
 {
-    public class Customer : IEntity
+    public class CustomerAccount : IEntity
     {
+        [Key]
         public string CustomerId { get; set; }
         [Required]
         [StringLength(100, MinimumLength = 1)]

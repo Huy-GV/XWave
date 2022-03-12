@@ -25,7 +25,7 @@ namespace XWave.Models
         public DateTime? LatestPurchase { get; set; } = null;
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public TransactionType TransactionType { get; set; }
-        public Customer Customer { get; set; }
+        public CustomerAccount Customer { get; set; }
         public PaymentAccount Payment { get; set; }
     }
 }

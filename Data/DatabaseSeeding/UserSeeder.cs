@@ -86,7 +86,7 @@ namespace XWave.Data.DatabaseSeeding
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(user, Roles.Customer);
-                dbContext.Customer.Add(new Customer()
+                dbContext.Customer.Add(new CustomerAccount()
                 {
                     CustomerId = user.Id,
                     BillingAddress = "2 Main St, Sydney"

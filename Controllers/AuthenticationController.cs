@@ -38,7 +38,6 @@ namespace XWave.Controllers
             _authService = authenticationService;
             _authenticationHelper = authenticationHelper;
         }
-        //TODO: attach jwt to cookies in response
         [HttpPost("register/customer")]
         public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync(RegisterUserViewModel model)
         {
