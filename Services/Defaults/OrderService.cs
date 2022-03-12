@@ -58,7 +58,6 @@ namespace XWave.Services.Defaults
                     
                 var order = new Order()
                 {
-                    Date = DateTime.Now,
                     CustomerId = customerId,
                     PaymentAccountId = purchaseViewModel.PaymentId,
                 };

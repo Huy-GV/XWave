@@ -6,7 +6,6 @@ using XWave.ViewModels.Management;
 
 namespace XWave.Services.Interfaces
 {
-    //todo rename to ActiviyService
     public interface IActivityService
     {
         Task<ServiceResult> CreateLog<T>(string staffID, OperationType operationType) where T : IEntity;

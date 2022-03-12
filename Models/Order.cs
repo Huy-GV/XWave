@@ -9,10 +9,9 @@ namespace XWave.Models
     {
         [Required]
         public int Id { get; set; }
-        // todo: add default value for Date
         [Required]
         [Column(TypeName = "datetime")]
-        public DateTime Date { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
         public string CustomerId { get; set; }
         public int PaymentAccountId { get; set; }
         public CustomerAccount Customer { get; set; }
