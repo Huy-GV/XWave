@@ -16,11 +16,11 @@ namespace XWave.Services.Defaults
 {
     public class ProductService : ServiceBase, IProductService
     {
-        private readonly IStaffActivityService _staffActivityService;
+        private readonly IActivityService _staffActivityService;
         private readonly ProductHelper _productHelper;
         public ProductService(
             XWaveDbContext dbContext,
-            IStaffActivityService staffActivityService,
+            IActivityService staffActivityService,
             ProductHelper productHelper) : base(dbContext) 
         { 
             _productHelper = productHelper;

@@ -60,7 +60,6 @@ namespace XWave.Data.DatabaseSeeding
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
                 Address = "2 Mian St VIC",
-                Nationality = "Australian"
             };
             var customer2 = new ApplicationUser()
             {
@@ -70,7 +69,6 @@ namespace XWave.Data.DatabaseSeeding
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
                 Address = "15 Second St VIC",
-                Nationality = "Australian"
             };
 
 
@@ -86,7 +84,7 @@ namespace XWave.Data.DatabaseSeeding
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(user, Roles.Customer);
-                dbContext.Customer.Add(new CustomerAccount()
+                dbContext.CustomerAccount.Add(new CustomerAccount()
                 {
                     CustomerId = user.Id,
                     BillingAddress = "2 Main St, Sydney"
@@ -105,7 +103,6 @@ namespace XWave.Data.DatabaseSeeding
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
                 Address = "15 Second St VIC",
-                Nationality = "Australian"
             };
             var staff2 = new ApplicationUser()
             {
@@ -115,7 +112,6 @@ namespace XWave.Data.DatabaseSeeding
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
                 Address = "15 Second St VIC",
-                Nationality = "Australian"
             };
             await CreateSingleStaffAsync(userManager, staff1);
             await CreateSingleStaffAsync(userManager, staff2);
@@ -138,7 +134,6 @@ namespace XWave.Data.DatabaseSeeding
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
                 Address = "15 Second St VIC",
-                Nationality = "Australian"
             };
 
             var manager2 = new ApplicationUser()
@@ -149,7 +144,6 @@ namespace XWave.Data.DatabaseSeeding
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
                 Address = "15 Second St VIC",
-                Nationality = "Australian"
             };
 
             await CreateManagerAsync(manager1, userManager);

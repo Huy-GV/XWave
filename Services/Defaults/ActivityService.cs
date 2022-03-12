@@ -13,12 +13,12 @@ using XWave.Services.ResultTemplate;
 
 namespace XWave.Services.Defaults
 {
-    public class StaffActivityService : ServiceBase, IStaffActivityService
+    public class ActivityService : ServiceBase, IActivityService
     {
         private readonly ILogger _logger;
-        public StaffActivityService(
+        public ActivityService(
             XWaveDbContext dbContext,
-            ILogger<StaffActivityService> logger) : base(dbContext) 
+            ILogger<ActivityService> logger) : base(dbContext) 
         {  
             _logger = logger;
         }
@@ -36,7 +36,6 @@ namespace XWave.Services.Defaults
                 DbContext.Activity.Add(newLog);
                 await DbContext.SaveChangesAsync();
 
-                _logger.LogInformation($"Staff ID {staffId} created entity of type {newLog.EntityType}");
                 return ServiceResult.Success(newLog.Id.ToString());
             } 
             catch(Exception e)

@@ -15,9 +15,9 @@ namespace XWave.Controllers
     [Authorize(Roles ="manager")]
     public class ActivityController : AbstractController<ActivityController>
     {
-        private readonly IStaffActivityService _staffActivityService;
+        private readonly IActivityService _staffActivityService;
         public ActivityController(
-            IStaffActivityService staffActivityService,
+            IActivityService staffActivityService,
             ILogger<ActivityController> logger) : base(logger)
         {
             _staffActivityService = staffActivityService;

@@ -11,7 +11,7 @@ namespace XWave.Services
         {
             //TODO: move all service registration here
 
-            services.AddScoped<IStaffActivityService, StaffActivityService>();
+            services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IProductService, ProductService>();

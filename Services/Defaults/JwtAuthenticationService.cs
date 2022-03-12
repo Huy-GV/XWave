@@ -126,7 +126,7 @@ namespace XWave.Services.Defaults
         }
         private async Task CreateCustomerAccount(string userId, RegisterUserViewModel registerViewModel)
         {
-            DbContext.Customer.Add(new CustomerAccount()
+            DbContext.CustomerAccount.Add(new CustomerAccount()
             {
                 CustomerId = userId,
                 //PhoneNumber = registerViewModel.PhoneNumber,

@@ -40,7 +40,7 @@ namespace XWave.Services.Defaults
             transaction.CreateSavepoint(savepoint);
             try
             {
-                var customer = await _dbContext.Customer
+                var customer = await _dbContext.CustomerAccount
                     .SingleOrDefaultAsync(c => c.CustomerId == customerId);
 
                 if (customer == null)

@@ -18,7 +18,8 @@ namespace XWave.Data
         public DbSet<TransactionDetails> TransactionDetails { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderDetails> OrderDetails { get; set; }
-        public DbSet<CustomerAccount> Customer { get; set; }
+        public DbSet<CustomerAccount> CustomerAccount { get; set; }
+        public DbSet<StaffAccount> StaffAccount { get; set; }
         public DbSet<Activity> Activity { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -69,9 +70,9 @@ namespace XWave.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<StaffAccount>()
-                .HasOne(sa => sa.CreatorManager)
+                .HasOne(sa => sa.ImmediateManager)
                 .WithMany()
-                .HasForeignKey(s => s.CreatorManagerId)
+                .HasForeignKey(s => s.ImmediateManagerId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<CustomerAccount>()

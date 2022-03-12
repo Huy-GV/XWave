@@ -12,8 +12,8 @@ namespace XWave.Models
     public class ApplicationUser : IdentityUser
     {
         [Required]
-        [Column(TypeName = "datetime")]
-        public DateTime RegistrationDate { get; set; }
+        [Column(TypeName = "date")]
+        public DateTime RegistrationDate { get; set; } = DateTime.Now;
         [Required]
         [StringLength(15, MinimumLength = 2)]
         public string FirstName { get; set; }
@@ -22,8 +22,6 @@ namespace XWave.Models
         public string LastName { get; set; }
         [StringLength(50, MinimumLength = 5)]
         public string Address { get; set; }
-        [StringLength(20, MinimumLength = 1)]
-        public string Nationality { get; set; }
 
         #region REMOVED FROM TABLE
         [NotMapped]

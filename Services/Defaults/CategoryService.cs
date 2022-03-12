@@ -12,10 +12,10 @@ namespace XWave.Services.Defaults
 {
     public class CategoryService : ServiceBase, ICategoryService
     {
-        private readonly IStaffActivityService _staffActivityService;
+        private readonly IActivityService _staffActivityService;
         public CategoryService(
             XWaveDbContext dbContext,
-            IStaffActivityService staffActivityService) : base(dbContext)
+            IActivityService staffActivityService) : base(dbContext)
         { 
             _staffActivityService = staffActivityService;
         }

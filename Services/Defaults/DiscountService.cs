@@ -15,10 +15,10 @@ namespace XWave.Services.Defaults
 {
     public class DiscountService : ServiceBase, IDiscountService
     {
-        private readonly IStaffActivityService _staffActivityService;
+        private readonly IActivityService _staffActivityService;
         public DiscountService(
             XWaveDbContext dbContext,
-            IStaffActivityService staffActivityService) : base(dbContext)  
+            IActivityService staffActivityService) : base(dbContext)  
         {
             _staffActivityService = staffActivityService;
         }

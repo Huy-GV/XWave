@@ -9,6 +9,8 @@ using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Authentication;
 using System;
+using Microsoft.EntityFrameworkCore;
+using XWave.Data.Constants;
 
 namespace XWave.Services.Defaults
 {
@@ -21,20 +23,26 @@ namespace XWave.Services.Defaults
         {
             _userManager = userManager;
         }
-        // todo: rewrite this and add update functionality 
-        public async Task<ServiceResult> CreateStaffAccount(RegisterUserViewModel registerUserViewModel)
+        public async Task<ServiceResult> RegisterStaffAccount(RegisterStaffViewModel registerStaffViewModel)
         {
             var user = new ApplicationUser
             {
-                UserName = registerUserViewModel.Username,
-                FirstName = registerUserViewModel.FirstName,
-                LastName = registerUserViewModel.LastName,
-                RegistrationDate = DateTime.UtcNow.Date,
+                UserName = registerStaffViewModel.Username,
+                FirstName = registerStaffViewModel.FirstName,
+                LastName = registerStaffViewModel.LastName,
             };
 
-            var result = await _userManager.CreateAsync(user, registerUserViewModel.Password);
+            var result = await _userManager.CreateAsync(user, registerStaffViewModel.Password);
             if (result.Succeeded)
             {
+                DbContext.StaffAccount.Add(new StaffAccount
+                {
+                    StaffId = user.Id,
+                    ImmediateManagerId = registerStaffViewModel.ImmediateManagerId,
+                    ContractEndDate = registerStaffViewModel.ContractEndDate,
+                    HourlyWage = registerStaffViewModel.HourlyWage
+                });
+
                 return ServiceResult.Success(user.Id);
             }
 
@@ -46,36 +54,55 @@ namespace XWave.Services.Defaults
             var staffUser = await _userManager.FindByIdAsync(id);
             if (staffUser != null)
             {
-                var accountDTO = new StaffAccountDto
-                {
-                    AccountId = staffUser.Id,
-                    FullName = $"{staffUser.FirstName} {staffUser.LastName}",
-                    RegistrationDate = staffUser.RegistrationDate
-                };
-
-                return accountDTO;
+                return await BuildStaffAccountDto(staffUser);
             }
 
             return null;
         }
 
-        public Task<IEnumerable<StaffAccountDto>> GetAllStaffAccounts()
+        public async Task<IEnumerable<StaffAccountDto>> GetAllStaffAccounts()
         {
-            var staffUsers = _userManager.Users.ToList();
-            var accountDTOs = new List<StaffAccountDto>();
+            var staffUsers = await _userManager.GetUsersInRoleAsync(Roles.Staff);
+            var accountDtos = new List<StaffAccountDto>();
+            StaffAccountDto? accountDto = null;
             foreach (var user in staffUsers)
             {
-                var accountDTO = new StaffAccountDto
+                accountDto = await BuildStaffAccountDto(user);
+                if (accountDto == null)
                 {
-                    AccountId = user.Id,
-                    FullName = $"{user.FirstName} {user.LastName}",
-                    RegistrationDate = user.RegistrationDate
-                };
+                    // log error
+                    continue;
+                }
 
-                accountDTOs.Add(accountDTO);
+                accountDtos.Add(accountDto);
             }
 
-            return Task.FromResult<IEnumerable<StaffAccountDto>>(accountDTOs);
+            return accountDtos;
         }
+        private async Task<StaffAccountDto?> BuildStaffAccountDto(ApplicationUser staffUser)
+        {
+            var staffAccount = await DbContext.StaffAccount.FindAsync(staffUser.Id);
+            if (staffAccount == null)
+            {
+                return null;
+            }
+
+            var managerFullName = string.Empty;
+            var manager = await _userManager.FindByIdAsync(staffAccount.ImmediateManagerId);
+            if (manager != null)
+            {
+                managerFullName = $"{manager.FirstName} {manager.LastName}";
+            }
+
+            return new StaffAccountDto
+            {
+                StaffId = staffUser.Id,
+                FullName = $"{staffUser.FirstName} {staffUser.LastName}",
+                ContractEndDate = staffAccount.ContractEndDate,
+                HourlyWage = staffAccount.HourlyWage,
+                ImmediateManagerFullName = managerFullName
+            };
+        }
+
     }
 }
