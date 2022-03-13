@@ -24,14 +24,13 @@ namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PaymentController : AbstractController<PaymentController>
+    public class PaymentController : XWaveBaseController
     {
         private readonly IPaymentService _paymentService;
         private readonly AuthenticationHelper _authenticationHelper;
         public PaymentController(
-            ILogger<PaymentController> logger,
             IPaymentService paymentService,
-            AuthenticationHelper authenticationHelper) : base(logger)
+            AuthenticationHelper authenticationHelper)
         {
             _paymentService = paymentService;
             _authenticationHelper = authenticationHelper;

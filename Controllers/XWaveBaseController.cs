@@ -4,13 +4,8 @@ using XWave.Data.Constants;
 
 namespace XWave.Controllers
 {
-    public class AbstractController<T> : ControllerBase where T : ControllerBase
+    public class XWaveBaseController : ControllerBase
     {
-        protected ILogger<T> Logger { get; }
-        public AbstractController(ILogger<T> logger)
-        {
-            Logger = logger;
-        }
         public ActionResult XWaveCreated(string url)
         {
             return Ok(XWaveResponse.Created(url));

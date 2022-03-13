@@ -13,14 +13,13 @@ namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class OrderController : AbstractController<OrderController>
+    public class OrderController : XWaveBaseController
     {
         private readonly IOrderService _orderService;
         private readonly AuthenticationHelper _authenticationHelper;
         public OrderController(
-            ILogger<OrderController> logger,
             IOrderService orderService,
-            AuthenticationHelper authenticationHelper) : base(logger)
+            AuthenticationHelper authenticationHelper)
         {
             _orderService = orderService;
             _authenticationHelper = authenticationHelper;   

@@ -14,14 +14,13 @@ namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoryController : AbstractController<CategoryController>
+    public class CategoryController : XWaveBaseController
     {
         private readonly ICategoryService _categoryService;
         private readonly AuthenticationHelper _authenticationHelper;
         public CategoryController(
-            ILogger<CategoryController> logger,
             ICategoryService categoryService,
-            AuthenticationHelper authenticationHelper) : base(logger)
+            AuthenticationHelper authenticationHelper)
         {
             _authenticationHelper = authenticationHelper;
             _categoryService = categoryService;

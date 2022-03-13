@@ -21,14 +21,13 @@ namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductController : AbstractController<ProductController>
+    public class ProductController : XWaveBaseController
     {
         private readonly IProductService _productService;
         private readonly AuthenticationHelper _authenticationHelper;
         public ProductController(
-            ILogger<ProductController> logger,
             IProductService productService,
-            AuthenticationHelper authenticationHelper) : base(logger)
+            AuthenticationHelper authenticationHelper)
         {
             _authenticationHelper = authenticationHelper;
             _productService = productService;

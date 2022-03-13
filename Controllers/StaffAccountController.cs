@@ -4,13 +4,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.DTOs.Management;
 using XWave.Services.Interfaces;
+using XWave.Services.ResultTemplate;
+using XWave.ViewModels.Authentication;
 
 namespace XWave.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/staff-account")]
     [ApiController]
     [Authorize(Roles ="manager")]
-    public class StaffAccountController : Controller
+    public class StaffAccountController : XWaveBaseController
     {
         private readonly IStaffAccountService _staffAccountService;
         public StaffAccountController(IStaffAccountService staffAccountService)
@@ -23,9 +25,20 @@ namespace XWave.Controllers
             return Ok(await _staffAccountService.GetAllStaffAccounts());
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<StaffAccountDto>> GetStaffAccountByID(string id)
+        public async Task<ActionResult<StaffAccountDto>> GetStaffAccountById(string id)
         {
             return Ok(await _staffAccountService.GetStaffAccountById(id));
+        }
+        [HttpPost("{id}")]
+        public async Task<ActionResult<ServiceResult>> UpdateStaffAccount(string id, UpdateStaffAccountViewModel updateStaffAccountViewModel)
+        {
+            var result = await _staffAccountService.UpdateStaffAccount(id, updateStaffAccountViewModel);
+            if (result.Succeeded)
+            {
+                return XWaveUpdated($"https://localhost:5001/api/staff-account/{result.ResourceId}");
+            }
+
+            return BadRequest(result.Error);
         }
     }
 }

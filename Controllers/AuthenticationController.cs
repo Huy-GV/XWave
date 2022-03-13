@@ -23,16 +23,15 @@ namespace XWave.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthenticationController : AbstractController<AuthenticationController>
+    public class AuthenticationController : XWaveBaseController
     {
         private readonly IAuthenticationService _authService;
         private readonly AuthenticationHelper _authenticationHelper;
         private readonly JwtCookie _jwtCookieConfig;
         public AuthenticationController(
-            ILogger<AuthenticationController> logger,
             IAuthenticationService authenticationService,
             AuthenticationHelper authenticationHelper,
-            IOptions<JwtCookie> jwtCookieOptions) : base (logger)
+            IOptions<JwtCookie> jwtCookieOptions)
         {
             _jwtCookieConfig = jwtCookieOptions.Value;
             _authService = authenticationService;

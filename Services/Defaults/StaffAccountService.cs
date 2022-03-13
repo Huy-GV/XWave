@@ -103,6 +103,21 @@ namespace XWave.Services.Defaults
                 ImmediateManagerFullName = managerFullName
             };
         }
+        public async Task<ServiceResult> UpdateStaffAccount(string staffId, UpdateStaffAccountViewModel updateStaffAccountViewModel)
+        {
+            var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
+            try
+            {
+                var entry = DbContext.StaffAccount.Update(staffAccount);
+                entry.CurrentValues.SetValues(updateStaffAccountViewModel);
+                await DbContext.SaveChangesAsync();
 
+                return ServiceResult.Success(staffId);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.Failure(ex.Message);
+            }
+        }
     }
 }

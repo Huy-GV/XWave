@@ -15,14 +15,13 @@ namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DiscountController : AbstractController<DiscountController>
+    public class DiscountController : XWaveBaseController
     {
         private readonly IDiscountService _discountService;
         private readonly AuthenticationHelper _authenticationHelper;
         public DiscountController(
-            ILogger<DiscountController> logger,
             IDiscountService discountService,
-            AuthenticationHelper authenticationHelper) : base(logger)
+            AuthenticationHelper authenticationHelper)
         {
             _discountService = discountService;
             _authenticationHelper = authenticationHelper;
