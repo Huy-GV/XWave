@@ -1,21 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using XWave.Models;
+using XWave.ViewModels.Management;
 
 namespace XWave.ViewModels.Authentication
 {
-    public class RegisterStaffViewModel : RegisterUserViewModel, IValidatableObject
+    public class RegisterStaffViewModel
     {
-        [Range(20, 500)]
-        public uint HourlyWage { get; set; }
-        public DateTime ContractEndDate { get; set; }
-        public string ImmediateManagerId { get; set; }
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (ContractEndDate > DateTime.Now.AddDays(30))
-            {
-                yield return new ValidationResult("Contract must last at least 30 days");
-            }
-        }
+        public AppUserViewModel User { get; set; }
+        public StaffAccountViewModel StaffAccount { get; set; }
     }
 }

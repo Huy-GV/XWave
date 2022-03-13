@@ -17,10 +17,10 @@ using XWave.Services.ResultTemplate;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using XWave.Helpers;
+using System.ComponentModel.DataAnnotations;
 
 namespace XWave.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
     public class AuthenticationController : XWaveBaseController
@@ -37,36 +37,39 @@ namespace XWave.Controllers
             _authService = authenticationService;
             _authenticationHelper = authenticationHelper;
         }
+        // todo: move this to user account controller
         [HttpPost("register/customer")]
-        public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync(RegisterUserViewModel model)
+        public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync(AppUserViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
               
-            var result = await _authService.RegisterAsync(model, Roles.Customer);
-            if (result.Succeeded)
-            {
-                if (Request.Cookies.ContainsKey(_jwtCookieConfig.Name))
-                {
-                    Response.Cookies.Delete(_jwtCookieConfig.Name);
-                }
-                var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
-                Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
-                return Ok(result);
-            }
+            //var result = await _authService.RegisterAsync(model, Roles.Customer);
+            //if (result.Succeeded)
+            //{
+            //    if (Request.Cookies.ContainsKey(_jwtCookieConfig.Name))
+            //    {
+            //        Response.Cookies.Delete(_jwtCookieConfig.Name);
+            //    }
+            //    var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
+            //    Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
+            //    return Ok(result);
+            //}
                 
             return XWaveBadRequest(result.Error); 
         }
         [HttpPost("register/staff")]
         [Authorize(Roles = "manager")]
-        public async Task<ActionResult<AuthenticationResult>> RegisterStaffAsync(RegisterUserViewModel model)
+        public async Task<ActionResult<AuthenticationResult>> RegisterStaffAsync(RegisterStaffViewModel viewModel)
         {
             if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
-
-            var result = await _authService.RegisterAsync(model, Roles.Staff);
+            }
+                
+            var result = await _authService.RegisterAsync(viewModel.User, Roles.Staff);
             if (result.Succeeded)
             {
                 return Ok(result);
@@ -75,7 +78,7 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
         [HttpPost("login")]
-        public async Task<ActionResult<AuthenticationResult>> LogInAsync(SignInUserViewModel model)
+        public async Task<ActionResult<AuthenticationResult>> LogInAsync(SignInViewModel model)
         {
             if (!ModelState.IsValid)
             {

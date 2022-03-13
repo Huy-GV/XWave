@@ -7,8 +7,8 @@ namespace XWave.Services.Interfaces
 {
     public interface IAuthenticationService
     {
-        public Task<AuthenticationResult> SignInAsync(SignInUserViewModel signInViewModel);
-        public Task<AuthenticationResult> RegisterAsync(RegisterUserViewModel registerViewModel, string role);
+        public Task<AuthenticationResult> SignInAsync(SignInViewModel signInViewModel);
+        public Task<AuthenticationResult> RegisterStaffAsync(RegisterStaffViewModel viewModel);
         public Task<AuthenticationResult> SignOutAsync(string username);
         public Task<bool> IsUserInRoleAsync(string userId, string role);
     }

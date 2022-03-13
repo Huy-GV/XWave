@@ -12,6 +12,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using XWave.Data.Constants;
 using System.Transactions;
+using XWave.ViewModels.Management;
 
 namespace XWave.Services.Defaults
 {
@@ -24,30 +25,24 @@ namespace XWave.Services.Defaults
         {
             _userManager = userManager;
         }
-        public async Task<ServiceResult> RegisterStaffAccount(RegisterStaffViewModel registerStaffViewModel)
+        public async Task<ServiceResult> RegisterStaffAccount(string id, StaffAccountViewModel registerStaffViewModel)
         {
-            var user = new ApplicationUser
-            {
-                UserName = registerStaffViewModel.Username,
-                FirstName = registerStaffViewModel.FirstName,
-                LastName = registerStaffViewModel.LastName,
-            };
-
-            var result = await _userManager.CreateAsync(user, registerStaffViewModel.Password);
-            if (result.Succeeded)
+            try
             {
                 DbContext.StaffAccount.Add(new StaffAccount
                 {
-                    StaffId = user.Id,
+                    StaffId = id,
                     ImmediateManagerId = registerStaffViewModel.ImmediateManagerId,
                     ContractEndDate = registerStaffViewModel.ContractEndDate,
                     HourlyWage = registerStaffViewModel.HourlyWage
                 });
 
-                return ServiceResult.Success(user.Id);
+                return ServiceResult.Success(id);
             }
-
-            return ServiceResult.Failure("Failed to register user");
+            catch (Exception ex)
+            {
+                return ServiceResult.Failure("Failed to register user");
+            }
         }
 
         public async Task<StaffAccountDto?> GetStaffAccountById(string id)
@@ -104,7 +99,7 @@ namespace XWave.Services.Defaults
                 ImmediateManagerFullName = managerFullName
             };
         }
-        public async Task<ServiceResult> UpdateStaffAccount(string staffId, UpdateStaffAccountViewModel updateStaffAccountViewModel)
+        public async Task<ServiceResult> UpdateStaffAccount(string staffId, StaffAccountViewModel updateStaffAccountViewModel)
         {
             var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
             try

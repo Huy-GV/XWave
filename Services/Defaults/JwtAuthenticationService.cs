@@ -23,18 +23,24 @@ namespace XWave.Services.Defaults
 {
     public class JwtAuthenticationService : ServiceBase, IAuthenticationService
     {
+        private readonly IStaffAccountService _staffAccountService;
+        private readonly ICustomerAccountService _customerAccountService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly Jwt _jwt;
         public JwtAuthenticationService(
             UserManager<ApplicationUser> userManager,
             IOptions<Jwt> jwt,
             ILogger<JwtAuthenticationService> logger,
-            XWaveDbContext dbContext) : base(dbContext)
+            XWaveDbContext dbContext,
+            IStaffAccountService staffAccountService,
+            ICustomerAccountService customerAccountService) : base(dbContext)
         {
+            _customerAccountService = customerAccountService;
+            _staffAccountService = staffAccountService;
             _userManager = userManager;
             _jwt = jwt.Value;
         }
-        public async Task<AuthenticationResult> SignInAsync(SignInUserViewModel model)
+        public async Task<AuthenticationResult> SignInAsync(SignInViewModel model)
         {
             AuthenticationResult authModel = new();
             var user = await _userManager.FindByNameAsync(model.Username);
@@ -63,26 +69,26 @@ namespace XWave.Services.Defaults
             var user = await _userManager.FindByIdAsync(userId);
             return user == null ? false : await _userManager.IsInRoleAsync(user, role);
         }
-        public async Task<AuthenticationResult> RegisterAsync(RegisterUserViewModel registerViewModel, string role)
+        public async Task<AuthenticationResult> RegisterStaffAsync(RegisterStaffViewModel viewModel)
         {
+            var appUser = viewModel.User;
+            // todo: add transactions
             var user = new ApplicationUser
             {
-                UserName = registerViewModel.Username,
-                FirstName = registerViewModel.FirstName,
-                LastName = registerViewModel.LastName,
+                UserName = appUser.Username,
+                FirstName = appUser.FirstName,
+                LastName = appUser.LastName,
                 RegistrationDate = DateTime.UtcNow.Date,
             };
 
-            var result = await _userManager.CreateAsync(user, registerViewModel.Password);
+            var result = await _userManager.CreateAsync(user, appUser.Password);
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, role);
-                if (role == Roles.Customer)
-                {
-                    await CreateCustomerAccount(user.Id, registerViewModel);
-                }
-                 
-                return await GetTokenAsync(user, role);
+                var staffAccount = viewModel.StaffAccount;
+                await _staffAccountService.RegisterStaffAccount(user.Id, staffAccount);
+                await _userManager.AddToRoleAsync(user, Roles.Staff);
+
+                return await GetTokenAsync(user, Roles.Staff);
             }
 
             var errorMessage = "";
@@ -124,7 +130,7 @@ namespace XWave.Services.Defaults
 
             return jwtSecurityToken;
         }
-        private async Task CreateCustomerAccount(string userId, RegisterUserViewModel registerViewModel)
+        private async Task CreateCustomerAccount(string userId, AppUserViewModel registerViewModel)
         {
             DbContext.CustomerAccount.Add(new CustomerAccount()
             {

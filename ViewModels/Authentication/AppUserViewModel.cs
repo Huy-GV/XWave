@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.ViewModels.Authentication
 {
-    public class RegisterUserViewModel
+    public class AppUserViewModel
     {
         [Required]
         public string FirstName { get; set; }
