@@ -11,6 +11,7 @@ using XWave.ViewModels.Authentication;
 using System;
 using Microsoft.EntityFrameworkCore;
 using XWave.Data.Constants;
+using System.Transactions;
 
 namespace XWave.Services.Defaults
 {
@@ -128,10 +129,27 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure("User not found");
             }
 
-            await _userManager.SetLockoutEnabledAsync(staffUser, true);
-            await _userManager.SetLockoutEndDateAsync(staffUser, DateTime.MaxValue);
+            using var transaction = DbContext.Database.BeginTransaction();
+            try
+            {
+                await _userManager.SetLockoutEnabledAsync(staffUser, true);
+                await _userManager.SetLockoutEndDateAsync(staffUser, DateTime.MaxValue);
+                var resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(staffUser);
+                var result = await _userManager.ResetPasswordAsync(staffUser, resetPasswordToken, Guid.NewGuid().ToString());
+                if (result.Succeeded)
+                {
+                    await transaction.CommitAsync();
+                    return ServiceResult.Success(staffId);
+                }
 
-            return ServiceResult.Success(staffId);
+                throw new Exception("Password reset failed");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+
+                return ServiceResult.Failure(ex.Message);
+            }
         }
     }
 }
