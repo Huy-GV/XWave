@@ -29,13 +29,9 @@ namespace XWave.Models
         [NotMapped]
         public override string NormalizedUserName { get; set; }
         [NotMapped]
-        public override bool LockoutEnabled { get; set; }
-        [NotMapped]
         public override int AccessFailedCount { get; set; }
         [NotMapped]
         public override string SecurityStamp { get; set; }
-        [NotMapped]
-        public override DateTimeOffset? LockoutEnd { get; set; }
         [NotMapped]
         public override bool TwoFactorEnabled { get; set; }
         [NotMapped]

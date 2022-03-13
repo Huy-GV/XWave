@@ -12,6 +12,6 @@ namespace XWave.Services.Interfaces
         public Task<IEnumerable<StaffAccountDto>> GetAllStaffAccounts();
         public Task<ServiceResult> RegisterStaffAccount(RegisterStaffViewModel registerStaffViewModel);
         public Task<ServiceResult> UpdateStaffAccount(string staffId, UpdateStaffAccountViewModel updateUserViewModel);
-        //public Task<ServiceResult> DeleteStaffAccount(RegisterUserViewModel registerUserViewModel);
+        public Task<ServiceResult> DeactivateStaffAccount(string staffId);
     }
 }

@@ -40,5 +40,16 @@ namespace XWave.Controllers
 
             return BadRequest(result.Error);
         }
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<ServiceResult>> DeactivateStaffAccount(string id)
+        {
+            var result = await _staffAccountService.DeactivateStaffAccount(id);
+            if (result.Succeeded)
+            {
+                return XWaveUpdated($"https://localhost:5001/api/staff-account/{result.ResourceId}");
+            }
+
+            return BadRequest(result.Error);
+        }
     }
 }

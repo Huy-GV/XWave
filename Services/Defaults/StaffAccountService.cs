@@ -119,5 +119,19 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure(ex.Message);
             }
         }
+
+        public async Task<ServiceResult> DeactivateStaffAccount(string staffId)
+        {
+            var staffUser = await _userManager.FindByIdAsync(staffId);
+            if (staffUser == null)
+            {
+                return ServiceResult.Failure("User not found");
+            }
+
+            await _userManager.SetLockoutEnabledAsync(staffUser, true);
+            await _userManager.SetLockoutEndDateAsync(staffUser, DateTime.MaxValue);
+
+            return ServiceResult.Success(staffId);
+        }
     }
 }
