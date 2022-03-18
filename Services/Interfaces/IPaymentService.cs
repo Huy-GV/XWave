@@ -9,12 +9,12 @@ namespace XWave.Services.Interfaces
 {
     public interface IPaymentService
     {
-        Task<ServiceResult> CreatePaymentAsync(string customerId, PaymentAccountViewModel newPayment);
-        Task<ServiceResult> UpdatePaymentAsync(
+        Task<ServiceResult> CreatePaymentAccountAsync(string customerId, PaymentAccountViewModel newPayment);
+        Task<ServiceResult> UpdatePaymentAccountAsync(
             string customerId, 
             int paymentId, 
             PaymentAccountViewModel updatedPayment);
-        Task<ServiceResult> DeletePaymentAsync(string customerId, int paymentId);
+        Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId);
         Task<IEnumerable<TransactionDetails>> GetAllTransactionDetailsForCustomersAsync(string customerId);
         Task<IEnumerable<TransactionDetails>> GetAllTransactionDetailsForStaffAsync();
         Task<bool> CustomerHasPayment(string customerId, int paymentId);

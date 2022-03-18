@@ -1,9 +1,11 @@
-﻿namespace XWave.ViewModels.Authentication
+﻿using XWave.ViewModels.Customer;
+
+namespace XWave.ViewModels.Authentication
 {
     public class RegisterCustomerViewModel
     {
-        public AppUserViewModel User { get; set; }
+        public RegisterUserViewModel User { get; set; }
         // todo: use in user account management
-        //public CustomerAccountViewModel CustomerAccount { get; set; }
+        public CustomerAccountViewModel CustomerAccount { get; set; }
     }
 }

@@ -29,17 +29,17 @@ namespace XWave.Controllers
         {
             return Ok(await _staffAccountService.GetStaffAccountById(id));
         }
-        [HttpPost("{id}")]
-        public async Task<ActionResult<ServiceResult>> UpdateStaffAccount(string id, UpdateStaffAccountViewModel updateStaffAccountViewModel)
-        {
-            var result = await _staffAccountService.UpdateStaffAccount(id, updateStaffAccountViewModel);
-            if (result.Succeeded)
-            {
-                return XWaveUpdated($"https://localhost:5001/api/staff-account/{result.ResourceId}");
-            }
+        //[HttpPost("{id}")]
+        //public async Task<ActionResult<ServiceResult>> UpdateStaffAccount(string id, UpdateStaffAccountViewModel updateStaffAccountViewModel)
+        //{
+        //    var result = await _staffAccountService.UpdateStaffAccount(id, updateStaffAccountViewModel);
+        //    if (result.Succeeded)
+        //    {
+        //        return XWaveUpdated($"https://localhost:5001/api/staff-account/{result.ResourceId}");
+        //    }
 
-            return BadRequest(result.Error);
-        }
+        //    return BadRequest(result.Error);
+        //}
         [HttpDelete("{id}")]
         public async Task<ActionResult<ServiceResult>> DeactivateStaffAccount(string id)
         {

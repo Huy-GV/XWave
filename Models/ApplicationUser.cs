@@ -20,8 +20,7 @@ namespace XWave.Models
         [Required]
         [StringLength(25, MinimumLength = 2)]
         public string LastName { get; set; }
-        [StringLength(50, MinimumLength = 5)]
-        public string Address { get; set; }
+        public override bool LockoutEnabled { get; set; } = false;
 
         #region REMOVED FROM TABLE
         [NotMapped]

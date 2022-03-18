@@ -1,72 +1,58 @@
-
-using Microsoft.AspNetCore.Authorization;
-using XWave.ViewModels.Authentication ;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using XWave.Services;
-using XWave.Data.Constants;
-using XWave.Data;
-using XWave.Services.Interfaces;
-using XWave.Configuration;
-using XWave.Models;
-using XWave.Services.ResultTemplate;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
+using XWave.Configuration;
+using XWave.Data.Constants;
 using XWave.Helpers;
-using System.ComponentModel.DataAnnotations;
+using XWave.Services.Interfaces;
+using XWave.Services.ResultTemplate;
+using XWave.ViewModels.Authentication;
 
 namespace XWave.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    public class AuthenticationController : XWaveBaseController
+    [ApiController]
+    public class CustomerAccountController : XWaveBaseController
     {
-        private readonly IAuthenticationService _authService;
+        private readonly Services.Interfaces.IAuthenticationService _authService;
+        private readonly ICustomerAccountService _customerAccountService;
         private readonly AuthenticationHelper _authenticationHelper;
         private readonly JwtCookie _jwtCookieConfig;
-        public AuthenticationController(
-            IAuthenticationService authenticationService,
+        public CustomerAccountController(
+            Services.Interfaces.IAuthenticationService authenticationService,
             AuthenticationHelper authenticationHelper,
+            ICustomerAccountService customerAccountService,
             IOptions<JwtCookie> jwtCookieOptions)
         {
             _jwtCookieConfig = jwtCookieOptions.Value;
             _authService = authenticationService;
             _authenticationHelper = authenticationHelper;
+            _customerAccountService = customerAccountService;   
         }
-        [HttpPost("login")]
-        public async Task<ActionResult<AuthenticationResult>> LogInAsync(SignInViewModel model)
+        [HttpPost("register/customer")]
+        public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync(RegisterCustomerViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var result = await _authService.SignInAsync(model);
+            var result = await _customerAccountService.RegisterCustomerAsync(viewModel);
             if (result.Succeeded)
             {
                 if (Request.Cookies.ContainsKey(_jwtCookieConfig.Name))
                 {
                     Response.Cookies.Delete(_jwtCookieConfig.Name);
                 }
+
                 var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
                 Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
+                return Ok(result);
             }
 
-            return Ok(result);
-        }
-        [HttpPost]
-        public ActionResult SignOutAsync()
-        {
-            if (Request.Cookies.ContainsKey(_jwtCookieConfig.Name))
-            {
-                Response.Cookies.Delete(_jwtCookieConfig.Name);
-            }
-
-            return NoContent();
+            return XWaveBadRequest(result.Error);
         }
     }
 }

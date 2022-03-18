@@ -17,6 +17,8 @@ namespace XWave.Services
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IDiscountService, DiscountService>();
+            services.AddScoped<IStaffAccountService, StaffAccountService>();
+            services.AddScoped<ICustomerAccountService, CustomerAccountService>();
         }
         public static void AddDefaultHelpers(this IServiceCollection services)
         {

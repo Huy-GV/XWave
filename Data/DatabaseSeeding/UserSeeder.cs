@@ -59,7 +59,6 @@ namespace XWave.Data.DatabaseSeeding
                 LastName = "Applebee",
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
-                Address = "2 Mian St VIC",
             };
             var customer2 = new ApplicationUser()
             {
@@ -68,7 +67,6 @@ namespace XWave.Data.DatabaseSeeding
                 LastName = "Applebee",
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
-                Address = "15 Second St VIC",
             };
 
 
@@ -102,7 +100,6 @@ namespace XWave.Data.DatabaseSeeding
                 LastName = "Applebee",
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
-                Address = "15 Second St VIC",
             };
             var staff2 = new ApplicationUser()
             {
@@ -111,7 +108,6 @@ namespace XWave.Data.DatabaseSeeding
                 LastName = "Applebee",
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
-                Address = "15 Second St VIC",
             };
             await CreateSingleStaffAsync(userManager, staff1);
             await CreateSingleStaffAsync(userManager, staff2);
@@ -133,7 +129,6 @@ namespace XWave.Data.DatabaseSeeding
                 LastName = "Applebee",
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
-                Address = "15 Second St VIC",
             };
 
             var manager2 = new ApplicationUser()
@@ -143,7 +138,6 @@ namespace XWave.Data.DatabaseSeeding
                 LastName = "Applebee",
                 RegistrationDate = DateTime.Now,
                 PhoneNumber = "98765432",
-                Address = "15 Second St VIC",
             };
 
             await CreateManagerAsync(manager1, userManager);

@@ -63,7 +63,7 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
-            var result = await _paymentService.DeletePaymentAsync(customerId, paymentId);
+            var result = await _paymentService.RemovePaymentAccountAsync(customerId, paymentId);
             
             if (!result.Succeeded)
             {
@@ -87,7 +87,7 @@ namespace XWave.Controllers
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
-            var result = await _paymentService.UpdatePaymentAsync(customerId, id, inputPayment);
+            var result = await _paymentService.UpdatePaymentAccountAsync(customerId, id, inputPayment);
             if (!result.Succeeded)
             {
                 return XWaveBadRequest(result.Error);
@@ -105,7 +105,7 @@ namespace XWave.Controllers
                 return BadRequest(ModelState);
             }
                 
-            var result = await _paymentService.CreatePaymentAsync(customerId, inputPayment);
+            var result = await _paymentService.CreatePaymentAccountAsync(customerId, inputPayment);
 
             if (!result.Succeeded)
             { 

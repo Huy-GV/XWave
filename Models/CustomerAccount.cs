@@ -10,7 +10,7 @@ namespace XWave.Models
         public string CustomerId { get; set; }
         [Required]
         [StringLength(100, MinimumLength = 1)]
-        public string BillingAddress { get; set; }
-        //todo: add promotion subscription
+        public string BillingAddress { get; set; } = string.Empty;
+        //public bool IsSubscribedToPromotions { get; set; } = false;
     }
 }

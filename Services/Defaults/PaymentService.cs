@@ -14,7 +14,7 @@ namespace XWave.Services.Defaults
     public class PaymentService : ServiceBase, IPaymentService
     {
         public PaymentService(XWaveDbContext dbContext) : base(dbContext) { }
-        public async Task<ServiceResult> CreatePaymentAsync(string customerId, PaymentAccountViewModel inputPayment)
+        public async Task<ServiceResult> CreatePaymentAccountAsync(string customerId, PaymentAccountViewModel inputPayment)
         {
             using var transaction = DbContext.Database.BeginTransaction();
             string savepoint = "BeforePaymentCreation";
@@ -62,7 +62,7 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public async Task<ServiceResult> DeletePaymentAsync(string customer, int paymentId)
+        public async Task<ServiceResult> RemovePaymentAccountAsync(string customer, int paymentId)
         {
             try
             {
@@ -98,7 +98,7 @@ namespace XWave.Services.Defaults
                 .AsEnumerable());
         }
 
-        public async Task<ServiceResult> UpdatePaymentAsync(
+        public async Task<ServiceResult> UpdatePaymentAccountAsync(
             string customerId, 
             int id,
             PaymentAccountViewModel updatedPayment)

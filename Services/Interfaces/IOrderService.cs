@@ -12,6 +12,7 @@ namespace XWave.Services.Interfaces
     public interface IOrderService
     {
         Task<ServiceResult> CreateOrderAsync(PurchaseViewModel purchaseViewModel, string customerId);
+        // todo: remove unnecessary get methods
         Task<IEnumerable<OrderDto>> GetAllOrdersAsync(string customerId);
         Task<OrderDto> GetOrderByIdAsync(string customerId, int orderId);
         Task<OrderDetails> GetOrderDetailsByIdAsync(int orderId, int productId);

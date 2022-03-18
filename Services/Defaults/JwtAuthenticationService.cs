@@ -42,7 +42,7 @@ namespace XWave.Services.Defaults
         }
         public async Task<AuthenticationResult> SignInAsync(SignInViewModel model)
         {
-            AuthenticationResult authModel = new();
+            var authModel = new AuthenticationResult();
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user == null) 
             {
@@ -69,40 +69,41 @@ namespace XWave.Services.Defaults
             var user = await _userManager.FindByIdAsync(userId);
             return user == null ? false : await _userManager.IsInRoleAsync(user, role);
         }
-        public async Task<AuthenticationResult> RegisterStaffAsync(RegisterStaffViewModel viewModel)
-        {
-            var appUser = viewModel.User;
-            // todo: add transactions
-            var user = new ApplicationUser
-            {
-                UserName = appUser.Username,
-                FirstName = appUser.FirstName,
-                LastName = appUser.LastName,
-                RegistrationDate = DateTime.UtcNow.Date,
-            };
+        //public async Task<AuthenticationResult> RegisterStaffAsync(RegisterStaffViewModel viewModel)
+        //{
+        //    var appUser = viewModel.User;
+        //    // todo: add transactions
+        //    var user = new ApplicationUser
+        //    {
+        //        UserName = appUser.Username,
+        //        FirstName = appUser.FirstName,
+        //        LastName = appUser.LastName,
+        //        RegistrationDate = DateTime.UtcNow.Date,
+        //    };
 
-            var result = await _userManager.CreateAsync(user, appUser.Password);
-            if (result.Succeeded)
-            {
-                var staffAccount = viewModel.StaffAccount;
-                await _staffAccountService.RegisterStaffAccount(user.Id, staffAccount);
-                await _userManager.AddToRoleAsync(user, Roles.Staff);
+        //    var result = await _userManager.CreateAsync(user, appUser.Password);
+        //    if (result.Succeeded)
+        //    {
+        //        var staffAccount = viewModel.StaffAccount;
+        //        await _staffAccountService.RegisterStaffAccount(user.Id, staffAccount);
+        //        await _userManager.AddToRoleAsync(user, Roles.Staff);
 
-                return await GetTokenAsync(user, Roles.Staff);
-            }
+        //        return await GetTokenAsync(user, Roles.Staff);
+        //    }
 
-            var errorMessage = "";
-            foreach (var error in result.Errors)
-            {
-                errorMessage += $"{error.Description}\n";
-            }
+        //    var errorMessage = "";
+        //    foreach (var error in result.Errors)
+        //    {
+        //        errorMessage += $"{error.Description}\n";
+        //    }
                 
 
-            return new AuthenticationResult
-            {
-                Error = errorMessage,
-            };
-        }
+        //    return new AuthenticationResult
+        //    {
+        //        Error = errorMessage,
+        //    };
+        //}
+       
         private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user, string role)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
@@ -130,16 +131,6 @@ namespace XWave.Services.Defaults
 
             return jwtSecurityToken;
         }
-        private async Task CreateCustomerAccount(string userId, AppUserViewModel registerViewModel)
-        {
-            DbContext.CustomerAccount.Add(new CustomerAccount()
-            {
-                CustomerId = userId,
-                //PhoneNumber = registerViewModel.PhoneNumber,
-                //Address = registerViewModel.Address,
-            });
-            await DbContext.SaveChangesAsync();
-        }
         private async Task<AuthenticationResult> GetTokenAsync (
             ApplicationUser user,
             string role)
@@ -152,6 +143,31 @@ namespace XWave.Services.Defaults
             };
 
             return result;
+        }
+
+        public async Task<AuthenticationResult> RegisterUserAsync(RegisterUserViewModel registerUserViewModel)
+        {
+            var appUser = new ApplicationUser
+            {
+                UserName = registerUserViewModel.Username,
+                FirstName = registerUserViewModel.FirstName,
+                LastName = registerUserViewModel.LastName,
+                RegistrationDate = DateTime.UtcNow.Date,
+            };
+
+            var result = await _userManager.CreateAsync(appUser, registerUserViewModel.Password);
+            if (result.Succeeded)
+            {
+                return new AuthenticationResult()
+                {
+                    Succeeded = true
+                };
+            }
+
+            return new AuthenticationResult()
+            {
+                Succeeded = false
+            };
         }
     }
 }
