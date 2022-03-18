@@ -55,18 +55,18 @@ namespace XWave.Controllers
         public async Task<ActionResult> CreateAsync([FromBody] DiscountViewModel newDiscount)
         {
             var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var result = await _discountService.CreateAsync(userId, newDiscount);
-                if (result.Succeeded)
-                {
-                    return XWaveCreated($"https://localhost:5001/api/discount/{result.ResourceId}");
-                }
-
-                return XWaveBadRequest(result.Error);
+                return BadRequest(ModelState);
             }
 
-            return BadRequest(ModelState);
+            var result = await _discountService.CreateAsync(userId, newDiscount);
+            if (result.Succeeded)
+            {
+                return XWaveCreated($"https://localhost:5001/api/discount/{result.ResourceId}");
+            }
+
+            return XWaveBadRequest(result.Error);
         }
 
         // PUT api/<DiscountController>/5
@@ -79,19 +79,19 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-                var result = await _discountService.UpdateAsync(managerId, id, updatedDiscount);
-                if (result.Succeeded)
-                {
-                    return XWaveUpdated($"https://localhost:5001/api/discount/{result.ResourceId}");
-                }
-
-                return XWaveBadRequest(result.Error);
+                return BadRequest(ModelState);
             }
 
-            return BadRequest(ModelState);
+            var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _discountService.UpdateAsync(managerId, id, updatedDiscount);
+            if (result.Succeeded)
+            {
+                return XWaveUpdated($"https://localhost:5001/api/discount/{result.ResourceId}");
+            }
+
+            return XWaveBadRequest(result.Error);
         }
 
         // DELETE api/<DiscountController>/5

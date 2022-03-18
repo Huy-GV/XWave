@@ -64,20 +64,19 @@ namespace XWave.Controllers
         [Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult> CreateAsync([FromBody] ProductViewModel productViewModel)
         {
-
             var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity); 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var result = await _productService.CreateProductAsync(staffId, productViewModel);
-                if (result.Succeeded)
-                {
-                    return XWaveCreated($"https://localhost:5001/api/product/staff/{result.ResourceId}");
-                }
-
-                return XWaveBadRequest(result.Error);
+                return BadRequest(ModelState);
             }
 
-            return BadRequest(ModelState);
+            var result = await _productService.CreateProductAsync(staffId, productViewModel);
+            if (result.Succeeded)
+            {
+                return XWaveCreated($"https://localhost:5001/api/product/staff/{result.ResourceId}");
+            }
+
+            return XWaveBadRequest(result.Error);
         }
 
         // PUT api/<ProductController>/5
@@ -91,19 +90,19 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-                var result = await _productService.UpdateProductAsync(staffId, id, updatedProduct);
-                if (result.Succeeded)
-                {
-                    return XWaveCreated($"https://localhost:5001/api/product/staff/{result.ResourceId}");
-                }
-
-                return XWaveBadRequest(result.Error);
+                return BadRequest(ModelState);
             }
 
-            return BadRequest(ModelState);
+            var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _productService.UpdateProductAsync(staffId, id, updatedProduct);
+            if (result.Succeeded)
+            {
+                return XWaveCreated($"https://localhost:5001/api/product/staff/{result.ResourceId}");
+            }
+
+            return XWaveBadRequest(result.Error);
         }
         // DELETE api/<ProductController>/5
         [Authorize(Policy = "StaffOnly")]
@@ -115,6 +114,7 @@ namespace XWave.Controllers
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
+
             var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var result = await _productService.DeleteProductAsync(staffId, id);
             if (result.Succeeded)

@@ -44,14 +44,14 @@ namespace XWave.Controllers
         [Authorize(Roles = "manager")]
         public async Task<ActionResult> CreateAsync([FromBody] Category newCategory)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-                var result = await _categoryService.CreateCategoryAsync(managerId, newCategory);
-                return XWaveCreated($"https://localhost:5001/api/category/admin/{result.ResourceId}");
+                return BadRequest(ModelState);
             }
 
-            return BadRequest(ModelState);
+            var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _categoryService.CreateCategoryAsync(managerId, newCategory);
+            return XWaveCreated($"https://localhost:5001/api/category/admin/{result.ResourceId}");
         }
 
         // PUT api/<CategoryController>/5
@@ -65,19 +65,19 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-                var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
-                if (result.Succeeded)
-                {
-                    return XWaveUpdated($"https://localhost:5001/api/category/admin/{result.ResourceId}");
-                }
-
-                return XWaveBadRequest(result.Error);
+                return BadRequest(ModelState);
             }
 
-            return BadRequest(ModelState);
+            var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
+            if (result.Succeeded)
+            {
+                return XWaveUpdated($"https://localhost:5001/api/category/admin/{result.ResourceId}");
+            }
+
+            return XWaveBadRequest(result.Error);
         }
 
         // DELETE api/<CategoryController>/5

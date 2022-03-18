@@ -24,11 +24,11 @@ namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PaymentController : XWaveBaseController
+    public class PaymentAccountController : XWaveBaseController
     {
         private readonly IPaymentService _paymentService;
         private readonly AuthenticationHelper _authenticationHelper;
-        public PaymentController(
+        public PaymentAccountController(
             IPaymentService paymentService,
             AuthenticationHelper authenticationHelper)
         {
@@ -58,7 +58,7 @@ namespace XWave.Controllers
         public async Task<ActionResult> Delete(int paymentId)
         {
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-            if (! await _paymentService.CustomerHasPayment(customerId, paymentId))
+            if (!await _paymentService.CustomerHasPayment(customerId, paymentId))
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }

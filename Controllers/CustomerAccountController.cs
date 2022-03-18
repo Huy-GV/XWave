@@ -16,18 +16,15 @@ namespace XWave.Controllers
     [ApiController]
     public class CustomerAccountController : XWaveBaseController
     {
-        private readonly Services.Interfaces.IAuthenticationService _authService;
         private readonly ICustomerAccountService _customerAccountService;
         private readonly AuthenticationHelper _authenticationHelper;
         private readonly JwtCookie _jwtCookieConfig;
         public CustomerAccountController(
-            Services.Interfaces.IAuthenticationService authenticationService,
             AuthenticationHelper authenticationHelper,
             ICustomerAccountService customerAccountService,
             IOptions<JwtCookie> jwtCookieOptions)
         {
             _jwtCookieConfig = jwtCookieOptions.Value;
-            _authService = authenticationService;
             _authenticationHelper = authenticationHelper;
             _customerAccountService = customerAccountService;   
         }
@@ -49,6 +46,7 @@ namespace XWave.Controllers
 
                 var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
                 Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
+
                 return Ok(result);
             }
 
