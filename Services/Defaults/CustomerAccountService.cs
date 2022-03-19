@@ -44,7 +44,7 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public async Task<ServiceResult> SubscribeToPromotionsAsync(string id, bool isSubscribed)
+        public async Task<ServiceResult> UpdateSubscriptionAsync(string id, bool isSubscribed)
         {
             try
             {

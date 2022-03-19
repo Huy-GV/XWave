@@ -52,5 +52,17 @@ namespace XWave.Controllers
 
             return XWaveBadRequest(result.Error);
         }
+        [HttpPost("subscribe")]
+        public async Task<ActionResult<ServiceResult>> UpdatePromotionSubscriptionAsync([FromBody] bool isSubscribed = true)
+        {
+            var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _customerAccountService.UpdateSubscriptionAsync(customerId, isSubscribed);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+
+            return XWaveBadRequest(result.Error);
+        }
     }
 }

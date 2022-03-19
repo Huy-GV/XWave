@@ -60,43 +60,8 @@ namespace XWave.Services.Defaults
         public async Task<bool> IsUserInRoleAsync(string userId, string role)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            return user == null ? false : await _userManager.IsInRoleAsync(user, role);
+            return user != null && await _userManager.IsInRoleAsync(user, role);
         }
-        //public async Task<AuthenticationResult> RegisterStaffAsync(RegisterStaffViewModel viewModel)
-        //{
-        //    var appUser = viewModel.User;
-        //    // todo: add transactions
-        //    var user = new ApplicationUser
-        //    {
-        //        UserName = appUser.Username,
-        //        FirstName = appUser.FirstName,
-        //        LastName = appUser.LastName,
-        //        RegistrationDate = DateTime.UtcNow.Date,
-        //    };
-
-        //    var result = await _userManager.CreateAsync(user, appUser.Password);
-        //    if (result.Succeeded)
-        //    {
-        //        var staffAccount = viewModel.StaffAccount;
-        //        await _staffAccountService.RegisterStaffAccount(user.Id, staffAccount);
-        //        await _userManager.AddToRoleAsync(user, Roles.Staff);
-
-        //        return await GetTokenAsync(user, Roles.Staff);
-        //    }
-
-        //    var errorMessage = "";
-        //    foreach (var error in result.Errors)
-        //    {
-        //        errorMessage += $"{error.Description}\n";
-        //    }
-                
-
-        //    return new AuthenticationResult
-        //    {
-        //        Error = errorMessage,
-        //    };
-        //}
-       
         private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user, string role)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
