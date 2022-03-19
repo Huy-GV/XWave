@@ -29,7 +29,7 @@ namespace XWave.Controllers
             _customerAccountService = customerAccountService;   
         }
         [HttpPost("register/customer")]
-        public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync(RegisterCustomerViewModel viewModel)
+        public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync([FromBody] RegisterCustomerViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {

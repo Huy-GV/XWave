@@ -13,9 +13,10 @@ namespace XWave.Models
         [Column(TypeName = "datetime")]
         public DateTime Date { get; set; } = DateTime.Now;
         public string CustomerId { get; set; }
+        public string DeliveryAddress { get; set; }
         public int PaymentAccountId { get; set; }
         public CustomerAccount Customer { get; set; }
         public PaymentAccount Payment { get; set; }
-        public ICollection<OrderDetails> OrderDetailCollection { get; set; }
+        public ICollection<OrderDetails> OrderDetails { get; set; }
     }
 }

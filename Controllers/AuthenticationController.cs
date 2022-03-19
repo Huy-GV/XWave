@@ -38,7 +38,7 @@ namespace XWave.Controllers
             _authenticationHelper = authenticationHelper;
         }
         [HttpPost("login")]
-        public async Task<ActionResult<AuthenticationResult>> LogInAsync(SignInViewModel model)
+        public async Task<ActionResult<AuthenticationResult>> LogInAsync([FromBody] SignInViewModel model)
         {
             if (!ModelState.IsValid)
             {

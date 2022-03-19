@@ -62,7 +62,7 @@ namespace XWave.Services.Defaults
                 List<Product> purchasedProducts = new();
                 List<OrderDetails> orderDetails = new();
 
-                foreach (var purchasedProduct in purchaseViewModel.ProductCart)
+                foreach (var purchasedProduct in purchaseViewModel.Cart)
                 {
                     var product = await _dbContext.Product
                         .Include(p => p.Discount)
@@ -150,7 +150,7 @@ namespace XWave.Services.Defaults
             
             var orderDtos =  _dbContext.Order
                 .AsNoTracking()
-                .Include(o => o.OrderDetailCollection)
+                .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
                 .Include(o => o.Payment)
                 .Where(o => o.CustomerId == customerId)
@@ -159,8 +159,8 @@ namespace XWave.Services.Defaults
                     Id = o.Id,
                     OrderDate = o.Date,
                     AccountNo = o.Payment.AccountNumber,
-                    Details = o
-                        .OrderDetailCollection
+                    OrderDetails = o
+                        .OrderDetails
                         .Select(od => new OrderDetailDto()
                         {
                             Quantity = od.Quantity,
