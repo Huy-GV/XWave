@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 using XWave.Data;
@@ -43,16 +44,38 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public Task<ServiceResult> SubscribeToPromotionsAsync(string id)
+        public async Task<ServiceResult> SubscribeToPromotionsAsync(string id, bool isSubscribed)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
+                if (customerAccount == null)
+                {
+                    return ServiceResult.Failure("User account not found");
+                }
+
+                DbContext.CustomerAccount.Update(customerAccount);
+                customerAccount.IsSubscribedToPromotions = isSubscribed;
+                await DbContext.SaveChangesAsync();
+
+                return ServiceResult.Success(id);
+            }
+            catch (Exception e)
+            {
+                return ServiceResult.Failure(e.Message);
+            }
         }
 
         public async Task<ServiceResult> UpdateCustomerAccountAsync(string id, CustomerAccountViewModel viewModel)
         {
             try
             {
-                var customerAccount = await DbContext.CustomerAccount.SingleAsync(ca => ca.CustomerId == id);
+                var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
+                if (customerAccount == null)
+                {
+                    return ServiceResult.Failure("User account not found");
+                }
+
                 var entry = DbContext.CustomerAccount.Update(customerAccount);
                 entry.CurrentValues.SetValues(viewModel);
                 await DbContext.SaveChangesAsync();

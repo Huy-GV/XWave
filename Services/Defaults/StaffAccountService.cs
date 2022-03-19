@@ -39,7 +39,7 @@ namespace XWave.Services.Defaults
 
                 return ServiceResult.Success(id);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return ServiceResult.Failure("Failed to register user");
             }
