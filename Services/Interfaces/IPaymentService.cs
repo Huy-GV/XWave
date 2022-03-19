@@ -15,8 +15,8 @@ namespace XWave.Services.Interfaces
             int paymentId, 
             PaymentAccountViewModel updatedPayment);
         Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId);
-        Task<IEnumerable<TransactionDetails>> GetAllTransactionDetailsForCustomersAsync(string customerId);
-        Task<IEnumerable<TransactionDetails>> GetAllTransactionDetailsForStaffAsync();
+        Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForCustomersAsync(string customerId);
+        Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForStaffAsync();
         Task<bool> CustomerHasPayment(string customerId, int paymentId);
     }
     

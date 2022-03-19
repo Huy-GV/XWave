@@ -25,7 +25,7 @@ namespace XWave.Services.Defaults
             {
                 DbContext.Category.Add(category);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.CreateLog<Category>(managerID, OperationType.Create);
+                await _staffActivityService.LogActivityAsync<Category>(managerID, OperationType.Create);
 
                 return ServiceResult.Success(category.Id.ToString());
             }
@@ -42,7 +42,7 @@ namespace XWave.Services.Defaults
                 var category = await DbContext.Category.FindAsync(id);
                 DbContext.Category.Remove(category);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.CreateLog<Category>(managerID, OperationType.Delete);
+                await _staffActivityService.LogActivityAsync<Category>(managerID, OperationType.Delete);
                 return ServiceResult.Success();
             }
             catch (Exception e)
@@ -50,12 +50,12 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure(e.Message);
             }
         }
-        public Task<IEnumerable<Category>> GetAllCategories()
+        public Task<IEnumerable<Category>> FindAllCategoriesAsync()
         {
             return Task.FromResult(DbContext.Category.AsEnumerable());
         }
 
-        public async Task<Category> GetCategoryById(int id)
+        public async Task<Category> FindCategoryByIdAsync(int id)
         {
             return await DbContext.Category.FindAsync(id);
         }
@@ -69,7 +69,7 @@ namespace XWave.Services.Defaults
                 category.Name = updatedCategory.Name;
                 DbContext.Category.Update(category);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.CreateLog<Category>(managerID, OperationType.Modify);
+                await _staffActivityService.LogActivityAsync<Category>(managerID, OperationType.Modify);
                 return ServiceResult.Success();
             }
             catch (Exception e)

@@ -22,24 +22,24 @@ namespace XWave.Services.Defaults
         {
             _staffActivityService = staffActivityService;
         }
-        public async Task<ServiceResult> CreateAsync(string managerId, DiscountViewModel discountViewModel)
+        public async Task<ServiceResult> CreateDiscountAsync(string managerId, DiscountViewModel discountViewModel)
         {
             var newDiscount = new Discount() { ManagerId = managerId };
             var entry = DbContext.Add(newDiscount);
             entry.CurrentValues.SetValues(discountViewModel);
             await DbContext.SaveChangesAsync();
-            await _staffActivityService.CreateLog<Discount>(managerId, OperationType.Create);
+            await _staffActivityService.LogActivityAsync<Discount>(managerId, OperationType.Create);
 
             return ServiceResult.Success(newDiscount.Id.ToString());
         }
-        public async Task<IEnumerable<Product>> GetProductsByDiscountId(int discountID)
+        public async Task<IEnumerable<Product>> FindProductsByDiscountId(int discountId)
         {
             return await DbContext.Product
-                .Where(p => p.DiscountId == discountID)
+                .Where(p => p.DiscountId == discountId)
                 .ToListAsync();
         }
 
-        public async Task<ServiceResult> DeleteAsync(string managerID, int id)
+        public async Task<ServiceResult> RemoveDiscountAsync(string managerID, int id)
         {
             var discount = await DbContext.Discount.FindAsync(id);
             if (discount == null)
@@ -48,40 +48,40 @@ namespace XWave.Services.Defaults
             }
 
             using var transaction = DbContext.Database.BeginTransaction();
-            string savepoint = "BeforeDiscountRemoval";
-            transaction.CreateSavepoint(savepoint);
             try
             {
-                //start tracking items to avoid FK constraint errors
-                await DbContext.Product.Where(d => d.DiscountId == id).ToListAsync();
-
+                // start tracking items to avoid FK constraint errors because Delete.ClientSetNull actually does NOT work
+                await DbContext.Product.Where(d => d.DiscountId == id).LoadAsync();
                 DbContext.Discount.Remove(discount);
                 await DbContext.SaveChangesAsync();
-
-                transaction.Commit();
-                await _staffActivityService.CreateLog<Discount>(managerID, OperationType.Delete);
+                await transaction.CommitAsync();
+                await _staffActivityService.LogActivityAsync<Discount>(managerID, OperationType.Delete);
 
                 return ServiceResult.Success(id.ToString());
             }
             catch (Exception ex)
             {
-                transaction.RollbackToSavepoint(savepoint);
-
+                await transaction.RollbackAsync();
                 return ServiceResult.Failure(ex.Message);
             }
         }
 
-        public async Task<IEnumerable<Discount>> GetAllAsync()
+        public async Task<IEnumerable<Discount>> FindAllDiscountsAsync()
         {
-            return await DbContext.Discount.ToListAsync();
+            return (await DbContext.Discount.ToListAsync())
+                .OrderBy(d =>
+                {
+                    var now = DateTime.Now;
+                    return now > d.StartDate && now < d.EndDate;
+                });
         }
 
-        public async Task<Discount> GetAsync(int id)
+        public async Task<Discount> FindDiscountByIdAsync(int id)
         {
             return await DbContext.Discount.FindAsync(id);
         }
 
-        public async Task<ServiceResult> UpdateAsync(string managerID, int id, DiscountViewModel updatedDiscountViewModel)
+        public async Task<ServiceResult> UpdateDiscountAsync(string managerID, int id, DiscountViewModel updatedDiscountViewModel)
         {
             var discount = await DbContext.Discount.FindAsync(id);
             if (discount == null)
@@ -92,7 +92,7 @@ namespace XWave.Services.Defaults
             var entry = DbContext.Discount.Update(discount);
             entry.CurrentValues.SetValues(updatedDiscountViewModel);
             await DbContext.SaveChangesAsync();
-            await _staffActivityService.CreateLog<Discount>(managerID, OperationType.Modify);
+            await _staffActivityService.LogActivityAsync<Discount>(managerID, OperationType.Modify);
 
             return ServiceResult.Success(id.ToString());
         }

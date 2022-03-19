@@ -24,12 +24,12 @@ namespace XWave.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Activity>>> Get()
         {
-            return Ok(await _staffActivityService.GetActivityLogsAsync());
+            return Ok(await _staffActivityService.FindAllActivityLogsAsync());
         }
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Activity>> Get(int id)
         {
-            return Ok(await _staffActivityService.GetActivityLogAsync(id));
+            return Ok(await _staffActivityService.FindActivityLogAsync(id));
         }
     }
 }

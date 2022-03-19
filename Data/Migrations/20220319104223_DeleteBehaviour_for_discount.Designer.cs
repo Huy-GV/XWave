@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using XWave.Data;
 
 namespace XWave.Data.Migrations
 {
     [DbContext(typeof(XWaveDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220319104223_DeleteBehaviour_for_discount")]
+    partial class DeleteBehaviour_for_discount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -405,6 +407,9 @@ namespace XWave.Data.Migrations
                     b.Property<int?>("DiscountId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("DiscountId1")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("LatestRestock")
                         .HasColumnType("datetime2");
 
@@ -424,6 +429,8 @@ namespace XWave.Data.Migrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("DiscountId");
+
+                    b.HasIndex("DiscountId1");
 
                     b.ToTable("Product");
                 });
@@ -611,9 +618,13 @@ namespace XWave.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("XWave.Models.Discount", "Discount")
+                    b.HasOne("XWave.Models.Discount", null)
                         .WithMany("Products")
                         .HasForeignKey("DiscountId");
+
+                    b.HasOne("XWave.Models.Discount", "Discount")
+                        .WithMany()
+                        .HasForeignKey("DiscountId1");
 
                     b.Navigation("Category");
 

@@ -34,7 +34,7 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.Failed("Customer ID not found"));
             }
                 
-            return Ok(await _orderService.GetAllOrdersAsync(customerId));
+            return Ok(await _orderService.FindAllOrdersAsync(customerId));
         }
         [HttpGet("{id:int}")]
         [Authorize(Roles = "customer")]
@@ -46,7 +46,7 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.Failed("Customer ID not found"));
             }
 
-            var orderDTO = await _orderService.GetOrderByIdAsync(customerId, id);
+            var orderDTO = await _orderService.FindOrderByOrderIdAsync(customerId, id);
 
             return Ok(orderDTO);
         }
@@ -54,13 +54,13 @@ namespace XWave.Controllers
         //[Authorize(Policy ="StaffOnly")]
         public async Task<ActionResult<OrderDetails>> GetOrderDetailsAsync()
         {
-            return Ok(await _orderService.GetAllOrderDetailsAsync());
+            return Ok(await _orderService.FindAllOrderDetailsAsync());
         }
         [HttpGet("detail/{orderId}/{productId}")]
         [Authorize(Policy ="StaffOnly")]
         public async Task<ActionResult<OrderDetails>> GetOrderDetailAsync(int orderId, int productId)
         {
-            OrderDetails orderDetail = await _orderService.GetOrderDetailsByIdAsync(orderId, productId);
+            OrderDetails orderDetail = await _orderService.FindOrderDetailsByIdsAsync(orderId, productId);
 
             return Ok(orderDetail);
         }

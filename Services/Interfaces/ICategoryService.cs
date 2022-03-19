@@ -10,8 +10,8 @@ namespace XWave.Services.Interfaces
         Task<ServiceResult> CreateCategoryAsync(string managerId, Category category);
         Task<ServiceResult> UpdateCategoryAsync(string managerId, int id, Category category);
         Task<ServiceResult> DeleteCategoryAsync(string managerId, int id);
-        Task<Category> GetCategoryById(int id);
-        Task<IEnumerable<Category>> GetAllCategories();
+        Task<Category> FindCategoryByIdAsync(int id);
+        Task<IEnumerable<Category>> FindAllCategoriesAsync();
 
     }
 }

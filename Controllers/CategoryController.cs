@@ -29,14 +29,14 @@ namespace XWave.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> Get()
         {
-            return Ok(await _categoryService.GetAllCategories());
+            return Ok(await _categoryService.FindAllCategoriesAsync());
         }
 
         // GET api/<CategoryController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Category>> Get(int id)
         {
-            return Ok(await _categoryService.GetCategoryById(id));
+            return Ok(await _categoryService.FindCategoryByIdAsync(id));
         }
 
         // POST api/<CategoryController>
@@ -59,7 +59,7 @@ namespace XWave.Controllers
         [Authorize(Roles = "manager")]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] Category updatedCategory)
         {
-            var category = await _categoryService.GetCategoryById(id);
+            var category = await _categoryService.FindCategoryByIdAsync(id);
             if (category == null)
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
@@ -85,7 +85,7 @@ namespace XWave.Controllers
         [Authorize(Roles ="manager")]
         public async Task<ActionResult> Delete(int id)
         {
-            var category = await _categoryService.GetCategoryById(id);
+            var category = await _categoryService.FindCategoryByIdAsync(id);
             if (category == null)
             {
                 return BadRequest(XWaveResponse.NonExistentResource());

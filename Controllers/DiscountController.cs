@@ -31,22 +31,22 @@ namespace XWave.Controllers
         [Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult<IEnumerable<Discount>>> Get()
         {
-            return Ok(await _discountService.GetAllAsync());
+            return Ok(await _discountService.FindAllDiscountsAsync());
         }
         [HttpGet("{id}/product")]
         [Authorize(Policy = "StaffOnly")]
         public async Task<IEnumerable<Product>> GetProductsWithDiscount(int id)
         {
             //no need to include discount at this level
-            return await _discountService.GetProductsByDiscountId(id);
+            return await _discountService.FindProductsByDiscountId(id);
         }
 
         // GET api/<DiscountController>/5
         [HttpGet("{id}")]
-        [Authorize(Policy = "StaffOnly")]
+        //[Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult<Discount>> GetAsync(int id)
         {
-            return Ok(_discountService.GetAsync(id));
+            return Ok(await _discountService.FindDiscountByIdAsync(id));
         }
 
         // POST api/<DiscountController>
@@ -60,7 +60,7 @@ namespace XWave.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _discountService.CreateAsync(userId, newDiscount);
+            var result = await _discountService.CreateDiscountAsync(userId, newDiscount);
             if (result.Succeeded)
             {
                 return XWaveCreated($"https://localhost:5001/api/discount/{result.ResourceId}");
@@ -74,7 +74,7 @@ namespace XWave.Controllers
         [Authorize(Roles = "managers")]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] DiscountViewModel updatedDiscount)
         {
-            if (await _discountService.GetAsync(id) == null)
+            if (await _discountService.FindDiscountByIdAsync(id) == null)
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
@@ -85,7 +85,7 @@ namespace XWave.Controllers
             }
 
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-            var result = await _discountService.UpdateAsync(managerId, id, updatedDiscount);
+            var result = await _discountService.UpdateDiscountAsync(managerId, id, updatedDiscount);
             if (result.Succeeded)
             {
                 return XWaveUpdated($"https://localhost:5001/api/discount/{result.ResourceId}");
@@ -96,16 +96,16 @@ namespace XWave.Controllers
 
         // DELETE api/<DiscountController>/5
         [HttpDelete("{id}")]
-        [Authorize(Roles ="manager")]
+        //[Authorize(Roles ="manager")]
         public async Task<ActionResult> Delete(int id)
         {
-            if (await _discountService.GetAsync(id) == null)
+            if (await _discountService.FindDiscountByIdAsync(id) == null)
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-            var result = await _discountService.DeleteAsync(managerId, id);
+            var result = await _discountService.RemoveDiscountAsync(managerId, id);
             if (result.Succeeded)
             {
                 return NoContent();

@@ -22,7 +22,7 @@ namespace XWave.Services.Defaults
         {  
             _logger = logger;
         }
-        public async Task<ServiceResult> CreateLog<T>(string staffId, OperationType operation) where T : IEntity
+        public async Task<ServiceResult> LogActivityAsync<T>(string staffId, OperationType operation) where T : IEntity
         {
             try
             {
@@ -44,11 +44,11 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure(e.Message);
             }
         }
-        public async Task<IEnumerable<Activity>> GetActivityLogsAsync()
+        public async Task<IEnumerable<Activity>> FindAllActivityLogsAsync()
         {
             return await DbContext.Activity.AsNoTracking().ToListAsync();
         }
-        public async Task<Activity> GetActivityLogAsync(int id)
+        public async Task<Activity> FindActivityLogAsync(int id)
         {
             return await DbContext.Activity
                 .AsNoTracking()

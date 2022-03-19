@@ -42,17 +42,23 @@ namespace XWave.Data
                 .Property(td => td.TransactionType)
                 .HasConversion(new EnumToStringConverter<TransactionType>());
 
-            builder.Entity<Product>()
-                .HasOne(p => p.Discount)
-                .WithMany(d => d.Products)
-                .HasForeignKey(p => p.DiscountId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.NoAction);
+            //builder.Entity<Product>()
+            //    .HasOne(p => p.Discount)
+            //    .WithMany(d => d.Products)
+            //    .HasForeignKey(p => p.DiscountId)
+            //    .IsRequired(false);
 
             builder.Entity<Discount>()
                 .HasOne(d => d.Manager)
                 .WithMany()
                 .HasForeignKey(d => d.ManagerId);
+
+            builder.Entity<Discount>()
+                .HasMany(d => d.Products)   
+                .WithOne(p => p.Discount)
+                .HasForeignKey(p => p.DiscountId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
             builder.Entity<Activity>()
                 .HasOne(activityLog => activityLog.StaffUser)

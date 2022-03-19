@@ -39,7 +39,7 @@ namespace XWave.Controllers
         [Authorize(Policy="staffonly")]
         public async Task<ActionResult> Get()
         {
-            return Ok(await _paymentService.GetAllTransactionDetailsForStaffAsync());
+            return Ok(await _paymentService.FindAllTransactionDetailsForStaffAsync());
         }
         [HttpGet("details")]
         [Authorize(Roles ="customer")]
@@ -51,7 +51,7 @@ namespace XWave.Controllers
                 return XWaveBadRequest("Customer Id is empty");
             }
 
-            return Ok(_paymentService.GetAllTransactionDetailsForCustomersAsync(customerId));
+            return Ok(_paymentService.FindAllTransactionDetailsForCustomersAsync(customerId));
         }
         [HttpPost("delete/{paymentId}")]
         [Authorize(Roles = "customer")]

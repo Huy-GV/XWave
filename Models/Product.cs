@@ -6,7 +6,7 @@ namespace XWave.Models
 {
     public class Product : IEntity
     {
-        // change to string and allow manual input
+        // todo: change to string and allow manual input
         public int Id { get; set; }
         [Required]
         [StringLength(15, MinimumLength = 2)]
@@ -18,6 +18,7 @@ namespace XWave.Models
         [Range(0, double.MaxValue, ErrorMessage ="Quantity cannot be negative")]
         public uint Quantity { get; set; }
         public DateTime? LatestRestock { get; set; }
+        // todo: add a discontinued field
         public int CategoryId { get; set; }
         public int? DiscountId { get; set; }
         public Category Category { get; set; }

@@ -74,19 +74,22 @@ namespace XWave.Data.DatabaseSeeding
                 {
                     Date = DateTime.Parse("15/11/2021"),
                     CustomerId = user1.Id,
-                    PaymentAccountId = 1
+                    PaymentAccountId = 1,
+                    DeliveryAddress = "2 Collins St, Melbourne"
                 },
                 new Order()
                 {
                     Date = DateTime.Parse("21/10/2021"),
                     CustomerId = user1.Id,
-                    PaymentAccountId = 1
+                    PaymentAccountId = 1,
+                    DeliveryAddress = "3 Collins St, Melbourne"
                 },
                 new Order()
                 {
                     Date = DateTime.Parse("16/9/2021"),
                     CustomerId = user2.Id,
-                    PaymentAccountId = 2
+                    PaymentAccountId = 2,
+                    DeliveryAddress = "4 Collins St, Melbourne"
                 }
             };
 

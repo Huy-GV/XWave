@@ -79,7 +79,7 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public Task<IEnumerable<TransactionDetails>> GetAllTransactionDetailsForCustomersAsync(string customerId)
+        public Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForCustomersAsync(string customerId)
         {
             return Task.FromResult(DbContext.TransactionDetails
                 .AsNoTracking()
@@ -88,7 +88,7 @@ namespace XWave.Services.Defaults
                 .AsEnumerable());
         }
 
-        public Task<IEnumerable<TransactionDetails>> GetAllTransactionDetailsForStaffAsync()
+        public Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForStaffAsync()
         {
             return Task.FromResult(DbContext.TransactionDetails
                 .AsNoTracking()

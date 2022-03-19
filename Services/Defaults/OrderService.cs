@@ -25,9 +25,9 @@ namespace XWave.Services.Defaults
             _dbContext = dbContext;
             _logger = logger;
         }
-        public async Task<OrderDto?> GetOrderByIdAsync(string customerId, int orderId)
+        public async Task<OrderDto?> FindOrderByOrderIdAsync(string customerId, int orderId)
         {
-            var orderDTOs = await GetAllOrdersAsync(customerId);
+            var orderDTOs = await FindAllOrdersAsync(customerId);
             return orderDTOs.FirstOrDefault(o => o.Id == orderId);
         }
         public async Task<ServiceResult> CreateOrderAsync(
@@ -140,12 +140,12 @@ namespace XWave.Services.Defaults
             _dbContext.TransactionDetails.Update(transactionDetails);
         }
 
-        public async Task<IEnumerable<OrderDetails>> GetAllOrderDetailsAsync()
+        public async Task<IEnumerable<OrderDetails>> FindAllOrderDetailsAsync()
         {
             return await _dbContext.OrderDetails.ToListAsync();
         }
 
-        public Task<IEnumerable<OrderDto>> GetAllOrdersAsync(string customerId)
+        public Task<IEnumerable<OrderDto>> FindAllOrdersAsync(string customerId)
         {
             
             var orderDtos =  _dbContext.Order
@@ -173,7 +173,7 @@ namespace XWave.Services.Defaults
             return Task.FromResult(orderDtos);
         }
 
-        public async Task<OrderDetails> GetOrderDetailsByIdAsync(int orderId, int productId)
+        public async Task<OrderDetails> FindOrderDetailsByIdsAsync(int orderId, int productId)
         {
             return await _dbContext.OrderDetails.FirstOrDefaultAsync(
                 od => od.ProductId == productId && od.OrderId == orderId);
