@@ -23,20 +23,13 @@ namespace XWave.Services.Defaults
 {
     public class JwtAuthenticationService : ServiceBase, IAuthenticationService
     {
-        private readonly IStaffAccountService _staffAccountService;
-        private readonly ICustomerAccountService _customerAccountService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly Jwt _jwt;
         public JwtAuthenticationService(
             UserManager<ApplicationUser> userManager,
             IOptions<Jwt> jwt,
-            ILogger<JwtAuthenticationService> logger,
-            XWaveDbContext dbContext,
-            IStaffAccountService staffAccountService,
-            ICustomerAccountService customerAccountService) : base(dbContext)
+            XWaveDbContext dbContext) : base(dbContext)
         {
-            _customerAccountService = customerAccountService;
-            _staffAccountService = staffAccountService;
             _userManager = userManager;
             _jwt = jwt.Value;
         }

@@ -25,7 +25,7 @@ namespace XWave.Services.Defaults
             _dbContext = dbContext;
             _logger = logger;
         }
-        public async Task<OrderDto> GetOrderByIdAsync(string customerId, int orderId)
+        public async Task<OrderDto?> GetOrderByIdAsync(string customerId, int orderId)
         {
             var orderDTOs = await GetAllOrdersAsync(customerId);
             return orderDTOs.FirstOrDefault(o => o.Id == orderId);
@@ -35,9 +35,6 @@ namespace XWave.Services.Defaults
             string customerId)
         {
             using var transaction = _dbContext.Database.BeginTransaction();
-            string savepoint = "BeforePurchaseConfirmation";
-
-            transaction.CreateSavepoint(savepoint);
             try
             {
                 var customer = await _dbContext.CustomerAccount
@@ -49,7 +46,7 @@ namespace XWave.Services.Defaults
                 }
                  
                 var payment = await _dbContext.PaymentAccount
-                    .SingleOrDefaultAsync(p => p.Id == purchaseViewModel.PaymentId);
+                    .SingleOrDefaultAsync(p => p.Id == purchaseViewModel.PaymentAccountId);
 
                 if (payment == null)
                 {
@@ -59,7 +56,7 @@ namespace XWave.Services.Defaults
                 var order = new Order()
                 {
                     CustomerId = customerId,
-                    PaymentAccountId = purchaseViewModel.PaymentId,
+                    PaymentAccountId = purchaseViewModel.PaymentAccountId,
                 };
 
                 List<Product> purchasedProducts = new();
@@ -105,7 +102,7 @@ namespace XWave.Services.Defaults
 
                 _dbContext.OrderDetails.AddRange(orderDetails);
                 _dbContext.Product.UpdateRange(purchasedProducts);
-                await UpdateTransactionDetailsAsync(purchaseViewModel.PaymentId, customerId);
+                await UpdateTransactionDetailsAsync(purchaseViewModel.PaymentAccountId, customerId);
                 await _dbContext.SaveChangesAsync();
                 transaction.Commit();
 
@@ -114,7 +111,7 @@ namespace XWave.Services.Defaults
             }
             catch (Exception exception)
             {
-                await transaction.RollbackToSavepointAsync(savepoint);
+                await transaction.RollbackAsync();
                 _logger.LogError(exception.Message);
 
                 return ServiceResult.Failure(exception.Message);

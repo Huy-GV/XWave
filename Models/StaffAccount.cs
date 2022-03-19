@@ -12,7 +12,7 @@ namespace XWave.Models
         public uint HourlyWage { get; set; }
         public string ImmediateManagerId { get; set; }
         public ApplicationUser ImmediateManager { get; set; }
-        [StringLength(50, MinimumLength = 5)]
+        [MaxLength(100)]
         public string Address { get; set; } = string.Empty;
     }
 }

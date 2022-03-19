@@ -10,7 +10,7 @@ namespace XWave.DTOs.Management
         public string CategoryName { get; init; }
         public decimal Price { get; init; }
         public uint Quantity { get; init; }
-        public DateTime LatestRestock { get; set; }
+        public DateTime? LatestRestock { get; set; }
         public int CategoryId { get; init; }
         public DetailedDiscountDto? Discount { get; init; }
     }

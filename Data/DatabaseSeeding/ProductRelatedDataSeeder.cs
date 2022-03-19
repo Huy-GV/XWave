@@ -84,7 +84,7 @@ namespace XWave.Data.DatabaseSeeding
                     Name = "HD Pro Monitor",
                     Price = 200,
                     Quantity = 150,
-                    LastRestock = DateTime.Parse("2/2/2020"),
+                    LatestRestock = DateTime.Parse("2/2/2020"),
                     CategoryId = 3
                 },
                 new Product() 
@@ -92,7 +92,7 @@ namespace XWave.Data.DatabaseSeeding
                     Name = "ROG RAM Card",
                     Price = 80,
                     Quantity = 70,
-                    LastRestock = DateTime.Parse("14/9/2021"),
+                    LatestRestock = DateTime.Parse("14/9/2021"),
                     CategoryId = 2,
                     DiscountId = 2
                 },
@@ -101,7 +101,7 @@ namespace XWave.Data.DatabaseSeeding
                     Name = "Corsair SSD 4GB",
                     Price = 160,
                     Quantity = 200,
-                    LastRestock = DateTime.Parse("3/12/2021"),
+                    LatestRestock = DateTime.Parse("3/12/2021"),
                     CategoryId = 2,
                     DiscountId = 1
                 },
@@ -110,7 +110,7 @@ namespace XWave.Data.DatabaseSeeding
                     Name = "NVIDIA GTX 3080",
                     Price = 1800,
                     Quantity = 10,
-                    LastRestock = DateTime.Parse("11/10/2021"),
+                    LatestRestock = DateTime.Parse("11/10/2021"),
                     CategoryId = 1,
                     DiscountId = 2
                 },

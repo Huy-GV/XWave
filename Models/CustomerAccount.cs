@@ -9,8 +9,8 @@ namespace XWave.Models
         [Key]
         public string CustomerId { get; set; }
         [Required]
-        [StringLength(100, MinimumLength = 1)]
+        [MaxLength(100)]
         public string BillingAddress { get; set; } = string.Empty;
-        //public bool IsSubscribedToPromotions { get; set; } = false;
+        public bool IsSubscribedToPromotions { get; set; } = false;
     }
 }

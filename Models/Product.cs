@@ -15,13 +15,11 @@ namespace XWave.Models
         [Column(TypeName = "decimal(18,4)")]
         public decimal Price { get; set; }
         //public string ImagePath { get; set; }
-
         [Range(0, double.MaxValue, ErrorMessage ="Quantity cannot be negative")]
         public uint Quantity { get; set; }
-        public DateTime LastRestock { get; set; }
+        public DateTime? LatestRestock { get; set; }
         public int CategoryId { get; set; }
         public int? DiscountId { get; set; }
-        //navigation properties
         public Category Category { get; set; }
         [ForeignKey("DiscountId")]
         public Discount? Discount { get; set; }

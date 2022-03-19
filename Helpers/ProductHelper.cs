@@ -19,7 +19,7 @@ namespace XWave.Helpers
                 Price = product.Price,
                 Quantity = product.Quantity,
                 CategoryId = product.Category.Id,
-                LatestRestock = product.LastRestock,
+                LatestRestock = product.LatestRestock,
                 Discount = staffDiscountDTO
             };
         }

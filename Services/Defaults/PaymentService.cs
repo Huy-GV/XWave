@@ -17,9 +17,6 @@ namespace XWave.Services.Defaults
         public async Task<ServiceResult> CreatePaymentAccountAsync(string customerId, PaymentAccountViewModel inputPayment)
         {
             using var transaction = DbContext.Database.BeginTransaction();
-            string savepoint = "BeforePaymentCreation";
-            transaction.CreateSavepoint(savepoint);
-
             try
             {
                 var newPayment = new PaymentAccount()
@@ -90,6 +87,7 @@ namespace XWave.Services.Defaults
                 .Where(pd => pd.CustomerId == customerId)
                 .AsEnumerable());
         }
+
         public Task<IEnumerable<TransactionDetails>> GetAllTransactionDetailsForStaffAsync()
         {
             return Task.FromResult(DbContext.TransactionDetails

@@ -26,9 +26,9 @@ namespace XWave.Services.Defaults
             {
                 var customerAccount = new CustomerAccount();
                 var entry = DbContext.CustomerAccount.Add(customerAccount);
-                entry.CurrentValues.SetValues(viewModel);
+                entry.CurrentValues.SetValues(viewModel.CustomerAccountViewModel);
                 await DbContext.SaveChangesAsync();
-                var authenticationResult = await _authenticationService.RegisterUserAsync(viewModel.User);
+                var authenticationResult = await _authenticationService.RegisterUserAsync(viewModel.UserViewModel);
                 if (authenticationResult.Succeeded)
                 {
                     await transaction.CommitAsync();
@@ -41,6 +41,11 @@ namespace XWave.Services.Defaults
                 await transaction.RollbackAsync();
                 return new AuthenticationResult();
             }
+        }
+
+        public Task<ServiceResult> SubscribeToPromotionsAsync(string id)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<ServiceResult> UpdateCustomerAccountAsync(string id, CustomerAccountViewModel viewModel)
