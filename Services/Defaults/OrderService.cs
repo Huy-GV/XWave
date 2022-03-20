@@ -165,6 +165,7 @@ namespace XWave.Services.Defaults
                         {
                             Quantity = od.Quantity,
                             Price = od.PriceAtOrder,
+                            // todo: add a product name field directly to order detail model?
                             ProductName = od.Product.Name
                         })
                 })

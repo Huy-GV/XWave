@@ -54,10 +54,14 @@ namespace XWave.Services.Defaults
                 await DbContext.Product.Where(d => d.DiscountId == id).LoadAsync();
                 DbContext.Discount.Remove(discount);
                 await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
-                await _staffActivityService.LogActivityAsync<Discount>(managerID, OperationType.Delete);
+                var result = await _staffActivityService.LogActivityAsync<Discount>(managerID, OperationType.Delete);
+                if (result.Succeeded)
+                {
+                    await transaction.CommitAsync();
+                    return ServiceResult.Success(id.ToString());
+                }
 
-                return ServiceResult.Success(id.ToString());
+                return ServiceResult.Failure(result.Error);
             }
             catch (Exception ex)
             {

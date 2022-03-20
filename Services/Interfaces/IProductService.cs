@@ -13,13 +13,13 @@ namespace XWave.Services.Interfaces
     {
         Task<IEnumerable<ProductDto>> GetAllProductsForCustomers();
         // todo: add bool for including discontinued products
-        Task<IEnumerable<DetailedProductDto>> GetAllProductsForStaff();
+        Task<IEnumerable<DetailedProductDto>> GetAllProductsForStaff(bool includeDiscontinuedProducts = false);
         Task<ProductDto> GetProductByIdForCustomers(int id);
         Task<DetailedProductDto> GetProductByIdForStaff(int id);
         Task<ServiceResult> CreateProductAsync(string staffId, ProductViewModel productViewModel);
         // todo: only update discontinued products
         Task<ServiceResult> UpdateProductAsync(string staffId, int id, ProductViewModel productViewModel);
-        // todo: rename to discontinue
-        Task<ServiceResult> DeleteProductAsync(string staffId, int id);
+        Task<ServiceResult> DeleteProductAsync(int id);
+        Task<ServiceResult> UpdateDiscontinuationStatus(int id, bool isDiscontinued);
     }
 }

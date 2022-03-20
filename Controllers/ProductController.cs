@@ -105,7 +105,7 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
         // DELETE api/<ProductController>/5
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Roles= "manager")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAsync(int id)
         {
@@ -115,8 +115,25 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
-            var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-            var result = await _productService.DeleteProductAsync(staffId, id);
+            var result = await _productService.DeleteProductAsync(id);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+
+            return XWaveBadRequest(result.Error);
+        }
+        [Authorize(Roles = "manager")]
+        [HttpPost("discontinue/{id}/{isDiscontinued:bool}")]
+        public async Task<ActionResult> UpdateStatusAsync(int id, bool isDiscontinued)
+        {
+            var product = await _productService.GetProductByIdForStaff(id);
+            if (product == null)
+            {
+                return BadRequest(XWaveResponse.NonExistentResource());
+            }
+
+            var result = await _productService.UpdateDiscontinuationStatus(id, isDiscontinued);
             if (result.Succeeded)
             {
                 return NoContent();

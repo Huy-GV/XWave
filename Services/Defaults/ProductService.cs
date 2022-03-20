@@ -53,15 +53,36 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure(ex.Message);
             }
         }
-        public async Task<ServiceResult> DeleteProductAsync(string staffId, int productId)
+        public async Task<ServiceResult> DeleteProductAsync(int productId)
         {
             try
             {
-                DbContext.Product.Remove(await DbContext.Product.FindAsync(productId));
+                var product = await DbContext.Product.FindAsync(productId);
+                DbContext.Product.Update(product);
+                product.IsDeleted = true;
+                product.DeleteDate = DateTime.Now;
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Delete);
+
                 return ServiceResult.Success();
             } 
+            catch (Exception ex)
+            {
+                return ServiceResult.Failure(ex.Message);
+            }
+        }
+
+        public async Task<ServiceResult> UpdateDiscontinuationStatus(int id, bool isDiscontinued)
+        {
+            try
+            {
+                var product = await DbContext.Product.FindAsync(id);
+                DbContext.Product.Update(product);
+                product.IsDiscontinued = isDiscontinued;
+                product.DiscontinuationDate = isDiscontinued ? DateTime.Now : null;
+                await DbContext.SaveChangesAsync();
+
+                return ServiceResult.Success();
+            }
             catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
@@ -74,24 +95,29 @@ namespace XWave.Services.Defaults
                 .AsNoTracking()
                 .Include(p => p.Discount)
                 .Include(p => p.Category)
+                .Where(p => !p.IsDiscontinued)
                 .Select(p => _productHelper.CreateCustomerProductDTO(p))
                 .AsEnumerable();
 
             return Task.FromResult(productDtos);
         }
 
-        public Task<IEnumerable<DetailedProductDto>> GetAllProductsForStaff()
+        public Task<IEnumerable<DetailedProductDto>> GetAllProductsForStaff(bool includeDiscontinuedProducts)
         {
-            
             var products = DbContext.Product
                 .AsNoTracking()
                 .Include(p => p.Discount)
                     .ThenInclude(d => d.Manager)
                 .Include(p => p.Category)
+                .AsEnumerable()
+                .Where(p =>
+                {
+                    return includeDiscontinuedProducts || !p.IsDiscontinued;
+                });
+
+            return Task.FromResult(products
                 .Select(p => _productHelper.CreateDetailedProductDto(p))
-                .AsEnumerable();
-            
-            return Task.FromResult(products);
+                .AsEnumerable());
         }
 
         public async Task<ProductDto> GetProductByIdForCustomers(int id)
@@ -123,7 +149,12 @@ namespace XWave.Services.Defaults
         {
             try
             {
-                var product = await DbContext.Product.FindAsync(id);
+                var product = await DbContext.Product.FindAsync(id); 
+                if (product.IsDiscontinued || product.IsDeleted)
+                {
+                    throw new Exception($"Product is discontinued or removed");
+                }
+
                 var entry = DbContext.Update(product);
                 entry.CurrentValues.SetValues(updatedProductViewModel);
                 await DbContext.SaveChangesAsync();
