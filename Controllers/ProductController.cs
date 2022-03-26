@@ -1,19 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using XWave.Data;
-using XWave.Models;
-using XWave.DTOs;
-using Microsoft.EntityFrameworkCore;
-using XWave.ViewModels.Management;
 using XWave.Data.Constants;
-using XWave.Services.Interfaces;
-using XWave.Helpers;
 using XWave.DTOs.Customers;
 using XWave.DTOs.Management;
+using XWave.Helpers;
+using XWave.Services.Interfaces;
+using XWave.ViewModels.Management;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkId=397860
 
@@ -25,6 +19,7 @@ namespace XWave.Controllers
     {
         private readonly IProductService _productService;
         private readonly AuthenticationHelper _authenticationHelper;
+
         public ProductController(
             IProductService productService,
             AuthenticationHelper authenticationHelper)
@@ -52,8 +47,8 @@ namespace XWave.Controllers
         {
             return Ok(await _productService.GetProductByIdForCustomers(id));
         }
+
         [HttpGet("staff/{id:int}")]
-        //[Authorize(Policy ="StaffOnly")]
         public async Task<ActionResult<DetailedProductDto>> GetByIdForStaff(int id)
         {
             return Ok(await _productService.GetProductByIdForStaff(id));
@@ -64,7 +59,7 @@ namespace XWave.Controllers
         [Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult> CreateAsync([FromBody] ProductViewModel productViewModel)
         {
-            var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity); 
+            var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -104,8 +99,9 @@ namespace XWave.Controllers
 
             return XWaveBadRequest(result.Error);
         }
+
         // DELETE api/<ProductController>/5
-        [Authorize(Roles= "manager")]
+        [Authorize(Roles = "manager")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAsync(int id)
         {
@@ -123,6 +119,7 @@ namespace XWave.Controllers
 
             return XWaveBadRequest(result.Error);
         }
+
         [Authorize(Roles = "manager")]
         [HttpPost("discontinue/{id}/{isDiscontinued:bool}")]
         public async Task<ActionResult> UpdateStatusAsync(int id, bool isDiscontinued)
@@ -141,6 +138,5 @@ namespace XWave.Controllers
 
             return XWaveBadRequest(result.Error);
         }
-
     }
 }

@@ -21,6 +21,7 @@ namespace XWave.Data
         public DbSet<CustomerAccount> CustomerAccount { get; set; }
         public DbSet<StaffAccount> StaffAccount { get; set; }
         public DbSet<Activity> Activity { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -30,7 +31,7 @@ namespace XWave.Data
             //builder.Entity<OrderDetails>()
             //    .HasIndex(od => od.OrderId)
             //    .IsUnique(false);
-                
+
             builder.Entity<PaymentAccount>()
                 .HasIndex(p => new { p.AccountNumber, p.Provider })
                 .IsUnique();
@@ -51,7 +52,7 @@ namespace XWave.Data
                 .HasForeignKey(d => d.ManagerId);
 
             builder.Entity<Discount>()
-                .HasMany(d => d.Products)   
+                .HasMany(d => d.Products)
                 .WithOne(p => p.Discount)
                 .HasForeignKey(p => p.DiscountId)
                 .IsRequired(false)

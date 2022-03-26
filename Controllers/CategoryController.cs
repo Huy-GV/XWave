@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.Data.Constants;
@@ -18,6 +17,7 @@ namespace XWave.Controllers
     {
         private readonly ICategoryService _categoryService;
         private readonly AuthenticationHelper _authenticationHelper;
+
         public CategoryController(
             ICategoryService categoryService,
             AuthenticationHelper authenticationHelper)
@@ -25,6 +25,7 @@ namespace XWave.Controllers
             _authenticationHelper = authenticationHelper;
             _categoryService = categoryService;
         }
+
         // GET: api/<CategoryController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> Get()
@@ -82,7 +83,7 @@ namespace XWave.Controllers
 
         // DELETE api/<CategoryController>/5
         [HttpDelete("{id}")]
-        [Authorize(Roles ="manager")]
+        [Authorize(Roles = "manager")]
         public async Task<ActionResult> Delete(int id)
         {
             var category = await _categoryService.FindCategoryByIdAsync(id);

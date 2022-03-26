@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using XWave.Configuration;
-using XWave.Data.Constants;
 using XWave.Helpers;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
@@ -19,6 +17,7 @@ namespace XWave.Controllers
         private readonly ICustomerAccountService _customerAccountService;
         private readonly AuthenticationHelper _authenticationHelper;
         private readonly JwtCookie _jwtCookieConfig;
+
         public CustomerAccountController(
             AuthenticationHelper authenticationHelper,
             ICustomerAccountService customerAccountService,
@@ -26,8 +25,9 @@ namespace XWave.Controllers
         {
             _jwtCookieConfig = jwtCookieOptions.Value;
             _authenticationHelper = authenticationHelper;
-            _customerAccountService = customerAccountService;   
+            _customerAccountService = customerAccountService;
         }
+
         [HttpPost("register/customer")]
         public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync([FromBody] RegisterCustomerViewModel viewModel)
         {
@@ -52,6 +52,7 @@ namespace XWave.Controllers
 
             return XWaveBadRequest(result.Error);
         }
+
         [HttpPost("subscribe")]
         public async Task<ActionResult<ServiceResult>> UpdatePromotionSubscriptionAsync([FromBody] bool isSubscribed = true)
         {

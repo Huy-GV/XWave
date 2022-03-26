@@ -1,10 +1,8 @@
-﻿using XWave.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace XWave.ViewModels.Customers
 {
-
     public class PurchaseViewModel
     {
         public record PurchasedItems
@@ -16,6 +14,7 @@ namespace XWave.ViewModels.Customers
         }
         public IList<PurchasedItems> Cart { get; set; }
         public int PaymentAccountId { get; set; }
+
         [Required(ErrorMessage = "Delivery address is empty")]
         [MaxLength(100)]
         public string DeliveryAddress { get; set; }

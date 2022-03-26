@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using XWave.DTOs;
 using XWave.DTOs.Customers;
 using XWave.Models;
 using XWave.Services.ResultTemplate;
@@ -12,8 +10,11 @@ namespace XWave.Services.Interfaces
     public interface IOrderService
     {
         Task<ServiceResult> AddOrderAsync(PurchaseViewModel purchaseViewModel, string customerId);
+
         Task<IEnumerable<OrderDto>> FindAllOrdersAsync(string customerId);
+
         Task<OrderDto?> FindOrderByIdAsync(string customerId, int orderId);
+
         /// <summary>
         /// Find the details of a purchased product in a specific order.
         /// </summary>

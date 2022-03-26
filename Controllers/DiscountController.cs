@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
-using XWave.Models;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using XWave.Data.Constants;
+using XWave.Helpers;
+using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.ViewModels.Management;
-using XWave.Helpers;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,6 +18,7 @@ namespace XWave.Controllers
     {
         private readonly IDiscountService _discountService;
         private readonly AuthenticationHelper _authenticationHelper;
+
         public DiscountController(
             IDiscountService discountService,
             AuthenticationHelper authenticationHelper)
@@ -26,6 +26,7 @@ namespace XWave.Controllers
             _discountService = discountService;
             _authenticationHelper = authenticationHelper;
         }
+
         // GET: api/<DiscountController>
         [HttpGet]
         [Authorize(Policy = "StaffOnly")]
@@ -33,6 +34,7 @@ namespace XWave.Controllers
         {
             return Ok(await _discountService.FindAllDiscountsAsync());
         }
+
         [HttpGet("{id}/product")]
         [Authorize(Policy = "StaffOnly")]
         public async Task<IEnumerable<Product>> GetProductsWithDiscount(int id)
@@ -43,7 +45,6 @@ namespace XWave.Controllers
 
         // GET api/<DiscountController>/5
         [HttpGet("{id}")]
-        //[Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult<Discount>> GetAsync(int id)
         {
             return Ok(await _discountService.FindDiscountByIdAsync(id));
@@ -96,7 +97,6 @@ namespace XWave.Controllers
 
         // DELETE api/<DiscountController>/5
         [HttpDelete("{id}")]
-        //[Authorize(Roles ="manager")]
         public async Task<ActionResult> Delete(int id)
         {
             if (await _discountService.FindDiscountByIdAsync(id) == null)

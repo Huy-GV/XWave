@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace XWave.Data.Constants
+﻿namespace XWave.Data.Constants
 {
     public static class XWaveResponse
     {
@@ -10,16 +7,19 @@ namespace XWave.Data.Constants
             Status = "Created",
             Message = $"Location: {url}"
         };
+
         public static object Updated(string url) => new
         {
             Status = "Updated",
             Message = $"Location: {url}"
         };
+
         public static object Failed(string error = "An error happended with your request") => new
         {
             Status = "Operation Failed",
             Message = $"Error: {error}"
         };
+
         public static object NonExistentResource() => new
         {
             Status = "Operation Aborted",

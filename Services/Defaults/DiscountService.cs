@@ -1,27 +1,27 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using XWave.Data;
-using XWave.Data.Constants;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Management;
-using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace XWave.Services.Defaults
 {
     public class DiscountService : ServiceBase, IDiscountService
     {
         private readonly IActivityService _staffActivityService;
+
         public DiscountService(
             XWaveDbContext dbContext,
-            IActivityService staffActivityService) : base(dbContext)  
+            IActivityService staffActivityService) : base(dbContext)
         {
             _staffActivityService = staffActivityService;
         }
+
         public async Task<ServiceResult> CreateDiscountAsync(string managerId, DiscountViewModel discountViewModel)
         {
             var newDiscount = new Discount() { ManagerId = managerId };
@@ -32,6 +32,7 @@ namespace XWave.Services.Defaults
 
             return ServiceResult.Success(newDiscount.Id.ToString());
         }
+
         public async Task<IEnumerable<Product>> FindProductsWithDiscountIdAsync(int discountId)
         {
             return await DbContext.Product

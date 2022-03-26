@@ -13,7 +13,10 @@ namespace XWave.Services.Defaults
 {
     public class PaymentService : ServiceBase, IPaymentService
     {
-        public PaymentService(XWaveDbContext dbContext) : base(dbContext) { }
+        public PaymentService(XWaveDbContext dbContext) : base(dbContext)
+        {
+        }
+
         public async Task<ServiceResult> AddPaymentAccountAsync(string customerId, PaymentAccountViewModel inputPayment)
         {
             using var transaction = DbContext.Database.BeginTransaction();
@@ -68,7 +71,7 @@ namespace XWave.Services.Defaults
                 await DbContext.SaveChangesAsync();
 
                 return ServiceResult.Success(paymentId.ToString());
-            } 
+            }
             catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
@@ -93,7 +96,7 @@ namespace XWave.Services.Defaults
         }
 
         public async Task<ServiceResult> UpdatePaymentAccountAsync(
-            string customerId, 
+            string customerId,
             int id,
             PaymentAccountViewModel updatedPayment)
         {
@@ -110,13 +113,13 @@ namespace XWave.Services.Defaults
                     Succeeded = true,
                     ResourceId = id.ToString(),
                 };
-            } 
+            }
             catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
             }
-
         }
+
         public Task<bool> CustomerHasPayment(string customerId, int paymentId)
         {
             return Task.FromResult(DbContext.TransactionDetails.Any(

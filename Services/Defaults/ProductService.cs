@@ -18,11 +18,12 @@ namespace XWave.Services.Defaults
     {
         private readonly IActivityService _staffActivityService;
         private readonly ProductHelper _productHelper;
+
         public ProductService(
             XWaveDbContext dbContext,
             IActivityService staffActivityService,
-            ProductHelper productHelper) : base(dbContext) 
-        { 
+            ProductHelper productHelper) : base(dbContext)
+        {
             _productHelper = productHelper;
             _staffActivityService = staffActivityService;
         }
@@ -47,12 +48,13 @@ namespace XWave.Services.Defaults
                 }
 
                 return ServiceResult.Success(newProduct.Id.ToString());
-            } 
+            }
             catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
             }
         }
+
         public async Task<ServiceResult> DeleteProductAsync(int productId)
         {
             try
@@ -64,7 +66,7 @@ namespace XWave.Services.Defaults
                 await DbContext.SaveChangesAsync();
 
                 return ServiceResult.Success();
-            } 
+            }
             catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
@@ -143,13 +145,13 @@ namespace XWave.Services.Defaults
         }
 
         public async Task<ServiceResult> UpdateProductAsync(
-            string staffId, 
-            int id, 
+            string staffId,
+            int id,
             ProductViewModel updatedProductViewModel)
         {
             try
             {
-                var product = await DbContext.Product.FindAsync(id); 
+                var product = await DbContext.Product.FindAsync(id);
                 if (product.IsDiscontinued || product.IsDeleted)
                 {
                     return ServiceResult.Failure($"Product has been discontinued or removed.");
@@ -160,7 +162,7 @@ namespace XWave.Services.Defaults
                 await DbContext.SaveChangesAsync();
                 await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Modify);
                 return ServiceResult.Success(id.ToString());
-            } 
+            }
             catch (Exception)
             {
                 return ServiceResult.Failure("Failed to update product information.");

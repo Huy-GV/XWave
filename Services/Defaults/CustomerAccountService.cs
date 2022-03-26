@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using XWave.Data;
 using XWave.Models;
@@ -14,12 +12,14 @@ namespace XWave.Services.Defaults
     public class CustomerAccountService : ServiceBase, ICustomerAccountService
     {
         private readonly IAuthenticationService _authenticationService;
+
         public CustomerAccountService(
             XWaveDbContext dbContext,
-            IAuthenticationService authenticationService) : base(dbContext) 
-        { 
+            IAuthenticationService authenticationService) : base(dbContext)
+        {
             _authenticationService = authenticationService;
         }
+
         public async Task<AuthenticationResult> RegisterCustomerAsync(RegisterCustomerViewModel viewModel)
         {
             using var transaction = DbContext.Database.BeginTransaction();
@@ -37,7 +37,7 @@ namespace XWave.Services.Defaults
 
                 return authenticationResult;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 await transaction.RollbackAsync();
                 return new AuthenticationResult();

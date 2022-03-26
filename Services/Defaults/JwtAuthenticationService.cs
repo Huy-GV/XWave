@@ -1,23 +1,20 @@
-using System.Threading.Tasks;
-using System;
-using XWave.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore;
-using XWave.Data.Constants;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.Linq;
+using System;
 using System.Collections.Generic;
-using XWave.ViewModels.Authentication;
-using XWave.Services.ResultTemplate;
-using XWave.Services.Interfaces;
-using XWave.Data;
-using System.Security.Principal;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 using XWave.Configuration;
+using XWave.Data;
+using XWave.Data.Constants;
+using XWave.Models;
+using XWave.Services.Interfaces;
+using XWave.Services.ResultTemplate;
+using XWave.ViewModels.Authentication;
 
 namespace XWave.Services.Defaults
 {
@@ -25,6 +22,7 @@ namespace XWave.Services.Defaults
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly Jwt _jwt;
+
         public JwtAuthenticationService(
             UserManager<ApplicationUser> userManager,
             IOptions<Jwt> jwt,
@@ -33,11 +31,12 @@ namespace XWave.Services.Defaults
             _userManager = userManager;
             _jwt = jwt.Value;
         }
+
         public async Task<AuthenticationResult> SignInAsync(SignInViewModel model)
         {
             var authModel = new AuthenticationResult();
             var user = await _userManager.FindByNameAsync(model.Username);
-            if (user == null) 
+            if (user == null)
             {
                 authModel.Error = $"User with {model.Username} does not exist";
                 return authModel;
@@ -47,25 +46,29 @@ namespace XWave.Services.Defaults
             {
                 authModel.Error = $"Incorrect password for user {model.Username}";
                 return authModel;
-            } else 
+            }
+            else
             {
                 string role = (await _userManager.GetRolesAsync(user)).First();
                 return await GetTokenAsync(user, role);
             }
         }
+
         public Task<AuthenticationResult> SignOutAsync(string userId)
         {
             return Task.FromResult(new AuthenticationResult() { Token = string.Empty });
         }
+
         public async Task<bool> IsUserInRoleAsync(string userId, string role)
         {
             var user = await _userManager.FindByIdAsync(userId);
             return user != null && await _userManager.IsInRoleAsync(user, role);
         }
+
         private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user, string role)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
-        
+
             IEnumerable<Claim> claims;
             claims = new[]
             {
@@ -77,7 +80,7 @@ namespace XWave.Services.Defaults
 
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
             var signingCredentials = new SigningCredentials(
-                symmetricSecurityKey, 
+                symmetricSecurityKey,
                 SecurityAlgorithms.HmacSha256);
 
             var jwtSecurityToken = new JwtSecurityToken(
@@ -89,7 +92,8 @@ namespace XWave.Services.Defaults
 
             return jwtSecurityToken;
         }
-        private async Task<AuthenticationResult> GetTokenAsync (
+
+        private async Task<AuthenticationResult> GetTokenAsync(
             ApplicationUser user,
             string role)
         {

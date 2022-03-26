@@ -20,6 +20,7 @@ namespace XWave.Services
             services.AddScoped<IStaffAccountService, StaffAccountService>();
             services.AddScoped<ICustomerAccountService, CustomerAccountService>();
         }
+
         public static void AddDefaultHelpers(this IServiceCollection services)
         {
             services.AddTransient<AuthenticationHelper>();

@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using XWave.Data.Constants;
 using XWave.Models;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace XWave.Data.DatabaseSeeding
 {
@@ -30,12 +28,13 @@ namespace XWave.Data.DatabaseSeeding
                 var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                 logger.LogError(ex, "An error occurred while seeding staff activities");
                 logger.LogError(ex.Message);
-            } 
+            }
             finally
             {
                 context.Database.CloseConnection();
             }
         }
+
         private static async Task CreateStaffActivityLogsAsync(
             XWaveDbContext dbContext,
             UserManager<ApplicationUser> userManager)

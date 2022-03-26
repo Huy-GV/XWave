@@ -1,18 +1,11 @@
-using System.Threading.Tasks;
-using System;
-using XWave.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using XWave.Data;
-using IdentityServer4.EntityFramework.Options;
-using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
-using Microsoft.Extensions.Options;
-using XWave.Data.Constants;
-using System.Collections.Generic;
-using System.Linq;
-using XWave.Models;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using XWave.Data.Constants;
+using XWave.Models;
 
 namespace XWave.Data.DatabaseSeeding
 {
@@ -31,13 +24,13 @@ namespace XWave.Data.DatabaseSeeding
                 CreateCategories(context);
                 CreateDiscounts(context, userManager);
                 CreateProducts(context);
-            } 
+            }
             catch (Exception ex)
             {
                 var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                 logger.LogError(ex, "An error occurred while seeding product data");
                 logger.LogError(ex.Message);
-            } 
+            }
             finally
             {
                 context.Database.CloseConnection();
@@ -69,17 +62,17 @@ namespace XWave.Data.DatabaseSeeding
             };
 
             dbContext.Database.OpenConnection();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Category ON") ;
+            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Category ON");
             dbContext.Category.AddRange(categories);
             dbContext.SaveChanges();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Category OFF") ;
-
+            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Category OFF");
         }
+
         public static void CreateProducts(XWaveDbContext dbContext)
         {
             var products = new List<Product>()
             {
-                new Product() 
+                new Product()
                 {
                     Name = "HD Pro Monitor",
                     Description = "Monitor suitable for daily tasks",
@@ -88,7 +81,7 @@ namespace XWave.Data.DatabaseSeeding
                     LatestRestock = DateTime.Parse("2/2/2020"),
                     CategoryId = 3
                 },
-                new Product() 
+                new Product()
                 {
                     Name = "ROG RAM Card",
                     Description = "Monitor suitable for daily tasks",
@@ -98,7 +91,7 @@ namespace XWave.Data.DatabaseSeeding
                     CategoryId = 2,
                     DiscountId = 2
                 },
-                new Product() 
+                new Product()
                 {
                     Name = "Corsair SSD 4GB",
                     Description = "Monitor suitable for daily tasks",
@@ -108,7 +101,7 @@ namespace XWave.Data.DatabaseSeeding
                     CategoryId = 2,
                     DiscountId = 1
                 },
-                new Product() 
+                new Product()
                 {
                     Name = "NVIDIA GTX 3080",
                     Description = "Monitor suitable for daily tasks",
@@ -123,6 +116,7 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.Product.AddRange(products);
             dbContext.SaveChanges();
         }
+
         public static void CreateDiscounts(
             XWaveDbContext dbContext,
             UserManager<ApplicationUser> userManager)
@@ -149,10 +143,10 @@ namespace XWave.Data.DatabaseSeeding
             };
 
             dbContext.Database.OpenConnection();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Discount ON") ;
+            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Discount ON");
             dbContext.Discount.AddRange(discounts);
             dbContext.SaveChanges();
-            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Discount OFF") ;
+            dbContext.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Discount OFF");
         }
     }
 }

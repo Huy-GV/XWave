@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.Models;
 using XWave.Services.ResultTemplate;
@@ -10,15 +9,19 @@ namespace XWave.Services.Interfaces
     public interface IPaymentService
     {
         Task<ServiceResult> AddPaymentAccountAsync(string customerId, PaymentAccountViewModel newPayment);
-        Task<ServiceResult> UpdatePaymentAccountAsync(
-            string customerId, 
-            int paymentId, 
-            PaymentAccountViewModel updatedPayment);
+
+        Task<bool> CustomerHasPayment(string customerId, int paymentId);
+
+        Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForCustomersAsync(string customerId);
+
+        Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForStaffAsync();
+
         // todo: only remove from the customer's perspective
         Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId);
-        Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForCustomersAsync(string customerId);
-        Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForStaffAsync();
-        Task<bool> CustomerHasPayment(string customerId, int paymentId);
+
+        Task<ServiceResult> UpdatePaymentAccountAsync(
+                                            string customerId,
+            int paymentId,
+            PaymentAccountViewModel updatedPayment);
     }
-    
 }

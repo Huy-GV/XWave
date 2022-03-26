@@ -26,12 +26,13 @@ namespace XWave.Data.DatabaseSeeding
                     CreateOrders(context, userManager).Wait();
                     CreateOrderDetail(context);
                     CreatePaymentDetail(context, userManager).Wait();
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "An error occurred while seeding purchase data");
                     logger.LogError(ex.Message);
-                } 
+                }
                 finally
                 {
                     context.Database.CloseConnection();
@@ -48,7 +49,6 @@ namespace XWave.Data.DatabaseSeeding
                     Provider = "mastercard",
                     AccountNumber = "12345678",
                     ExpiryDate = DateTime.Parse("2/5/2023"),
-
                 },
                 new PaymentAccount()
                 {
@@ -61,8 +61,9 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.PaymentAccount.AddRange(payments);
             dbContext.SaveChanges();
         }
+
         private static async Task CreateOrders(
-            XWaveDbContext dbContext, 
+            XWaveDbContext dbContext,
             UserManager<ApplicationUser> userManager)
         {
             var user1 = await userManager.FindByNameAsync("john_customer");
@@ -96,6 +97,7 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.Order.AddRange(orders);
             dbContext.SaveChanges();
         }
+
         private static void CreateOrderDetail(XWaveDbContext dbContext)
         {
             var orderDetail = new List<OrderDetails>()
@@ -147,6 +149,7 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.OrderDetails.AddRange(orderDetail);
             dbContext.SaveChanges();
         }
+
         private static async Task CreatePaymentDetail(
             XWaveDbContext dbContext,
             UserManager<ApplicationUser> userManager)
@@ -178,6 +181,5 @@ namespace XWave.Data.DatabaseSeeding
             dbContext.TransactionDetails.AddRange(paymentDetail);
             dbContext.SaveChanges();
         }
-
     }
 }

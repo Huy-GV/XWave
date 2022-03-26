@@ -1,16 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using XWave.Models;
-using XWave.Data;
-using XWave.Services.Interfaces;
-using System.Linq;
-using XWave.DTOs.Customers;
-using System;
-using XWave.ViewModels.Customers;
 using Microsoft.Extensions.Logging;
-using XWave.Services.ResultTemplate;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using XWave.Data;
 using XWave.DTOs.Customers;
+using XWave.Models;
+using XWave.Services.Interfaces;
+using XWave.Services.ResultTemplate;
+using XWave.ViewModels.Customers;
 
 namespace XWave.Services.Defaults
 {
@@ -18,6 +17,7 @@ namespace XWave.Services.Defaults
     {
         private readonly XWaveDbContext _dbContext;
         private readonly ILogger<OrderService> _logger;
+
         public OrderService(
             XWaveDbContext dbContext,
             ILogger<OrderService> logger)
@@ -25,13 +25,15 @@ namespace XWave.Services.Defaults
             _dbContext = dbContext;
             _logger = logger;
         }
+
         public async Task<OrderDto?> FindOrderByIdAsync(string customerId, int orderId)
         {
             var orderDTOs = await FindAllOrdersAsync(customerId);
             return orderDTOs.FirstOrDefault(o => o.Id == orderId);
         }
+
         public async Task<ServiceResult> AddOrderAsync(
-            PurchaseViewModel purchaseViewModel, 
+            PurchaseViewModel purchaseViewModel,
             string customerId)
         {
             using var transaction = _dbContext.Database.BeginTransaction();
@@ -42,7 +44,7 @@ namespace XWave.Services.Defaults
                 {
                     return ServiceResult.Failure("Customer not found");
                 }
-                 
+
                 var payment = await _dbContext.PaymentAccount
                     .SingleOrDefaultAsync(p => p.Id == purchaseViewModel.PaymentAccountId);
 
@@ -50,7 +52,7 @@ namespace XWave.Services.Defaults
                 {
                     return ServiceResult.Failure("Payment not found");
                 }
-                    
+
                 var order = new Order()
                 {
                     CustomerId = customerId,
@@ -116,7 +118,6 @@ namespace XWave.Services.Defaults
                 await transaction.CommitAsync();
 
                 return ServiceResult.Success(order.Id.ToString());
-
             }
             catch (Exception exception)
             {
@@ -145,7 +146,7 @@ namespace XWave.Services.Defaults
 
         public Task<IEnumerable<OrderDto>> FindAllOrdersAsync(string customerId)
         {
-            var orderDtos =  _dbContext.Order
+            var orderDtos = _dbContext.Order
                 .AsNoTracking()
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
