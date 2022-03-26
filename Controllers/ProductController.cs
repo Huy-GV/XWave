@@ -31,27 +31,27 @@ namespace XWave.Controllers
         [HttpGet("customers")]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetForCustomersAsync()
         {
-            return Ok(await _productService.GetAllProductsForCustomers());
+            return Ok(await _productService.FindAllProductsForCustomers());
         }
 
         [HttpGet("staff")]
         [Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult<IEnumerable<DetailedProductDto>>> GetForStaff()
         {
-            return Ok(await _productService.GetAllProductsForStaff());
+            return Ok(await _productService.FindAllProductsForStaff());
         }
 
         // GET api/<ProductController>/5
         [HttpGet("customers/{id:int}")]
         public async Task<ActionResult<ProductDto>> Get(int id)
         {
-            return Ok(await _productService.GetProductByIdForCustomers(id));
+            return Ok(await _productService.FindProductByIdForCustomers(id));
         }
 
         [HttpGet("staff/{id:int}")]
         public async Task<ActionResult<DetailedProductDto>> GetByIdForStaff(int id)
         {
-            return Ok(await _productService.GetProductByIdForStaff(id));
+            return Ok(await _productService.FindProductByIdForStaff(id));
         }
 
         // POST api/<ProductController>
@@ -79,7 +79,7 @@ namespace XWave.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] ProductViewModel updatedProduct)
         {
-            var product = await _productService.GetProductByIdForStaff(id);
+            var product = await _productService.FindProductByIdForStaff(id);
             if (product == null)
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
@@ -105,7 +105,7 @@ namespace XWave.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAsync(int id)
         {
-            var product = await _productService.GetProductByIdForStaff(id);
+            var product = await _productService.FindProductByIdForStaff(id);
             if (product == null)
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
@@ -124,7 +124,7 @@ namespace XWave.Controllers
         [HttpPost("discontinue/{id}/{isDiscontinued:bool}")]
         public async Task<ActionResult> UpdateStatusAsync(int id, bool isDiscontinued)
         {
-            var product = await _productService.GetProductByIdForStaff(id);
+            var product = await _productService.FindProductByIdForStaff(id);
             if (product == null)
             {
                 return BadRequest(XWaveResponse.NonExistentResource());

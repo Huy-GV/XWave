@@ -91,7 +91,7 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public Task<IEnumerable<ProductDto>> GetAllProductsForCustomers()
+        public Task<IEnumerable<ProductDto>> FindAllProductsForCustomers()
         {
             var productDtos = DbContext.Product
                 .AsNoTracking()
@@ -104,7 +104,7 @@ namespace XWave.Services.Defaults
             return Task.FromResult(productDtos);
         }
 
-        public Task<IEnumerable<DetailedProductDto>> GetAllProductsForStaff(bool includeDiscontinuedProducts)
+        public Task<IEnumerable<DetailedProductDto>> FindAllProductsForStaff(bool includeDiscontinuedProducts)
         {
             var products = DbContext.Product
                 .AsNoTracking()
@@ -122,7 +122,7 @@ namespace XWave.Services.Defaults
                 .AsEnumerable());
         }
 
-        public async Task<ProductDto> GetProductByIdForCustomers(int id)
+        public async Task<ProductDto> FindProductByIdForCustomers(int id)
         {
             var product = await DbContext.Product
                 .AsNoTracking()
@@ -132,7 +132,7 @@ namespace XWave.Services.Defaults
             return _productHelper.CreateCustomerProductDTO(product);
         }
 
-        public async Task<DetailedProductDto> GetProductByIdForStaff(int id)
+        public async Task<DetailedProductDto> FindProductByIdForStaff(int id)
         {
             var productDto = await DbContext.Product
                 .AsNoTracking()

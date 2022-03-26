@@ -58,7 +58,7 @@ namespace XWave.Controllers
         public async Task<ActionResult> Delete(int paymentId)
         {
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-            if (!await _paymentService.CustomerHasPayment(customerId, paymentId))
+            if (!await _paymentService.CustomerHasPaymentAccount(customerId, paymentId))
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
@@ -83,7 +83,7 @@ namespace XWave.Controllers
             }
                 
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-            if (!await _paymentService.CustomerHasPayment(customerId, id))
+            if (!await _paymentService.CustomerHasPaymentAccount(customerId, id))
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }

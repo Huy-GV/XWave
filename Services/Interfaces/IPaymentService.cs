@@ -8,9 +8,15 @@ namespace XWave.Services.Interfaces
 {
     public interface IPaymentService
     {
-        Task<ServiceResult> AddPaymentAccountAsync(string customerId, PaymentAccountViewModel newPayment);
+        Task<ServiceResult> AddPaymentAccountAsync(string customerId, PaymentAccountViewModel newPaymentAccount);
 
-        Task<bool> CustomerHasPayment(string customerId, int paymentId);
+        /// <summary>
+        /// Check if a customer has a payment account.
+        /// </summary>
+        /// <param name="customerId">ID of customer.</param>
+        /// <param name="paymentAccountId">ID of the searched payment account.</param>
+        /// <returns></returns>
+        Task<bool> CustomerHasPaymentAccount(string customerId, int paymentAccountId);
 
         Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForCustomersAsync(string customerId);
 
@@ -20,7 +26,7 @@ namespace XWave.Services.Interfaces
         Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId);
 
         Task<ServiceResult> UpdatePaymentAccountAsync(
-                                            string customerId,
+            string customerId,
             int paymentId,
             PaymentAccountViewModel updatedPayment);
     }

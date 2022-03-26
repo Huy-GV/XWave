@@ -50,7 +50,13 @@ namespace XWave.Services.Defaults
             else
             {
                 string role = (await _userManager.GetRolesAsync(user)).First();
-                return await GetTokenAsync(user, role);
+                var token = await CreateJwtTokenAsync(user, role);
+
+                return new AuthenticationResult()
+                {
+                    Succeeded = true,
+                    Token = new JwtSecurityTokenHandler().WriteToken(token),
+                };
             }
         }
 
@@ -91,20 +97,6 @@ namespace XWave.Services.Defaults
                 signingCredentials: signingCredentials);
 
             return jwtSecurityToken;
-        }
-
-        private async Task<AuthenticationResult> GetTokenAsync(
-            ApplicationUser user,
-            string role)
-        {
-            var token = await CreateJwtTokenAsync(user, role);
-            AuthenticationResult result = new()
-            {
-                Succeeded = true,
-                Token = new JwtSecurityTokenHandler().WriteToken(token),
-            };
-
-            return result;
         }
 
         public async Task<AuthenticationResult> RegisterUserAsync(RegisterUserViewModel registerUserViewModel)

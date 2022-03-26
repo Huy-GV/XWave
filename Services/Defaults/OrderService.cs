@@ -128,9 +128,15 @@ namespace XWave.Services.Defaults
             }
         }
 
-        private async Task<bool> UpdateTransactionDetailsAsync(int paymentId, string customerId)
+        /// <summary>
+        /// Records the latest transaction made by a customer.
+        /// </summary>
+        /// <param name="paymentAccountId">ID of payment account used in the latest transaction.</param>
+        /// <param name="customerId">ID of customer who made the transaction.</param>
+        /// <returns>True if the update succeeds and False otherwise.</returns>
+        private async Task<bool> UpdateTransactionDetailsAsync(int paymentAccountId, string customerId)
         {
-            var transactionDetails = await _dbContext.TransactionDetails.FindAsync(customerId, paymentId);
+            var transactionDetails = await _dbContext.TransactionDetails.FindAsync(customerId, paymentAccountId);
             if (transactionDetails == null)
             {
                 return false;

@@ -120,7 +120,7 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public Task<bool> CustomerHasPayment(string customerId, int paymentId)
+        public Task<bool> CustomerHasPaymentAccount(string customerId, int paymentId)
         {
             return Task.FromResult(DbContext.TransactionDetails.Any(
                 td => td.CustomerId == customerId && td.PaymentAccountId == paymentId));
