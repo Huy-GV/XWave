@@ -12,13 +12,20 @@ namespace XWave.Services.Interfaces
     public interface IProductService
     {
         Task<IEnumerable<ProductDto>> GetAllProductsForCustomers();
-        // todo: add bool for including discontinued products
         Task<IEnumerable<DetailedProductDto>> GetAllProductsForStaff(bool includeDiscontinuedProducts = false);
         Task<ProductDto> GetProductByIdForCustomers(int id);
         Task<DetailedProductDto> GetProductByIdForStaff(int id);
-        Task<ServiceResult> CreateProductAsync(string staffId, ProductViewModel productViewModel);
-        // todo: only update discontinued products
+        // todo: replace create with add in services
+        Task<ServiceResult> AddProductAsync(string staffId, ProductViewModel productViewModel);
+        // todo: only update discontinued products and only update general information
         Task<ServiceResult> UpdateProductAsync(string staffId, int id, ProductViewModel productViewModel);
+        /// <summary>
+        /// Update existing stock due to restocking or erroreneous input.
+        /// </summary>
+        /// <param name="productId">ID of product to update.</param>
+        /// <param name="updatedStock">New stock quantity.</param>
+        /// <returns></returns>
+        Task<ServiceResult> UpdateStockAsync(int productId, uint updatedStock);
         Task<ServiceResult> DeleteProductAsync(int id);
         Task<ServiceResult> UpdateDiscontinuationStatus(int id, bool isDiscontinued);
     }

@@ -70,7 +70,7 @@ namespace XWave.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _productService.CreateProductAsync(staffId, productViewModel);
+            var result = await _productService.AddProductAsync(staffId, productViewModel);
             if (result.Succeeded)
             {
                 return XWaveCreated($"https://localhost:5001/api/product/staff/{result.ResourceId}");

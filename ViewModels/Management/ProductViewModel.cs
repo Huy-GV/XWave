@@ -15,8 +15,8 @@ namespace XWave.ViewModels.Management
         //TODO: implement image path
         //public string ImagePath { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "Quantity cannot be negative")]
-        public uint Quantity { get; set; }
+        //[Range(0, double.MaxValue, ErrorMessage = "Quantity cannot be negative")]
+        //public uint Quantity { get; set; }
         public int CategoryId { get; set; }
     }
 }

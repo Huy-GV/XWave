@@ -50,7 +50,7 @@ namespace XWave.Controllers
             }
 
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-            var result = await _categoryService.CreateCategoryAsync(managerId, newCategory);
+            var result = await _categoryService.AddCategoryAsync(managerId, newCategory);
             return XWaveCreated($"https://localhost:5001/api/category/admin/{result.ResourceId}");
         }
 

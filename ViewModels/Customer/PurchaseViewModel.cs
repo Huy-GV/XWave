@@ -12,7 +12,7 @@ namespace XWave.ViewModels.Customers
             public int ProductId { get; set; }
             public uint Quantity { get; set; }
             public decimal DisplayedPrice { get; set; }
-            public decimal DisplayedDiscount { get; set; } = 0;
+            public decimal DisplayedDiscountPercentage { get; set; } = 0;
         }
         public IList<PurchasedItems> Cart { get; set; }
         public int PaymentAccountId { get; set; }

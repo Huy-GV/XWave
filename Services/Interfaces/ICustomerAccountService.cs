@@ -9,6 +9,12 @@ namespace XWave.Services.Interfaces
     {
         public Task<AuthenticationResult> RegisterCustomerAsync(RegisterCustomerViewModel viewModel);
         public Task<ServiceResult> UpdateCustomerAccountAsync(string id, CustomerAccountViewModel viewModel);
-        public Task<ServiceResult> UpdateSubscriptionAsync(string id, bool isSubscribed);
+        /// <summary>
+        /// Update subscription to promotion.
+        /// </summary>
+        /// <param name="customerId">ID of customer.</param>
+        /// <param name="isSubscribed">Subscription status.</param>
+        /// <returns></returns>
+        public Task<ServiceResult> UpdateSubscriptionAsync(string customerId, bool isSubscribed);
     }
 }

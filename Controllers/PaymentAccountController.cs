@@ -105,7 +105,7 @@ namespace XWave.Controllers
                 return BadRequest(ModelState);
             }
                 
-            var result = await _paymentService.CreatePaymentAccountAsync(customerId, inputPayment);
+            var result = await _paymentService.AddPaymentAccountAsync(customerId, inputPayment);
 
             if (!result.Succeeded)
             { 

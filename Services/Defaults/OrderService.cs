@@ -25,21 +25,19 @@ namespace XWave.Services.Defaults
             _dbContext = dbContext;
             _logger = logger;
         }
-        public async Task<OrderDto?> FindOrderByOrderIdAsync(string customerId, int orderId)
+        public async Task<OrderDto?> FindOrderByIdAsync(string customerId, int orderId)
         {
             var orderDTOs = await FindAllOrdersAsync(customerId);
             return orderDTOs.FirstOrDefault(o => o.Id == orderId);
         }
-        public async Task<ServiceResult> CreateOrderAsync(
+        public async Task<ServiceResult> AddOrderAsync(
             PurchaseViewModel purchaseViewModel, 
             string customerId)
         {
             using var transaction = _dbContext.Database.BeginTransaction();
             try
             {
-                var customer = await _dbContext.CustomerAccount
-                    .SingleOrDefaultAsync(c => c.CustomerId == customerId);
-
+                var customer = await _dbContext.CustomerAccount.FindAsync(customerId);
                 if (customer == null)
                 {
                     return ServiceResult.Failure("Customer not found");
@@ -59,14 +57,15 @@ namespace XWave.Services.Defaults
                     PaymentAccountId = purchaseViewModel.PaymentAccountId,
                 };
 
-                List<Product> purchasedProducts = new();
-                List<OrderDetails> orderDetails = new();
+                var purchasedProducts = new List<Product>();
+                var orderDetails = new List<OrderDetails>();
 
                 foreach (var purchasedProduct in purchaseViewModel.Cart)
                 {
                     var product = await _dbContext.Product
                         .Include(p => p.Discount)
                         .SingleOrDefaultAsync(p => p.Id == purchasedProduct.ProductId);
+
                     if (product == null)
                     {
                         return ServiceResult.Failure("Ordered product not found");
@@ -78,10 +77,14 @@ namespace XWave.Services.Defaults
                     }
 
                     //prevent customers from ordering based on incorrect data
-                    if (product.Price != purchasedProduct.DisplayedPrice ||
-                        product.Discount?.Percentage != purchasedProduct.DisplayedDiscount)
+                    if (product.Discount?.Percentage != purchasedProduct.DisplayedDiscountPercentage)
                     {
-                        return ServiceResult.Failure("Conflicting data about product");
+                        return ServiceResult.Failure($"Discount percentage has been changed during transaction. Please view the latest price for the item {product.Name}");
+                    }
+
+                    if (product.Price != purchasedProduct.DisplayedPrice)
+                    {
+                        return ServiceResult.Failure($"Price has been changed during transaction. Please view the latest price for the item {product.Name}");
                     }
 
                     product.Quantity -= purchasedProduct.Quantity;
@@ -95,16 +98,22 @@ namespace XWave.Services.Defaults
                 }
 
                 _dbContext.Order.Add(order);
-                //call SaveChanges to get the generated Id
                 await _dbContext.SaveChangesAsync();
-
-                orderDetails = AssignOrderId(order.Id, orderDetails);
+                foreach (var orderDetail in orderDetails)
+                {
+                    orderDetail.OrderId = order.Id;
+                }
 
                 _dbContext.OrderDetails.AddRange(orderDetails);
                 _dbContext.Product.UpdateRange(purchasedProducts);
-                await UpdateTransactionDetailsAsync(purchaseViewModel.PaymentAccountId, customerId);
+                var succeeded = await UpdateTransactionDetailsAsync(purchaseViewModel.PaymentAccountId, customerId);
+                if (!succeeded)
+                {
+                    return ServiceResult.Failure("Failed to update transaction. Operation is aborted");
+                }
+
                 await _dbContext.SaveChangesAsync();
-                transaction.Commit();
+                await transaction.CommitAsync();
 
                 return ServiceResult.Success(order.Id.ToString());
 
@@ -127,17 +136,22 @@ namespace XWave.Services.Defaults
             return orderDetails;
         }
 
-        private async Task UpdateTransactionDetailsAsync(
+        private async Task<bool> UpdateTransactionDetailsAsync(
             int paymentId,
             string customerId)
         {
-            var transactionDetails = await _dbContext.TransactionDetails.SingleAsync(
-                pd => pd.PaymentAccountId == paymentId && pd.CustomerId == customerId);
+            var transactionDetails = await _dbContext.TransactionDetails.FindAsync(customerId, paymentId);
+            if (transactionDetails == null)
+            {
+                return false;
+            }
 
             transactionDetails.PurchaseCount++;
             transactionDetails.LatestPurchase = DateTime.Now;
             transactionDetails.TransactionType = TransactionType.Purchase;
             _dbContext.TransactionDetails.Update(transactionDetails);
+
+            return true;
         }
 
         public async Task<IEnumerable<OrderDetails>> FindAllOrderDetailsAsync()
@@ -174,7 +188,7 @@ namespace XWave.Services.Defaults
             return Task.FromResult(orderDtos);
         }
 
-        public async Task<OrderDetails> FindOrderDetailsByIdsAsync(int orderId, int productId)
+        public async Task<OrderDetails> FindPurchasedProductDetailsByOrderId(int orderId, int productId)
         {
             return await _dbContext.OrderDetails.FirstOrDefaultAsync(
                 od => od.ProductId == productId && od.OrderId == orderId);

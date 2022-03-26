@@ -27,7 +27,7 @@ namespace XWave.Services.Defaults
             _staffActivityService = staffActivityService;
         }
 
-        public async Task<ServiceResult> CreateProductAsync(string staffId, ProductViewModel productViewModel)
+        public async Task<ServiceResult> AddProductAsync(string staffId, ProductViewModel productViewModel)
         {
             try
             {
@@ -142,6 +142,7 @@ namespace XWave.Services.Defaults
             return productDto;
         }
 
+        // todo: only update general information
         public async Task<ServiceResult> UpdateProductAsync(
             string staffId, 
             int id, 
@@ -152,7 +153,7 @@ namespace XWave.Services.Defaults
                 var product = await DbContext.Product.FindAsync(id); 
                 if (product.IsDiscontinued || product.IsDeleted)
                 {
-                    throw new Exception($"Product is discontinued or removed");
+                    return ServiceResult.Failure($"Product is discontinued or removed");
                 }
 
                 var entry = DbContext.Update(product);
@@ -164,6 +165,29 @@ namespace XWave.Services.Defaults
             catch (Exception ex)
             {
                 return ServiceResult.Failure(ex.Message);
+            }
+        }
+
+        public async Task<ServiceResult> UpdateStockAsync(int productId, uint updatedStock)
+        {
+            var product = await DbContext.Product.FindAsync(productId);
+            if (product == null)
+            {
+                return ServiceResult.Failure($"Product with ID {productId} not found");
+            }
+
+            try
+            {
+                product.Quantity = updatedStock;
+                product.LatestRestock = DateTime.Now;
+                await DbContext.SaveChangesAsync();
+
+                return ServiceResult.Success(productId.ToString());
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.Failure($"Stock update for product with ID {productId} failed." +
+                    $"Error: {ex}");
             }
         }
     }

@@ -14,7 +14,7 @@ namespace XWave.Services.Defaults
     public class PaymentService : ServiceBase, IPaymentService
     {
         public PaymentService(XWaveDbContext dbContext) : base(dbContext) { }
-        public async Task<ServiceResult> CreatePaymentAccountAsync(string customerId, PaymentAccountViewModel inputPayment)
+        public async Task<ServiceResult> AddPaymentAccountAsync(string customerId, PaymentAccountViewModel inputPayment)
         {
             using var transaction = DbContext.Database.BeginTransaction();
             try
@@ -67,11 +67,7 @@ namespace XWave.Services.Defaults
                 DbContext.Remove(deletedPayment);
                 await DbContext.SaveChangesAsync();
 
-                return new ServiceResult()
-                {
-                    Succeeded = true,
-                    ResourceId = paymentId.ToString(),
-                };
+                return ServiceResult.Success(paymentId.ToString());
             } 
             catch (Exception ex)
             {

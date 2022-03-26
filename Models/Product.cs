@@ -11,6 +11,7 @@ namespace XWave.Models
         [Required]
         [StringLength(15, MinimumLength = 2)]
         public string Name { get; set; }
+        // todo: add description and country of manufacture
         [Required]
         [Column(TypeName = "decimal(18,4)")]
         public decimal Price { get; set; }

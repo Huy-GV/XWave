@@ -19,7 +19,7 @@ namespace XWave.Services.Defaults
         { 
             _staffActivityService = staffActivityService;
         }
-        public async Task<ServiceResult> CreateCategoryAsync(string managerID, Category category)
+        public async Task<ServiceResult> AddCategoryAsync(string managerID, Category category)
         {
             try
             {

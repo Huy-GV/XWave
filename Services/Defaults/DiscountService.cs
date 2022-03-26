@@ -32,7 +32,7 @@ namespace XWave.Services.Defaults
 
             return ServiceResult.Success(newDiscount.Id.ToString());
         }
-        public async Task<IEnumerable<Product>> FindProductsByDiscountId(int discountId)
+        public async Task<IEnumerable<Product>> FindProductsWithDiscountIdAsync(int discountId)
         {
             return await DbContext.Product
                 .Where(p => p.DiscountId == discountId)
