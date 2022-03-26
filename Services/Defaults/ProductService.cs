@@ -142,7 +142,6 @@ namespace XWave.Services.Defaults
             return productDto;
         }
 
-        // todo: only update general information
         public async Task<ServiceResult> UpdateProductAsync(
             string staffId, 
             int id, 
@@ -153,7 +152,7 @@ namespace XWave.Services.Defaults
                 var product = await DbContext.Product.FindAsync(id); 
                 if (product.IsDiscontinued || product.IsDeleted)
                 {
-                    return ServiceResult.Failure($"Product is discontinued or removed");
+                    return ServiceResult.Failure($"Product has been discontinued or removed.");
                 }
 
                 var entry = DbContext.Update(product);
@@ -162,9 +161,9 @@ namespace XWave.Services.Defaults
                 await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Modify);
                 return ServiceResult.Success(id.ToString());
             } 
-            catch (Exception ex)
+            catch (Exception)
             {
-                return ServiceResult.Failure(ex.Message);
+                return ServiceResult.Failure("Failed to update product information.");
             }
         }
 
@@ -173,7 +172,7 @@ namespace XWave.Services.Defaults
             var product = await DbContext.Product.FindAsync(productId);
             if (product == null)
             {
-                return ServiceResult.Failure($"Product with ID {productId} not found");
+                return ServiceResult.Failure($"Failed to update stock of product with ID {productId} because it was not found.");
             }
 
             try
@@ -184,10 +183,9 @@ namespace XWave.Services.Defaults
 
                 return ServiceResult.Success(productId.ToString());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return ServiceResult.Failure($"Stock update for product with ID {productId} failed." +
-                    $"Error: {ex}");
+                return ServiceResult.Failure($"Stock update for product with ID {productId} failed due to internal errors.");
             }
         }
     }

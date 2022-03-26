@@ -126,19 +126,8 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure(exception.Message);
             }
         }
-        private static List<OrderDetails> AssignOrderId(int orderId, List<OrderDetails> orderDetails)
-        {
-            foreach (var orderDetail in orderDetails)
-            {
-                orderDetail.OrderId = orderId;
-            }
-                
-            return orderDetails;
-        }
 
-        private async Task<bool> UpdateTransactionDetailsAsync(
-            int paymentId,
-            string customerId)
+        private async Task<bool> UpdateTransactionDetailsAsync(int paymentId, string customerId)
         {
             var transactionDetails = await _dbContext.TransactionDetails.FindAsync(customerId, paymentId);
             if (transactionDetails == null)
@@ -154,19 +143,14 @@ namespace XWave.Services.Defaults
             return true;
         }
 
-        public async Task<IEnumerable<OrderDetails>> FindAllOrderDetailsAsync()
-        {
-            return await _dbContext.OrderDetails.ToListAsync();
-        }
-
         public Task<IEnumerable<OrderDto>> FindAllOrdersAsync(string customerId)
         {
-            
             var orderDtos =  _dbContext.Order
                 .AsNoTracking()
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
                 .Include(o => o.Payment)
+                .IgnoreQueryFilters()
                 .Where(o => o.CustomerId == customerId)
                 .Select(o => new OrderDto()
                 {
@@ -179,7 +163,6 @@ namespace XWave.Services.Defaults
                         {
                             Quantity = od.Quantity,
                             Price = od.PriceAtOrder,
-                            // todo: add a product name field directly to order detail model?
                             ProductName = od.Product.Name
                         })
                 })
@@ -190,8 +173,7 @@ namespace XWave.Services.Defaults
 
         public async Task<OrderDetails> FindPurchasedProductDetailsByOrderId(int orderId, int productId)
         {
-            return await _dbContext.OrderDetails.FirstOrDefaultAsync(
-                od => od.ProductId == productId && od.OrderId == orderId);
+            return await _dbContext.OrderDetails.FindAsync(orderId, productId);
         }
     }
 }

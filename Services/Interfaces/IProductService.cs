@@ -17,7 +17,6 @@ namespace XWave.Services.Interfaces
         Task<DetailedProductDto> GetProductByIdForStaff(int id);
         // todo: replace create with add in services
         Task<ServiceResult> AddProductAsync(string staffId, ProductViewModel productViewModel);
-        // todo: only update discontinued products and only update general information
         Task<ServiceResult> UpdateProductAsync(string staffId, int id, ProductViewModel productViewModel);
         /// <summary>
         /// Update existing stock due to restocking or erroreneous input.
