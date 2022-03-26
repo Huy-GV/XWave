@@ -169,7 +169,7 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public async Task<ServiceResult> UpdateStockAsync(int productId, uint updatedStock)
+        public async Task<ServiceResult> UpdateStockAsync(string staffId, int productId, uint updatedStock)
         {
             var product = await DbContext.Product.FindAsync(productId);
             if (product == null)
@@ -182,13 +182,45 @@ namespace XWave.Services.Defaults
                 product.Quantity = updatedStock;
                 product.LatestRestock = DateTime.Now;
                 await DbContext.SaveChangesAsync();
-
+                await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Modify);
                 return ServiceResult.Success(productId.ToString());
             }
             catch (Exception)
             {
-                return ServiceResult.Failure($"Stock update for product with ID {productId} failed due to internal errors.");
+                return ServiceResult.Failure($"Failed to update stock of product with ID {productId} due to internal errors.");
             }
+        }
+
+        public async Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice)
+        {
+            var product = await DbContext.Product.FindAsync(productId);
+            if (product == null)
+            {
+                return ServiceResult.Failure($"Failed to update price of product with ID {productId} because it was not found.");
+            }
+
+            try
+            {
+                product.Price = updatedPrice;
+                await DbContext.SaveChangesAsync();
+                await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Modify);
+                return ServiceResult.Success(productId.ToString());
+            }
+            catch (Exception)
+            {
+                return ServiceResult.Failure($"Failed to update price of product with ID {productId} due to internal errors.");
+            }
+        }
+
+        public Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice, DateTime updateSchedule)
+        {
+            // todo: use hangfire to schedule price update
+            throw new NotImplementedException();
+        }
+
+        public Task<ServiceResult> UpdateDiscontinuationStatus(int id, bool isDiscontinued, DateTime updateSchedule)
+        {
+            throw new NotImplementedException();
         }
     }
 }

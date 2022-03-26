@@ -101,5 +101,15 @@ namespace XWave.Services.Defaults
 
             return ServiceResult.Success(id.ToString());
         }
+
+        public Task<ServiceResult> AssignDiscountToProduct(int discountId, IEnumerable<int> productIds)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ServiceResult> AssignDiscountToProduct(int discountId, IEnumerable<int> productIds, DateTime? schedule)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

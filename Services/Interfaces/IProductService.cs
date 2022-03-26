@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.DTOs.Customers;
 using XWave.DTOs.Management;
@@ -45,7 +46,11 @@ namespace XWave.Services.Interfaces
         /// <param name="productId">ID of product to update.</param>
         /// <param name="updatedStockQuantity">New stock quantity.</param>
         /// <returns></returns>
-        Task<ServiceResult> UpdateStockAsync(int productId, uint updatedStockQuantity);
+        Task<ServiceResult> UpdateStockAsync(string staffId, int productId, uint updatedStockQuantity);
+
+        Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice, DateTime updateSchedule);
+
+        Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice);
 
         /// <summary>
         /// Soft-delete a product.
@@ -55,5 +60,7 @@ namespace XWave.Services.Interfaces
         Task<ServiceResult> DeleteProductAsync(int id);
 
         Task<ServiceResult> UpdateDiscontinuationStatus(int id, bool isDiscontinued);
+
+        Task<ServiceResult> UpdateDiscontinuationStatus(int id, bool isDiscontinued, DateTime updateSchedule);
     }
 }
