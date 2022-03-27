@@ -7,6 +7,7 @@ using XWave.DTOs.Customers;
 using XWave.DTOs.Management;
 using XWave.Helpers;
 using XWave.Services.Interfaces;
+using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Management;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkId=397860
@@ -100,6 +101,44 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
+        //[Authorize(Policy = "StaffOnly")]
+        [HttpPut("{id}/price")]
+        public async Task<ActionResult> UpdatePriceAsync(int id, [FromBody] ProductPriceAdjustmentViewModel viewModel)
+        {
+            var product = await _productService.FindProductByIdForStaff(id);
+            if (product == null)
+            {
+                return BadRequest(XWaveResponse.NonExistentResource());
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            ServiceResult result;
+            if (viewModel.Schedule == null)
+            {
+                result = await _productService.UpdateProductPriceAsync(staffId, id, viewModel.UpdatedPrice);
+            }
+            else
+            {
+                result = await _productService.UpdateProductPriceAsync(
+                    staffId: staffId, 
+                    productId: id, 
+                    updatedPrice: viewModel.UpdatedPrice, 
+                    updateSchedule: viewModel.Schedule.Value);
+            }
+
+            if (result.Succeeded)
+            {
+                return XWaveCreated($"https://localhost:5001/api/product/staff/{result.ResourceId}");
+            }
+
+            return XWaveBadRequest(result.Error);
+        }
+
         // DELETE api/<ProductController>/5
         [Authorize(Roles = "manager")]
         [HttpDelete("{id}")]
@@ -120,8 +159,8 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
-        [Authorize(Roles = "manager")]
-        [HttpPost("discontinue/{id}/{isDiscontinued:bool}")]
+        //[Authorize(Roles = "manager")]
+        [HttpPut("{id}/discontinue/{isDiscontinued:bool}")]
         public async Task<ActionResult> UpdateStatusAsync(int id, bool isDiscontinued)
         {
             var product = await _productService.FindProductByIdForStaff(id);

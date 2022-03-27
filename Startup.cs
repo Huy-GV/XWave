@@ -21,6 +21,7 @@ using XWave.Services;
 using XWave.Services.Defaults;
 using System.Diagnostics;
 using XWave.Configuration;
+using Hangfire;
 
 namespace XWave
 {
@@ -49,6 +50,16 @@ namespace XWave
             
             services.AddDefaultXWaveServices();
             services.AddDefaultHelpers();
+
+            services.AddHangfire(config =>
+            {
+                config.UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            services.AddHangfireServer(options =>
+            {
+                options.SchedulePollingInterval = TimeSpan.FromMinutes(1);
+            });
 
             services
                 .AddAuthentication(options =>
@@ -97,11 +108,11 @@ namespace XWave
             });
 
             services.AddDbContext<XWaveDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            });
 
             
-
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddRazorPages();
 
@@ -153,6 +164,8 @@ namespace XWave
             //        spa.UseReactDevelopmentServer(npmScript: "start");
             //    }
             //});
+
+            app.UseHangfireDashboard();
         }
     }
 }

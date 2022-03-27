@@ -28,7 +28,6 @@ namespace XWave.Services.Interfaces
         /// <returns>A DTO containing details of the product.</returns>
         Task<DetailedProductDto> FindProductByIdForStaff(int id);
 
-        // todo: replace create with add in services
         Task<ServiceResult> AddProductAsync(string staffId, ProductViewModel productViewModel);
 
         /// <summary>
