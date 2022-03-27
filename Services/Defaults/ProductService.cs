@@ -74,24 +74,6 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public async Task<ServiceResult> UpdateDiscontinuationStatus(int id, bool isDiscontinued)
-        {
-            try
-            {
-                var product = await DbContext.Product.FindAsync(id);
-                DbContext.Product.Update(product);
-                product.IsDiscontinued = isDiscontinued;
-                product.DiscontinuationDate = isDiscontinued ? DateTime.Now : null;
-                await DbContext.SaveChangesAsync();
-
-                return ServiceResult.Success();
-            }
-            catch (Exception ex)
-            {
-                return ServiceResult.Failure(ex.Message);
-            }
-        }
-
         public Task<IEnumerable<ProductDto>> FindAllProductsForCustomers()
         {
             var productDtos = DbContext.Product
@@ -251,7 +233,7 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public async Task<ServiceResult> UpdateDiscontinuationStatus(int productId, bool isDiscontinued, DateTime updateSchedule)
+        public async Task<ServiceResult> DiscontinueProductAsync(int productId, DateTime updateSchedule)
         {
             if (!await DbContext.Product.AnyAsync(p => p.Id == productId))
             {
@@ -261,28 +243,53 @@ namespace XWave.Services.Defaults
             var now = DateTime.Now;
             if (updateSchedule < now)
             {
-                return ServiceResult.Failure("Scheduled update date must be in the future.");
+                return ServiceResult.Failure("Scheduled sale discontinuation date must be in the future.");
             }
 
             if (updateSchedule < now.AddDays(7))
             {
-                return ServiceResult.Failure("Scheduled update date must be at least 1 week in the future.");
+                return ServiceResult.Failure("Scheduled sale discontinuation date must be at least 1 week in the future.");
             }
 
             BackgroundJob.Schedule(
-                methodCall: () => ScheduledUpdateProductDiscontinuationStatus(productId, isDiscontinued, updateSchedule),
+                methodCall: () => UpdateProductSaleStatusByScheduleAsync(productId, false, updateSchedule),
                 delay: updateSchedule - now);
 
             return ServiceResult.Success(productId.ToString());
         }
 
-        public async Task ScheduledUpdateProductDiscontinuationStatus(int productId, bool isDiscontinued, DateTime updateSchedule)
+        public async Task<ServiceResult> RestartProductSaleAsync(int productId, DateTime updateSchedule)
+        {
+            if (!await DbContext.Product.AnyAsync(p => p.Id == productId))
+            {
+                return ServiceResult.Failure($"Failed to update price of product with ID {productId} because it was not found.");
+            }
+
+            var now = DateTime.Now;
+            if (updateSchedule < now)
+            {
+                return ServiceResult.Failure("Scheduled sale restart date must be in the future.");
+            }
+
+            if (updateSchedule < now.AddDays(7))
+            {
+                return ServiceResult.Failure("Scheduled sale restart date must be at least 1 week in the future.");
+            }
+
+            BackgroundJob.Schedule(
+                methodCall: () => UpdateProductSaleStatusByScheduleAsync(productId, false, updateSchedule),
+                delay: updateSchedule - now);
+
+            return ServiceResult.Success(productId.ToString());
+        }
+
+        public async Task UpdateProductSaleStatusByScheduleAsync(int productId, bool isDiscontinued, DateTime updateSchedule)
         {
             var product = await DbContext.Product.FindAsync(productId);
             if (product != null)
             {
                 product.IsDiscontinued = isDiscontinued;
-                product.DiscontinuationDate = updateSchedule;
+                product.DiscontinuationDate = isDiscontinued ? updateSchedule : null;
                 await DbContext.SaveChangesAsync();
             }
         }

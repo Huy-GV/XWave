@@ -58,8 +58,8 @@ namespace XWave.Services.Interfaces
         /// <returns></returns>
         Task<ServiceResult> DeleteProductAsync(int id);
 
-        Task<ServiceResult> UpdateDiscontinuationStatus(int id, bool isDiscontinued);
+        Task<ServiceResult> RestartProductSaleAsync(int id, DateTime updateSchedule);
 
-        Task<ServiceResult> UpdateDiscontinuationStatus(int id, bool isDiscontinued, DateTime updateSchedule);
+        Task<ServiceResult> DiscontinueProductAsync(int id, DateTime updateSchedule);
     }
 }

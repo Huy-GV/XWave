@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.Data.Constants;
@@ -29,13 +30,13 @@ namespace XWave.Controllers
             _productService = productService;
         }
 
-        [HttpGet("customers")]
+        [HttpGet("")]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetForCustomersAsync()
         {
             return Ok(await _productService.FindAllProductsForCustomers());
         }
 
-        [HttpGet("staff")]
+        [HttpGet("private")]
         [Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult<IEnumerable<DetailedProductDto>>> GetForStaff()
         {
@@ -43,13 +44,13 @@ namespace XWave.Controllers
         }
 
         // GET api/<ProductController>/5
-        [HttpGet("customers/{id:int}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<ProductDto>> Get(int id)
         {
             return Ok(await _productService.FindProductByIdForCustomers(id));
         }
 
-        [HttpGet("staff/{id:int}")]
+        [HttpGet("{id:int}/private")]
         public async Task<ActionResult<DetailedProductDto>> GetByIdForStaff(int id)
         {
             return Ok(await _productService.FindProductByIdForStaff(id));
@@ -125,15 +126,15 @@ namespace XWave.Controllers
             else
             {
                 result = await _productService.UpdateProductPriceAsync(
-                    staffId: staffId, 
-                    productId: id, 
-                    updatedPrice: viewModel.UpdatedPrice, 
+                    staffId: staffId,
+                    productId: id,
+                    updatedPrice: viewModel.UpdatedPrice,
                     updateSchedule: viewModel.Schedule.Value);
             }
 
             if (result.Succeeded)
             {
-                return XWaveCreated($"https://localhost:5001/api/product/staff/{result.ResourceId}");
+                return XWaveUpdated($"https://localhost:5001/api/product/staff/{result.ResourceId}");
             }
 
             return XWaveBadRequest(result.Error);
@@ -160,8 +161,8 @@ namespace XWave.Controllers
         }
 
         //[Authorize(Roles = "manager")]
-        [HttpPut("{id}/discontinue/{isDiscontinued:bool}")]
-        public async Task<ActionResult> UpdateStatusAsync(int id, bool isDiscontinued)
+        [HttpPut("{id}/discontinue/{updateSchedule}")]
+        public async Task<ActionResult> DiscontinueProductAsync(int id, DateTime updateSchedule)
         {
             var product = await _productService.FindProductByIdForStaff(id);
             if (product == null)
@@ -169,7 +170,36 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
-            var result = await _productService.UpdateDiscontinuationStatus(id, isDiscontinued);
+            if (product.IsDiscontinued)
+            {
+                return BadRequest(XWaveResponse.Failed("Product is already discontinued"));
+            }
+
+            var result = await _productService.DiscontinueProductAsync(id, updateSchedule);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+
+            return XWaveBadRequest(result.Error);
+        }
+
+        //[Authorize(Roles = "manager")]
+        [HttpPut("{id}/restart-sale/{updateSchedule}")]
+        public async Task<ActionResult> RestartProductSaleAsync(int id, DateTime updateSchedule)
+        {
+            var product = await _productService.FindProductByIdForStaff(id);
+            if (product == null)
+            {
+                return BadRequest(XWaveResponse.NonExistentResource());
+            }
+
+            if (!product.IsDiscontinued)
+            {
+                return BadRequest(XWaveResponse.Failed("Product is currently in sale"));
+            }
+
+            var result = await _productService.RestartProductSaleAsync(id, updateSchedule);
             if (result.Succeeded)
             {
                 return NoContent();

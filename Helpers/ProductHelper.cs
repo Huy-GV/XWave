@@ -17,12 +17,14 @@ namespace XWave.Helpers
                 ProductName = product.Name,
                 CategoryName = product.Category.Name,
                 Price = product.Price,
+                IsDiscontinued = product.IsDiscontinued,
                 Quantity = product.Quantity,
                 CategoryId = product.Category.Id,
                 LatestRestock = product.LatestRestock,
                 Discount = staffDiscountDTO
             };
         }
+
         public ProductDto CreateCustomerProductDTO(Product product)
         {
             var discountDTO = CreateCustomerDiscountDto(product);
@@ -38,6 +40,7 @@ namespace XWave.Helpers
                 Discount = discountDTO
             };
         }
+
         private DiscountDto? CreateCustomerDiscountDto(Product product)
         {
             if (product.Discount != null)
@@ -55,6 +58,7 @@ namespace XWave.Helpers
 
             return null;
         }
+
         private DetailedDiscountDto? CreateDetailedDiscountDto(Product product)
         {
             if (product.Discount != null)
