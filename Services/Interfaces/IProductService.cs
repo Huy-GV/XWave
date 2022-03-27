@@ -19,14 +19,14 @@ namespace XWave.Services.Interfaces
         /// </summary>
         /// <param name="id">Product ID.</param>
         /// <returns>A DTO containing limited details of the product.</returns>
-        Task<ProductDto> FindProductByIdForCustomers(int id);
+        Task<ProductDto?> FindProductByIdForCustomers(int id);
 
         /// <summary>
         /// Find a product by its ID with full details for staff.
         /// </summary>
         /// <param name="id">Product ID.</param>
         /// <returns>A DTO containing details of the product.</returns>
-        Task<DetailedProductDto> FindProductByIdForStaff(int id);
+        Task<DetailedProductDto?> FindProductByIdForStaff(int id);
 
         Task<ServiceResult> AddProductAsync(string staffId, ProductViewModel productViewModel);
 

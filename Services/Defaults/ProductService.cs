@@ -81,8 +81,8 @@ namespace XWave.Services.Defaults
                 .Include(p => p.Discount)
                 .Include(p => p.Category)
                 .Where(p => !p.IsDiscontinued)
-                .Select(p => _productHelper.CreateCustomerProductDTO(p))
-                .AsEnumerable();
+                .AsEnumerable()
+                .Select(p => _productHelper.CreateCustomerProductDTO(p));
 
             return Task.FromResult(productDtos);
         }
@@ -105,27 +105,26 @@ namespace XWave.Services.Defaults
                 .AsEnumerable());
         }
 
-        public async Task<ProductDto> FindProductByIdForCustomers(int id)
+        public async Task<ProductDto?> FindProductByIdForCustomers(int id)
         {
             var product = await DbContext.Product
                 .AsNoTracking()
                 .Include(p => p.Discount)
                 .Include(p => p.Category)
-                .SingleOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id);
 
-            return _productHelper.CreateCustomerProductDTO(product);
+            return product == null ? null : _productHelper.CreateCustomerProductDTO(product);
         }
 
-        public async Task<DetailedProductDto> FindProductByIdForStaff(int id)
+        public async Task<DetailedProductDto?> FindProductByIdForStaff(int id)
         {
-            var productDto = await DbContext.Product
+            var product = await DbContext.Product
                 .AsNoTracking()
                 .Include(p => p.Discount)
                 .Include(p => p.Category)
-                .Select(p => _productHelper.CreateDetailedProductDto(p))
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-            return productDto;
+            return product == null ? null : _productHelper.CreateDetailedProductDto(product);
         }
 
         public async Task<ServiceResult> UpdateProductAsync(
