@@ -113,5 +113,39 @@ namespace XWave.Controllers
 
             return XWaveBadRequest(result.Error);
         }
+
+        [HttpPost("{id}/apply")]
+        public async Task<ActionResult> ApplyDiscountToProduct(int id, [FromBody] int[] productIds)
+        {
+            if (await _discountService.FindDiscountByIdAsync(id) == null)
+            {
+                return BadRequest(XWaveResponse.NonExistentResource());
+            }
+
+            var result = await _discountService.ApplyDiscountToProducts(id, productIds);
+            if (result.Succeeded)
+            {
+                return Ok("Discount has been successfully applied to selected products.");
+            }
+
+            return XWaveBadRequest(result.Error);
+        }
+
+        [HttpPost("{id}/remove")]
+        public async Task<ActionResult> RemoveDiscountFromProducts(int id, [FromBody] int[] productIds)
+        {
+            if (await _discountService.FindDiscountByIdAsync(id) == null)
+            {
+                return BadRequest(XWaveResponse.NonExistentResource());
+            }
+
+            var result = await _discountService.RemoveDiscountFromProductsAsync(id, productIds);
+            if (result.Succeeded)
+            {
+                return Ok("Discount has been successfully applied to selected products.");
+            }
+
+            return XWaveBadRequest(result.Error);
+        }
     }
 }

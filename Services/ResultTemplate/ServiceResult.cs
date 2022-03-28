@@ -2,8 +2,10 @@
 {
     public class ServiceResult
     {
+        // todo: consider better properties
         public bool Succeeded { get; init; } = false;
-        public string Error { get; init; }  = string.Empty;
+
+        public string Error { get; init; } = string.Empty;
         public string ResourceId { get; init; } = string.Empty;
 
         /// <summary>
@@ -11,7 +13,7 @@
         /// </summary>
         /// <param name="error">Error message describing the cause of failure.</param>
         /// <returns></returns>
-        public static ServiceResult Failure(string error) 
+        public static ServiceResult Failure(string error)
         {
             return new ServiceResult { Error = error };
         }
@@ -23,8 +25,8 @@
         /// <returns></returns>
         public static ServiceResult Success(string id = "")
         {
-            return new ServiceResult 
-            { 
+            return new ServiceResult
+            {
                 ResourceId = id,
                 Succeeded = true,
             };

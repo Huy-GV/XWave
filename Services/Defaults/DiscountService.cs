@@ -102,14 +102,51 @@ namespace XWave.Services.Defaults
             return ServiceResult.Success(id.ToString());
         }
 
-        public Task<ServiceResult> AssignDiscountToProduct(int discountId, IEnumerable<int> productIds)
+        public async Task<ServiceResult> ApplyDiscountToProducts(int discountId, IEnumerable<int> productIds)
         {
-            throw new NotImplementedException();
+            var discount = await DbContext.Discount.FindAsync(discountId);
+            if (discount == null)
+            {
+                return ServiceResult.Failure($"Discount with ID {discountId} was not found");
+            }
+
+            var productIdSet = new HashSet<int>(productIds);
+            var appliedProducts = await DbContext.Product.Where(x => productIdSet.Contains(x.Id)).ToListAsync();
+            foreach (var product in appliedProducts)
+            {
+                product.DiscountId = discountId;
+            }
+
+            DbContext.Product.UpdateRange(appliedProducts);
+            await DbContext.SaveChangesAsync();
+
+            return ServiceResult.Success();
         }
 
-        public Task<ServiceResult> AssignDiscountToProduct(int discountId, IEnumerable<int> productIds, DateTime? schedule)
+        public async Task<ServiceResult> RemoveDiscountFromProductsAsync(int discountId, IEnumerable<int> productIds)
         {
-            throw new NotImplementedException();
+            var discount = await DbContext.Discount.FindAsync(discountId);
+            if (discount == null)
+            {
+                return ServiceResult.Failure($"Discount with ID {discountId} was not found");
+            }
+
+            var productIdSet = new HashSet<int>(productIds);
+            var appliedProducts = await DbContext.Product.Where(x => productIdSet.Contains(x.Id)).ToListAsync();
+            foreach (var product in appliedProducts)
+            {
+                if (product.DiscountId == null)
+                {
+                    return ServiceResult.Failure($"Discount with ID {discountId} is not applied to product with ID {product.Id}");
+                }
+
+                product.DiscountId = null;
+            }
+
+            DbContext.Product.UpdateRange(appliedProducts);
+            await DbContext.SaveChangesAsync();
+
+            return ServiceResult.Success();
         }
     }
 }

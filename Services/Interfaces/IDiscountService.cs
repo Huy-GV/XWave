@@ -20,9 +20,8 @@ namespace XWave.Services.Interfaces
 
         Task<ServiceResult> RemoveDiscountAsync(string managerId, int id);
 
-        // todo: add method for assigning discounts
-        Task<ServiceResult> AssignDiscountToProduct(int discountId, IEnumerable<int> productIds);
+        Task<ServiceResult> ApplyDiscountToProducts(int discountId, IEnumerable<int> productIds);
 
-        Task<ServiceResult> AssignDiscountToProduct(int discountId, IEnumerable<int> productIds, System.DateTime? schedule);
+        Task<ServiceResult> RemoveDiscountFromProductsAsync(int discountId, IEnumerable<int> productIds);
     }
 }
