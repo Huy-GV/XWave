@@ -20,8 +20,20 @@ namespace XWave.Services.Interfaces
 
         Task<ServiceResult> RemoveDiscountAsync(string managerId, int id);
 
+        /// <summary>
+        /// Apply a discount to a collection of products.
+        /// </summary>
+        /// <param name="discountId">ID of the discount.</param>
+        /// <param name="productIds">Collection of IDs of products to apply the discount to.</param>
+        /// <returns></returns>
         Task<ServiceResult> ApplyDiscountToProducts(int discountId, IEnumerable<int> productIds);
 
+        /// <summary>
+        /// Remove a discount from a collection of products on which the discount is applied.
+        /// </summary>
+        /// <param name="discountId">ID of the discount.</param>
+        /// <param name="productIds">Collection of IDs of products to remove the discount from.</param>
+        /// <returns></returns>
         Task<ServiceResult> RemoveDiscountFromProductsAsync(int discountId, IEnumerable<int> productIds);
     }
 }
