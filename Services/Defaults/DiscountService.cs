@@ -110,8 +110,7 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure($"Discount with ID {discountId} was not found");
             }
 
-            var productIdSet = new HashSet<int>(productIds);
-            var appliedProducts = await DbContext.Product.Where(x => productIdSet.Contains(x.Id)).ToListAsync();
+            var appliedProducts = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
             foreach (var product in appliedProducts)
             {
                 product.DiscountId = discountId;
@@ -131,8 +130,7 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure($"Discount with ID {discountId} was not found");
             }
 
-            var productIdSet = new HashSet<int>(productIds);
-            var appliedProducts = await DbContext.Product.Where(x => productIdSet.Contains(x.Id)).ToListAsync();
+            var appliedProducts = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
             foreach (var product in appliedProducts)
             {
                 if (product.DiscountId == null)
