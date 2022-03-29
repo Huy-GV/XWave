@@ -17,7 +17,7 @@ namespace XWave.Services.Defaults
         {
         }
 
-        public async Task<ServiceResult> AddPaymentAccountAsync(string customerId, PaymentAccountViewModel inputPayment)
+        public async Task<(ServiceResult, int? PaymentAccountId)> AddPaymentAccountAsync(string customerId, PaymentAccountViewModel inputPayment)
         {
             using var transaction = DbContext.Database.BeginTransaction();
             try
@@ -45,20 +45,13 @@ namespace XWave.Services.Defaults
                 await DbContext.SaveChangesAsync();
                 transaction.Commit();
 
-                return new ServiceResult
-                {
-                    Succeeded = true,
-                    ResourceId = newPayment.Id.ToString(),
-                };
+                return (ServiceResult.Success(), newPayment.Id);
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
 
-                return new ServiceResult
-                {
-                    Error = ex.Message,
-                };
+                return (ServiceResult.Failure("Failed to add payment account"), null);
             }
         }
 
@@ -70,7 +63,7 @@ namespace XWave.Services.Defaults
                 DbContext.Remove(deletedPayment);
                 await DbContext.SaveChangesAsync();
 
-                return ServiceResult.Success(paymentId.ToString());
+                return ServiceResult.Success();
             }
             catch (Exception ex)
             {
@@ -108,11 +101,7 @@ namespace XWave.Services.Defaults
                 DbContext.PaymentAccount.Update(payment);
                 await DbContext.SaveChangesAsync();
 
-                return new ServiceResult
-                {
-                    Succeeded = true,
-                    ResourceId = id.ToString(),
-                };
+                return ServiceResult.Success();
             }
             catch (Exception ex)
             {

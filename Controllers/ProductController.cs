@@ -67,10 +67,10 @@ namespace XWave.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _productService.AddProductAsync(staffId, productViewModel);
+            var (result, productId) = await _productService.AddProductAsync(staffId, productViewModel);
             if (result.Succeeded)
             {
-                return XWaveCreated($"https://localhost:5001/api/product/staff/{result.ResourceId}");
+                return XWaveCreated($"https://localhost:5001/api/product/staff/{productId}");
             }
 
             return XWaveBadRequest(result.Error);
@@ -96,7 +96,7 @@ namespace XWave.Controllers
             var result = await _productService.UpdateProductAsync(staffId, id, updatedProduct);
             if (result.Succeeded)
             {
-                return XWaveCreated($"https://localhost:5001/api/product/staff/{result.ResourceId}");
+                return XWaveCreated($"https://localhost:5001/api/product/staff/{id}");
             }
 
             return XWaveBadRequest(result.Error);
@@ -134,7 +134,7 @@ namespace XWave.Controllers
 
             if (result.Succeeded)
             {
-                return XWaveUpdated($"https://localhost:5001/api/product/staff/{result.ResourceId}");
+                return XWaveUpdated($"https://localhost:5001/api/product/staff/{id}");
             }
 
             return XWaveBadRequest(result.Error);

@@ -22,7 +22,7 @@ namespace XWave.Services.Defaults
             _staffActivityService = staffActivityService;
         }
 
-        public async Task<ServiceResult> CreateDiscountAsync(string managerId, DiscountViewModel discountViewModel)
+        public async Task<(ServiceResult, int? DiscountId)> CreateDiscountAsync(string managerId, DiscountViewModel discountViewModel)
         {
             var newDiscount = new Discount() { ManagerId = managerId };
             var entry = DbContext.Add(newDiscount);
@@ -30,7 +30,7 @@ namespace XWave.Services.Defaults
             await DbContext.SaveChangesAsync();
             await _staffActivityService.LogActivityAsync<Discount>(managerId, OperationType.Create);
 
-            return ServiceResult.Success(newDiscount.Id.ToString());
+            return (ServiceResult.Success(), newDiscount.Id);
         }
 
         public async Task<IEnumerable<Product>> FindProductsWithDiscountIdAsync(int discountId)
@@ -59,7 +59,7 @@ namespace XWave.Services.Defaults
                 if (result.Succeeded)
                 {
                     await transaction.CommitAsync();
-                    return ServiceResult.Success(id.ToString());
+                    return ServiceResult.Success();
                 }
 
                 return ServiceResult.Failure(result.Error);
@@ -99,7 +99,7 @@ namespace XWave.Services.Defaults
             await DbContext.SaveChangesAsync();
             await _staffActivityService.LogActivityAsync<Discount>(managerID, OperationType.Modify);
 
-            return ServiceResult.Success(id.ToString());
+            return ServiceResult.Success();
         }
 
         public async Task<ServiceResult> ApplyDiscountToProducts(int discountId, IEnumerable<int> productIds)

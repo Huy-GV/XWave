@@ -51,8 +51,13 @@ namespace XWave.Controllers
             }
 
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-            var result = await _categoryService.AddCategoryAsync(managerId, newCategory);
-            return XWaveCreated($"https://localhost:5001/api/category/admin/{result.ResourceId}");
+            var (result, categoryId) = await _categoryService.AddCategoryAsync(managerId, newCategory);
+            if (result.Succeeded)
+            {
+                return XWaveCreated($"https://localhost:5001/api/category/admin/{categoryId}");
+            }
+
+            return XWaveBadRequest(result.Error);
         }
 
         // PUT api/<CategoryController>/5
@@ -75,7 +80,7 @@ namespace XWave.Controllers
             var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
             if (result.Succeeded)
             {
-                return XWaveUpdated($"https://localhost:5001/api/category/admin/{result.ResourceId}");
+                return XWaveUpdated($"https://localhost:5001/api/category/admin/{id}");
             }
 
             return XWaveBadRequest(result.Error);

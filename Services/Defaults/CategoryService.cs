@@ -13,13 +13,15 @@ namespace XWave.Services.Defaults
     public class CategoryService : ServiceBase, ICategoryService
     {
         private readonly IActivityService _staffActivityService;
+
         public CategoryService(
             XWaveDbContext dbContext,
             IActivityService staffActivityService) : base(dbContext)
-        { 
+        {
             _staffActivityService = staffActivityService;
         }
-        public async Task<ServiceResult> AddCategoryAsync(string managerID, Category category)
+
+        public async Task<(ServiceResult, int? CategoryId)> AddCategoryAsync(string managerID, Category category)
         {
             try
             {
@@ -27,11 +29,11 @@ namespace XWave.Services.Defaults
                 await DbContext.SaveChangesAsync();
                 await _staffActivityService.LogActivityAsync<Category>(managerID, OperationType.Create);
 
-                return ServiceResult.Success(category.Id.ToString());
+                return (ServiceResult.Success(), category.Id);
             }
             catch (Exception e)
             {
-                return ServiceResult.Failure(e.Message);
+                return (ServiceResult.Failure(e.Message), null);
             }
         }
 
@@ -50,6 +52,7 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure(e.Message);
             }
         }
+
         public Task<IEnumerable<Category>> FindAllCategoriesAsync()
         {
             return Task.FromResult(DbContext.Category.AsEnumerable());
@@ -76,7 +79,6 @@ namespace XWave.Services.Defaults
             {
                 return ServiceResult.Failure(e.Message);
             }
-
         }
     }
 }

@@ -32,7 +32,7 @@ namespace XWave.Services.Defaults
             return orderDTOs.FirstOrDefault(o => o.Id == orderId);
         }
 
-        public async Task<ServiceResult> AddOrderAsync(
+        public async Task<(ServiceResult, int? OrderId)> AddOrderAsync(
             PurchaseViewModel purchaseViewModel,
             string customerId)
         {
@@ -42,7 +42,7 @@ namespace XWave.Services.Defaults
                 var customer = await _dbContext.CustomerAccount.FindAsync(customerId);
                 if (customer == null)
                 {
-                    return ServiceResult.Failure("Customer not found");
+                    return (ServiceResult.Failure("Customer not found"), null);
                 }
 
                 var payment = await _dbContext.PaymentAccount
@@ -50,7 +50,7 @@ namespace XWave.Services.Defaults
 
                 if (payment == null)
                 {
-                    return ServiceResult.Failure("Payment not found");
+                    return (ServiceResult.Failure("Payment not found"), null);
                 }
 
                 var order = new Order()
@@ -70,23 +70,23 @@ namespace XWave.Services.Defaults
 
                     if (product == null)
                     {
-                        return ServiceResult.Failure("Ordered product not found");
+                        return (ServiceResult.Failure("Ordered product not found."), null);
                     }
 
                     if (product.Quantity < purchasedProduct.Quantity)
                     {
-                        return ServiceResult.Failure("Quantity exceeded existing stock");
+                        return (ServiceResult.Failure("Quantity exceeded existing stock."), null);
                     }
 
                     //prevent customers from ordering based on incorrect data
                     if (product.Discount?.Percentage != purchasedProduct.DisplayedDiscountPercentage)
                     {
-                        return ServiceResult.Failure($"Discount percentage has been changed during transaction. Please view the latest price for the item {product.Name}");
+                        return (ServiceResult.Failure($"Discount percentage has been changed during transaction. Please view the latest price for the item {product.Name}."), null);
                     }
 
                     if (product.Price != purchasedProduct.DisplayedPrice)
                     {
-                        return ServiceResult.Failure($"Price has been changed during transaction. Please view the latest price for the item {product.Name}");
+                        return (ServiceResult.Failure($"Price has been changed during transaction. Please view the latest price for the item {product.Name}."), null);
                     }
 
                     product.Quantity -= purchasedProduct.Quantity;
@@ -111,20 +111,20 @@ namespace XWave.Services.Defaults
                 var succeeded = await UpdateTransactionDetailsAsync(purchaseViewModel.PaymentAccountId, customerId);
                 if (!succeeded)
                 {
-                    return ServiceResult.Failure("Failed to update transaction. Operation is aborted");
+                    return (ServiceResult.Failure("Failed to update transaction. Operation is aborted."), null);
                 }
 
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return ServiceResult.Success(order.Id.ToString());
+                return (ServiceResult.Success(), order.Id);
             }
             catch (Exception exception)
             {
                 await transaction.RollbackAsync();
                 _logger.LogError(exception.Message);
 
-                return ServiceResult.Failure(exception.Message);
+                return (ServiceResult.Failure("An error occured when placing your order."), null);
             }
         }
 

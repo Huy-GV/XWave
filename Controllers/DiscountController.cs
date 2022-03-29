@@ -61,10 +61,10 @@ namespace XWave.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _discountService.CreateDiscountAsync(userId, newDiscount);
+            var (result, productId) = await _discountService.CreateDiscountAsync(userId, newDiscount);
             if (result.Succeeded)
             {
-                return XWaveCreated($"https://localhost:5001/api/discount/{result.ResourceId}");
+                return XWaveCreated($"https://localhost:5001/api/discount/{productId}");
             }
 
             return XWaveBadRequest(result.Error);
@@ -89,7 +89,7 @@ namespace XWave.Controllers
             var result = await _discountService.UpdateDiscountAsync(managerId, id, updatedDiscount);
             if (result.Succeeded)
             {
-                return XWaveUpdated($"https://localhost:5001/api/discount/{result.ResourceId}");
+                return XWaveUpdated($"https://localhost:5001/api/discount/{id}");
             }
 
             return XWaveBadRequest(result.Error);

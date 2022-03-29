@@ -72,14 +72,14 @@ namespace XWave.Controllers
                 return XWaveBadRequest("Customer ID not found");
             }
 
-            var result = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
+            var (result, orderId) = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
 
             if (!result.Succeeded)
             {
                 return XWaveBadRequest(result.Error);
             }
 
-            return Ok();
+            return Ok("");
         }
     }
 }

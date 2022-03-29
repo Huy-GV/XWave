@@ -28,6 +28,7 @@ namespace XWave.Controllers
     {
         private readonly IPaymentService _paymentService;
         private readonly AuthenticationHelper _authenticationHelper;
+
         public PaymentAccountController(
             IPaymentService paymentService,
             AuthenticationHelper authenticationHelper)
@@ -35,14 +36,16 @@ namespace XWave.Controllers
             _paymentService = paymentService;
             _authenticationHelper = authenticationHelper;
         }
+
         [HttpGet]
-        [Authorize(Policy="staffonly")]
+        [Authorize(Policy = "staffonly")]
         public async Task<ActionResult> Get()
         {
             return Ok(await _paymentService.FindAllTransactionDetailsForStaffAsync());
         }
+
         [HttpGet("details")]
-        [Authorize(Roles ="customer")]
+        [Authorize(Roles = "customer")]
         public ActionResult<IEnumerable<TransactionDetails>> GetByCustomer()
         {
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -53,6 +56,7 @@ namespace XWave.Controllers
 
             return Ok(_paymentService.FindAllTransactionDetailsForCustomersAsync(customerId));
         }
+
         [HttpPost("delete/{paymentId}")]
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> Delete(int paymentId)
@@ -64,15 +68,15 @@ namespace XWave.Controllers
             }
 
             var result = await _paymentService.RemovePaymentAccountAsync(customerId, paymentId);
-            
+
             if (!result.Succeeded)
             {
                 return XWaveBadRequest(result.Error);
             }
 
             return NoContent();
-            
         }
+
         [HttpPut("{id}")]
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> UpdatePaymentAsync(int id, [FromBody] PaymentAccountViewModel inputPayment)
@@ -81,7 +85,7 @@ namespace XWave.Controllers
             {
                 return BadRequest(ModelState);
             }
-                
+
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (!await _paymentService.CustomerHasPaymentAccount(customerId, id))
             {
@@ -95,6 +99,7 @@ namespace XWave.Controllers
 
             return Ok(XWaveResponse.Updated($"https://localhost:5001/api/payment/details/{id}"));
         }
+
         [HttpPost]
         [Authorize(Roles = "customer")]
         public async Task<ActionResult> CreatePaymentAsync([FromBody] PaymentAccountViewModel inputPayment)
@@ -104,15 +109,15 @@ namespace XWave.Controllers
             {
                 return BadRequest(ModelState);
             }
-                
-            var result = await _paymentService.AddPaymentAccountAsync(customerId, inputPayment);
+
+            var (result, paymentAccountId) = await _paymentService.AddPaymentAccountAsync(customerId, inputPayment);
 
             if (!result.Succeeded)
-            { 
+            {
                 return XWaveBadRequest(result.Error);
             }
 
-            return Ok(XWaveResponse.Created($"https://localhost:5001/api/payment/details/{result.ResourceId}"));
+            return Ok(XWaveResponse.Created($"https://localhost:5001/api/payment/details/{paymentAccountId}"));
         }
     }
 }

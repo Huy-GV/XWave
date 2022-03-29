@@ -49,7 +49,7 @@ namespace XWave.Controllers
             var result = await _staffAccountService.DeactivateStaffAccount(id);
             if (result.Succeeded)
             {
-                return XWaveUpdated($"https://localhost:5001/api/staff-account/{result.ResourceId}");
+                return XWaveUpdated($"https://localhost:5001/api/staff-account/{id}");
             }
 
             return BadRequest(result.Error);

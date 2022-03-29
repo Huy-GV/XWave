@@ -58,7 +58,7 @@ namespace XWave.Services.Defaults
                 customerAccount.IsSubscribedToPromotions = isSubscribed;
                 await DbContext.SaveChangesAsync();
 
-                return ServiceResult.Success(id);
+                return ServiceResult.Success();
             }
             catch (Exception e)
             {
@@ -80,7 +80,7 @@ namespace XWave.Services.Defaults
                 entry.CurrentValues.SetValues(viewModel);
                 await DbContext.SaveChangesAsync();
 
-                return ServiceResult.Success(id);
+                return ServiceResult.Success();
             }
             catch (Exception e)
             {

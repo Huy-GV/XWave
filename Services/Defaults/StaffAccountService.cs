@@ -19,13 +19,15 @@ namespace XWave.Services.Defaults
     public class StaffAccountService : ServiceBase, IStaffAccountService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+
         public StaffAccountService(
             XWaveDbContext dbContext,
             UserManager<ApplicationUser> userManager) : base(dbContext)
         {
             _userManager = userManager;
         }
-        public async Task<ServiceResult> RegisterStaffAccount(string id, StaffAccountViewModel registerStaffViewModel)
+
+        public async Task<(ServiceResult, string? StaffId)> RegisterStaffAccount(string id, StaffAccountViewModel registerStaffViewModel)
         {
             try
             {
@@ -37,11 +39,11 @@ namespace XWave.Services.Defaults
                     HourlyWage = registerStaffViewModel.HourlyWage
                 });
 
-                return ServiceResult.Success(id);
+                return (ServiceResult.Success(), id);
             }
             catch (Exception)
             {
-                return ServiceResult.Failure("Failed to register user");
+                return (ServiceResult.Failure("Failed to register user"), null);
             }
         }
 
@@ -75,6 +77,7 @@ namespace XWave.Services.Defaults
 
             return accountDtos;
         }
+
         private async Task<StaffAccountDto?> BuildStaffAccountDto(ApplicationUser staffUser)
         {
             var staffAccount = await DbContext.StaffAccount.FindAsync(staffUser.Id);
@@ -99,6 +102,7 @@ namespace XWave.Services.Defaults
                 ImmediateManagerFullName = managerFullName
             };
         }
+
         public async Task<ServiceResult> UpdateStaffAccount(string staffId, StaffAccountViewModel updateStaffAccountViewModel)
         {
             var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
@@ -108,7 +112,7 @@ namespace XWave.Services.Defaults
                 entry.CurrentValues.SetValues(updateStaffAccountViewModel);
                 await DbContext.SaveChangesAsync();
 
-                return ServiceResult.Success(staffId);
+                return ServiceResult.Success();
             }
             catch (Exception ex)
             {
@@ -134,7 +138,7 @@ namespace XWave.Services.Defaults
                 if (result.Succeeded)
                 {
                     await transaction.CommitAsync();
-                    return ServiceResult.Success(staffId);
+                    return ServiceResult.Success();
                 }
 
                 throw new Exception("Password reset failed");

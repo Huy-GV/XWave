@@ -12,7 +12,7 @@ namespace XWave.Services.Interfaces
 
         public Task<IEnumerable<StaffAccountDto>> GetAllStaffAccounts();
 
-        public Task<ServiceResult> RegisterStaffAccount(string staffId, StaffAccountViewModel registerStaffViewModel);
+        public Task<(ServiceResult, string? StaffId)> RegisterStaffAccount(string staffId, StaffAccountViewModel registerStaffViewModel);
 
         public Task<ServiceResult> UpdateStaffAccount(string staffId, StaffAccountViewModel updateUserViewModel);
 

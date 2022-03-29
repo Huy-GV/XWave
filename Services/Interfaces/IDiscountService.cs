@@ -14,7 +14,7 @@ namespace XWave.Services.Interfaces
 
         Task<IEnumerable<Product>> FindProductsWithDiscountIdAsync(int id);
 
-        Task<ServiceResult> CreateDiscountAsync(string managerId, DiscountViewModel discount);
+        Task<(ServiceResult, int? DiscountId)> CreateDiscountAsync(string managerId, DiscountViewModel discount);
 
         Task<ServiceResult> UpdateDiscountAsync(string managerId, int id, DiscountViewModel discount);
 

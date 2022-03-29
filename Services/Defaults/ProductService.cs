@@ -29,13 +29,13 @@ namespace XWave.Services.Defaults
             _staffActivityService = staffActivityService;
         }
 
-        public async Task<ServiceResult> AddProductAsync(string staffId, ProductViewModel productViewModel)
+        public async Task<(ServiceResult, int? ProductId)> AddProductAsync(string staffId, ProductViewModel productViewModel)
         {
             try
             {
                 if (!await DbContext.Category.AnyAsync(c => c.Id == productViewModel.CategoryId))
                 {
-                    return ServiceResult.Failure("Category not found");
+                    return (ServiceResult.Failure("Category not found"), null);
                 }
 
                 var newProduct = new Product();
@@ -48,11 +48,11 @@ namespace XWave.Services.Defaults
                     throw new Exception(result.Error);
                 }
 
-                return ServiceResult.Success(newProduct.Id.ToString());
+                return (ServiceResult.Success(), newProduct.Id);
             }
             catch (Exception ex)
             {
-                return ServiceResult.Failure(ex.Message);
+                return (ServiceResult.Failure(ex.Message), null);
             }
         }
 
@@ -144,7 +144,7 @@ namespace XWave.Services.Defaults
                 entry.CurrentValues.SetValues(updatedProductViewModel);
                 await DbContext.SaveChangesAsync();
                 await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Modify);
-                return ServiceResult.Success(id.ToString());
+                return ServiceResult.Success();
             }
             catch (Exception)
             {
@@ -166,7 +166,7 @@ namespace XWave.Services.Defaults
                 product.LatestRestock = DateTime.Now;
                 await DbContext.SaveChangesAsync();
                 await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Modify);
-                return ServiceResult.Success(productId.ToString());
+                return ServiceResult.Success();
             }
             catch (Exception)
             {
@@ -187,7 +187,7 @@ namespace XWave.Services.Defaults
                 product.Price = updatedPrice;
                 await DbContext.SaveChangesAsync();
                 await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Modify);
-                return ServiceResult.Success(productId.ToString());
+                return ServiceResult.Success();
             }
             catch (Exception)
             {
@@ -217,7 +217,7 @@ namespace XWave.Services.Defaults
                 methodCall: () => ScheduledUpdateProductPrice(staffId, productId, updatedPrice),
                 delay: updateSchedule - now);
 
-            return ServiceResult.Success(productId.ToString());
+            return ServiceResult.Success();
         }
 
         // todo: reuse this method?
@@ -254,7 +254,7 @@ namespace XWave.Services.Defaults
                 methodCall: () => UpdateProductSaleStatusByScheduleAsync(productId, false, updateSchedule),
                 delay: updateSchedule - now);
 
-            return ServiceResult.Success(productId.ToString());
+            return ServiceResult.Success();
         }
 
         public async Task<ServiceResult> RestartProductSaleAsync(int productId, DateTime updateSchedule)
@@ -279,7 +279,7 @@ namespace XWave.Services.Defaults
                 methodCall: () => UpdateProductSaleStatusByScheduleAsync(productId, false, updateSchedule),
                 delay: updateSchedule - now);
 
-            return ServiceResult.Success(productId.ToString());
+            return ServiceResult.Success();
         }
 
         public async Task UpdateProductSaleStatusByScheduleAsync(int productId, bool isDiscontinued, DateTime updateSchedule)

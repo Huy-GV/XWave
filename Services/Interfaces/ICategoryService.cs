@@ -7,7 +7,7 @@ namespace XWave.Services.Interfaces
 {
     public interface ICategoryService
     {
-        Task<ServiceResult> AddCategoryAsync(string managerId, Category category);
+        Task<(ServiceResult, int? CategoryId)> AddCategoryAsync(string managerId, Category category);
 
         Task<ServiceResult> UpdateCategoryAsync(string managerId, int id, Category category);
 
