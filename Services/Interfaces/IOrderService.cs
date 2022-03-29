@@ -38,6 +38,6 @@ namespace XWave.Services.Interfaces
         /// <param name="orderId">ID of order in which the product was purchased.</param>
         /// <param name="productId">Purchased product.</param>
         /// <returns></returns>
-        Task<OrderDetails> FindPurchasedProductDetailsByOrderId(int orderId, int productId);
+        Task<OrderDetails?> FindPurchasedProductDetailsByOrderId(int orderId, int productId);
     }
 }

@@ -53,7 +53,7 @@ namespace XWave.Services.Defaults
             return await DbContext.Activity.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Activity> FindActivityLogAsync(int id)
+        public async Task<Activity?> FindActivityLogAsync(int id)
         {
             return await DbContext.Activity
                 .AsNoTracking()

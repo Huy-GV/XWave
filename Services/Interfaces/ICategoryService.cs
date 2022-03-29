@@ -13,7 +13,7 @@ namespace XWave.Services.Interfaces
 
         Task<ServiceResult> DeleteCategoryAsync(string managerId, int id);
 
-        Task<Category> FindCategoryByIdAsync(int id);
+        Task<Category?> FindCategoryByIdAsync(int id);
 
         Task<IEnumerable<Category>> FindAllCategoriesAsync();
     }

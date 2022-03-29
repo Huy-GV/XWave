@@ -16,7 +16,7 @@ namespace XWave.Services.Interfaces
         /// <returns></returns>
         Task<ServiceResult> LogActivityAsync<T>(string staffId, OperationType operationType) where T : IEntity;
 
-        Task<Activity> FindActivityLogAsync(int id);
+        Task<Activity?> FindActivityLogAsync(int id);
 
         Task<IEnumerable<Activity>> FindAllActivityLogsAsync();
     }

@@ -58,7 +58,7 @@ namespace XWave.Services.Defaults
             return Task.FromResult(DbContext.Category.AsEnumerable());
         }
 
-        public async Task<Category> FindCategoryByIdAsync(int id)
+        public async Task<Category?> FindCategoryByIdAsync(int id)
         {
             return await DbContext.Category.FindAsync(id);
         }

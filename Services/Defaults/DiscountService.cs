@@ -81,7 +81,7 @@ namespace XWave.Services.Defaults
                 });
         }
 
-        public async Task<Discount> FindDiscountByIdAsync(int id)
+        public async Task<Discount?> FindDiscountByIdAsync(int id)
         {
             return await DbContext.Discount.FindAsync(id);
         }

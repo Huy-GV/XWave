@@ -37,7 +37,8 @@ namespace XWave.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Category>> Get(int id)
         {
-            return Ok(await _categoryService.FindCategoryByIdAsync(id));
+            var category = await _categoryService.FindCategoryByIdAsync(id);
+            return category == null ? Ok(category) : NotFound();
         }
 
         // POST api/<CategoryController>

@@ -91,6 +91,7 @@ namespace XWave.Controllers
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
+
             var result = await _paymentService.UpdatePaymentAccountAsync(customerId, id, inputPayment);
             if (!result.Succeeded)
             {

@@ -31,29 +31,31 @@ namespace XWave.Controllers
         }
 
         [HttpGet("")]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetForCustomersAsync()
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllForCustomersAsync()
         {
             return Ok(await _productService.FindAllProductsForCustomers());
         }
 
         [HttpGet("private")]
         [Authorize(Policy = "StaffOnly")]
-        public async Task<ActionResult<IEnumerable<DetailedProductDto>>> GetForStaff()
+        public async Task<ActionResult<IEnumerable<DetailedProductDto>>> GetAllForStaff()
         {
             return Ok(await _productService.FindAllProductsForStaff());
         }
 
         // GET api/<ProductController>/5
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<ProductDto>> Get(int id)
+        public async Task<ActionResult<ProductDto>> GetById(int id)
         {
-            return Ok(await _productService.FindProductByIdForCustomers(id));
+            var productDto = await _productService.FindProductByIdForCustomers(id);
+            return productDto == null ? Ok(productDto) : NotFound();
         }
 
         [HttpGet("{id:int}/private")]
         public async Task<ActionResult<DetailedProductDto>> GetByIdForStaff(int id)
         {
-            return Ok(await _productService.FindProductByIdForStaff(id));
+            var productDto = await _productService.FindProductByIdForStaff(id);
+            return productDto == null ? Ok(productDto) : NotFound();
         }
 
         // POST api/<ProductController>

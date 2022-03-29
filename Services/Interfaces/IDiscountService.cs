@@ -10,7 +10,7 @@ namespace XWave.Services.Interfaces
     {
         Task<IEnumerable<Discount>> FindAllDiscountsAsync();
 
-        Task<Discount> FindDiscountByIdAsync(int id);
+        Task<Discount?> FindDiscountByIdAsync(int id);
 
         Task<IEnumerable<Product>> FindProductsWithDiscountIdAsync(int id);
 

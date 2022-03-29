@@ -178,7 +178,7 @@ namespace XWave.Services.Defaults
             return Task.FromResult(orderDtos);
         }
 
-        public async Task<OrderDetails> FindPurchasedProductDetailsByOrderId(int orderId, int productId)
+        public async Task<OrderDetails?> FindPurchasedProductDetailsByOrderId(int orderId, int productId)
         {
             return await _dbContext.OrderDetails.FindAsync(orderId, productId);
         }

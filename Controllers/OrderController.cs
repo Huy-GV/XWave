@@ -57,9 +57,9 @@ namespace XWave.Controllers
         [Authorize(Policy = "StaffOnly")]
         public async Task<ActionResult<OrderDetails>> GetOrderDetailAsync(int orderId, int productId)
         {
-            OrderDetails orderDetail = await _orderService.FindPurchasedProductDetailsByOrderId(orderId, productId);
+            var orderDetail = await _orderService.FindPurchasedProductDetailsByOrderId(orderId, productId);
 
-            return Ok(orderDetail);
+            return orderDetail == null ? Ok(orderDetail) : NotFound();
         }
 
         [HttpPost]
