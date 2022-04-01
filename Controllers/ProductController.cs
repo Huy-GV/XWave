@@ -151,21 +151,10 @@ namespace XWave.Controllers
         }
 
         //[Authorize(Roles = "manager")]
-        [HttpPut("{id}/discontinue/{updateSchedule}")]
-        public async Task<ActionResult> DiscontinueProductAsync(int id, DateTime updateSchedule)
+        [HttpPut("discontinue/{updateSchedule}")]
+        public async Task<ActionResult> DiscontinueProductAsync([FromBody] int[] ids, DateTime updateSchedule)
         {
-            var product = await _productService.FindProductByIdForStaff(id);
-            if (product == null)
-            {
-                return BadRequest(XWaveResponse.NonExistentResource());
-            }
-
-            if (product.IsDiscontinued)
-            {
-                return BadRequest(XWaveResponse.Failed("Product is already discontinued"));
-            }
-
-            var result = await _productService.DiscontinueProductAsync(id, updateSchedule);
+            var result = await _productService.DiscontinueProductAsync(ids, updateSchedule);
             if (result.Succeeded)
             {
                 return NoContent();

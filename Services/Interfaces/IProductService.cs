@@ -58,7 +58,6 @@ namespace XWave.Services.Interfaces
         /// <returns></returns>
         Task<ServiceResult> DeleteProductAsync(int id);
 
-        // todo: make the below methods accept an array of product
         /// <summary>
         /// Restart sale of a discontinued product.
         /// </summary>
@@ -73,6 +72,6 @@ namespace XWave.Services.Interfaces
         /// <param name="id"></param>
         /// <param name="updateSchedule">The scheduled date for discontinuing an active product.</param>
         /// <returns></returns>
-        Task<ServiceResult> DiscontinueProductAsync(int id, DateTime updateSchedule);
+        Task<ServiceResult> DiscontinueProductAsync(int[] id, DateTime updateSchedule);
     }
 }

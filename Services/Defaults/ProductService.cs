@@ -233,11 +233,25 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public async Task<ServiceResult> DiscontinueProductAsync(int productId, DateTime updateSchedule)
+        /// <inheritdoc/>
+        /// <remarks>This method will return a failed result if one of the passed product IDs belongs to no product or if one of the products is already discontinued. However, it does not check for products that are already scheduled for discontinuation.
+        /// </remarks>
+        public async Task<ServiceResult> DiscontinueProductAsync(int[] productIds, DateTime updateSchedule)
         {
-            if (!await DbContext.Product.AnyAsync(p => p.Id == productId))
+            var productsToDiscontinue = await DbContext.Product
+                .Where(product => productIds.Contains(product.Id))
+                .ToArrayAsync();
+
+            var missingProducts = productIds.Except(productsToDiscontinue.Select(p => p.Id));
+            if (missingProducts.Any())
             {
-                return ServiceResult.Failure($"Failed to update price of product with ID {productId} because it was not found.");
+                return ServiceResult.Failure($"Failed to discontinue product with the following IDs: {string.Join(", ", missingProducts)} because they were not found.");
+            }
+
+            var discontinuedProducts = productsToDiscontinue.Where(p => p.IsDiscontinued).Select(p => p.Id);
+            if (discontinuedProducts.Any())
+            {
+                return ServiceResult.Failure($"Failed to discontinue of product with the following IDs: {string.Join(", ", discontinuedProducts)} because they were already discontinued.");
             }
 
             var now = DateTime.Now;
@@ -252,7 +266,7 @@ namespace XWave.Services.Defaults
             }
 
             BackgroundJob.Schedule(
-                methodCall: () => UpdateProductSaleStatusByScheduleAsync(productId, false, updateSchedule),
+                methodCall: () => UpdateProductSaleStatusByScheduleAsync(productIds, false, updateSchedule),
                 delay: updateSchedule - now);
 
             return ServiceResult.Success();
@@ -291,6 +305,30 @@ namespace XWave.Services.Defaults
                 product.IsDiscontinued = isDiscontinued;
                 product.DiscontinuationDate = isDiscontinued ? updateSchedule : null;
                 await DbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task UpdateProductSaleStatusByScheduleAsync(int[] productIds, bool isDiscontinued, DateTime updateSchedule)
+        {
+            using var transaction = await DbContext.Database.BeginTransactionAsync();
+            try
+            {
+                foreach (var productId in productIds)
+                {
+                    var product = await DbContext.Product.FindAsync(productId);
+                    if (product != null)
+                    {
+                        product.IsDiscontinued = isDiscontinued;
+                        product.DiscontinuationDate = isDiscontinued ? updateSchedule : null;
+                        await DbContext.SaveChangesAsync();
+                    }
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
             }
         }
     }
