@@ -121,6 +121,7 @@ namespace XWave.Services.Defaults
             var product = await DbContext.Product
                 .AsNoTracking()
                 .Include(p => p.Discount)
+                    .ThenInclude(d => d.Manager)
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
 

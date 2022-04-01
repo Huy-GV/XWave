@@ -54,16 +54,7 @@ namespace XWave
 
             services.AddDefaultXWaveServices();
             services.AddDefaultHelpers();
-
-            services.AddHangfire(config =>
-            {
-                config.UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection"));
-            });
-
-            services.AddHangfireServer(options =>
-            {
-                options.SchedulePollingInterval = TimeSpan.FromMinutes(1);
-            });
+            services.AddHangFireBackgroundServices(Configuration.GetConnectionString("DefaultConnection"));
 
             services
                 .AddAuthentication(options =>

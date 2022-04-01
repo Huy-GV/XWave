@@ -21,11 +21,14 @@ namespace XWave.Controllers
     {
         private readonly IProductService _productService;
         private readonly AuthenticationHelper _authenticationHelper;
+        private readonly IBackgroundJobService _backgroundJobService;
 
         public ProductController(
             IProductService productService,
-            AuthenticationHelper authenticationHelper)
+            AuthenticationHelper authenticationHelper,
+            IBackgroundJobService backgroundJobService)
         {
+            _backgroundJobService = backgroundJobService;
             _authenticationHelper = authenticationHelper;
             _productService = productService;
         }
@@ -187,6 +190,19 @@ namespace XWave.Controllers
             }
 
             var result = await _productService.RestartProductSaleAsync(id, updateSchedule);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+
+            return XWaveBadRequest(result.Error);
+        }
+
+        //[Authorize(Roles = "manager")]
+        [HttpDelete("{id}/cancel")]
+        public async Task<ActionResult> CancelBackgroundTaskAsync(string id)
+        {
+            var result = await _backgroundJobService.CancelJobAsync(id);
             if (result.Succeeded)
             {
                 return NoContent();

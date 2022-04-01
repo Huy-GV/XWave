@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Hangfire;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using XWave.Helpers;
 using XWave.Services.Defaults;
 using XWave.Services.Interfaces;
@@ -9,8 +11,6 @@ namespace XWave.Services
     {
         public static void AddDefaultXWaveServices(this IServiceCollection services)
         {
-            //TODO: move all service registration here
-
             services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPaymentService, PaymentService>();
@@ -25,6 +25,20 @@ namespace XWave.Services
         {
             services.AddTransient<AuthenticationHelper>();
             services.AddTransient<ProductHelper>();
+        }
+
+        public static void AddHangFireBackgroundServices(this IServiceCollection services, string dbConnectionString)
+        {
+            services.AddTransient<IBackgroundJobService, HangFireBackgroundJobService>();
+            services.AddHangfire(config =>
+            {
+                config.UseSqlServerStorage(dbConnectionString);
+            });
+
+            services.AddHangfireServer(options =>
+            {
+                options.SchedulePollingInterval = TimeSpan.FromMinutes(1);
+            });
         }
     }
 }
