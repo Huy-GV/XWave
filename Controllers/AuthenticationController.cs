@@ -1,6 +1,5 @@
-
 using Microsoft.AspNetCore.Authorization;
-using XWave.ViewModels.Authentication ;
+using XWave.ViewModels.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -28,6 +27,7 @@ namespace XWave.Controllers
         private readonly IAuthenticationService _authService;
         private readonly AuthenticationHelper _authenticationHelper;
         private readonly JwtCookie _jwtCookieConfig;
+
         public AuthenticationController(
             IAuthenticationService authenticationService,
             AuthenticationHelper authenticationHelper,
@@ -37,14 +37,10 @@ namespace XWave.Controllers
             _authService = authenticationService;
             _authenticationHelper = authenticationHelper;
         }
+
         [HttpPost("login")]
         public async Task<ActionResult<AuthenticationResult>> LogInAsync([FromBody] SignInViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var result = await _authService.SignInAsync(model);
             if (result.Succeeded)
             {
@@ -58,6 +54,7 @@ namespace XWave.Controllers
 
             return Ok(result);
         }
+
         [HttpPost]
         public ActionResult SignOutAsync()
         {

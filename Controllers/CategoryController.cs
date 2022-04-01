@@ -46,11 +46,6 @@ namespace XWave.Controllers
         [Authorize(Roles = "manager")]
         public async Task<ActionResult> CreateAsync([FromBody] Category newCategory)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var (result, categoryId) = await _categoryService.AddCategoryAsync(managerId, newCategory);
             if (result.Succeeded)
@@ -70,11 +65,6 @@ namespace XWave.Controllers
             if (category == null)
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
             }
 
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);

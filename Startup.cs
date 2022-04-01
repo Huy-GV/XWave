@@ -22,6 +22,7 @@ using XWave.Services.Defaults;
 using System.Diagnostics;
 using XWave.Configuration;
 using Hangfire;
+using XWave.Filters;
 
 namespace XWave
 {
@@ -37,17 +38,20 @@ namespace XWave
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.Configure<Jwt>(Configuration.GetSection("Jwt"));
             services.Configure<JwtCookie>(Configuration.GetSection("JwtCookie"));
+
+            services.AddControllers(options =>
+            {
+                options.Filters.Add<ModelStateValidationFilter>();
+            });
 
             services
                 .AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<XWaveDbContext>();
-            
-            
+
             services.AddScoped<Services.Interfaces.IAuthenticationService, JwtAuthenticationService>();
-            
+
             services.AddDefaultXWaveServices();
             services.AddDefaultHelpers();
 
@@ -112,7 +116,6 @@ namespace XWave
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
 
-            
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddRazorPages();
 
@@ -165,6 +168,7 @@ namespace XWave
             //    }
             //});
 
+            // todo: move to env dev only
             app.UseHangfireDashboard();
         }
     }

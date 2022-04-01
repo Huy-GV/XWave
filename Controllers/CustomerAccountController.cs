@@ -31,11 +31,6 @@ namespace XWave.Controllers
         [HttpPost("register/customer")]
         public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync([FromBody] RegisterCustomerViewModel viewModel)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var result = await _customerAccountService.RegisterCustomerAsync(viewModel);
             if (result.Succeeded)
             {

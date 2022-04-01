@@ -57,11 +57,6 @@ namespace XWave.Controllers
         public async Task<ActionResult> CreateAsync([FromBody] DiscountViewModel newDiscount)
         {
             var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var (result, productId) = await _discountService.CreateDiscountAsync(userId, newDiscount);
             if (result.Succeeded)
             {
@@ -79,11 +74,6 @@ namespace XWave.Controllers
             if (await _discountService.FindDiscountByIdAsync(id) == null)
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
             }
 
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
