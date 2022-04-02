@@ -1,27 +1,16 @@
-using Microsoft.AspNetCore.Authorization;
-using XWave.ViewModels.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using XWave.Services;
-using XWave.Data.Constants;
-using XWave.Data;
-using XWave.Services.Interfaces;
-using XWave.Configuration;
-using XWave.Models;
-using XWave.Services.ResultTemplate;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+using XWave.Configuration;
 using XWave.Helpers;
-using System.ComponentModel.DataAnnotations;
+using XWave.Services.Interfaces;
+using XWave.Services.ResultTemplate;
+using XWave.ViewModels.Authentication;
 
 namespace XWave.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthenticationController : XWaveBaseController
     {
         private readonly IAuthenticationService _authService;

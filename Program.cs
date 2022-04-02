@@ -1,15 +1,9 @@
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using XWave.Data;
-using Microsoft.Extensions.DependencyInjection;
-using XWave.Data.DatabaseSeeding;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using XWave.Data;
+using XWave.Data.DatabaseSeeding;
 
 namespace XWave
 {
@@ -30,7 +24,7 @@ namespace XWave
                 PurchaseRelatedDataSeeder.SeedData(services);
                 StaffActivitySeeder.SeedData(services);
             }
-            
+
             host.Run();
         }
 

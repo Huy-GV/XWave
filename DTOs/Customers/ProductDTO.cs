@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace XWave.DTOs.Customers
+﻿namespace XWave.DTOs.Customers
 {
     public class ProductDto
     {

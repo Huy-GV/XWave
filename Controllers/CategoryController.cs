@@ -26,14 +26,12 @@ namespace XWave.Controllers
             _categoryService = categoryService;
         }
 
-        // GET: api/<CategoryController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> Get()
         {
             return Ok(await _categoryService.FindAllCategoriesAsync());
         }
 
-        // GET api/<CategoryController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Category>> Get(int id)
         {
@@ -41,9 +39,8 @@ namespace XWave.Controllers
             return category == null ? Ok(category) : NotFound();
         }
 
-        // POST api/<CategoryController>
         [HttpPost]
-        [Authorize(Roles = "manager")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> CreateAsync([FromBody] Category newCategory)
         {
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -56,9 +53,8 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
-        // PUT api/<CategoryController>/5
         [HttpPut("{id}")]
-        [Authorize(Roles = "manager")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] Category updatedCategory)
         {
             var category = await _categoryService.FindCategoryByIdAsync(id);
@@ -77,9 +73,8 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
-        // DELETE api/<CategoryController>/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "manager")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> Delete(int id)
         {
             var category = await _categoryService.FindCategoryByIdAsync(id);

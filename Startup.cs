@@ -1,11 +1,8 @@
-using Microsoft.AspNetCore.Authentication;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,15 +11,12 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using XWave.Configuration;
 using XWave.Data;
-using XWave.Models;
 using XWave.Data.Constants;
+using XWave.Models;
 using XWave.Services;
 using XWave.Services.Defaults;
-using System.Diagnostics;
-using XWave.Configuration;
-using Hangfire;
-using XWave.Filters;
 
 namespace XWave
 {
@@ -41,17 +35,13 @@ namespace XWave
             services.Configure<Jwt>(Configuration.GetSection("Jwt"));
             services.Configure<JwtCookie>(Configuration.GetSection("JwtCookie"));
 
-            services.AddControllers(options =>
-            {
-                options.Filters.Add<ModelStateValidationFilter>();
-            });
-
             services
                 .AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<XWaveDbContext>();
 
             services.AddScoped<Services.Interfaces.IAuthenticationService, JwtAuthenticationService>();
 
+            services.AddControllers();
             services.AddDefaultXWaveServices();
             services.AddDefaultHelpers();
             services.AddHangFireBackgroundServices(Configuration.GetConnectionString("DefaultConnection"));
@@ -98,7 +88,7 @@ namespace XWave
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("StaffOnly",
+                options.AddPolicy(Policies.InternalPersonnelOnly,
                     policy => policy.RequireRole(Roles.Staff, Roles.Manager));
             });
 
@@ -108,7 +98,6 @@ namespace XWave
             });
 
             services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddRazorPages();
 
             // In production, the React files will be served from this directory
             //services.AddSpaStaticFiles(configuration =>
@@ -124,6 +113,7 @@ namespace XWave
             {
                 app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
+                app.UseHangfireDashboard();
             }
             else
             {
@@ -158,9 +148,6 @@ namespace XWave
             //        spa.UseReactDevelopmentServer(npmScript: "start");
             //    }
             //});
-
-            // todo: move to env dev only
-            app.UseHangfireDashboard();
         }
     }
 }

@@ -9,7 +9,7 @@ namespace XWave.Services.Interfaces
     public interface IActivityService
     {
         /// <summary>
-        /// Log changes made by staff members.
+        /// Log changes made by staff members. Is exception-safe.
         /// </summary>
         /// <typeparam name="T">Type of concerned entity.</typeparam>
         /// <param name="staffId">ID of staff member who made the change.</param>

@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using XWave.Models;
-using XWave.ViewModels.Management;
+﻿using XWave.ViewModels.Management;
 
 namespace XWave.ViewModels.Authentication
 {

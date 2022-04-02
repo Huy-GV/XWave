@@ -1,17 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.Linq;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.Data;
+using XWave.Data.Constants;
 using XWave.DTOs.Management;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
-using XWave.ViewModels.Authentication;
-using System;
-using Microsoft.EntityFrameworkCore;
-using XWave.Data.Constants;
-using System.Transactions;
 using XWave.ViewModels.Management;
 
 namespace XWave.Services.Defaults

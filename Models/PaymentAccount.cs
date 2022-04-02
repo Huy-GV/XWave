@@ -1,7 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace XWave.Models
 {
@@ -10,6 +8,7 @@ namespace XWave.Models
         public int Id { get; set; }
         public string AccountNumber { get; set; }
         public string Provider { get; set; }
+
         [DataType(DataType.Date)]
         public DateTime ExpiryDate { get; set; }
     }

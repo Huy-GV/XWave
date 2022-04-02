@@ -1,23 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using XWave.Data;
-using XWave.Services;
-using XWave.ViewModels;
-using XWave.DTOs;
-using XWave.Models;
-using System.Linq;
-using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
-using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using XWave.Data.Constants;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Net.Http;
-using XWave.Services.Interfaces;
 using XWave.Helpers;
-using System.Net;
+using XWave.Models;
+using XWave.Services.Interfaces;
 using XWave.ViewModels.Customer;
 
 namespace XWave.Controllers
@@ -38,27 +27,27 @@ namespace XWave.Controllers
         }
 
         [HttpGet]
-        [Authorize(Policy = "staffonly")]
+        [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
         public async Task<ActionResult> Get()
         {
             return Ok(await _paymentService.FindAllTransactionDetailsForStaffAsync());
         }
 
         [HttpGet("details")]
-        [Authorize(Roles = "customer")]
+        [Authorize(Roles = nameof(Roles.Customer))]
         public ActionResult<IEnumerable<TransactionDetails>> GetByCustomer()
         {
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (customerId == null)
             {
-                return XWaveBadRequest("Customer Id is empty");
+                return XWaveBadRequest("Customer Id is empty.");
             }
 
             return Ok(_paymentService.FindAllTransactionDetailsForCustomersAsync(customerId));
         }
 
         [HttpPost("delete/{paymentId}")]
-        [Authorize(Roles = "customer")]
+        [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult> Delete(int paymentId)
         {
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -78,7 +67,7 @@ namespace XWave.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "customer")]
+        [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult> UpdatePaymentAsync(int id, [FromBody] PaymentAccountViewModel inputPayment)
         {
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -97,7 +86,7 @@ namespace XWave.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "customer")]
+        [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult> CreatePaymentAsync([FromBody] PaymentAccountViewModel inputPayment)
         {
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);

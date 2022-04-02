@@ -1,16 +1,15 @@
-﻿using XWave.Models;
-using XWave.Data;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System;
-using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using XWave.ViewModels.Management;
+using XWave.Data;
+using XWave.DTOs.Management;
+using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
-using XWave.DTOs.Management;
 
 namespace XWave.Services.Defaults
 {

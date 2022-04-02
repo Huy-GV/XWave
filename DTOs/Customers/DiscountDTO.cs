@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using XWave.Models;
 
 namespace XWave.DTOs.Customers
 {

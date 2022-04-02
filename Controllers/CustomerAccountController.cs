@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using XWave.Configuration;
+using XWave.Data.Constants;
 using XWave.Helpers;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
@@ -29,6 +31,7 @@ namespace XWave.Controllers
         }
 
         [HttpPost("register/customer")]
+        [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync([FromBody] RegisterCustomerViewModel viewModel)
         {
             var result = await _customerAccountService.RegisterCustomerAsync(viewModel);
@@ -49,6 +52,7 @@ namespace XWave.Controllers
         }
 
         [HttpPost("subscribe")]
+        [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult<ServiceResult>> UpdatePromotionSubscriptionAsync([FromBody] bool isSubscribed = true)
         {
             var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);

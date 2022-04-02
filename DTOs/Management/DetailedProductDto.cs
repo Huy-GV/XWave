@@ -1,5 +1,4 @@
 ﻿using System;
-using XWave.Models;
 
 namespace XWave.DTOs.Management
 {

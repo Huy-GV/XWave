@@ -6,6 +6,7 @@ namespace XWave.ViewModels.Management
     {
         [Required]
         public uint UpdatedPrice { get; set; }
+
         public System.DateTime? Schedule { get; set; } = null;
     }
 }

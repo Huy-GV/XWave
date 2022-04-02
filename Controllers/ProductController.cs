@@ -40,13 +40,12 @@ namespace XWave.Controllers
         }
 
         [HttpGet("private")]
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
         public async Task<ActionResult<IEnumerable<DetailedProductDto>>> GetAllForStaff()
         {
             return Ok(await _productService.FindAllProductsForStaff());
         }
 
-        // GET api/<ProductController>/5
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ProductDto>> GetById(int id)
         {
@@ -61,9 +60,8 @@ namespace XWave.Controllers
             return productDto == null ? Ok(productDto) : NotFound();
         }
 
-        // POST api/<ProductController>
         [HttpPost]
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
         public async Task<ActionResult> CreateAsync([FromBody] ProductViewModel productViewModel)
         {
             var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -76,9 +74,8 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
-        // PUT api/<ProductController>/5
-        [Authorize(Policy = "StaffOnly")]
         [HttpPut("{id}")]
+        [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] ProductViewModel updatedProduct)
         {
             var product = await _productService.FindProductByIdForStaff(id);
@@ -97,8 +94,8 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
-        //[Authorize(Policy = "StaffOnly")]
         [HttpPut("{id}/price")]
+        [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
         public async Task<ActionResult> UpdatePriceAsync(int id, [FromBody] ProductPriceAdjustmentViewModel viewModel)
         {
             var product = await _productService.FindProductByIdForStaff(id);
@@ -130,9 +127,8 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
-        // DELETE api/<ProductController>/5
-        [Authorize(Roles = "manager")]
         [HttpDelete("{id}")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> DeleteAsync(int id)
         {
             var product = await _productService.FindProductByIdForStaff(id);
@@ -150,8 +146,8 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
-        //[Authorize(Roles = "manager")]
         [HttpPut("discontinue/{updateSchedule}")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> DiscontinueProductAsync([FromBody] int[] ids, DateTime updateSchedule)
         {
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -164,8 +160,8 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
-        //[Authorize(Roles = "manager")]
         [HttpPut("{id}/restart-sale/{updateSchedule}")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> RestartProductSaleAsync(int id, DateTime updateSchedule)
         {
             var product = await _productService.FindProductByIdForStaff(id);
@@ -176,7 +172,7 @@ namespace XWave.Controllers
 
             if (!product.IsDiscontinued)
             {
-                return BadRequest(XWaveResponse.Failed("Product is currently in sale"));
+                return BadRequest(XWaveResponse.Failed("Product is currently in sale."));
             }
 
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -189,8 +185,8 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
-        //[Authorize(Roles = "manager")]
         [HttpDelete("{id}/cancel")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> CancelBackgroundTaskAsync(string id)
         {
             var result = await _backgroundJobService.CancelJobAsync(id);

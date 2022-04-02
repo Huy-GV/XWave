@@ -8,8 +8,10 @@ namespace XWave.ViewModels.Management
     {
         [Range(20, 500)]
         public uint HourlyWage { get; set; }
+
         public DateTime ContractEndDate { get; set; }
         public string ImmediateManagerId { get; set; }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (ContractEndDate > DateTime.Now.AddDays(30))

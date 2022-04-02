@@ -150,7 +150,7 @@ namespace XWave.Services.Defaults
                 await _staffActivityService.LogActivityAsync<Product>(
                     staffId,
                     OperationType.Modify,
-                    $"updated general information of product named {product.Name}");
+                    $"updated general information of product named {product.Name}.");
                 return ServiceResult.Success();
             }
             catch (Exception)
@@ -176,7 +176,7 @@ namespace XWave.Services.Defaults
                 await _staffActivityService.LogActivityAsync<Product>(
                     staffId,
                     OperationType.Modify,
-                    $"updated stock of product named {product.Name} (from {quantityBeforeRestock} to {updatedStock}");
+                    $"updated stock of product named {product.Name} (from {quantityBeforeRestock} to {updatedStock}.");
 
                 return ServiceResult.Success();
             }
@@ -202,7 +202,7 @@ namespace XWave.Services.Defaults
                 await _staffActivityService.LogActivityAsync<Product>(
                     staffId,
                     OperationType.Modify,
-                    $"updated price of product named {product.Name} (from {formerPrice} to {updatedPrice}");
+                    $"updated price of product named {product.Name} (from {formerPrice} to {updatedPrice}.");
 
                 return ServiceResult.Success();
             }
@@ -242,7 +242,7 @@ namespace XWave.Services.Defaults
             return ServiceResult.Success();
         }
 
-        // todo: reuse this method?
+        // todo: reuse this method and log staff activity?
         public async Task ScheduledUpdateProductPrice(string staffId, int productId, uint updatedPrice)
         {
             var product = await DbContext.Product.FindAsync(productId);

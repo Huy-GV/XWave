@@ -27,23 +27,21 @@ namespace XWave.Controllers
             _authenticationHelper = authenticationHelper;
         }
 
-        // GET: api/<DiscountController>
         [HttpGet]
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
         public async Task<ActionResult<IEnumerable<Discount>>> Get()
         {
             return Ok(await _discountService.FindAllDiscountsAsync());
         }
 
         [HttpGet("{id}/product")]
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
         public async Task<IEnumerable<Product>> GetProductsWithDiscount(int id)
         {
             //no need to include discount at this level
             return await _discountService.FindProductsWithDiscountIdAsync(id);
         }
 
-        // GET api/<DiscountController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Discount>> GetAsync(int id)
         {
@@ -51,9 +49,8 @@ namespace XWave.Controllers
             return discount == null ? Ok(discount) : NotFound();
         }
 
-        // POST api/<DiscountController>
         [HttpPost]
-        [Authorize(Roles = "managers")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> CreateAsync([FromBody] DiscountViewModel newDiscount)
         {
             var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -66,9 +63,8 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
-        // PUT api/<DiscountController>/5
         [HttpPut("{id}")]
-        [Authorize(Roles = "managers")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] DiscountViewModel updatedDiscount)
         {
             if (await _discountService.FindDiscountByIdAsync(id) == null)
@@ -86,8 +82,8 @@ namespace XWave.Controllers
             return XWaveBadRequest(result.Error);
         }
 
-        // DELETE api/<DiscountController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> Delete(int id)
         {
             if (await _discountService.FindDiscountByIdAsync(id) == null)
@@ -106,6 +102,7 @@ namespace XWave.Controllers
         }
 
         [HttpPost("{id}/apply")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> ApplyDiscountToProduct(int id, [FromBody] int[] productIds)
         {
             if (await _discountService.FindDiscountByIdAsync(id) == null)
@@ -124,6 +121,7 @@ namespace XWave.Controllers
         }
 
         [HttpPost("{id}/remove")]
+        [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> RemoveDiscountFromProducts(int id, [FromBody] int[] productIds)
         {
             if (await _discountService.FindDiscountByIdAsync(id) == null)

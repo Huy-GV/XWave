@@ -7,6 +7,7 @@ namespace XWave.DTOs.Management
         public string StaffId { get; set; }
         public string FullName { get; set; }
         public DateTime ContractEndDate { get; set; }
+
         public int RemaningDaysInContract
         {
             get
@@ -19,7 +20,8 @@ namespace XWave.DTOs.Management
                 return (ContractEndDate - DateTime.Now).Days;
             }
         }
+
         public uint HourlyWage { get; set; }
-        public string ImmediateManagerFullName { get; set; } 
+        public string ImmediateManagerFullName { get; set; }
     }
 }

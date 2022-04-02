@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using XWave.Data.Constants;
 using XWave.DTOs.Management;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
@@ -10,7 +11,7 @@ namespace XWave.Controllers
 {
     [Route("api/staff-account")]
     [ApiController]
-    [Authorize(Roles = "manager")]
+    [Authorize(Roles = nameof(Roles.Manager))]
     public class StaffAccountController : XWaveBaseController
     {
         private readonly IStaffAccountService _staffAccountService;
@@ -43,6 +44,7 @@ namespace XWave.Controllers
 
         //    return BadRequest(result.Error);
         //}
+
         [HttpDelete("{id}")]
         public async Task<ActionResult<ServiceResult>> DeactivateStaffAccount(string id)
         {

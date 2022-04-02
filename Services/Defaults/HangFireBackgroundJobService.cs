@@ -1,5 +1,4 @@
 ﻿using Hangfire;
-using Hangfire.Storage;
 using System.Threading.Tasks;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
