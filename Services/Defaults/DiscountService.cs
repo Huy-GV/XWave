@@ -146,14 +146,14 @@ namespace XWave.Services.Defaults
             }
 
             var appliedProducts = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
-            // todo: use linq to refactor this and make it atomic
+            var productsWithoutDiscount = appliedProducts.Where(p => p.DiscountId == null);
+            if (productsWithoutDiscount.Any())
+            {
+                return ServiceResult.Failure($"Discount with ID {discountId} is not applied to product with the following IDs: {string.Join(", ", productsWithoutDiscount.Select(p => p.Id))}");
+            }
+
             foreach (var product in appliedProducts)
             {
-                if (product.DiscountId == null)
-                {
-                    return ServiceResult.Failure($"Discount with ID {discountId} is not applied to product with ID {product.Id}");
-                }
-
                 product.DiscountId = null;
             }
 
@@ -162,7 +162,7 @@ namespace XWave.Services.Defaults
             await _staffActivityService.LogActivityAsync<Discount>(
                 managerId,
                 OperationType.Modify,
-                $"removed discount with ID {discountId} (created by {discount.Manager.UserName}) from the following products with IDs: {string.Join(", ", appliedProducts)}.");
+                $"removed discount with ID {discountId} (created by {discount.Manager.UserName}) from products with the following IDs: {string.Join(", ", appliedProducts)}.");
 
             return ServiceResult.Success();
         }
