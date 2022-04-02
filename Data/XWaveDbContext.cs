@@ -59,9 +59,9 @@ namespace XWave.Data
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
             builder.Entity<Activity>()
-                .HasOne(activityLog => activityLog.StaffUser)
+                .HasOne(activityLog => activityLog.AppUser)
                 .WithMany()
-                .HasForeignKey(activityLog => activityLog.StaffId);
+                .HasForeignKey(activityLog => activityLog.UserId);
 
             builder.Entity<Activity>()
                 .Property(a => a.OperationType)

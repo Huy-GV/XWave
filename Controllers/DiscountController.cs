@@ -113,7 +113,8 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
-            var result = await _discountService.ApplyDiscountToProducts(id, productIds);
+            var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _discountService.ApplyDiscountToProducts(userId, id, productIds);
             if (result.Succeeded)
             {
                 return Ok("Discount has been successfully applied to selected products.");
@@ -130,7 +131,8 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
-            var result = await _discountService.RemoveDiscountFromProductsAsync(id, productIds);
+            var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _discountService.RemoveDiscountFromProductsAsync(userId, id, productIds);
             if (result.Succeeded)
             {
                 return Ok("Discount has been successfully applied to selected products.");

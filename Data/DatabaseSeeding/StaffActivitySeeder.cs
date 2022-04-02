@@ -51,24 +51,27 @@ namespace XWave.Data.DatabaseSeeding
             {
                 new Activity
                 {
-                    Time = DateTime.Now,
-                    StaffId = staff[0].Id,
+                    Timestamp = DateTime.Now,
+                    UserId = staff[0].Id,
                     EntityType = typeof(Product).Name,
                     OperationType = OperationType.Create,
+                    Info = " created a product named Test 1"
                 },
                 new Activity
                 {
-                    Time = DateTime.Now,
-                    StaffId = staff[1].Id,
+                    Timestamp = DateTime.Now,
+                    UserId = staff[1].Id,
                     EntityType = typeof(Product).Name,
                     OperationType = OperationType.Modify,
+                    Info = " created a product named Test 2"
                 },
                 new Activity
                 {
-                    Time = DateTime.Now,
-                    StaffId = managers[0].Id,
+                    Timestamp = DateTime.Now,
+                    UserId = managers[0].Id,
                     EntityType = typeof(Product).Name,
                     OperationType = OperationType.Delete,
+                    Info = " created a product named Test 3"
                 },
             };
 

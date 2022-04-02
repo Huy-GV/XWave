@@ -10,30 +10,38 @@ using System.Collections.Generic;
 using XWave.ViewModels.Management;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
+using XWave.DTOs.Management;
 
 namespace XWave.Services.Defaults
 {
     public class ActivityService : ServiceBase, IActivityService
     {
         private readonly ILogger _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public ActivityService(
             XWaveDbContext dbContext,
-            ILogger<ActivityService> logger) : base(dbContext)
+            ILogger<ActivityService> logger,
+            UserManager<ApplicationUser> userManager) : base(dbContext)
         {
             _logger = logger;
+            _userManager = userManager;
         }
 
-        public async Task<ServiceResult> LogActivityAsync<T>(string staffId, OperationType operation) where T : IEntity
+        public async Task<ServiceResult> LogActivityAsync<T>(
+            string staffId,
+            OperationType operation,
+            string infoText) where T : IEntity
         {
             try
             {
                 var newLog = new Activity
                 {
                     OperationType = operation,
-                    Time = DateTime.Now,
-                    StaffId = staffId,
-                    EntityType = typeof(T).Name
+                    Timestamp = DateTime.Now,
+                    UserId = staffId,
+                    EntityType = typeof(T).Name,
+                    Info = infoText
                 };
 
                 DbContext.Activity.Add(newLog);
@@ -48,16 +56,49 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public async Task<IEnumerable<Activity>> FindAllActivityLogsAsync()
+        public async Task<IEnumerable<ActivityLogDto>> FindAllActivityLogsAsync()
         {
-            return await DbContext.Activity.AsNoTracking().ToListAsync();
+            return DbContext.Activity
+                .AsNoTracking()
+                .ToList()
+                .Select(async (a) => new ActivityLogDto()
+                {
+                    Timestamp = a.Timestamp,
+                    InfoText = await GenerateInfoText(a.UserId, a.Info)
+                })
+                .Select(t => t.Result);
         }
 
-        public async Task<Activity?> FindActivityLogAsync(int id)
+        public async Task<ActivityLogDto?> FindActivityLogAsync(int id)
         {
-            return await DbContext.Activity
-                .AsNoTracking()
-                .FirstOrDefaultAsync(a => a.Id == id);
+            var log = await DbContext.Activity.AsNoTracking().FirstAsync(a => a.Id == id);
+            if (log != null)
+            {
+                return new ActivityLogDto()
+                {
+                    Timestamp = log.Timestamp,
+                    InfoText = await GenerateInfoText(log.UserId, log.Info)
+                };
+            }
+
+            return null;
+        }
+
+        private async Task<string> GenerateInfoText(string userId, string infoText)
+        {
+            var (userName, firstName) = await GetUserInfo(userId);
+            return $"{firstName} ({userName}) {infoText.Trim()}.";
+        }
+
+        private async Task<(string UserName, string FirstName)> GetUserInfo(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return ("deleted", "deleted");
+            }
+
+            return (user.UserName, user.FirstName);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +15,15 @@ namespace XWave.Services.Defaults
     public class DiscountService : ServiceBase, IDiscountService
     {
         private readonly IActivityService _staffActivityService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public DiscountService(
             XWaveDbContext dbContext,
-            IActivityService staffActivityService) : base(dbContext)
+            IActivityService staffActivityService,
+            UserManager<ApplicationUser> userManager) : base(dbContext)
         {
             _staffActivityService = staffActivityService;
+            _userManager = userManager;
         }
 
         public async Task<(ServiceResult, int? DiscountId)> CreateDiscountAsync(string managerId, DiscountViewModel discountViewModel)
@@ -28,7 +32,10 @@ namespace XWave.Services.Defaults
             var entry = DbContext.Add(newDiscount);
             entry.CurrentValues.SetValues(discountViewModel);
             await DbContext.SaveChangesAsync();
-            await _staffActivityService.LogActivityAsync<Discount>(managerId, OperationType.Create);
+            await _staffActivityService.LogActivityAsync<Discount>(
+                managerId,
+                OperationType.Create,
+                $"created discount with ID {newDiscount.Id}.");
 
             return (ServiceResult.Success(), newDiscount.Id);
         }
@@ -40,14 +47,16 @@ namespace XWave.Services.Defaults
                 .ToListAsync();
         }
 
-        public async Task<ServiceResult> RemoveDiscountAsync(string managerID, int id)
+        public async Task<ServiceResult> RemoveDiscountAsync(string managerId, int id)
         {
-            var discount = await DbContext.Discount.FindAsync(id);
+            var discount = await DbContext.Discount.Include(d => d.Manager).FirstOrDefaultAsync(d => d.Id == id);
             if (discount == null)
             {
-                return ServiceResult.Failure($"Discount with ID {id} not found");
+                return ServiceResult.Failure($"Discount with ID {id} not found.");
             }
 
+            var percentage = discount.Percentage;
+            var creator = discount.Manager.UserName;
             using var transaction = DbContext.Database.BeginTransaction();
             try
             {
@@ -55,14 +64,13 @@ namespace XWave.Services.Defaults
                 await DbContext.Product.Where(d => d.DiscountId == id).LoadAsync();
                 DbContext.Discount.Remove(discount);
                 await DbContext.SaveChangesAsync();
-                var result = await _staffActivityService.LogActivityAsync<Discount>(managerID, OperationType.Delete);
-                if (result.Succeeded)
-                {
-                    await transaction.CommitAsync();
-                    return ServiceResult.Success();
-                }
+                await _staffActivityService.LogActivityAsync<Discount>(
+                    managerId,
+                    OperationType.Delete,
+                    $"removed a {percentage} discount with ID {id} (created by {creator}).");
 
-                return ServiceResult.Failure(result.Error);
+                await transaction.CommitAsync();
+                return ServiceResult.Success();
             }
             catch (Exception ex)
             {
@@ -86,9 +94,9 @@ namespace XWave.Services.Defaults
             return await DbContext.Discount.FindAsync(id);
         }
 
-        public async Task<ServiceResult> UpdateDiscountAsync(string managerID, int id, DiscountViewModel updatedDiscountViewModel)
+        public async Task<ServiceResult> UpdateDiscountAsync(string managerId, int id, DiscountViewModel updatedDiscountViewModel)
         {
-            var discount = await DbContext.Discount.FindAsync(id);
+            var discount = await DbContext.Discount.Include(d => d.Manager).FirstOrDefaultAsync(d => d.Id == id);
             if (discount == null)
             {
                 return ServiceResult.Failure("Not found");
@@ -97,12 +105,15 @@ namespace XWave.Services.Defaults
             var entry = DbContext.Discount.Update(discount);
             entry.CurrentValues.SetValues(updatedDiscountViewModel);
             await DbContext.SaveChangesAsync();
-            await _staffActivityService.LogActivityAsync<Discount>(managerID, OperationType.Modify);
+            await _staffActivityService.LogActivityAsync<Discount>(
+                managerId,
+                OperationType.Delete,
+                $"removed discount with ID {id} (created by {discount.Manager.UserName}).");
 
             return ServiceResult.Success();
         }
 
-        public async Task<ServiceResult> ApplyDiscountToProducts(int discountId, IEnumerable<int> productIds)
+        public async Task<ServiceResult> ApplyDiscountToProducts(string managerId, int discountId, IEnumerable<int> productIds)
         {
             var discount = await DbContext.Discount.FindAsync(discountId);
             if (discount == null)
@@ -118,11 +129,15 @@ namespace XWave.Services.Defaults
 
             DbContext.Product.UpdateRange(appliedProducts);
             await DbContext.SaveChangesAsync();
+            await _staffActivityService.LogActivityAsync<Discount>(
+                managerId,
+                OperationType.Modify,
+                $"applied discount with ID {discountId} (created by {discount.Manager.UserName}) to the following products with IDs: {string.Join(", ", appliedProducts)}.");
 
             return ServiceResult.Success();
         }
 
-        public async Task<ServiceResult> RemoveDiscountFromProductsAsync(int discountId, IEnumerable<int> productIds)
+        public async Task<ServiceResult> RemoveDiscountFromProductsAsync(string managerId, int discountId, IEnumerable<int> productIds)
         {
             var discount = await DbContext.Discount.FindAsync(discountId);
             if (discount == null)
@@ -131,6 +146,7 @@ namespace XWave.Services.Defaults
             }
 
             var appliedProducts = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
+            // todo: use linq to refactor this and make it atomic
             foreach (var product in appliedProducts)
             {
                 if (product.DiscountId == null)
@@ -143,6 +159,10 @@ namespace XWave.Services.Defaults
 
             DbContext.Product.UpdateRange(appliedProducts);
             await DbContext.SaveChangesAsync();
+            await _staffActivityService.LogActivityAsync<Discount>(
+                managerId,
+                OperationType.Modify,
+                $"removed discount with ID {discountId} (created by {discount.Manager.UserName}) from the following products with IDs: {string.Join(", ", appliedProducts)}.");
 
             return ServiceResult.Success();
         }

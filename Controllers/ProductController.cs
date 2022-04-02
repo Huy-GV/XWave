@@ -154,7 +154,8 @@ namespace XWave.Controllers
         [HttpPut("discontinue/{updateSchedule}")]
         public async Task<ActionResult> DiscontinueProductAsync([FromBody] int[] ids, DateTime updateSchedule)
         {
-            var result = await _productService.DiscontinueProductAsync(ids, updateSchedule);
+            var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _productService.DiscontinueProductAsync(managerId, ids, updateSchedule);
             if (result.Succeeded)
             {
                 return NoContent();
@@ -178,7 +179,8 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.Failed("Product is currently in sale"));
             }
 
-            var result = await _productService.RestartProductSaleAsync(id, updateSchedule);
+            var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _productService.RestartProductSaleAsync(managerId, id, updateSchedule);
             if (result.Succeeded)
             {
                 return NoContent();

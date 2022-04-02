@@ -42,7 +42,10 @@ namespace XWave.Services.Defaults
                 var entry = DbContext.Product.Add(newProduct);
                 entry.CurrentValues.SetValues(productViewModel);
                 await DbContext.SaveChangesAsync();
-                var result = await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Create);
+                var result = await _staffActivityService.LogActivityAsync<Product>(
+                    staffId,
+                    OperationType.Create,
+                    $"added product named {newProduct.Name} and priced ${newProduct.Price}");
                 if (!result.Succeeded)
                 {
                     throw new Exception(result.Error);
@@ -144,7 +147,10 @@ namespace XWave.Services.Defaults
                 var entry = DbContext.Update(product);
                 entry.CurrentValues.SetValues(updatedProductViewModel);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Modify);
+                await _staffActivityService.LogActivityAsync<Product>(
+                    staffId,
+                    OperationType.Modify,
+                    $"updated general information of product named {product.Name}");
                 return ServiceResult.Success();
             }
             catch (Exception)
@@ -163,10 +169,15 @@ namespace XWave.Services.Defaults
 
             try
             {
+                var quantityBeforeRestock = product.Quantity;
                 product.Quantity = updatedStock;
                 product.LatestRestock = DateTime.Now;
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Modify);
+                await _staffActivityService.LogActivityAsync<Product>(
+                    staffId,
+                    OperationType.Modify,
+                    $"updated stock of product named {product.Name} (from {quantityBeforeRestock} to {updatedStock}");
+
                 return ServiceResult.Success();
             }
             catch (Exception)
@@ -185,9 +196,14 @@ namespace XWave.Services.Defaults
 
             try
             {
+                var formerPrice = product.Price;
                 product.Price = updatedPrice;
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Modify);
+                await _staffActivityService.LogActivityAsync<Product>(
+                    staffId,
+                    OperationType.Modify,
+                    $"updated price of product named {product.Name} (from {formerPrice} to {updatedPrice}");
+
                 return ServiceResult.Success();
             }
             catch (Exception)
@@ -218,6 +234,11 @@ namespace XWave.Services.Defaults
                 methodCall: () => ScheduledUpdateProductPrice(staffId, productId, updatedPrice),
                 delay: updateSchedule - now);
 
+            await _staffActivityService.LogActivityAsync<Product>(
+                staffId,
+                OperationType.Modify,
+                $"scheduled a price update (to ${updatedPrice}) for product ID {productId} at {updateSchedule}.");
+
             return ServiceResult.Success();
         }
 
@@ -229,14 +250,13 @@ namespace XWave.Services.Defaults
             {
                 product.Price = updatedPrice;
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Product>(staffId, OperationType.Modify);
             }
         }
 
         /// <inheritdoc/>
         /// <remarks>This method will return a failed result if one of the passed product IDs belongs to no product or if one of the products is already discontinued. However, it does not check for products that are already scheduled for discontinuation.
         /// </remarks>
-        public async Task<ServiceResult> DiscontinueProductAsync(int[] productIds, DateTime updateSchedule)
+        public async Task<ServiceResult> DiscontinueProductAsync(string managerId, int[] productIds, DateTime updateSchedule)
         {
             var productsToDiscontinue = await DbContext.Product
                 .Where(product => productIds.Contains(product.Id))
@@ -269,10 +289,15 @@ namespace XWave.Services.Defaults
                 methodCall: () => UpdateProductSaleStatusByScheduleAsync(productIds, false, updateSchedule),
                 delay: updateSchedule - now);
 
+            await _staffActivityService.LogActivityAsync<Product>(
+                managerId,
+                OperationType.Modify,
+                $"discontinued sale of product with IDs {string.Join(", ", productIds)}, effective at {updateSchedule:d MMMM yyyy}.");
+
             return ServiceResult.Success();
         }
 
-        public async Task<ServiceResult> RestartProductSaleAsync(int productId, DateTime updateSchedule)
+        public async Task<ServiceResult> RestartProductSaleAsync(string managerId, int productId, DateTime updateSchedule)
         {
             if (!await DbContext.Product.AnyAsync(p => p.Id == productId))
             {
@@ -293,6 +318,11 @@ namespace XWave.Services.Defaults
             BackgroundJob.Schedule(
                 methodCall: () => UpdateProductSaleStatusByScheduleAsync(productId, false, updateSchedule),
                 delay: updateSchedule - now);
+
+            await _staffActivityService.LogActivityAsync<Product>(
+                managerId,
+                OperationType.Modify,
+                $"restarted sale of product ID {productId}, effective {updateSchedule:d MMMM yyyy}.");
 
             return ServiceResult.Success();
         }
