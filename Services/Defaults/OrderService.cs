@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -17,13 +18,16 @@ namespace XWave.Services.Defaults
     {
         private readonly XWaveDbContext _dbContext;
         private readonly ILogger<OrderService> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public OrderService(
             XWaveDbContext dbContext,
-            ILogger<OrderService> logger)
+            ILogger<OrderService> logger,
+            UserManager<ApplicationUser> userManager)
         {
             _dbContext = dbContext;
             _logger = logger;
+            _userManager = userManager;
         }
 
         public async Task<OrderDto?> FindOrderByIdAsync(string customerId, int orderId)
@@ -39,16 +43,13 @@ namespace XWave.Services.Defaults
             using var transaction = _dbContext.Database.BeginTransaction();
             try
             {
-                var customer = await _dbContext.CustomerAccount.FindAsync(customerId);
-                if (customer == null)
+                if (!await _dbContext.CustomerAccount.AnyAsync(c => c.CustomerId == customerId) ||
+                    await _userManager.FindByIdAsync(customerId) == null)
                 {
-                    return (ServiceResult.Failure("Customer not found"), null);
+                    return (ServiceResult.Failure("Customer account not found."), null);
                 }
 
-                var payment = await _dbContext.PaymentAccount
-                    .SingleOrDefaultAsync(p => p.Id == purchaseViewModel.PaymentAccountId);
-
-                if (payment == null)
+                if (!await _dbContext.PaymentAccount.AnyAsync(p => p.Id == purchaseViewModel.PaymentAccountId))
                 {
                     return (ServiceResult.Failure("Payment not found"), null);
                 }
@@ -57,56 +58,68 @@ namespace XWave.Services.Defaults
                 {
                     CustomerId = customerId,
                     PaymentAccountId = purchaseViewModel.PaymentAccountId,
+                    DeliveryAddress = purchaseViewModel.DeliveryAddress,
                 };
+
+                var productIdsToPurchase = purchaseViewModel.Cart.Select(p => p.ProductId);
+                var productsToPurchase = await _dbContext.Product
+                    .Include(p => p.Discount)
+                    .Where(p => productIdsToPurchase.Contains(p.Id))
+                    .ToDictionaryAsync(p => p.Id);
+
+                var missingProductNames = productIdsToPurchase.Except(productsToPurchase.Select(p => p.Key));
+                if (missingProductNames.Any())
+                {
+                    return (ServiceResult.Failure($"Error: some ordered products were not found."), null);
+                }
 
                 var purchasedProducts = new List<Product>();
                 var orderDetails = new List<OrderDetails>();
+                var errorMessage = string.Empty;
 
-                foreach (var purchasedProduct in purchaseViewModel.Cart)
+                foreach (var productInCart in purchaseViewModel.Cart)
                 {
-                    var product = await _dbContext.Product
-                        .Include(p => p.Discount)
-                        .SingleOrDefaultAsync(p => p.Id == purchasedProduct.ProductId);
-
-                    if (product == null)
+                    var product = productsToPurchase[productInCart.ProductId];
+                    if (product.Quantity < productInCart.Quantity)
                     {
-                        return (ServiceResult.Failure("Ordered product not found."), null);
-                    }
-
-                    if (product.Quantity < purchasedProduct.Quantity)
-                    {
-                        return (ServiceResult.Failure("Quantity exceeded existing stock."), null);
+                        errorMessage += $"Quantity of product named {product.Name} exceeded existing stock.\n";
                     }
 
                     //prevent customers from ordering based on incorrect data
-                    if (product.Discount?.Percentage != purchasedProduct.DisplayedDiscountPercentage)
+                    if (product.Discount?.Percentage != productInCart.DisplayedDiscountPercentage)
                     {
-                        return (ServiceResult.Failure($"Discount percentage has been changed during transaction. Please view the latest price for the item {product.Name}."), null);
+                        errorMessage += $"Discount percentage has been changed during the transaction. Please view the latest price for the item {product.Name}.\n";
                     }
 
-                    if (product.Price != purchasedProduct.DisplayedPrice)
+                    if (product.Price != productInCart.DisplayedPrice)
                     {
-                        return (ServiceResult.Failure($"Price has been changed during transaction. Please view the latest price for the item {product.Name}."), null);
+                        errorMessage += $"Price has been changed during the transaction. Please view the latest price for the item {product.Name}.\n";
                     }
 
-                    product.Quantity -= purchasedProduct.Quantity;
+                    if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        continue;
+                    }
+
+                    var purchasePrice = product.Discount == null ? product.Price : product.Price - product.Price * product.Discount.Percentage / 100;
+                    product.Quantity -= productInCart.Quantity;
                     purchasedProducts.Add(product);
                     orderDetails.Add(new OrderDetails
                     {
-                        Quantity = purchasedProduct.Quantity,
-                        ProductId = purchasedProduct.ProductId,
-                        PriceAtOrder = product.Price - product.Price * product.Discount.Percentage / 100,
+                        Quantity = productInCart.Quantity,
+                        ProductId = productInCart.ProductId,
+                        PriceAtOrder = purchasePrice,
                     });
+                }
+
+                if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    return (ServiceResult.Failure($"\n{errorMessage}"), null);
                 }
 
                 _dbContext.Order.Add(order);
                 await _dbContext.SaveChangesAsync();
-                foreach (var orderDetail in orderDetails)
-                {
-                    orderDetail.OrderId = order.Id;
-                }
-
-                _dbContext.OrderDetails.AddRange(orderDetails);
+                _dbContext.OrderDetails.AddRange(orderDetails.Select(x => { x.OrderId = order.Id; return x; }));
                 _dbContext.Product.UpdateRange(purchasedProducts);
                 var succeeded = await UpdateTransactionDetailsAsync(purchaseViewModel.PaymentAccountId, customerId);
                 if (!succeeded)
@@ -126,28 +139,28 @@ namespace XWave.Services.Defaults
 
                 return (ServiceResult.Failure("An error occured when placing your order."), null);
             }
-        }
 
-        /// <summary>
-        /// Records the latest transaction made by a customer.
-        /// </summary>
-        /// <param name="paymentAccountId">ID of payment account used in the latest transaction.</param>
-        /// <param name="customerId">ID of customer who made the transaction.</param>
-        /// <returns>True if the update succeeds and False otherwise.</returns>
-        private async Task<bool> UpdateTransactionDetailsAsync(int paymentAccountId, string customerId)
-        {
-            var transactionDetails = await _dbContext.TransactionDetails.FindAsync(customerId, paymentAccountId);
-            if (transactionDetails == null)
+            /// <summary>
+            /// Records the latest transaction made by a customer.
+            /// </summary>
+            /// <param name="paymentAccountId">ID of payment account used in the latest transaction.</param>
+            /// <param name="customerId">ID of customer who made the transaction.</param>
+            /// <returns>True if the update succeeds and False otherwise.</returns>
+            async Task<bool> UpdateTransactionDetailsAsync(int paymentAccountId, string customerId)
             {
-                return false;
+                var transactionDetails = await _dbContext.TransactionDetails.FindAsync(customerId, paymentAccountId);
+                if (transactionDetails == null)
+                {
+                    return false;
+                }
+
+                transactionDetails.PurchaseCount++;
+                transactionDetails.LatestPurchase = DateTime.Now;
+                transactionDetails.TransactionType = TransactionType.Purchase;
+                _dbContext.TransactionDetails.Update(transactionDetails);
+
+                return true;
             }
-
-            transactionDetails.PurchaseCount++;
-            transactionDetails.LatestPurchase = DateTime.Now;
-            transactionDetails.TransactionType = TransactionType.Purchase;
-            _dbContext.TransactionDetails.Update(transactionDetails);
-
-            return true;
         }
 
         public Task<IEnumerable<OrderDto>> FindAllOrdersAsync(string customerId)

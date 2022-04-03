@@ -4,6 +4,7 @@
     {
         public bool Succeeded { get; init; } = false;
 
+        // todo: replace with IEnumerable<string>
         public string Error { get; init; } = string.Empty;
 
         /// <summary>
