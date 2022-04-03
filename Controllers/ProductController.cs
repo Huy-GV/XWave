@@ -50,14 +50,14 @@ namespace XWave.Controllers
         public async Task<ActionResult<ProductDto>> GetById(int id)
         {
             var productDto = await _productService.FindProductByIdForCustomers(id);
-            return productDto == null ? Ok(productDto) : NotFound();
+            return productDto != null ? Ok(productDto) : NotFound();
         }
 
         [HttpGet("{id:int}/private")]
         public async Task<ActionResult<DetailedProductDto>> GetByIdForStaff(int id)
         {
             var productDto = await _productService.FindProductByIdForStaff(id);
-            return productDto == null ? Ok(productDto) : NotFound();
+            return productDto != null ? Ok(productDto) : NotFound();
         }
 
         [HttpPost]

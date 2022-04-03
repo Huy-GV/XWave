@@ -46,7 +46,7 @@ namespace XWave.Controllers
         public async Task<ActionResult<Discount>> GetAsync(int id)
         {
             var discount = await _discountService.FindDiscountByIdAsync(id);
-            return discount == null ? Ok(discount) : NotFound();
+            return discount != null ? Ok(discount) : NotFound();
         }
 
         [HttpPost]

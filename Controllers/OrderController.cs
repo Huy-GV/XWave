@@ -59,7 +59,7 @@ namespace XWave.Controllers
         {
             var orderDetail = await _orderService.FindPurchasedProductDetailsByOrderId(orderId, productId);
 
-            return orderDetail == null ? Ok(orderDetail) : NotFound();
+            return orderDetail != null ? Ok(orderDetail) : NotFound();
         }
 
         [HttpPost]

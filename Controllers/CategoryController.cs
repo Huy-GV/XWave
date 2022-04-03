@@ -36,7 +36,7 @@ namespace XWave.Controllers
         public async Task<ActionResult<Category>> Get(int id)
         {
             var category = await _categoryService.FindCategoryByIdAsync(id);
-            return category == null ? Ok(category) : NotFound();
+            return category != null ? Ok(category) : NotFound();
         }
 
         [HttpPost]

@@ -31,7 +31,7 @@ namespace XWave.Controllers
         public async Task<ActionResult<Activity>> Get(int id)
         {
             var activity = await _staffActivityService.FindActivityLogAsync(id);
-            return activity == null ? Ok(activity) : NotFound();
+            return activity != null ? Ok(activity) : NotFound();
         }
     }
 }
