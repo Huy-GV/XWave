@@ -76,6 +76,7 @@ namespace XWave.Services.Defaults
                 var purchasedProducts = new List<Product>();
                 var orderDetails = new List<OrderDetails>();
                 var errorMessage = string.Empty;
+                var errorMessages = new List<string>();
 
                 foreach (var productInCart in purchaseViewModel.Cart)
                 {
@@ -83,25 +84,31 @@ namespace XWave.Services.Defaults
                     if (product.Quantity < productInCart.Quantity)
                     {
                         errorMessage += $"Quantity of product named {product.Name} exceeded existing stock.\n";
+                        errorMessages.Add($"Quantity of product named {product.Name} exceeded existing stock.");
                     }
 
                     //prevent customers from ordering based on incorrect data
                     if (product.Discount?.Percentage != productInCart.DisplayedDiscountPercentage)
                     {
-                        errorMessage += $"Discount percentage has been changed during the transaction. Please view the latest price for the item {product.Name}.\n";
+                        errorMessage += $"Discount percentage has been changed during the transaction. Please view the latest price for the item {product.Name}.";
+                        errorMessages.Add($"Discount percentage has been changed during the transaction. Please view the latest price for the item {product.Name}.");
                     }
 
                     if (product.Price != productInCart.DisplayedPrice)
                     {
                         errorMessage += $"Price has been changed during the transaction. Please view the latest price for the item {product.Name}.\n";
+                        errorMessages.Add($"Price has been changed during the transaction. Please view the latest price for the item {product.Name}.");
                     }
 
-                    if (!string.IsNullOrEmpty(errorMessage))
+                    if (errorMessages.Any())
                     {
+                        // move to validate remaining products without processing any of them.
                         continue;
                     }
 
-                    var purchasePrice = product.Discount == null ? product.Price : product.Price - product.Price * product.Discount.Percentage / 100;
+                    var purchasePrice = product.Discount == null
+                        ? product.Price
+                        : product.Price - product.Price * product.Discount.Percentage / 100;
                     product.Quantity -= productInCart.Quantity;
                     purchasedProducts.Add(product);
                     orderDetails.Add(new OrderDetails
@@ -114,15 +121,15 @@ namespace XWave.Services.Defaults
 
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
-                    return (ServiceResult.Failure($"\n{errorMessage}"), null);
+                    return (ServiceResult.Failure(errorMessages.ToArray()), null);
                 }
 
                 _dbContext.Order.Add(order);
                 await _dbContext.SaveChangesAsync();
                 _dbContext.OrderDetails.AddRange(orderDetails.Select(x => { x.OrderId = order.Id; return x; }));
                 _dbContext.Product.UpdateRange(purchasedProducts);
-                var succeeded = await UpdateTransactionDetailsAsync(purchaseViewModel.PaymentAccountId, customerId);
-                if (!succeeded)
+                var isTransactionDetailsUpdated = await UpdateTransactionDetailsAsync(purchaseViewModel.PaymentAccountId, customerId);
+                if (!isTransactionDetailsUpdated)
                 {
                     return (ServiceResult.Failure("Failed to update transaction. Operation is aborted."), null);
                 }
