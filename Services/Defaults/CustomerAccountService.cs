@@ -51,7 +51,7 @@ namespace XWave.Services.Defaults
                 var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
                 if (customerAccount == null)
                 {
-                    return ServiceResult.Failure("User account not found");
+                    return ServiceResult.Failure("User account not found.");
                 }
 
                 DbContext.CustomerAccount.Update(customerAccount);
@@ -73,7 +73,7 @@ namespace XWave.Services.Defaults
                 var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
                 if (customerAccount == null)
                 {
-                    return ServiceResult.Failure("User account not found");
+                    return ServiceResult.Failure("User account not found.");
                 }
 
                 var entry = DbContext.CustomerAccount.Update(customerAccount);

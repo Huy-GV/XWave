@@ -134,7 +134,7 @@ namespace XWave.Controllers
             var result = await _discountService.RemoveDiscountFromProductsAsync(userId, id, productIds);
             if (result.Succeeded)
             {
-                return Ok("Discount has been successfully applied to selected products.");
+                return Ok("Discount has been successfully removed from selected products.");
             }
 
             return this.XWaveBadRequest(result.Errors);

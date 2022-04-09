@@ -118,7 +118,7 @@ namespace XWave.Services.Defaults
             var discount = await DbContext.Discount.FindAsync(discountId);
             if (discount == null)
             {
-                return ServiceResult.Failure($"Discount with ID {discountId} was not found");
+                return ServiceResult.Failure($"Discount with ID {discountId} was not found.");
             }
 
             var appliedProducts = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
@@ -139,31 +139,28 @@ namespace XWave.Services.Defaults
 
         public async Task<ServiceResult> RemoveDiscountFromProductsAsync(string managerId, int discountId, IEnumerable<int> productIds)
         {
-            var discount = await DbContext.Discount.FindAsync(discountId);
+            var discount = await DbContext.Discount
+                .Include(d => d.Manager)
+                .SingleOrDefaultAsync(d => d.Id == discountId);
+
             if (discount == null)
             {
-                return ServiceResult.Failure($"Discount with ID {discountId} was not found");
+                return ServiceResult.Failure($"Discount with ID {discountId} was not found.");
             }
 
             var appliedProducts = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
             var productsWithoutDiscount = appliedProducts.Where(p => p.DiscountId == null);
             if (productsWithoutDiscount.Any())
             {
-                return ServiceResult.Failure($"Discount with ID {discountId} is not applied to product with the following IDs: {string.Join(", ", productsWithoutDiscount.Select(p => p.Id))}");
+                return ServiceResult.Failure($"Discount with ID {discountId} is not applied to product with the following IDs: {string.Join(", ", productsWithoutDiscount.Select(p => p.Id))}.");
             }
 
-            foreach (var product in appliedProducts)
-            {
-                product.DiscountId = null;
-            }
-
-            // todo: use Select here, watch for lazy eval
-            DbContext.Product.UpdateRange(appliedProducts);
+            DbContext.Product.UpdateRange(appliedProducts.Select(p => { p.Discount = null; return p; }));
             await DbContext.SaveChangesAsync();
             await _staffActivityService.LogActivityAsync<Discount>(
                 managerId,
                 OperationType.Modify,
-                $"removed discount with ID {discountId} (created by {discount.Manager.UserName}) from products with the following IDs: {string.Join(", ", appliedProducts)}.");
+                $"removed discount with ID {discountId} (created by {discount.Manager.UserName}) from products with the following IDs: {string.Join(", ", appliedProducts.Select(p => p.Id)) }.");
 
             return ServiceResult.Success();
         }
