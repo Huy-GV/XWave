@@ -8,12 +8,14 @@ using XWave.Helpers;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.ViewModels.Customer;
+using XWave.Extensions;
+using System.Linq;
 
 namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PaymentAccountController : XWaveBaseController
+    public class PaymentAccountController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
         private readonly AuthenticationHelper _authenticationHelper;
@@ -40,7 +42,7 @@ namespace XWave.Controllers
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (customerId == null)
             {
-                return XWaveBadRequest("Customer Id is empty.");
+                return this.XWaveBadRequest("Customer Id is empty.");
             }
 
             return Ok(await _paymentService.FindAllTransactionDetailsForCustomersAsync(customerId));
@@ -60,7 +62,7 @@ namespace XWave.Controllers
 
             if (!result.Succeeded)
             {
-                return XWaveBadRequest(result.Error);
+                return this.XWaveBadRequest(result.Errors.ToArray());
             }
 
             return NoContent();
@@ -79,7 +81,7 @@ namespace XWave.Controllers
             var result = await _paymentService.UpdatePaymentAccountAsync(customerId, id, inputPayment);
             if (!result.Succeeded)
             {
-                return XWaveBadRequest(result.Error);
+                return this.XWaveBadRequest(result.Errors.ToArray());
             }
 
             return Ok(XWaveResponse.Updated($"https://localhost:5001/api/payment/details/{id}"));
@@ -94,7 +96,7 @@ namespace XWave.Controllers
 
             if (!result.Succeeded)
             {
-                return XWaveBadRequest(result.Error);
+                return this.XWaveBadRequest(result.Errors.ToArray());
             }
 
             return Ok(XWaveResponse.Created($"https://localhost:5001/api/payment/details/{paymentAccountId}"));

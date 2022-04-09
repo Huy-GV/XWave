@@ -15,7 +15,7 @@ using XWave.Configuration;
 using XWave.Data;
 using XWave.Data.Constants;
 using XWave.Models;
-using XWave.Services;
+using XWave.Extensions;
 using XWave.Services.Defaults;
 
 namespace XWave

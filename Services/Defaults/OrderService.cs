@@ -75,7 +75,6 @@ namespace XWave.Services.Defaults
 
                 var purchasedProducts = new List<Product>();
                 var orderDetails = new List<OrderDetails>();
-                var errorMessage = string.Empty;
                 var errorMessages = new List<string>();
 
                 foreach (var productInCart in purchaseViewModel.Cart)
@@ -83,20 +82,17 @@ namespace XWave.Services.Defaults
                     var product = productsToPurchase[productInCart.ProductId];
                     if (product.Quantity < productInCart.Quantity)
                     {
-                        errorMessage += $"Quantity of product named {product.Name} exceeded existing stock.\n";
                         errorMessages.Add($"Quantity of product named {product.Name} exceeded existing stock.");
                     }
 
                     //prevent customers from ordering based on incorrect data
                     if (product.Discount?.Percentage != productInCart.DisplayedDiscountPercentage)
                     {
-                        errorMessage += $"Discount percentage has been changed during the transaction. Please view the latest price for the item {product.Name}.";
                         errorMessages.Add($"Discount percentage has been changed during the transaction. Please view the latest price for the item {product.Name}.");
                     }
 
                     if (product.Price != productInCart.DisplayedPrice)
                     {
-                        errorMessage += $"Price has been changed during the transaction. Please view the latest price for the item {product.Name}.\n";
                         errorMessages.Add($"Price has been changed during the transaction. Please view the latest price for the item {product.Name}.");
                     }
 
@@ -119,7 +115,7 @@ namespace XWave.Services.Defaults
                     });
                 }
 
-                if (!string.IsNullOrEmpty(errorMessage))
+                if (errorMessages.Any())
                 {
                     return (ServiceResult.Failure(errorMessages.ToArray()), null);
                 }

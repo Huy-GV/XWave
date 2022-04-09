@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace XWave.DTOs.Customers
 {
-    public class OrderDto
+    public record OrderDto
     {
         public IEnumerable<OrderDetailDto> OrderDetails { get; set; }
         public DateTime OrderDate { get; set; }

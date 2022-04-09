@@ -5,7 +5,7 @@ using XWave.Helpers;
 using XWave.Services.Defaults;
 using XWave.Services.Interfaces;
 
-namespace XWave.Services
+namespace XWave.Extensions
 {
     public static class XWaveServiceExtension
     {

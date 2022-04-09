@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.Data.Constants;
+using XWave.Extensions;
 using XWave.Helpers;
 using XWave.Models;
 using XWave.Services.Interfaces;
@@ -13,7 +14,7 @@ namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoryController : XWaveBaseController
+    public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
         private readonly AuthenticationHelper _authenticationHelper;
@@ -47,10 +48,10 @@ namespace XWave.Controllers
             var (result, categoryId) = await _categoryService.AddCategoryAsync(managerId, newCategory);
             if (result.Succeeded)
             {
-                return XWaveCreated($"https://localhost:5001/api/category/admin/{categoryId}");
+                return this.XWaveCreated($"https://localhost:5001/api/category/admin/{categoryId}");
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpPut("{id}")]
@@ -67,10 +68,10 @@ namespace XWave.Controllers
             var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
             if (result.Succeeded)
             {
-                return XWaveUpdated($"https://localhost:5001/api/category/admin/{id}");
+                return this.XWaveUpdated($"https://localhost:5001/api/category/admin/{id}");
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpDelete("{id}")]
@@ -90,7 +91,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
     }
 }

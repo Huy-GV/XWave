@@ -2,7 +2,7 @@
 
 namespace XWave.DTOs.Management
 {
-    public class StaffAccountDto
+    public record StaffAccountDto
     {
         public string StaffId { get; set; }
         public string FullName { get; set; }

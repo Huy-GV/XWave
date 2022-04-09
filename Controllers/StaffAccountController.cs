@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.Data.Constants;
 using XWave.DTOs.Management;
+using XWave.Extensions;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
 
@@ -12,7 +13,7 @@ namespace XWave.Controllers
     [Route("api/staff-account")]
     [ApiController]
     [Authorize(Roles = nameof(Roles.Manager))]
-    public class StaffAccountController : XWaveBaseController
+    public class StaffAccountController : ControllerBase
     {
         private readonly IStaffAccountService _staffAccountService;
 
@@ -51,10 +52,10 @@ namespace XWave.Controllers
             var result = await _staffAccountService.DeactivateStaffAccount(id);
             if (result.Succeeded)
             {
-                return XWaveUpdated($"https://localhost:5001/api/staff-account/{id}");
+                return this.XWaveUpdated($"https://localhost:5001/api/staff-account/{id}");
             }
 
-            return BadRequest(result.Error);
+            return BadRequest(result.Errors);
         }
     }
 }

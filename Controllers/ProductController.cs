@@ -2,22 +2,22 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using XWave.Data.Constants;
 using XWave.DTOs.Customers;
 using XWave.DTOs.Management;
+using XWave.Extensions;
 using XWave.Helpers;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Management;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkId=397860
-
 namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductController : XWaveBaseController
+    public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
         private readonly AuthenticationHelper _authenticationHelper;
@@ -68,10 +68,10 @@ namespace XWave.Controllers
             var (result, productId) = await _productService.AddProductAsync(staffId, productViewModel);
             if (result.Succeeded)
             {
-                return XWaveCreated($"https://localhost:5001/api/product/staff/{productId}");
+                return this.XWaveCreated($"https://localhost:5001/api/product/staff/{productId}");
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpPut("{id}")]
@@ -88,10 +88,10 @@ namespace XWave.Controllers
             var result = await _productService.UpdateProductAsync(staffId, id, updatedProduct);
             if (result.Succeeded)
             {
-                return XWaveCreated($"https://localhost:5001/api/product/staff/{id}");
+                return this.XWaveCreated($"https://localhost:5001/api/product/staff/{id}");
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpPut("{id}/price")]
@@ -121,10 +121,10 @@ namespace XWave.Controllers
 
             if (result.Succeeded)
             {
-                return XWaveUpdated($"https://localhost:5001/api/product/staff/{id}");
+                return this.XWaveUpdated($"https://localhost:5001/api/product/staff/{id}");
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpDelete("{id}")]
@@ -143,7 +143,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpPut("discontinue/{updateSchedule}")]
@@ -157,7 +157,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpPut("{id}/restart-sale/{updateSchedule}")]
@@ -182,7 +182,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpDelete("{id}/cancel")]
@@ -195,7 +195,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
     }
 }

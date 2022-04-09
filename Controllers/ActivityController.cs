@@ -11,7 +11,7 @@ namespace XWave.Controllers
     [ApiController]
     [Route("api/activity")]
     [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
-    public class ActivityController : XWaveBaseController
+    public class ActivityController : ControllerBase
     {
         private readonly IActivityService _staffActivityService;
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.Data.Constants;
+using XWave.Extensions;
 using XWave.Helpers;
 using XWave.Models;
 using XWave.Services.Interfaces;
@@ -14,7 +15,7 @@ namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DiscountController : XWaveBaseController
+    public class DiscountController : ControllerBase
     {
         private readonly IDiscountService _discountService;
         private readonly AuthenticationHelper _authenticationHelper;
@@ -57,10 +58,10 @@ namespace XWave.Controllers
             var (result, productId) = await _discountService.CreateDiscountAsync(userId, newDiscount);
             if (result.Succeeded)
             {
-                return XWaveCreated($"https://localhost:5001/api/discount/{productId}");
+                return this.XWaveCreated($"https://localhost:5001/api/discount/{productId}");
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpPut("{id}")]
@@ -76,10 +77,10 @@ namespace XWave.Controllers
             var result = await _discountService.UpdateDiscountAsync(managerId, id, updatedDiscount);
             if (result.Succeeded)
             {
-                return XWaveUpdated($"https://localhost:5001/api/discount/{id}");
+                return this.XWaveUpdated($"https://localhost:5001/api/discount/{id}");
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpDelete("{id}")]
@@ -98,7 +99,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpPost("{id}/apply")]
@@ -117,7 +118,7 @@ namespace XWave.Controllers
                 return Ok("Discount has been successfully applied to selected products.");
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
 
         [HttpPost("{id}/remove")]
@@ -136,7 +137,7 @@ namespace XWave.Controllers
                 return Ok("Discount has been successfully applied to selected products.");
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
     }
 }

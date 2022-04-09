@@ -2,7 +2,7 @@
 
 namespace XWave.DTOs.Customers
 {
-    public class DiscountDto
+    public record DiscountDto
     {
         public uint Percentage { get; set; }
         public bool IsActive { get; set; }

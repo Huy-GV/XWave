@@ -157,6 +157,7 @@ namespace XWave.Services.Defaults
                 product.DiscountId = null;
             }
 
+            // todo: use Select here, watch for lazy eval
             DbContext.Product.UpdateRange(appliedProducts);
             await DbContext.SaveChangesAsync();
             await _staffActivityService.LogActivityAsync<Discount>(

@@ -2,7 +2,7 @@
 
 namespace XWave.DTOs.Management
 {
-    public class DetailedDiscountDto
+    public record DetailedDiscountDto
     {
         public string ManagerName { get; set; }
         public uint Percentage { get; set; }

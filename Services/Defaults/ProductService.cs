@@ -42,14 +42,10 @@ namespace XWave.Services.Defaults
                 var entry = DbContext.Product.Add(newProduct);
                 entry.CurrentValues.SetValues(productViewModel);
                 await DbContext.SaveChangesAsync();
-                var result = await _staffActivityService.LogActivityAsync<Product>(
+                await _staffActivityService.LogActivityAsync<Product>(
                     staffId,
                     OperationType.Create,
                     $"added product named {newProduct.Name} and priced ${newProduct.Price}");
-                if (!result.Succeeded)
-                {
-                    throw new Exception(result.Error);
-                }
 
                 return (ServiceResult.Success(), newProduct.Id);
             }

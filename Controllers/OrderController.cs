@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using System.Threading.Tasks;
 using XWave.Data.Constants;
 using XWave.DTOs.Customers;
+using XWave.Extensions;
 using XWave.Helpers;
 using XWave.Models;
 using XWave.Services.Interfaces;
@@ -12,7 +14,7 @@ namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class OrderController : XWaveBaseController
+    public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
         private readonly AuthenticationHelper _authenticationHelper;
@@ -69,14 +71,14 @@ namespace XWave.Controllers
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (string.IsNullOrEmpty(customerId))
             {
-                return XWaveBadRequest("Customer ID not found.");
+                return this.XWaveBadRequest("Customer ID not found.");
             }
 
             var (result, orderId) = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
 
             if (!result.Succeeded)
             {
-                return XWaveBadRequest(result.Errors);
+                return this.XWaveBadRequest(result.Errors.ToArray());
             }
 
             return Ok("");

@@ -1,6 +1,6 @@
 ﻿namespace XWave.DTOs.Customers
 {
-    public class ProductDto
+    public record ProductDto
     {
         public int Id { get; init; }
         public string Name { get; init; }

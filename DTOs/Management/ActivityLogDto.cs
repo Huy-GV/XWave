@@ -1,6 +1,6 @@
 ﻿namespace XWave.DTOs.Management
 {
-    public class ActivityLogDto
+    public record ActivityLogDto
     {
         public int Id { get; set; }
         public string InfoText { get; set; }

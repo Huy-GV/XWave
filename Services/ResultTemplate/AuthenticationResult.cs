@@ -1,5 +1,6 @@
 ﻿namespace XWave.Services.ResultTemplate
 {
+    // todo: convert to record
     public class AuthenticationResult
     {
         public string Error { get; set; } = string.Empty;

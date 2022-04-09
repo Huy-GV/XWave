@@ -14,15 +14,16 @@
             Message = $"Location: {url}."
         };
 
-        public static object Failed(string error = "An error happended with your request.") => new
+        public static object Failed(params string[] errors) => new
         {
-            Status = "Operation Failed.",
-            Message = $"Error: {error}."
+            Status = "Failed.",
+            Message = "One or more errors occured.",
+            Errors = errors,
         };
 
         public static object NonExistentResource() => new
         {
-            Status = "Operation Aborted.",
+            Status = "Aborted.",
             Message = "Operation called on a non-existing resource."
         };
     }

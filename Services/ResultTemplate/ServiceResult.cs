@@ -2,21 +2,12 @@
 
 namespace XWave.Services.ResultTemplate
 {
+    // convert to record and move methods to helper objects
     public class ServiceResult
     {
         public bool Succeeded { get; init; } = false;
 
-        // todo: replace with IEnumerable<string>
-        public string Error { get; init; } = string.Empty;
-
-        public ICollection<string> Errors { get; init; } = new List<string>();
-
-        /// <summary>
-        /// Helper method that returns a failed result.
-        /// </summary>
-        /// <param name="error">Error message describing the cause of failure.</param>
-        /// <returns></returns>
-        public static ServiceResult Failure(string error = "An error occured") => new() { Error = error };
+        public IEnumerable<string> Errors { get; init; } = new List<string>();
 
         /// <summary>
         /// Helper method that returns a failed result.

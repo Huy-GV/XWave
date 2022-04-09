@@ -2,7 +2,7 @@
 
 namespace XWave.DTOs.Management
 {
-    public class DetailedProductDto
+    public record DetailedProductDto
     {
         public int Id { get; init; }
         public string ProductName { get; init; }

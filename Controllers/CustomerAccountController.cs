@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using XWave.Configuration;
 using XWave.Data.Constants;
+using XWave.Extensions;
 using XWave.Helpers;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
@@ -14,7 +15,7 @@ namespace XWave.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CustomerAccountController : XWaveBaseController
+    public class CustomerAccountController : ControllerBase
     {
         private readonly ICustomerAccountService _customerAccountService;
         private readonly AuthenticationHelper _authenticationHelper;
@@ -48,7 +49,7 @@ namespace XWave.Controllers
                 return Ok(result);
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Error);
         }
 
         [HttpPost("subscribe")]
@@ -62,7 +63,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return XWaveBadRequest(result.Error);
+            return this.XWaveBadRequest(result.Errors);
         }
     }
 }

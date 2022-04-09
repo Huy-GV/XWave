@@ -11,7 +11,7 @@ namespace XWave.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    public class AuthenticationController : XWaveBaseController
+    public class AuthenticationController : ControllerBase
     {
         private readonly IAuthenticationService _authService;
         private readonly AuthenticationHelper _authenticationHelper;
