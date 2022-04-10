@@ -13,30 +13,28 @@ namespace XWave.Data.DatabaseSeeding
     {
         public static void SeedData(IServiceProvider serviceProvider)
         {
-            using (var context = new XWaveDbContext(
+            using var context = new XWaveDbContext(
                 serviceProvider
-                .GetRequiredService<DbContextOptions<XWaveDbContext>>()))
-            {
-                var userManager = serviceProvider
-                    .GetRequiredService<UserManager<ApplicationUser>>();
+                .GetRequiredService<DbContextOptions<XWaveDbContext>>());
+            var userManager = serviceProvider
+                .GetRequiredService<UserManager<ApplicationUser>>();
 
-                try
-                {
-                    CreatePayments(context);
-                    CreateOrders(context, userManager).Wait();
-                    CreateOrderDetail(context);
-                    CreatePaymentDetail(context, userManager).Wait();
-                }
-                catch (Exception ex)
-                {
-                    var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding purchase data");
-                    logger.LogError(ex.Message);
-                }
-                finally
-                {
-                    context.Database.CloseConnection();
-                }
+            try
+            {
+                CreatePayments(context);
+                CreateOrders(context, userManager).Wait();
+                CreateOrderDetail(context);
+                CreatePaymentDetail(context, userManager).Wait();
+            }
+            catch (Exception ex)
+            {
+                var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred while seeding purchase data");
+                logger.LogError(ex.Message);
+            }
+            finally
+            {
+                context.Database.CloseConnection();
             }
         }
 
@@ -55,6 +53,12 @@ namespace XWave.Data.DatabaseSeeding
                     Provider = "visa",
                     AccountNumber = "24681357",
                     ExpiryDate = DateTime.Parse("1/2/2023"),
+                },
+                new PaymentAccount()
+                {
+                    Provider = "visa",
+                    AccountNumber = "01010101",
+                    ExpiryDate = DateTime.Parse("1/8/2023"),
                 },
             };
 
@@ -91,7 +95,14 @@ namespace XWave.Data.DatabaseSeeding
                     CustomerId = user2.Id,
                     PaymentAccountId = 2,
                     DeliveryAddress = "4 Collins St, Melbourne"
-                }
+                },
+                new Order()
+                {
+                    Date = DateTime.Parse("21/11/2021"),
+                    CustomerId = user1.Id,
+                    PaymentAccountId = 3,
+                    DeliveryAddress = "3 Collins St, Melbourne"
+                },
             };
 
             dbContext.Order.AddRange(orders);
@@ -144,6 +155,20 @@ namespace XWave.Data.DatabaseSeeding
                     PriceAtOrder = 600,
                     Quantity = 15,
                 },
+                new OrderDetails()
+                {
+                    OrderId = 4,
+                    ProductId = 3,
+                    PriceAtOrder = 100,
+                    Quantity = 2,
+                },
+                new OrderDetails()
+                {
+                    OrderId = 4,
+                    ProductId = 2,
+                    PriceAtOrder = 200,
+                    Quantity = 3,
+                },
             };
 
             dbContext.OrderDetails.AddRange(orderDetail);
@@ -162,15 +187,23 @@ namespace XWave.Data.DatabaseSeeding
                 {
                     PaymentAccountId = 1,
                     CustomerId =  user1.Id,
+                    FirstRegistration = DateTime.Parse("5/1/2020"),
+                },
+                new PaymentAccountDetails
+                {
+                    PaymentAccountId = 3,
+                    CustomerId =  user1.Id,
+                    FirstRegistration = DateTime.Parse("5/1/2020"),
                 },
                 new PaymentAccountDetails
                 {
                     CustomerId = user2.Id,
                     PaymentAccountId = 2,
+                    FirstRegistration = DateTime.Parse("5/7/2019"),
                 }
             };
 
-            dbContext.TransactionDetails.AddRange(paymentDetail);
+            dbContext.PaymentAccountDetails.AddRange(paymentDetail);
             dbContext.SaveChanges();
         }
     }

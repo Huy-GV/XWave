@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using XWave.Data;
+using XWave.DTOs.Customers;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
@@ -53,7 +54,7 @@ namespace XWave.Services.Defaults
                     PaymentAccountId = newPayment.Id,
                 };
 
-                DbContext.TransactionDetails.Add(newTransactionDetails);
+                DbContext.PaymentAccountDetails.Add(newTransactionDetails);
                 await DbContext.SaveChangesAsync();
                 transaction.Commit();
 
@@ -90,20 +91,12 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public Task<IEnumerable<PaymentAccountDetails>> FindAllTransactionDetailsForCustomersAsync(string customerId)
+        public Task<IEnumerable<PaymentAccount>> FindAllTransactionDetailsForStaffAsync()
         {
-            return Task.FromResult(DbContext.TransactionDetails
+            return Task.FromResult(DbContext.PaymentAccount
                 .AsNoTracking()
-                .Include(pd => pd.Payment)
-                .Where(pd => pd.CustomerId == customerId)
-                .AsEnumerable());
-        }
-
-        public Task<IEnumerable<PaymentAccountDetails>> FindAllTransactionDetailsForStaffAsync()
-        {
-            return Task.FromResult(DbContext.TransactionDetails
-                .AsNoTracking()
-                .Include(pd => pd.Payment)
+                .Include(pd => pd.PaymentAccountDetails)
+                .ThenInclude(pd => pd.Customer)
                 .AsEnumerable());
         }
 
@@ -130,8 +123,46 @@ namespace XWave.Services.Defaults
 
         public Task<bool> CustomerHasPaymentAccount(string customerId, int paymentId)
         {
-            return Task.FromResult(DbContext.TransactionDetails.Any(
+            return Task.FromResult(DbContext.PaymentAccountDetails.Any(
                 td => td.CustomerId == customerId && td.PaymentAccountId == paymentId));
+        }
+
+        public async Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId)
+        {
+            var orders = DbContext.Order
+                .Include(o => o.OrderDetails)
+                .Where(o => o.CustomerId == customerId)
+                .AsEnumerable();
+
+            var latestPurchase = orders
+                .GroupBy(o => o.PaymentAccountId)
+                .Select(g => new
+                {
+                    PaymentAccountId = g.Key,
+                    Date = g.Max(o => o.Date)
+                })
+                .ToDictionary(x => x.PaymentAccountId);
+
+            var totalSpending = orders
+                .GroupBy(o => o.PaymentAccountId)
+                .Select(g => new
+                {
+                    PaymentAccountId = g.Key,
+                    TotalSpending = g.Sum(o => o.OrderDetails.Sum(od => od.Quantity * od.PriceAtOrder))
+                })
+                .ToDictionary(x => x.PaymentAccountId); ;
+
+            return await DbContext.PaymentAccount
+                .Include(p => p.PaymentAccountDetails)
+                .Where(p => p.PaymentAccountDetails.CustomerId == customerId)
+                .Select(p => new PaymentAccountUsageDto
+                {
+                    Provider = p.Provider,
+                    AccountNumber = p.AccountNumber,
+                    LatestPurchase = latestPurchase[p.Id].Date,
+                    TotalSpending = (int)totalSpending[p.Id].TotalSpending
+                })
+                .ToListAsync();
         }
     }
 }

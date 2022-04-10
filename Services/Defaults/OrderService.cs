@@ -153,9 +153,10 @@ namespace XWave.Services.Defaults
                     Id = o.Id,
                     OrderDate = o.Date,
                     AccountNo = o.Payment.AccountNumber,
-                    OrderDetails = o
+                    Provider = o.Payment.AccountNumber,
+                    ProductPurchaseDetails = o
                         .OrderDetails
-                        .Select(od => new OrderDetailDto()
+                        .Select(od => new ProductPurchaseDetailsDto()
                         {
                             Quantity = od.Quantity,
                             Price = od.PriceAtOrder,

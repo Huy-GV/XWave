@@ -15,7 +15,7 @@ namespace XWave.Data
         public DbSet<Discount> Discount { get; set; }
         public DbSet<Product> Product { get; set; }
         public DbSet<PaymentAccount> PaymentAccount { get; set; }
-        public DbSet<PaymentAccountDetails> TransactionDetails { get; set; }
+        public DbSet<PaymentAccountDetails> PaymentAccountDetails { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderDetails> OrderDetails { get; set; }
         public DbSet<CustomerAccount> CustomerAccount { get; set; }

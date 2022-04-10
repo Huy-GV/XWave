@@ -35,7 +35,7 @@ namespace XWave.Controllers
             return Ok(await _paymentService.FindAllTransactionDetailsForStaffAsync());
         }
 
-        [HttpGet("details")]
+        [HttpGet("usage")]
         [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult<IEnumerable<PaymentAccountDetails>>> GetByCustomer()
         {
@@ -45,7 +45,7 @@ namespace XWave.Controllers
                 return this.XWaveBadRequest("Customer Id is empty.");
             }
 
-            return Ok(await _paymentService.FindAllTransactionDetailsForCustomersAsync(customerId));
+            return Ok(await _paymentService.FindPaymentAccountSummary(customerId));
         }
 
         [HttpPost("delete/{paymentId}")]

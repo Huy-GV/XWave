@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using XWave.DTOs.Customers;
 using XWave.Models;
 using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Customer;
@@ -18,11 +20,10 @@ namespace XWave.Services.Interfaces
         /// <returns></returns>
         Task<bool> CustomerHasPaymentAccount(string customerId, int paymentAccountId);
 
-        Task<IEnumerable<PaymentAccountDetails>> FindAllTransactionDetailsForCustomersAsync(string customerId);
+        Task<IEnumerable<PaymentAccount>> FindAllTransactionDetailsForStaffAsync();
 
-        Task<IEnumerable<PaymentAccountDetails>> FindAllTransactionDetailsForStaffAsync();
+        Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId);
 
-        // todo: only remove from the customer's perspective
         Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId);
 
         Task<ServiceResult> UpdatePaymentAccountAsync(

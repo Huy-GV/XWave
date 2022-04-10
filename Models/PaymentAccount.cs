@@ -14,5 +14,6 @@ namespace XWave.Models
 
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeleteDate { get; set; } = null;
+        public PaymentAccountDetails PaymentAccountDetails { get; set; }
     }
 }
