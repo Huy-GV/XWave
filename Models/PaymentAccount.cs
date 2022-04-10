@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace XWave.Models
 {
-    public class PaymentAccount : IEntity
+    public class PaymentAccount : IEntity, ISoftDeletable
     {
         public int Id { get; set; }
         public string AccountNumber { get; set; }
@@ -11,5 +11,8 @@ namespace XWave.Models
 
         [DataType(DataType.Date)]
         public DateTime ExpiryDate { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeleteDate { get; set; } = null;
     }
 }

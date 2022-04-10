@@ -156,25 +156,17 @@ namespace XWave.Data.DatabaseSeeding
         {
             var user1 = await userManager.FindByNameAsync("john_customer");
             var user2 = await userManager.FindByNameAsync("jake_customer");
-            var paymentDetail = new List<TransactionDetails>()
+            var paymentDetail = new List<PaymentAccountDetails>()
             {
-                new TransactionDetails
+                new PaymentAccountDetails
                 {
                     PaymentAccountId = 1,
                     CustomerId =  user1.Id,
-                    PurchaseCount = 1,
-                    Registration = DateTime.Parse("2/1/2021"),
-                    LatestPurchase = DateTime.Now,
-                    TransactionType = TransactionType.Purchase
                 },
-                new TransactionDetails
+                new PaymentAccountDetails
                 {
                     CustomerId = user2.Id,
                     PaymentAccountId = 2,
-                    PurchaseCount = 5,
-                    Registration = DateTime.Parse("18/6/2021"),
-                    LatestPurchase = DateTime.Now,
-                    TransactionType = TransactionType.Purchase
                 }
             };
 

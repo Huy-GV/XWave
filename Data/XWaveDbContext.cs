@@ -15,7 +15,7 @@ namespace XWave.Data
         public DbSet<Discount> Discount { get; set; }
         public DbSet<Product> Product { get; set; }
         public DbSet<PaymentAccount> PaymentAccount { get; set; }
-        public DbSet<TransactionDetails> TransactionDetails { get; set; }
+        public DbSet<PaymentAccountDetails> TransactionDetails { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderDetails> OrderDetails { get; set; }
         public DbSet<CustomerAccount> CustomerAccount { get; set; }
@@ -36,12 +36,11 @@ namespace XWave.Data
                 .HasIndex(p => new { p.AccountNumber, p.Provider })
                 .IsUnique();
 
-            builder.Entity<TransactionDetails>()
-                .HasKey(pd => new { pd.CustomerId, pd.PaymentAccountId });
+            builder.Entity<PaymentAccount>()
+                .HasQueryFilter(p => !p.IsDeleted);
 
-            builder.Entity<TransactionDetails>()
-                .Property(td => td.TransactionType)
-                .HasConversion(new EnumToStringConverter<TransactionType>());
+            builder.Entity<PaymentAccountDetails>()
+                .HasKey(pd => new { pd.CustomerId, pd.PaymentAccountId });
 
             builder.Entity<Product>()
                 .HasQueryFilter(p => !p.IsDeleted);

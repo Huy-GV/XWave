@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using XWave.Data;
 
@@ -11,9 +12,10 @@ using XWave.Data;
 namespace XWave.Data.Migrations
 {
     [DbContext(typeof(XWaveDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220410013909_TransactionDetails_Remove_NonsenseFields")]
+    partial class TransactionDetails_Remove_NonsenseFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -411,24 +413,6 @@ namespace XWave.Data.Migrations
                     b.ToTable("PaymentAccount");
                 });
 
-            modelBuilder.Entity("XWave.Models.PaymentAccountDetails", b =>
-                {
-                    b.Property<string>("CustomerId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("PaymentAccountId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("FirstRegistration")
-                        .HasColumnType("datetime");
-
-                    b.HasKey("CustomerId", "PaymentAccountId");
-
-                    b.HasIndex("PaymentAccountId");
-
-                    b.ToTable("TransactionDetails");
-                });
-
             modelBuilder.Entity("XWave.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -514,6 +498,24 @@ namespace XWave.Data.Migrations
                     b.HasIndex("ImmediateManagerId");
 
                     b.ToTable("StaffAccount");
+                });
+
+            modelBuilder.Entity("XWave.Models.TransactionDetails", b =>
+                {
+                    b.Property<string>("CustomerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("PaymentAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FirstRegistration")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("CustomerId", "PaymentAccountId");
+
+                    b.HasIndex("PaymentAccountId");
+
+                    b.ToTable("TransactionDetails");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -636,25 +638,6 @@ namespace XWave.Data.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("XWave.Models.PaymentAccountDetails", b =>
-                {
-                    b.HasOne("XWave.Models.CustomerAccount", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("XWave.Models.PaymentAccount", "Payment")
-                        .WithMany()
-                        .HasForeignKey("PaymentAccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Payment");
-                });
-
             modelBuilder.Entity("XWave.Models.Product", b =>
                 {
                     b.HasOne("XWave.Models.Category", "Category")
@@ -687,6 +670,25 @@ namespace XWave.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("ImmediateManager");
+                });
+
+            modelBuilder.Entity("XWave.Models.TransactionDetails", b =>
+                {
+                    b.HasOne("XWave.Models.CustomerAccount", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XWave.Models.PaymentAccount", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("XWave.Models.Discount", b =>

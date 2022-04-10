@@ -22,6 +22,21 @@ namespace XWave.Services.Defaults
             using var transaction = DbContext.Database.BeginTransaction();
             try
             {
+                var existingPaymentAccount = await DbContext.PaymentAccount
+                    .SingleOrDefaultAsync(x =>
+                    x.AccountNumber == inputPayment.AccountNumber &&
+                    x.Provider == inputPayment.Provider &&
+                    x.IsDeleted);
+
+                if (existingPaymentAccount != null)
+                {
+                    DbContext.PaymentAccount.Update(existingPaymentAccount);
+                    existingPaymentAccount.IsDeleted = false;
+                    existingPaymentAccount.DeleteDate = null;
+
+                    return (ServiceResult.Success(), existingPaymentAccount.Id);
+                }
+
                 var newPayment = new PaymentAccount()
                 {
                     AccountNumber = inputPayment.AccountNumber,
@@ -32,13 +47,10 @@ namespace XWave.Services.Defaults
                 DbContext.PaymentAccount.Add(newPayment);
                 await DbContext.SaveChangesAsync();
 
-                var newTransactionDetails = new TransactionDetails()
+                var newTransactionDetails = new PaymentAccountDetails()
                 {
                     CustomerId = customerId,
                     PaymentAccountId = newPayment.Id,
-                    Registration = DateTime.Now,
-                    PurchaseCount = 0,
-                    TransactionType = TransactionType.PaymentAccountRegistration
                 };
 
                 DbContext.TransactionDetails.Add(newTransactionDetails);
@@ -60,7 +72,14 @@ namespace XWave.Services.Defaults
             try
             {
                 var deletedPayment = await DbContext.PaymentAccount.FindAsync(paymentId);
-                DbContext.Remove(deletedPayment);
+                if (deletedPayment == null)
+                {
+                    return ServiceResult.Failure("Payment account could not be found.");
+                }
+
+                DbContext.Update(deletedPayment);
+                deletedPayment.DeleteDate = DateTime.Now;
+                deletedPayment.IsDeleted = true;
                 await DbContext.SaveChangesAsync();
 
                 return ServiceResult.Success();
@@ -71,7 +90,7 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForCustomersAsync(string customerId)
+        public Task<IEnumerable<PaymentAccountDetails>> FindAllTransactionDetailsForCustomersAsync(string customerId)
         {
             return Task.FromResult(DbContext.TransactionDetails
                 .AsNoTracking()
@@ -80,7 +99,7 @@ namespace XWave.Services.Defaults
                 .AsEnumerable());
         }
 
-        public Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForStaffAsync()
+        public Task<IEnumerable<PaymentAccountDetails>> FindAllTransactionDetailsForStaffAsync()
         {
             return Task.FromResult(DbContext.TransactionDetails
                 .AsNoTracking()

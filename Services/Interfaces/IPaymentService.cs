@@ -18,9 +18,9 @@ namespace XWave.Services.Interfaces
         /// <returns></returns>
         Task<bool> CustomerHasPaymentAccount(string customerId, int paymentAccountId);
 
-        Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForCustomersAsync(string customerId);
+        Task<IEnumerable<PaymentAccountDetails>> FindAllTransactionDetailsForCustomersAsync(string customerId);
 
-        Task<IEnumerable<TransactionDetails>> FindAllTransactionDetailsForStaffAsync();
+        Task<IEnumerable<PaymentAccountDetails>> FindAllTransactionDetailsForStaffAsync();
 
         // todo: only remove from the customer's perspective
         Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId);

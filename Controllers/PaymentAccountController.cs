@@ -37,7 +37,7 @@ namespace XWave.Controllers
 
         [HttpGet("details")]
         [Authorize(Roles = nameof(Roles.Customer))]
-        public async Task<ActionResult<IEnumerable<TransactionDetails>>> GetByCustomer()
+        public async Task<ActionResult<IEnumerable<PaymentAccountDetails>>> GetByCustomer()
         {
             string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (customerId == null)

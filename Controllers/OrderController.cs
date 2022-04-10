@@ -78,7 +78,7 @@ namespace XWave.Controllers
 
             if (!result.Succeeded)
             {
-                return this.XWaveBadRequest(result.Errors.ToArray());
+                return this.XWaveBadRequest(result.Errors);
             }
 
             return Ok("");

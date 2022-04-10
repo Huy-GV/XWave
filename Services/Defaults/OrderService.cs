@@ -124,11 +124,6 @@ namespace XWave.Services.Defaults
                 await _dbContext.SaveChangesAsync();
                 _dbContext.OrderDetails.AddRange(orderDetails.Select(x => { x.OrderId = order.Id; return x; }));
                 _dbContext.Product.UpdateRange(purchasedProducts);
-                var isTransactionDetailsUpdated = await UpdateTransactionDetailsAsync(purchaseViewModel.PaymentAccountId, customerId);
-                if (!isTransactionDetailsUpdated)
-                {
-                    return (ServiceResult.Failure("Failed to update transaction. Operation is aborted."), null);
-                }
 
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -141,28 +136,6 @@ namespace XWave.Services.Defaults
                 _logger.LogError(exception.Message);
 
                 return (ServiceResult.Failure("An error occured when placing your order."), null);
-            }
-
-            /// <summary>
-            /// Records the latest transaction made by a customer.
-            /// </summary>
-            /// <param name="paymentAccountId">ID of payment account used in the latest transaction.</param>
-            /// <param name="customerId">ID of customer who made the transaction.</param>
-            /// <returns>True if the update succeeds and False otherwise.</returns>
-            async Task<bool> UpdateTransactionDetailsAsync(int paymentAccountId, string customerId)
-            {
-                var transactionDetails = await _dbContext.TransactionDetails.FindAsync(customerId, paymentAccountId);
-                if (transactionDetails == null)
-                {
-                    return false;
-                }
-
-                transactionDetails.PurchaseCount++;
-                transactionDetails.LatestPurchase = DateTime.Now;
-                transactionDetails.TransactionType = TransactionType.Purchase;
-                _dbContext.TransactionDetails.Update(transactionDetails);
-
-                return true;
             }
         }
 
