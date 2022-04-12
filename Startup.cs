@@ -17,6 +17,7 @@ using XWave.Data.Constants;
 using XWave.Models;
 using XWave.Extensions;
 using XWave.Services.Defaults;
+using Serilog;
 
 namespace XWave
 {
@@ -36,7 +37,10 @@ namespace XWave
             services.Configure<JwtCookie>(Configuration.GetSection("JwtCookie"));
 
             services
-                .AddIdentity<ApplicationUser, IdentityRole>()
+                .AddIdentity<ApplicationUser, IdentityRole>(options =>
+                {
+                    options.Lockout.AllowedForNewUsers = false;
+                })
                 .AddEntityFrameworkStores<XWaveDbContext>();
 
             services.AddScoped<Services.Interfaces.IAuthenticationService, JwtAuthenticationService>();
@@ -61,8 +65,8 @@ namespace XWave
                         {
                             var cookieName = Configuration["JwtCookie:Name"];
                             // accommodate clients without cookies
-                            if (string.IsNullOrEmpty(context.Token)
-                                && context.Request.Cookies.ContainsKey(cookieName))
+                            if (string.IsNullOrEmpty(context.Token) &&
+                            context.Request.Cookies.ContainsKey(cookieName))
                             {
                                 context.Token = context.Request.Cookies[cookieName];
                             }
@@ -122,6 +126,7 @@ namespace XWave
                 app.UseHsts();
             }
 
+            app.UseSerilogRequestLogging();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             //app.UseSpaStaticFiles();

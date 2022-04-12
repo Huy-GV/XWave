@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using XWave.Configuration;
 using XWave.Data;
 using XWave.Data.Constants;
+using XWave.Extensions;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
@@ -42,9 +43,9 @@ namespace XWave.Services.Defaults
                 return authModel;
             }
 
-            if (!await _userManager.CheckPasswordAsync(user, model.Password))
+            if (!await _userManager.CheckPasswordAndLockoutStatusAsync(user, model.Password))
             {
-                authModel.Error = $"Incorrect password for user {model.Username}";
+                authModel.Error = $"Unable to sign in user {model.Username}.";
                 return authModel;
             }
             else
@@ -112,16 +113,10 @@ namespace XWave.Services.Defaults
             var result = await _userManager.CreateAsync(appUser, registerUserViewModel.Password);
             if (result.Succeeded)
             {
-                return new AuthenticationResult()
-                {
-                    Succeeded = true
-                };
+                return new AuthenticationResult() { Succeeded = true };
             }
 
-            return new AuthenticationResult()
-            {
-                Succeeded = false
-            };
+            return new AuthenticationResult() { Succeeded = false };
         }
     }
 }
