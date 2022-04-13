@@ -50,7 +50,7 @@ namespace XWave.Services.Defaults
             }
             catch (Exception e)
             {
-                _logger.LogError($"Failed to log activiy create for staff ID {staffId}");
+                _logger.LogError($"Failed to log activiy create for staff ID {staffId}.");
                 return ServiceResult.Failure(e.Message);
             }
         }

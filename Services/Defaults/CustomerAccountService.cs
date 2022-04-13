@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 using XWave.Data;
 using XWave.Models;
@@ -12,11 +13,14 @@ namespace XWave.Services.Defaults
     public class CustomerAccountService : ServiceBase, ICustomerAccountService
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly ILogger<CustomerAccountService> _logger;
 
         public CustomerAccountService(
             XWaveDbContext dbContext,
-            IAuthenticationService authenticationService) : base(dbContext)
+            IAuthenticationService authenticationService,
+            ILogger<CustomerAccountService> logger) : base(dbContext)
         {
+            _logger = logger;
             _authenticationService = authenticationService;
         }
 
@@ -60,9 +64,12 @@ namespace XWave.Services.Defaults
 
                 return ServiceResult.Success();
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                return ServiceResult.Failure(e.Message);
+                _logger.LogCritical($"Failed to update subscription status of customer ID {id}");
+                _logger.LogError($"Exception message: {exception.Message}");
+                _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
+                return ServiceResult.Failure(exception.Message);
             }
         }
 
@@ -82,9 +89,12 @@ namespace XWave.Services.Defaults
 
                 return ServiceResult.Success();
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                return ServiceResult.Failure(e.Message);
+                _logger.LogError($"Failed to update customer account of user ID {id}");
+                _logger.LogError($"Exception message: {exception.Message}");
+                _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
+                return ServiceResult.Failure(exception.Message);
             }
         }
     }

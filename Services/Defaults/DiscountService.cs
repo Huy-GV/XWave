@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +15,16 @@ namespace XWave.Services.Defaults
 {
     public class DiscountService : ServiceBase, IDiscountService
     {
-        private readonly IActivityService _staffActivityService;
+        private readonly IActivityService _activityService;
+        private readonly ILogger<DiscountService> _logger;
 
         public DiscountService(
             XWaveDbContext dbContext,
-            IActivityService staffActivityService) : base(dbContext)
+            IActivityService activityService,
+            ILogger<DiscountService> logger) : base(dbContext)
         {
-            _staffActivityService = staffActivityService;
+            _logger = logger;
+            _activityService = activityService;
         }
 
         public async Task<(ServiceResult, int? DiscountId)> CreateDiscountAsync(string managerId, DiscountViewModel discountViewModel)
@@ -29,7 +33,7 @@ namespace XWave.Services.Defaults
             var entry = DbContext.Add(newDiscount);
             entry.CurrentValues.SetValues(discountViewModel);
             await DbContext.SaveChangesAsync();
-            await _staffActivityService.LogActivityAsync<Discount>(
+            await _activityService.LogActivityAsync<Discount>(
                 managerId,
                 OperationType.Create,
                 $"created discount with ID {newDiscount.Id}.");
@@ -61,7 +65,7 @@ namespace XWave.Services.Defaults
                 await DbContext.Product.Where(d => d.DiscountId == id).LoadAsync();
                 DbContext.Discount.Remove(discount);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Discount>(
+                await _activityService.LogActivityAsync<Discount>(
                     managerId,
                     OperationType.Delete,
                     $"removed a {percentage} discount with ID {id} (created by {creator}).");
@@ -69,10 +73,12 @@ namespace XWave.Services.Defaults
                 await transaction.CommitAsync();
                 return ServiceResult.Success();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
                 await transaction.RollbackAsync();
-                return ServiceResult.Failure(ex.Message);
+                _logger.LogError(exception.Message);
+                _logger.LogError(exception.StackTrace);
+                return ServiceResult.Failure(exception.Message);
             }
         }
 
@@ -102,7 +108,7 @@ namespace XWave.Services.Defaults
             var entry = DbContext.Discount.Update(discount);
             entry.CurrentValues.SetValues(updatedDiscountViewModel);
             await DbContext.SaveChangesAsync();
-            await _staffActivityService.LogActivityAsync<Discount>(
+            await _activityService.LogActivityAsync<Discount>(
                 managerId,
                 OperationType.Delete,
                 $"removed discount with ID {id} (created by {discount.Manager.UserName}).");
@@ -126,7 +132,7 @@ namespace XWave.Services.Defaults
 
             DbContext.Product.UpdateRange(appliedProducts);
             await DbContext.SaveChangesAsync();
-            await _staffActivityService.LogActivityAsync<Discount>(
+            await _activityService.LogActivityAsync<Discount>(
                 managerId,
                 OperationType.Modify,
                 $"applied discount with ID {discountId} (created by {discount.Manager.UserName}) to the following products with IDs: {string.Join(", ", appliedProducts)}.");
@@ -154,7 +160,7 @@ namespace XWave.Services.Defaults
 
             DbContext.Product.UpdateRange(appliedProducts.Select(p => { p.Discount = null; return p; }));
             await DbContext.SaveChangesAsync();
-            await _staffActivityService.LogActivityAsync<Discount>(
+            await _activityService.LogActivityAsync<Discount>(
                 managerId,
                 OperationType.Modify,
                 $"removed discount with ID {discountId} (created by {discount.Manager.UserName}) from products with the following IDs: {string.Join(", ", appliedProducts.Select(p => p.Id)) }.");

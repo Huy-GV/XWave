@@ -2,9 +2,12 @@
 
 namespace XWave.Services.Defaults
 {
+    /// <summary>
+    /// Abstract class that defines EF Core database context.
+    /// </summary>
     public abstract class ServiceBase
     {
-        public XWaveDbContext DbContext { get; set; }
+        protected XWaveDbContext DbContext { get; set; }
 
         public ServiceBase(XWaveDbContext dbContext)
         {

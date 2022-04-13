@@ -108,6 +108,11 @@ namespace XWave.Services.Defaults
             try
             {
                 var payment = await DbContext.PaymentAccount.FindAsync(id);
+                if (payment == null)
+                {
+                    return ServiceResult.Failure($"Payment account for user ID {} not found.");
+                }
+
                 var entry = DbContext.Update(payment);
                 entry.CurrentValues.SetValues(updatedPayment);
                 DbContext.PaymentAccount.Update(payment);

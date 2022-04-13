@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +18,19 @@ namespace XWave.Services.Defaults
 {
     public class ProductService : ServiceBase, IProductService
     {
-        private readonly IActivityService _staffActivityService;
+        private readonly IActivityService _activityService;
         private readonly ProductHelper _productHelper;
+        private readonly ILogger<ProductService> _logger;
 
         public ProductService(
             XWaveDbContext dbContext,
-            IActivityService staffActivityService,
-            ProductHelper productHelper) : base(dbContext)
+            IActivityService activityService,
+            ProductHelper productHelper,
+            ILogger<ProductService> logger) : base(dbContext)
         {
             _productHelper = productHelper;
-            _staffActivityService = staffActivityService;
+            _activityService = activityService;
+            _logger = logger;
         }
 
         public async Task<(ServiceResult, int? ProductId)> AddProductAsync(string staffId, ProductViewModel productViewModel)
@@ -42,7 +46,7 @@ namespace XWave.Services.Defaults
                 var entry = DbContext.Product.Add(newProduct);
                 entry.CurrentValues.SetValues(productViewModel);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Product>(
+                await _activityService.LogActivityAsync<Product>(
                     staffId,
                     OperationType.Create,
                     $"added product named {newProduct.Name} and priced ${newProduct.Price}");
@@ -135,6 +139,11 @@ namespace XWave.Services.Defaults
             try
             {
                 var product = await DbContext.Product.FindAsync(id);
+                if (product == null)
+                {
+                    return ServiceResult.Failure($"Product with ID {id} not found");
+                }
+
                 if (product.IsDiscontinued || product.IsDeleted)
                 {
                     return ServiceResult.Failure($"Product has been discontinued or removed.");
@@ -143,13 +152,13 @@ namespace XWave.Services.Defaults
                 var entry = DbContext.Update(product);
                 entry.CurrentValues.SetValues(updatedProductViewModel);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Product>(
+                await _activityService.LogActivityAsync<Product>(
                     staffId,
                     OperationType.Modify,
                     $"updated general information of product named {product.Name}.");
                 return ServiceResult.Success();
             }
-            catch (Exception)
+            catch (Exception exception)
             {
                 return ServiceResult.Failure("Failed to update product information.");
             }
@@ -169,15 +178,18 @@ namespace XWave.Services.Defaults
                 product.Quantity = updatedStock;
                 product.LatestRestock = DateTime.Now;
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Product>(
+                await _activityService.LogActivityAsync<Product>(
                     staffId,
                     OperationType.Modify,
                     $"updated stock of product named {product.Name} (from {quantityBeforeRestock} to {updatedStock}.");
 
                 return ServiceResult.Success();
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                _logger.LogCritical($"Failed to update product stock.");
+                _logger.LogError($"Exception message: {exception.Message}");
+                _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
                 return ServiceResult.Failure($"Failed to update stock of product with ID {productId} due to internal errors.");
             }
         }
@@ -195,15 +207,18 @@ namespace XWave.Services.Defaults
                 var formerPrice = product.Price;
                 product.Price = updatedPrice;
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Product>(
+                await _activityService.LogActivityAsync<Product>(
                     staffId,
                     OperationType.Modify,
                     $"updated price of product named {product.Name} (from {formerPrice} to {updatedPrice}.");
 
                 return ServiceResult.Success();
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                _logger.LogError($"Failed to update product general information.");
+                _logger.LogError($"Exception message: {exception.Message}");
+                _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
                 return ServiceResult.Failure($"Failed to update price of product with ID {productId} due to internal errors.");
             }
         }
@@ -230,7 +245,7 @@ namespace XWave.Services.Defaults
                 methodCall: () => ScheduledUpdateProductPrice(staffId, productId, updatedPrice),
                 delay: updateSchedule - now);
 
-            await _staffActivityService.LogActivityAsync<Product>(
+            await _activityService.LogActivityAsync<Product>(
                 staffId,
                 OperationType.Modify,
                 $"scheduled a price update (to ${updatedPrice}) for product ID {productId} at {updateSchedule}.");
@@ -245,7 +260,7 @@ namespace XWave.Services.Defaults
             {
                 product.Price = updatedPrice;
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Product>(
+                await _activityService.LogActivityAsync<Product>(
                     staffId,
                     OperationType.Modify,
                     $"carried out a scheduled change in the price of product ID = {productId}. The new price is {updatedPrice}.");
@@ -288,7 +303,7 @@ namespace XWave.Services.Defaults
                 methodCall: () => UpdateProductSaleStatusByScheduleAsync(productIds, false, updateSchedule),
                 delay: updateSchedule - now);
 
-            await _staffActivityService.LogActivityAsync<Product>(
+            await _activityService.LogActivityAsync<Product>(
                 managerId,
                 OperationType.Modify,
                 $"discontinued sale of product with IDs {string.Join(", ", productIds)}, effective at {updateSchedule:d MMMM yyyy}.");
@@ -318,7 +333,7 @@ namespace XWave.Services.Defaults
                 methodCall: () => UpdateProductSaleStatusByScheduleAsync(productId, false, updateSchedule),
                 delay: updateSchedule - now);
 
-            await _staffActivityService.LogActivityAsync<Product>(
+            await _activityService.LogActivityAsync<Product>(
                 managerId,
                 OperationType.Modify,
                 $"restarted sale of product ID {productId}, effective {updateSchedule:d MMMM yyyy}.");
@@ -355,8 +370,11 @@ namespace XWave.Services.Defaults
 
                 await transaction.CommitAsync();
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                _logger.LogError($"Failed to carry out scheduled product status update for multiple products. Transaction rolled back.");
+                _logger.LogError($"Exception message: {exception.Message}");
+                _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
                 await transaction.RollbackAsync();
             }
         }

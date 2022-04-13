@@ -121,23 +121,37 @@ namespace XWave.Services.Defaults
             var staffUser = await _userManager.FindByIdAsync(staffId);
             if (staffUser == null)
             {
-                return ServiceResult.Failure("User not found");
+                return ServiceResult.Failure($"Unable to find user with id {staffId};");
+            }
+
+            var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
+            if (staffAccount == null)
+            {
+                return ServiceResult.Failure($"Unable to find user with id {staffId}.");
             }
 
             using var transaction = DbContext.Database.BeginTransaction();
             try
             {
-                await _userManager.SetLockoutEnabledAsync(staffUser, true);
-                await _userManager.SetLockoutEndDateAsync(staffUser, DateTime.MaxValue);
+                var lockoutResult = await _userManager.SetLockoutEnabledAsync(staffUser, true);
+                var lockoutEndDateResult = await _userManager.SetLockoutEndDateAsync(staffUser, DateTime.MaxValue);
                 var resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(staffUser);
-                var result = await _userManager.ResetPasswordAsync(staffUser, resetPasswordToken, Guid.NewGuid().ToString());
-                if (result.Succeeded)
+                var resetPasswordResult = await _userManager.ResetPasswordAsync(
+                    staffUser,
+                    resetPasswordToken,
+                    Guid.NewGuid().ToString());
+
+                if (lockoutResult.Succeeded && lockoutEndDateResult.Succeeded && resetPasswordResult.Succeeded)
                 {
+                    staffAccount.DeleteDate = DateTime.Now;
+                    staffAccount.IsDeleted = true;
+                    await DbContext.SaveChangesAsync();
                     await transaction.CommitAsync();
+
                     return ServiceResult.Success();
                 }
 
-                throw new Exception("Password reset failed");
+                return ServiceResult.Failure("Deactivation process failed.");
             }
             catch (Exception ex)
             {

@@ -133,7 +133,9 @@ namespace XWave.Services.Defaults
             catch (Exception exception)
             {
                 await transaction.RollbackAsync();
-                _logger.LogError(exception.Message);
+                _logger.LogError($"Failed to place order for customer ID {customerId}");
+                _logger.LogError($"Exception message: {exception.Message}");
+                _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
 
                 return (ServiceResult.Failure("An error occured when placing your order."), null);
             }

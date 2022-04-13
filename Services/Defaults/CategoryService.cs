@@ -11,13 +11,13 @@ namespace XWave.Services.Defaults
 {
     public class CategoryService : ServiceBase, ICategoryService
     {
-        private readonly IActivityService _staffActivityService;
+        private readonly IActivityService _activityService;
 
         public CategoryService(
             XWaveDbContext dbContext,
-            IActivityService staffActivityService) : base(dbContext)
+            IActivityService activityService) : base(dbContext)
         {
-            _staffActivityService = staffActivityService;
+            _activityService = activityService;
         }
 
         public async Task<(ServiceResult, int? CategoryId)> AddCategoryAsync(string managerUserName, Category category)
@@ -26,7 +26,7 @@ namespace XWave.Services.Defaults
             {
                 DbContext.Category.Add(category);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Category>(
+                await _activityService.LogActivityAsync<Category>(
                     managerUserName,
                     OperationType.Create,
                     $"created a category named {category.Name}");
@@ -47,7 +47,7 @@ namespace XWave.Services.Defaults
                 var categoryName = category.Name;
                 DbContext.Category.Remove(category);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Category>(
+                await _activityService.LogActivityAsync<Category>(
                     managerId,
                     OperationType.Delete,
                     $"removed category named {categoryName}");
@@ -78,7 +78,7 @@ namespace XWave.Services.Defaults
                 category.Name = updatedCategory.Name;
                 DbContext.Category.Update(category);
                 await DbContext.SaveChangesAsync();
-                await _staffActivityService.LogActivityAsync<Category>(
+                await _activityService.LogActivityAsync<Category>(
                     managerId,
                     OperationType.Modify,
                     $"updated category named {category.Name}");
