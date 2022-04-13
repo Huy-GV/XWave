@@ -6,7 +6,6 @@ namespace XWave.Models
 {
     public class Product : IEntity, ISoftDeletable
     {
-        // todo: change to string and allow manual input
         public int Id { get; set; }
 
         [Required]

@@ -15,15 +15,12 @@ namespace XWave.Services.Defaults
     public class DiscountService : ServiceBase, IDiscountService
     {
         private readonly IActivityService _staffActivityService;
-        private readonly UserManager<ApplicationUser> _userManager;
 
         public DiscountService(
             XWaveDbContext dbContext,
-            IActivityService staffActivityService,
-            UserManager<ApplicationUser> userManager) : base(dbContext)
+            IActivityService staffActivityService) : base(dbContext)
         {
             _staffActivityService = staffActivityService;
-            _userManager = userManager;
         }
 
         public async Task<(ServiceResult, int? DiscountId)> CreateDiscountAsync(string managerId, DiscountViewModel discountViewModel)

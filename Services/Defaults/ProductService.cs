@@ -238,7 +238,6 @@ namespace XWave.Services.Defaults
             return ServiceResult.Success();
         }
 
-        // todo: reuse this method and log staff activity?
         public async Task ScheduledUpdateProductPrice(string staffId, int productId, uint updatedPrice)
         {
             var product = await DbContext.Product.FindAsync(productId);
@@ -246,6 +245,10 @@ namespace XWave.Services.Defaults
             {
                 product.Price = updatedPrice;
                 await DbContext.SaveChangesAsync();
+                await _staffActivityService.LogActivityAsync<Product>(
+                    staffId,
+                    OperationType.Modify,
+                    $"carried out a scheduled change in the price of product ID = {productId}. The new price is {updatedPrice}.");
             }
         }
 
