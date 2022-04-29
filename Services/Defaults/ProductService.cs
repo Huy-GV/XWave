@@ -8,24 +8,25 @@ using System.Threading.Tasks;
 using XWave.Data;
 using XWave.DTOs.Customers;
 using XWave.DTOs.Management;
-using XWave.Helpers;
+using XWave.Utils;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Management;
+using XWave.Extensions;
 
 namespace XWave.Services.Defaults
 {
     public class ProductService : ServiceBase, IProductService
     {
         private readonly IActivityService _activityService;
-        private readonly ProductHelper _productHelper;
+        private readonly ProductDtoMapper _productHelper;
         private readonly ILogger<ProductService> _logger;
 
         public ProductService(
             XWaveDbContext dbContext,
             IActivityService activityService,
-            ProductHelper productHelper,
+            ProductDtoMapper productHelper,
             ILogger<ProductService> logger) : base(dbContext)
         {
             _productHelper = productHelper;
@@ -37,6 +38,7 @@ namespace XWave.Services.Defaults
         {
             try
             {
+                _logger.LogInformation($"User with ID {staffId} is attempting to add product named {productViewModel.Name}");
                 if (!await DbContext.Category.AnyAsync(c => c.Id == productViewModel.CategoryId))
                 {
                     return (ServiceResult.Failure("Category not found"), null);
@@ -59,21 +61,31 @@ namespace XWave.Services.Defaults
             }
         }
 
+        // todo: make this a scheduled task?
         public async Task<ServiceResult> DeleteProductAsync(int productId)
         {
             try
             {
                 var product = await DbContext.Product.FindAsync(productId);
+                if (product == null)
+                {
+                    return ServiceResult.Failure($"Product with ID {productId} not found");
+                }
+
                 DbContext.Product.Update(product);
-                product.IsDeleted = true;
-                product.DeleteDate = DateTime.Now;
+                product.SoftDelete();
                 await DbContext.SaveChangesAsync();
+                //await _activityService.LogActivityAsync<Product>(
+                //    staffId,
+                //    OperationType.Modify,
+                //    $"deleted product named {product.Name}, ID = {product.Id} at {product.DeleteDate}.");
 
                 return ServiceResult.Success();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                return ServiceResult.Failure(ex.Message);
+                _logger.LogError($"Exception: {exception.Message}.");
+                return ServiceResult.Failure($"Failed to delete product with ID {productId}");
             }
         }
 
@@ -85,7 +97,9 @@ namespace XWave.Services.Defaults
                 .Include(p => p.Category)
                 .Where(p => !p.IsDiscontinued)
                 .AsEnumerable()
-                .Select(p => _productHelper.CreateCustomerProductDTO(p));
+                .Select(p => p.Discount == null
+                    ? ProductDtoMapper.MapCustomerProductDto(p)
+                    : ProductDtoMapper.MapCustomerProductDto(p, CalculateDiscountedPrice(p)));
 
             return Task.FromResult(productDtos);
         }
@@ -95,16 +109,12 @@ namespace XWave.Services.Defaults
             var products = DbContext.Product
                 .AsNoTracking()
                 .Include(p => p.Discount)
-                    .ThenInclude(d => d.Manager)
                 .Include(p => p.Category)
                 .AsEnumerable()
-                .Where(p =>
-                {
-                    return includeDiscontinuedProducts || !p.IsDiscontinued;
-                });
+                .Where(p => includeDiscontinuedProducts || !p.IsDiscontinued);
 
             return Task.FromResult(products
-                .Select(p => _productHelper.CreateDetailedProductDto(p))
+                .Select(p => ProductDtoMapper.MapDetailedProductDto(p))
                 .AsEnumerable());
         }
 
@@ -116,7 +126,14 @@ namespace XWave.Services.Defaults
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-            return product == null ? null : _productHelper.CreateCustomerProductDTO(product);
+            if (product == null)
+            {
+                return null;
+            }
+
+            return product.Discount == null
+                ? ProductDtoMapper.MapCustomerProductDto(product)
+                : ProductDtoMapper.MapCustomerProductDto(product, CalculateDiscountedPrice(product));
         }
 
         public async Task<DetailedProductDto?> FindProductByIdForStaff(int id)
@@ -124,24 +141,24 @@ namespace XWave.Services.Defaults
             var product = await DbContext.Product
                 .AsNoTracking()
                 .Include(p => p.Discount)
-                    .ThenInclude(d => d.Manager)
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-            return product == null ? null : _productHelper.CreateDetailedProductDto(product);
+            return product == null ? null : ProductDtoMapper.MapDetailedProductDto(product);
         }
 
         public async Task<ServiceResult> UpdateProductAsync(
             string staffId,
-            int id,
+            int productId,
             ProductViewModel updatedProductViewModel)
         {
             try
             {
-                var product = await DbContext.Product.FindAsync(id);
+                _logger.LogInformation($"User with ID {staffId} is attempting to update product ID {productId}");
+                var product = await DbContext.Product.FindAsync(productId);
                 if (product == null)
                 {
-                    return ServiceResult.Failure($"Product with ID {id} not found");
+                    return ServiceResult.Failure($"Product with ID {productId} not found");
                 }
 
                 if (product.IsDiscontinued || product.IsDeleted)
@@ -160,6 +177,7 @@ namespace XWave.Services.Defaults
             }
             catch (Exception exception)
             {
+                _logger.LogError($"Exception: {exception.Message}.");
                 return ServiceResult.Failure("Failed to update product information.");
             }
         }
@@ -187,9 +205,8 @@ namespace XWave.Services.Defaults
             }
             catch (Exception exception)
             {
-                _logger.LogCritical($"Failed to update product stock.");
-                _logger.LogError($"Exception message: {exception.Message}");
-                _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
+                _logger.LogCritical($"Failed to update stock of product with ID {product.Id}.");
+                _logger.LogDebug($"Exception: {exception.Message}");
                 return ServiceResult.Failure($"Failed to update stock of product with ID {productId} due to internal errors.");
             }
         }
@@ -216,9 +233,8 @@ namespace XWave.Services.Defaults
             }
             catch (Exception exception)
             {
-                _logger.LogError($"Failed to update product general information.");
-                _logger.LogError($"Exception message: {exception.Message}");
-                _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
+                _logger.LogError($"Failed to update general information of product with ID {productId}.");
+                _logger.LogDebug($"Exception message: {exception.Message}");
                 return ServiceResult.Failure($"Failed to update price of product with ID {productId} due to internal errors.");
             }
         }
@@ -373,10 +389,19 @@ namespace XWave.Services.Defaults
             catch (Exception exception)
             {
                 _logger.LogError($"Failed to carry out scheduled product status update for multiple products. Transaction rolled back.");
-                _logger.LogError($"Exception message: {exception.Message}");
-                _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
+                _logger.LogDebug($"Exception message: {exception.Message}");
                 await transaction.RollbackAsync();
             }
+        }
+
+        public decimal CalculateDiscountedPrice(Product product)
+        {
+            if (product.Discount == null)
+            {
+                throw new InvalidOperationException($"Product ID {product.Id} does not have any discount");
+            }
+
+            return product.Price - product.Price * product.Discount.Percentage / 100;
         }
     }
 }

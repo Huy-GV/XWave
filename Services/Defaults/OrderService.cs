@@ -19,15 +19,18 @@ namespace XWave.Services.Defaults
         private readonly XWaveDbContext _dbContext;
         private readonly ILogger<OrderService> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IProductService _productService;
 
         public OrderService(
             XWaveDbContext dbContext,
             ILogger<OrderService> logger,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IProductService productService)
         {
             _dbContext = dbContext;
             _logger = logger;
             _userManager = userManager;
+            _productService = productService;
         }
 
         public async Task<OrderDto?> FindOrderByIdAsync(string customerId, int orderId)
@@ -104,7 +107,8 @@ namespace XWave.Services.Defaults
 
                     var purchasePrice = product.Discount == null
                         ? product.Price
-                        : product.Price - product.Price * product.Discount.Percentage / 100;
+                        : _productService.CalculateDiscountedPrice(product);
+
                     product.Quantity -= productInCart.Quantity;
                     purchasedProducts.Add(product);
                     orderDetails.Add(new OrderDetails
@@ -168,11 +172,6 @@ namespace XWave.Services.Defaults
                 .AsEnumerable();
 
             return Task.FromResult(orderDtos);
-        }
-
-        public async Task<OrderDetails?> FindPurchasedProductDetailsByOrderId(int orderId, int productId)
-        {
-            return await _dbContext.OrderDetails.FindAsync(orderId, productId);
         }
     }
 }

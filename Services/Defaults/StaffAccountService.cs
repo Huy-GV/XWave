@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using XWave.Data;
 using XWave.Data.Constants;
 using XWave.DTOs.Management;
+using XWave.Extensions;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
@@ -143,8 +144,7 @@ namespace XWave.Services.Defaults
 
                 if (lockoutResult.Succeeded && lockoutEndDateResult.Succeeded && resetPasswordResult.Succeeded)
                 {
-                    staffAccount.DeleteDate = DateTime.Now;
-                    staffAccount.IsDeleted = true;
+                    staffAccount.SoftDelete();
                     await DbContext.SaveChangesAsync();
                     await transaction.CommitAsync();
 

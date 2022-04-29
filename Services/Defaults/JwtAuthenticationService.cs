@@ -35,30 +35,28 @@ namespace XWave.Services.Defaults
 
         public async Task<AuthenticationResult> SignInAsync(SignInViewModel model)
         {
-            var authModel = new AuthenticationResult();
+            var authenticationResult = new AuthenticationResult();
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user == null)
             {
-                authModel.Error = $"User with {model.Username} does not exist";
-                return authModel;
+                authenticationResult.Error = $"User with {model.Username} does not exist";
+                return authenticationResult;
             }
 
             if (!await _userManager.CheckPasswordAndLockoutStatusAsync(user, model.Password))
             {
-                authModel.Error = $"Unable to sign in user {model.Username}.";
-                return authModel;
+                authenticationResult.Error = $"Unable to sign in user {model.Username}.";
+                return authenticationResult;
             }
-            else
-            {
-                string role = (await _userManager.GetRolesAsync(user)).First();
-                var token = await CreateJwtTokenAsync(user, role);
 
-                return new AuthenticationResult()
-                {
-                    Succeeded = true,
-                    Token = new JwtSecurityTokenHandler().WriteToken(token),
-                };
-            }
+            string role = (await _userManager.GetRolesAsync(user)).First();
+            var token = await CreateJwtTokenAsync(user, role);
+
+            return new AuthenticationResult()
+            {
+                Succeeded = true,
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+            };
         }
 
         public Task<AuthenticationResult> SignOutAsync(string userId)

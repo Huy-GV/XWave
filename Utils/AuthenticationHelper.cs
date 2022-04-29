@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using XWave.Data.Constants;
 
-namespace XWave.Helpers
+namespace XWave.Utils
 {
     public class AuthenticationHelper
     {

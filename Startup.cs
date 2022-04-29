@@ -66,7 +66,7 @@ namespace XWave
                             var cookieName = Configuration["JwtCookie:Name"];
                             // accommodate clients without cookies
                             if (string.IsNullOrEmpty(context.Token) &&
-                            context.Request.Cookies.ContainsKey(cookieName))
+                                context.Request.Cookies.ContainsKey(cookieName))
                             {
                                 context.Token = context.Request.Cookies[cookieName];
                             }

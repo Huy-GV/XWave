@@ -7,6 +7,7 @@
     <IsPackable>false</IsPackable>
 	<Nullable>enable</Nullable>
     <SpaRoot>ClientApp\</SpaRoot>
+	  <NoWarn>C8618</NoWarn>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
   </PropertyGroup>
 

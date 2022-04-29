@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using XWave.DTOs.Management;
 using XWave.Models;
 using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Management;
@@ -8,9 +9,9 @@ namespace XWave.Services.Interfaces
 {
     public interface IDiscountService
     {
-        Task<IEnumerable<Discount>> FindAllDiscountsAsync();
+        Task<IEnumerable<DetailedDiscountDto>> FindAllDiscountsAsync();
 
-        Task<Discount?> FindDiscountByIdAsync(int id);
+        Task<DetailedDiscountDto?> FindDiscountByIdAsync(int id);
 
         Task<IEnumerable<Product>> FindProductsWithDiscountIdAsync(int id);
 
@@ -35,5 +36,7 @@ namespace XWave.Services.Interfaces
         /// <param name="productIds">Collection of IDs of products to remove the discount from.</param>
         /// <returns></returns>
         Task<ServiceResult> RemoveDiscountFromProductsAsync(string managerId, int discountId, IEnumerable<int> productIds);
+
+        // todo: schedule discount removal + create a model for scheduled task (independent of the underlying library like hangfire?)
     }
 }

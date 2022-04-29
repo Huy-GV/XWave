@@ -1,7 +1,7 @@
 ﻿using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using XWave.Helpers;
+using XWave.Utils;
 using XWave.Services.Defaults;
 using XWave.Services.Interfaces;
 
@@ -24,7 +24,7 @@ namespace XWave.Extensions
         public static void AddDefaultHelpers(this IServiceCollection services)
         {
             services.AddTransient<AuthenticationHelper>();
-            services.AddTransient<ProductHelper>();
+            services.AddTransient<ProductDtoMapper>();
         }
 
         public static void AddHangFireBackgroundServices(this IServiceCollection services, string dbConnectionString)

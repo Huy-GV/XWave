@@ -6,9 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using XWave.Data;
+using XWave.DTOs.Management;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
+using XWave.Utils;
 using XWave.ViewModels.Management;
 
 namespace XWave.Services.Defaults
@@ -29,7 +31,7 @@ namespace XWave.Services.Defaults
 
         public async Task<(ServiceResult, int? DiscountId)> CreateDiscountAsync(string managerId, DiscountViewModel discountViewModel)
         {
-            var newDiscount = new Discount() { ManagerId = managerId };
+            var newDiscount = new Discount();
             var entry = DbContext.Add(newDiscount);
             entry.CurrentValues.SetValues(discountViewModel);
             await DbContext.SaveChangesAsync();
@@ -50,14 +52,13 @@ namespace XWave.Services.Defaults
 
         public async Task<ServiceResult> RemoveDiscountAsync(string managerId, int id)
         {
-            var discount = await DbContext.Discount.Include(d => d.Manager).FirstOrDefaultAsync(d => d.Id == id);
+            var discount = await DbContext.Discount.FindAsync(id);
             if (discount == null)
             {
                 return ServiceResult.Failure($"Discount with ID {id} not found.");
             }
 
             var percentage = discount.Percentage;
-            var creator = discount.Manager.UserName;
             using var transaction = DbContext.Database.BeginTransaction();
             try
             {
@@ -68,7 +69,7 @@ namespace XWave.Services.Defaults
                 await _activityService.LogActivityAsync<Discount>(
                     managerId,
                     OperationType.Delete,
-                    $"removed a {percentage} discount with ID {id} (created by {creator}).");
+                    $"removed a {percentage} discount with ID {id}.");
 
                 await transaction.CommitAsync();
                 return ServiceResult.Success();
@@ -82,24 +83,23 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public async Task<IEnumerable<Discount>> FindAllDiscountsAsync()
+        public async Task<IEnumerable<DetailedDiscountDto>> FindAllDiscountsAsync()
         {
-            return (await DbContext.Discount.ToListAsync())
-                .OrderBy(d =>
-                {
-                    var now = DateTime.Now;
-                    return now > d.StartDate && now < d.EndDate;
-                });
+            return await DbContext.Discount
+                .Select(d => DiscountDtoMapper.MapDetailedDiscountDto(d))
+                .OrderBy(d => d.IsActive)
+                .ToListAsync();
         }
 
-        public async Task<Discount?> FindDiscountByIdAsync(int id)
+        public async Task<DetailedDiscountDto?> FindDiscountByIdAsync(int id)
         {
-            return await DbContext.Discount.FindAsync(id);
+            var discount = await DbContext.Discount.FindAsync(id);
+            return discount == null ? null : DiscountDtoMapper.MapDetailedDiscountDto(discount);
         }
 
         public async Task<ServiceResult> UpdateDiscountAsync(string managerId, int id, DiscountViewModel updatedDiscountViewModel)
         {
-            var discount = await DbContext.Discount.Include(d => d.Manager).FirstOrDefaultAsync(d => d.Id == id);
+            var discount = await DbContext.Discount.FindAsync(id);
             if (discount == null)
             {
                 return ServiceResult.Failure("Not found");
@@ -111,7 +111,7 @@ namespace XWave.Services.Defaults
             await _activityService.LogActivityAsync<Discount>(
                 managerId,
                 OperationType.Delete,
-                $"removed discount with ID {id} (created by {discount.Manager.UserName}).");
+                $"removed discount with ID {id}.");
 
             return ServiceResult.Success();
         }
@@ -135,7 +135,7 @@ namespace XWave.Services.Defaults
             await _activityService.LogActivityAsync<Discount>(
                 managerId,
                 OperationType.Modify,
-                $"applied discount with ID {discountId} (created by {discount.Manager.UserName}) to the following products with IDs: {string.Join(", ", appliedProducts)}.");
+                $"applied discount with ID {discountId} to the following products with IDs: {string.Join(", ", appliedProducts)}.");
 
             return ServiceResult.Success();
         }
@@ -143,7 +143,6 @@ namespace XWave.Services.Defaults
         public async Task<ServiceResult> RemoveDiscountFromProductsAsync(string managerId, int discountId, IEnumerable<int> productIds)
         {
             var discount = await DbContext.Discount
-                .Include(d => d.Manager)
                 .SingleOrDefaultAsync(d => d.Id == discountId);
 
             if (discount == null)
@@ -163,7 +162,7 @@ namespace XWave.Services.Defaults
             await _activityService.LogActivityAsync<Discount>(
                 managerId,
                 OperationType.Modify,
-                $"removed discount with ID {discountId} (created by {discount.Manager.UserName}) from products with the following IDs: {string.Join(", ", appliedProducts.Select(p => p.Id)) }.");
+                $"removed discount with ID {discountId} from products with the following IDs: {string.Join(", ", appliedProducts.Select(p => p.Id)) }.");
 
             return ServiceResult.Success();
         }

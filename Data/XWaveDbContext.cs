@@ -46,11 +46,6 @@ namespace XWave.Data
                 .HasQueryFilter(p => !p.IsDeleted);
 
             builder.Entity<Discount>()
-                .HasOne(d => d.Manager)
-                .WithMany()
-                .HasForeignKey(d => d.ManagerId);
-
-            builder.Entity<Discount>()
                 .HasMany(d => d.Products)
                 .WithOne(p => p.Discount)
                 .HasForeignKey(p => p.DiscountId)

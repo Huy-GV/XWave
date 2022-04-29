@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using XWave.DTOs.Customers;
 using XWave.DTOs.Management;
+using XWave.Models;
 using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Management;
 
@@ -10,6 +11,13 @@ namespace XWave.Services.Interfaces
 {
     public interface IProductService
     {
+        /// <summary>
+        /// Calculate the discounted price of a product. Throws InvalidOperationException if product does not have any discount
+        /// </summary>
+        /// <param name="product">Product with a discount</param>
+        /// <returns>Discounted price</returns>
+        decimal CalculateDiscountedPrice(Product product);
+
         Task<IEnumerable<ProductDto>> FindAllProductsForCustomers();
 
         Task<IEnumerable<DetailedProductDto>> FindAllProductsForStaff(bool includeDiscontinuedProducts = false);

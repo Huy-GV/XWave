@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using XWave.Data;
 using XWave.DTOs.Customers;
+using XWave.Extensions;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
@@ -72,15 +73,14 @@ namespace XWave.Services.Defaults
         {
             try
             {
-                var deletedPayment = await DbContext.PaymentAccount.FindAsync(paymentId);
-                if (deletedPayment == null)
+                var paymentAccountToRemove = await DbContext.PaymentAccount.FindAsync(paymentId);
+                if (paymentAccountToRemove == null)
                 {
                     return ServiceResult.Failure("Payment account could not be found.");
                 }
 
-                DbContext.Update(deletedPayment);
-                deletedPayment.DeleteDate = DateTime.Now;
-                deletedPayment.IsDeleted = true;
+                DbContext.Update(paymentAccountToRemove);
+                paymentAccountToRemove.SoftDelete();
                 await DbContext.SaveChangesAsync();
 
                 return ServiceResult.Success();
@@ -110,7 +110,7 @@ namespace XWave.Services.Defaults
                 var payment = await DbContext.PaymentAccount.FindAsync(id);
                 if (payment == null)
                 {
-                    return ServiceResult.Failure($"Payment account for user ID {} not found.");
+                    return ServiceResult.Failure($"Payment account for user ID {id} not found.");
                 }
 
                 var entry = DbContext.Update(payment);
@@ -137,6 +137,7 @@ namespace XWave.Services.Defaults
             var orders = DbContext.Order
                 .Include(o => o.OrderDetails)
                 .Where(o => o.CustomerId == customerId)
+                .OrderByDescending(o => o.Date)
                 .AsEnumerable();
 
             var latestPurchase = orders

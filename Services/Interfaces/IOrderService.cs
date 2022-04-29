@@ -31,13 +31,5 @@ namespace XWave.Services.Interfaces
         /// <param name="orderId">ID of order.</param>
         /// <returns></returns>
         Task<OrderDto?> FindOrderByIdAsync(string customerId, int orderId);
-
-        /// <summary>
-        /// Find the details of a purchased product in a specific order.
-        /// </summary>
-        /// <param name="orderId">ID of order in which the product was purchased.</param>
-        /// <param name="productId">Purchased product.</param>
-        /// <returns></returns>
-        Task<OrderDetails?> FindPurchasedProductDetailsByOrderId(int orderId, int productId);
     }
 }

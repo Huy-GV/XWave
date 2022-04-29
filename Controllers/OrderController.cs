@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using XWave.Data.Constants;
 using XWave.DTOs.Customers;
 using XWave.Extensions;
-using XWave.Helpers;
+using XWave.Utils;
 using XWave.Models;
 using XWave.Services.Interfaces;
 using XWave.ViewModels.Customers;
@@ -53,15 +53,6 @@ namespace XWave.Controllers
             var orderDTO = await _orderService.FindOrderByIdAsync(customerId, id);
 
             return Ok(orderDTO);
-        }
-
-        [HttpGet("detail/{orderId}/{productId}")]
-        [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
-        public async Task<ActionResult<OrderDetails>> GetOrderDetailAsync(int orderId, int productId)
-        {
-            var orderDetail = await _orderService.FindPurchasedProductDetailsByOrderId(orderId, productId);
-
-            return orderDetail != null ? Ok(orderDetail) : NotFound();
         }
 
         [HttpPost]

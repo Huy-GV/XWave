@@ -130,7 +130,6 @@ namespace XWave.Data.DatabaseSeeding
                     Percentage = 20,
                     StartDate = DateTime.ParseExact("7/1/2021", "d/M/yyyy", null),
                     EndDate = DateTime.ParseExact("11/2/2021", "d/M/yyyy", null),
-                    ManagerId = managers[0].Id,
                 },
                 new Discount()
                 {
@@ -138,7 +137,6 @@ namespace XWave.Data.DatabaseSeeding
                     Percentage = 35,
                     StartDate = DateTime.ParseExact("17/7/2021", "d/M/yyyy", null),
                     EndDate = DateTime.ParseExact("25/7/2021", "d/M/yyyy", null),
-                    ManagerId = managers[1].Id,
                 }
             };
 

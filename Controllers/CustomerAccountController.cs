@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using XWave.Configuration;
 using XWave.Data.Constants;
 using XWave.Extensions;
-using XWave.Helpers;
+using XWave.Utils;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Authentication;

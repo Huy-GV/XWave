@@ -8,6 +8,7 @@
         public decimal Price { get; init; }
         public uint Quantity { get; init; }
         public int CategoryId { get; init; }
-        public DiscountDto? Discount { get; init; }
+        public decimal? DiscountedPrice { get; init; } = null;
+        public DiscountDto? Discount { get; init; } = null;
     }
 }
