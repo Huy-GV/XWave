@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,8 +16,13 @@ namespace XWave.Services.Defaults
 {
     public class PaymentService : ServiceBase, IPaymentService
     {
-        public PaymentService(XWaveDbContext dbContext) : base(dbContext)
+        private readonly ILogger<PaymentService> _logger;
+
+        public PaymentService(
+            XWaveDbContext dbContext,
+            ILogger<PaymentService> logger) : base(dbContext)
         {
+            _logger = logger;
         }
 
         public async Task<(ServiceResult, int? PaymentAccountId)> AddPaymentAccountAsync(string customerId, PaymentAccountViewModel inputPayment)
@@ -26,9 +32,9 @@ namespace XWave.Services.Defaults
             {
                 var existingPaymentAccount = await DbContext.PaymentAccount
                     .SingleOrDefaultAsync(x =>
-                    x.AccountNumber == inputPayment.AccountNumber &&
-                    x.Provider == inputPayment.Provider &&
-                    x.IsDeleted);
+                        x.AccountNumber == inputPayment.AccountNumber &&
+                        x.Provider == inputPayment.Provider &&
+                        x.IsDeleted);
 
                 if (existingPaymentAccount != null)
                 {
@@ -57,38 +63,32 @@ namespace XWave.Services.Defaults
 
                 DbContext.PaymentAccountDetails.Add(newTransactionDetails);
                 await DbContext.SaveChangesAsync();
-                transaction.Commit();
+                await transaction.CommitAsync();
 
                 return (ServiceResult.Success(), newPayment.Id);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                transaction.Rollback();
+                _logger.LogError($"Exception: {exception.Message}");
+                await transaction.RollbackAsync();
 
-                return (ServiceResult.Failure("Failed to add payment account"), null);
+                return (ServiceResult.Failure("Failed to add payment account."), null);
             }
         }
 
         public async Task<ServiceResult> RemovePaymentAccountAsync(string customer, int paymentId)
         {
-            try
+            var paymentAccountToRemove = await DbContext.PaymentAccount.FindAsync(paymentId);
+            if (paymentAccountToRemove == null)
             {
-                var paymentAccountToRemove = await DbContext.PaymentAccount.FindAsync(paymentId);
-                if (paymentAccountToRemove == null)
-                {
-                    return ServiceResult.Failure("Payment account could not be found.");
-                }
-
-                DbContext.Update(paymentAccountToRemove);
-                paymentAccountToRemove.SoftDelete();
-                await DbContext.SaveChangesAsync();
-
-                return ServiceResult.Success();
+                return ServiceResult.Failure("Payment account could not be found.");
             }
-            catch (Exception ex)
-            {
-                return ServiceResult.Failure(ex.Message);
-            }
+
+            DbContext.Update(paymentAccountToRemove);
+            paymentAccountToRemove.SoftDelete();
+            await DbContext.SaveChangesAsync();
+
+            return ServiceResult.Success();
         }
 
         public Task<IEnumerable<PaymentAccount>> FindAllTransactionDetailsForStaffAsync()
@@ -113,9 +113,7 @@ namespace XWave.Services.Defaults
                     return ServiceResult.Failure($"Payment account for user ID {id} not found.");
                 }
 
-                var entry = DbContext.Update(payment);
-                entry.CurrentValues.SetValues(updatedPayment);
-                DbContext.PaymentAccount.Update(payment);
+                DbContext.Update(payment).CurrentValues.SetValues(updatedPayment);
                 await DbContext.SaveChangesAsync();
 
                 return ServiceResult.Success();
@@ -126,10 +124,10 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public Task<bool> CustomerHasPaymentAccount(string customerId, int paymentId)
+        public async Task<bool> CustomerHasPaymentAccount(string customerId, int paymentId)
         {
-            return Task.FromResult(DbContext.PaymentAccountDetails.Any(
-                td => td.CustomerId == customerId && td.PaymentAccountId == paymentId));
+            return await DbContext.PaymentAccountDetails.AnyAsync(
+                td => td.CustomerId == customerId && td.PaymentAccountId == paymentId);
         }
 
         public async Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId)
@@ -140,12 +138,13 @@ namespace XWave.Services.Defaults
                 .OrderByDescending(o => o.Date)
                 .AsEnumerable();
 
-            var latestPurchase = orders
+            var purchasesByPaymentAccount = orders
                 .GroupBy(o => o.PaymentAccountId)
                 .Select(g => new
                 {
                     PaymentAccountId = g.Key,
-                    Date = g.Max(o => o.Date)
+                    Date = g.Max(o => o.Date),
+                    PurchaseCount = g.Count()
                 })
                 .ToDictionary(x => x.PaymentAccountId);
 
@@ -156,7 +155,7 @@ namespace XWave.Services.Defaults
                     PaymentAccountId = g.Key,
                     TotalSpending = g.Sum(o => o.OrderDetails.Sum(od => od.Quantity * od.PriceAtOrder))
                 })
-                .ToDictionary(x => x.PaymentAccountId); ;
+                .ToDictionary(x => x.PaymentAccountId);
 
             return await DbContext.PaymentAccount
                 .Include(p => p.PaymentAccountDetails)
@@ -165,8 +164,9 @@ namespace XWave.Services.Defaults
                 {
                     Provider = p.Provider,
                     AccountNumber = p.AccountNumber,
-                    LatestPurchase = latestPurchase[p.Id].Date,
-                    TotalSpending = (int)totalSpending[p.Id].TotalSpending
+                    LatestPurchase = purchasesByPaymentAccount[p.Id].Date,
+                    TotalSpending = totalSpending[p.Id].TotalSpending,
+                    PurchaseCount = (ushort)purchasesByPaymentAccount[p.Id].PurchaseCount
                 })
                 .ToListAsync();
         }

@@ -137,7 +137,8 @@ namespace XWave.Controllers
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
-            var result = await _productService.DeleteProductAsync(id);
+            var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var result = await _productService.DeleteProductAsync(id, managerId);
             if (result.Succeeded)
             {
                 return NoContent();

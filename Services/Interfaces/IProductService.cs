@@ -63,8 +63,9 @@ namespace XWave.Services.Interfaces
         /// Soft-delete a product.
         /// </summary>
         /// <param name="id">ID of the product to delete.</param>
+        /// <param name="managerId">ID of the manager who deleted discount.</param>
         /// <returns></returns>
-        Task<ServiceResult> DeleteProductAsync(int id);
+        Task<ServiceResult> DeleteProductAsync(int id, string managerId);
 
         /// <summary>
         /// Restart sale of a discontinued product.

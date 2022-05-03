@@ -18,18 +18,18 @@ namespace XWave.Services.Defaults
     {
         private readonly XWaveDbContext _dbContext;
         private readonly ILogger<OrderService> _logger;
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IProductService _productService;
+        private readonly IAuthenticationService _authenticationService;
 
         public OrderService(
             XWaveDbContext dbContext,
             ILogger<OrderService> logger,
-            UserManager<ApplicationUser> userManager,
+            IAuthenticationService authenticationService,
             IProductService productService)
         {
             _dbContext = dbContext;
             _logger = logger;
-            _userManager = userManager;
+            _authenticationService = authenticationService;
             _productService = productService;
         }
 
@@ -47,14 +47,20 @@ namespace XWave.Services.Defaults
             try
             {
                 if (!await _dbContext.CustomerAccount.AnyAsync(c => c.CustomerId == customerId) ||
-                    await _userManager.FindByIdAsync(customerId) == null)
+                    !await _authenticationService.UserExists(customerId))
                 {
                     return (ServiceResult.Failure("Customer account not found."), null);
                 }
 
-                if (!await _dbContext.PaymentAccount.AnyAsync(p => p.Id == purchaseViewModel.PaymentAccountId))
+                var paymentAccount = await _dbContext.PaymentAccount.FindAsync(purchaseViewModel.PaymentAccountId);
+                if (paymentAccount == null)
                 {
-                    return (ServiceResult.Failure("Payment not found"), null);
+                    return (ServiceResult.Failure("Payment account not found."), null);
+                }
+
+                if (paymentAccount.ExpiryDate > DateTime.Now)
+                {
+                    return (ServiceResult.Failure("Could not proceed because selected payment account expired."), null);
                 }
 
                 var order = new Order()
@@ -73,7 +79,7 @@ namespace XWave.Services.Defaults
                 var missingProductNames = productIdsToPurchase.Except(productsToPurchase.Select(p => p.Key));
                 if (missingProductNames.Any())
                 {
-                    return (ServiceResult.Failure($"Error: some ordered products were not found."), null);
+                    return (ServiceResult.Failure($"Error: the following products were not found: {string.Join(", ", missingProductNames)}."), null);
                 }
 
                 var purchasedProducts = new List<Product>();
@@ -139,7 +145,6 @@ namespace XWave.Services.Defaults
                 await transaction.RollbackAsync();
                 _logger.LogError($"Failed to place order for customer ID {customerId}");
                 _logger.LogError($"Exception message: {exception.Message}");
-                _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
 
                 return (ServiceResult.Failure("An error occured when placing your order."), null);
             }

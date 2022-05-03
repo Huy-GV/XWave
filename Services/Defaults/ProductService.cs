@@ -62,7 +62,8 @@ namespace XWave.Services.Defaults
         }
 
         // todo: make this a scheduled task?
-        public async Task<ServiceResult> DeleteProductAsync(int productId)
+        // todo: re-check manager roles?
+        public async Task<ServiceResult> DeleteProductAsync(int productId, string managerId)
         {
             try
             {
@@ -75,10 +76,10 @@ namespace XWave.Services.Defaults
                 DbContext.Product.Update(product);
                 product.SoftDelete();
                 await DbContext.SaveChangesAsync();
-                //await _activityService.LogActivityAsync<Product>(
-                //    staffId,
-                //    OperationType.Modify,
-                //    $"deleted product named {product.Name}, ID = {product.Id} at {product.DeleteDate}.");
+                await _activityService.LogActivityAsync<Product>(
+                    managerId,
+                    OperationType.Modify,
+                    $"deleted product named {product.Name}, ID = {product.Id} at {product.DeleteDate}.");
 
                 return ServiceResult.Success();
             }

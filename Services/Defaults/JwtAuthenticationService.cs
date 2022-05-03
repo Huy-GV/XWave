@@ -79,7 +79,10 @@ namespace XWave.Services.Defaults
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                // todo: add iat
                 new Claim(CustomClaimType.UserId, user.Id),
+
+                // todo: add roles through middleware, use jwt for authentication only
                 new Claim(ClaimTypes.Role, role)
             };
 
@@ -115,6 +118,11 @@ namespace XWave.Services.Defaults
             }
 
             return new AuthenticationResult() { Succeeded = false };
+        }
+
+        public async Task<bool> UserExists(string userId)
+        {
+            return await _userManager.FindByIdAsync(userId) != null;
         }
     }
 }
