@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -72,12 +73,11 @@ namespace XWave.Services.Defaults
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
 
-            IEnumerable<Claim> claims;
-            claims = new[]
+            var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                // todo: add iat
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString(CultureInfo.InvariantCulture)),
                 new Claim(CustomClaimType.UserId, user.Id),
 
                 // todo: add roles through middleware, use jwt for authentication only

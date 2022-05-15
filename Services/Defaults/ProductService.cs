@@ -165,8 +165,7 @@ namespace XWave.Services.Defaults
                     return ServiceResult.Failure($"Product has been discontinued or removed.");
                 }
 
-                var entry = DbContext.Update(product);
-                entry.CurrentValues.SetValues(updatedProductViewModel);
+                DbContext.Update(product).CurrentValues.SetValues(updatedProductViewModel);
                 await DbContext.SaveChangesAsync();
                 await _activityService.LogActivityAsync<Product>(
                     staffId,
@@ -192,6 +191,7 @@ namespace XWave.Services.Defaults
             try
             {
                 var quantityBeforeRestock = product.Quantity;
+                DbContext.Product.Update(product);
                 product.Quantity = updatedStock;
                 product.LatestRestock = DateTime.Now;
                 await DbContext.SaveChangesAsync();
@@ -221,6 +221,7 @@ namespace XWave.Services.Defaults
             try
             {
                 var formerPrice = product.Price;
+                DbContext.Product.Update(product);
                 product.Price = updatedPrice;
                 await DbContext.SaveChangesAsync();
                 await _activityService.LogActivityAsync<Product>(

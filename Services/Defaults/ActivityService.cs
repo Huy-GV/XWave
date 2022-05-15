@@ -57,15 +57,13 @@ namespace XWave.Services.Defaults
 
         public async Task<IEnumerable<ActivityLogDto>> FindAllActivityLogsAsync()
         {
-            return (await DbContext.Activity
-                .AsNoTracking()
+            return await Task.WhenAll((await DbContext.Activity.AsNoTracking()
                 .ToListAsync())
-                .Select(async (a) => new ActivityLogDto()
-                {
-                    Timestamp = a.Timestamp,
-                    InfoText = await GenerateInfoText(a.UserId, a.Info)
-                })
-                .Select(t => t.Result);
+            .Select(async a => new ActivityLogDto
+            {
+                Timestamp = a.Timestamp,
+                InfoText = await GenerateInfoText(a.UserId, a.Info)
+            }));
         }
 
         public async Task<ActivityLogDto?> FindActivityLogAsync(int id)

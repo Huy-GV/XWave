@@ -54,15 +54,12 @@ namespace XWave.Controllers
         {
             var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var (result, productId) = await _discountService.CreateDiscountAsync(userId, newDiscount);
-            if (result.Succeeded)
-            {
-                return this.XWaveCreated($"https://localhost:5001/api/discount/{productId}");
-            }
-
-            return UnprocessableEntity(result.Errors);
+            return result.Succeeded
+                ? this.XWaveCreated($"https://localhost:5001/api/discount/{productId}")
+                : UnprocessableEntity(result.Errors);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] DiscountViewModel updatedDiscount)
         {
@@ -73,15 +70,12 @@ namespace XWave.Controllers
 
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var result = await _discountService.UpdateDiscountAsync(managerId, id, updatedDiscount);
-            if (result.Succeeded)
-            {
-                return this.XWaveUpdated($"https://localhost:5001/api/discount/{id}");
-            }
-
-            return UnprocessableEntity(result.Errors);
+            return result.Succeeded
+                ? this.XWaveUpdated($"https://localhost:5001/api/discount/{id}")
+                : UnprocessableEntity(result.Errors);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> Delete(int id)
         {
@@ -100,7 +94,7 @@ namespace XWave.Controllers
             return UnprocessableEntity(result.Errors);
         }
 
-        [HttpPost("{id}/apply")]
+        [HttpPost("{id:int}/apply")]
         [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> ApplyDiscountToProduct(int id, [FromBody] int[] productIds)
         {

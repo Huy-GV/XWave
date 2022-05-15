@@ -74,7 +74,7 @@ namespace XWave
                             return Task.CompletedTask;
                         }
                     };
-
+                    
                     options.SaveToken = false;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {

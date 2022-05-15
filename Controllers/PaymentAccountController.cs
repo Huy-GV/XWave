@@ -39,20 +39,17 @@ namespace XWave.Controllers
         [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult<IEnumerable<PaymentAccountDetails>>> GetByCustomer()
         {
-            string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-            if (customerId == null)
-            {
-                return this.XWaveBadRequest("Customer Id is empty.");
-            }
-
-            return Ok(await _paymentService.FindPaymentAccountSummary(customerId));
+            var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            return string.IsNullOrEmpty(customerId)
+                ? this.XWaveBadRequest("Customer Id is empty.")
+                : Ok(await _paymentService.FindPaymentAccountSummary(customerId));
         }
 
-        [HttpPost("delete/{paymentId}")]
+        [HttpPost("delete/{paymentId:int}")]
         [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult> Delete(int paymentId)
         {
-            string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (!await _paymentService.CustomerHasPaymentAccount(customerId, paymentId))
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
@@ -68,38 +65,32 @@ namespace XWave.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult> UpdatePaymentAsync(int id, [FromBody] PaymentAccountViewModel inputPayment)
         {
-            string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (!await _paymentService.CustomerHasPaymentAccount(customerId, id))
             {
                 return BadRequest(XWaveResponse.NonExistentResource());
             }
 
             var result = await _paymentService.UpdatePaymentAccountAsync(customerId, id, inputPayment);
-            if (!result.Succeeded)
-            {
-                return this.XWaveBadRequest(result.Errors.ToArray());
-            }
-
-            return Ok(XWaveResponse.Updated($"https://localhost:5001/api/payment/details/{id}"));
+            return !result.Succeeded
+                ? this.XWaveBadRequest(result.Errors.ToArray())
+                : Ok(XWaveResponse.Updated($"https://localhost:5001/api/payment/details/{id}"));
         }
 
         [HttpPost]
         [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult> CreatePaymentAsync([FromBody] PaymentAccountViewModel inputPayment)
         {
-            string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var (result, paymentAccountId) = await _paymentService.AddPaymentAccountAsync(customerId, inputPayment);
 
-            if (!result.Succeeded)
-            {
-                return this.XWaveBadRequest(result.Errors.ToArray());
-            }
-
-            return Ok(XWaveResponse.Created($"https://localhost:5001/api/payment/details/{paymentAccountId}"));
+            return !result.Succeeded
+                ? this.XWaveBadRequest(result.Errors.ToArray())
+                : Ok(XWaveResponse.Created($"https://localhost:5001/api/payment/details/{paymentAccountId}"));
         }
     }
 }

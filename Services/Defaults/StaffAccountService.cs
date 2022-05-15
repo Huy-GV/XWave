@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using XWave.Data;
 using XWave.Data.Constants;
@@ -58,38 +59,27 @@ namespace XWave.Services.Defaults
         public async Task<IEnumerable<StaffAccountDto>> GetAllStaffAccounts()
         {
             var staffUsers = await _userManager.GetUsersInRoleAsync(Roles.Staff);
-            var accountDtos = new List<StaffAccountDto>();
-            StaffAccountDto? accountDto = null;
-            foreach (var user in staffUsers)
-            {
-                accountDto = await BuildStaffAccountDto(user);
-                if (accountDto == null)
-                {
-                    // log error
-                    continue;
-                }
+            var staffAccountDtos = await Task.WhenAll(staffUsers
+                .Select(async x => await BuildStaffAccountDto(x)));
 
-                accountDtos.Add(accountDto);
-            }
-
-            return accountDtos;
+            // filter null elements
+            return staffAccountDtos.OfType<StaffAccountDto>();
         }
 
         private async Task<StaffAccountDto?> BuildStaffAccountDto(ApplicationUser staffUser)
         {
+            // todo: log errors here
             var staffAccount = await DbContext.StaffAccount.FindAsync(staffUser.Id);
             if (staffAccount == null)
             {
                 return null;
             }
 
-            var managerFullName = string.Empty;
             var manager = await _userManager.FindByIdAsync(staffAccount.ImmediateManagerId);
-            if (manager != null)
-            {
-                managerFullName = $"{manager.FirstName} {manager.LastName}";
-            }
-
+            var managerFullName =  manager == null
+                ? string.Empty
+                : $"{manager.FirstName} {manager.LastName}";
+            
             return new StaffAccountDto
             {
                 StaffId = staffUser.Id,
@@ -146,16 +136,16 @@ namespace XWave.Services.Defaults
                     resetPasswordToken,
                     Guid.NewGuid().ToString());
 
-                if (lockoutResult.Succeeded && lockoutEndDateResult.Succeeded && resetPasswordResult.Succeeded)
+                if (!lockoutResult.Succeeded || !lockoutEndDateResult.Succeeded || !resetPasswordResult.Succeeded)
                 {
-                    staffAccount.SoftDelete();
-                    await DbContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
-                    return ServiceResult.Success();
+                    return ServiceResult.Failure("Deactivation process failed.");
                 }
+                
+                staffAccount.SoftDelete();
+                await DbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-                return ServiceResult.Failure("Deactivation process failed.");
+                return ServiceResult.Success();
             }
             catch (Exception ex)
             {

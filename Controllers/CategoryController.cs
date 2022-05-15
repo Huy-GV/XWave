@@ -33,7 +33,7 @@ namespace XWave.Controllers
             return Ok(await _categoryService.FindAllCategoriesAsync());
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<Category>> Get(int id)
         {
             var category = await _categoryService.FindCategoryByIdAsync(id);
@@ -46,15 +46,12 @@ namespace XWave.Controllers
         {
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var (result, categoryId) = await _categoryService.AddCategoryAsync(managerId, newCategory);
-            if (result.Succeeded)
-            {
-                return this.XWaveCreated($"https://localhost:5001/api/category/admin/{categoryId}");
-            }
-            
-            return UnprocessableEntity(result.Errors);
+            return result.Succeeded
+                ? this.XWaveCreated($"https://localhost:5001/api/category/admin/{categoryId}")
+                : UnprocessableEntity(result.Errors);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] Category updatedCategory)
         {
@@ -66,15 +63,12 @@ namespace XWave.Controllers
 
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
-            if (result.Succeeded)
-            {
-                return this.XWaveUpdated($"https://localhost:5001/api/category/admin/{id}");
-            }
-
-            return UnprocessableEntity(result.Errors);
+            return result.Succeeded
+                ? this.XWaveUpdated($"https://localhost:5001/api/category/admin/{id}")
+                : UnprocessableEntity(result.Errors);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> Delete(int id)
         {

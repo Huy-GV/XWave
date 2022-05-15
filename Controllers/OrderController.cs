@@ -31,7 +31,7 @@ namespace XWave.Controllers
         [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult<OrderDetails>> GetOrdersAsync()
         {
-            string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (string.IsNullOrEmpty(customerId))
             {
                 return BadRequest(XWaveResponse.Failed("Customer ID not found."));
@@ -44,22 +44,21 @@ namespace XWave.Controllers
         [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<ActionResult<OrderDto>> GetOrderById(int id)
         {
-            string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (string.IsNullOrEmpty(customerId))
             {
                 return BadRequest(XWaveResponse.Failed("Customer ID not found."));
             }
 
-            var orderDTO = await _orderService.FindOrderByIdAsync(customerId, id);
-
-            return Ok(orderDTO);
+            var orderDto = await _orderService.FindOrderByIdAsync(customerId, id);
+            return orderDto != null ? Ok(orderDto) : NotFound();
         }
 
         [HttpPost]
         [Authorize(Roles = nameof(Roles.Customer))]
         public async Task<IActionResult> CreateOrder([FromBody] PurchaseViewModel purchaseViewModel)
         {
-            string customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+            var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             if (string.IsNullOrEmpty(customerId))
             {
                 return this.XWaveBadRequest("Customer ID not found.");

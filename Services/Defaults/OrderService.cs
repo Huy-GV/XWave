@@ -78,6 +78,7 @@ namespace XWave.Services.Defaults
                 var missingProductNames = productIdsToPurchase
                     .Except(productsToPurchase.Select(p => p.Key))
                     .ToArray();
+                
                 if (missingProductNames.Any())
                 {
                     return (ServiceResult.Failure($"Error: the following products were not found: {string.Join(", ", missingProductNames)}."), null);

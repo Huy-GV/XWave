@@ -31,15 +31,17 @@ namespace XWave.Controllers
         public async Task<ActionResult<AuthenticationResult>> LogInAsync([FromBody] SignInViewModel model)
         {
             var result = await _authService.SignInAsync(model);
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                if (Request.Cookies.ContainsKey(_jwtCookieConfig.Name))
-                {
-                    Response.Cookies.Delete(_jwtCookieConfig.Name);
-                }
-                var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
-                Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
+                return Ok(result);
             }
+            
+            if (Request.Cookies.ContainsKey(_jwtCookieConfig.Name))
+            {
+                Response.Cookies.Delete(_jwtCookieConfig.Name);
+            }
+            var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
+            Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
 
             return Ok(result);
         }

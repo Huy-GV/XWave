@@ -36,20 +36,21 @@ namespace XWave.Controllers
         public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync([FromBody] RegisterCustomerViewModel viewModel)
         {
             var result = await _customerAccountService.RegisterCustomerAsync(viewModel);
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                if (Request.Cookies.ContainsKey(_jwtCookieConfig.Name))
-                {
-                    Response.Cookies.Delete(_jwtCookieConfig.Name);
-                }
-
-                var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
-                Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
-
-                return Ok(result);
+                return this.XWaveBadRequest(result.Error);
+            }
+            
+            if (Request.Cookies.ContainsKey(_jwtCookieConfig.Name))
+            {
+                Response.Cookies.Delete(_jwtCookieConfig.Name);
             }
 
-            return this.XWaveBadRequest(result.Error);
+            var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
+            Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
+
+            return Ok(result);
+
         }
 
         [HttpPost("subscribe")]

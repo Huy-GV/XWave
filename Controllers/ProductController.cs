@@ -66,15 +66,12 @@ namespace XWave.Controllers
         {
             var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var (result, productId) = await _productService.AddProductAsync(staffId, productViewModel);
-            if (result.Succeeded)
-            {
-                return this.XWaveCreated($"https://localhost:5001/api/product/staff/{productId}");
-            }
-
-            return UnprocessableEntity(result.Errors);
+            return result.Succeeded
+                ? this.XWaveCreated($"https://localhost:5001/api/product/staff/{productId}")
+                : UnprocessableEntity(result.Errors);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
         public async Task<ActionResult> UpdateAsync(int id, [FromBody] ProductViewModel updatedProduct)
         {
@@ -86,15 +83,12 @@ namespace XWave.Controllers
 
             var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var result = await _productService.UpdateProductAsync(staffId, id, updatedProduct);
-            if (result.Succeeded)
-            {
-                return this.XWaveCreated($"https://localhost:5001/api/product/staff/{id}");
-            }
-
-            return UnprocessableEntity(result.Errors);
+            return result.Succeeded
+                ? this.XWaveCreated($"https://localhost:5001/api/product/staff/{id}")
+                : UnprocessableEntity(result.Errors);
         }
 
-        [HttpPut("{id}/price")]
+        [HttpPut("{id:int}/price")]
         [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
         public async Task<ActionResult> UpdatePriceAsync(int id, [FromBody] ProductPriceAdjustmentViewModel viewModel)
         {
@@ -119,15 +113,12 @@ namespace XWave.Controllers
                     updateSchedule: viewModel.Schedule.Value);
             }
 
-            if (result.Succeeded)
-            {
-                return this.XWaveUpdated($"https://localhost:5001/api/product/staff/{id}");
-            }
-
-            return UnprocessableEntity(result.Errors);
+            return result.Succeeded
+                ? this.XWaveUpdated($"https://localhost:5001/api/product/staff/{id}")
+                : UnprocessableEntity(result.Errors);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> DeleteAsync(int id)
         {
@@ -139,12 +130,9 @@ namespace XWave.Controllers
 
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var result = await _productService.DeleteProductAsync(id, managerId);
-            if (result.Succeeded)
-            {
-                return NoContent();
-            }
-
-            return UnprocessableEntity(result.Errors);
+            return result.Succeeded
+                ? NoContent()
+                : UnprocessableEntity(result.Errors);
         }
 
         [HttpPut("discontinue/{updateSchedule}")]
@@ -153,15 +141,12 @@ namespace XWave.Controllers
         {
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var result = await _productService.DiscontinueProductAsync(managerId, ids, updateSchedule);
-            if (result.Succeeded)
-            {
-                return NoContent();
-            }
-
-            return UnprocessableEntity(result.Errors);
+            return result.Succeeded
+                ? NoContent()
+                : UnprocessableEntity(result.Errors);
         }
 
-        [HttpPut("{id}/restart-sale/{updateSchedule}")]
+        [HttpPut("{id:int}/restart-sale/{updateSchedule:datetime}")]
         [Authorize(Roles = nameof(Roles.Manager))]
         public async Task<ActionResult> RestartProductSaleAsync(int id, DateTime updateSchedule)
         {
@@ -178,12 +163,9 @@ namespace XWave.Controllers
 
             var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
             var result = await _productService.RestartProductSaleAsync(managerId, id, updateSchedule);
-            if (result.Succeeded)
-            {
-                return NoContent();
-            }
-
-            return UnprocessableEntity(result.Errors);
+            return result.Succeeded
+                ? NoContent()
+                : UnprocessableEntity(result.Errors);
         }
 
         [HttpDelete("{id}/cancel")]
@@ -191,12 +173,9 @@ namespace XWave.Controllers
         public async Task<ActionResult> CancelBackgroundTaskAsync(string id)
         {
             var result = await _backgroundJobService.CancelJobAsync(id);
-            if (result.Succeeded)
-            {
-                return NoContent();
-            }
-
-            return UnprocessableEntity(result.Errors);
+            return result.Succeeded
+                ? NoContent()
+                : UnprocessableEntity(result.Errors);
         }
     }
 }

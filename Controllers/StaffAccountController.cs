@@ -31,7 +31,8 @@ namespace XWave.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<StaffAccountDto>> GetStaffAccountById(string id)
         {
-            return Ok(await _staffAccountService.GetStaffAccountById(id));
+            var staffAccountDto = await _staffAccountService.GetStaffAccountById(id);
+            return staffAccountDto != null ? Ok(staffAccountDto) : NotFound();
         }
 
         //[HttpPost("{id}")]
@@ -50,12 +51,9 @@ namespace XWave.Controllers
         public async Task<ActionResult<ServiceResult>> DeactivateStaffAccount(string id)
         {
             var result = await _staffAccountService.DeactivateStaffAccount(id);
-            if (result.Succeeded)
-            {
-                return this.XWaveUpdated($"https://localhost:5001/api/staff-account/{id}");
-            }
-
-            return BadRequest(result.Errors);
+            return result.Succeeded
+                ? this.XWaveUpdated($"https://localhost:5001/api/staff-account/{id}")
+                : UnprocessableEntity(result.Errors);
         }
     }
 }

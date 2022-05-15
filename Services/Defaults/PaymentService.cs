@@ -27,7 +27,7 @@ namespace XWave.Services.Defaults
 
         public async Task<(ServiceResult, int? PaymentAccountId)> AddPaymentAccountAsync(string customerId, PaymentAccountViewModel inputPayment)
         {
-            using var transaction = DbContext.Database.BeginTransaction();
+            await using var transaction = await DbContext.Database.BeginTransactionAsync();
             try
             {
                 var existingPaymentAccount = await DbContext.PaymentAccount

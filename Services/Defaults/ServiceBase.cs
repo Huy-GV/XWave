@@ -7,7 +7,7 @@ namespace XWave.Services.Defaults
     /// </summary>
     public abstract class ServiceBase
     {
-        protected XWaveDbContext DbContext { get; set; }
+        protected XWaveDbContext DbContext { get; }
 
         public ServiceBase(XWaveDbContext dbContext)
         {
