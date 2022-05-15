@@ -35,7 +35,7 @@ namespace XWave.Services.Defaults
             }
             catch (Exception e)
             {
-                return (ServiceResult.Failure(e.Message), null);
+                return (ServiceResult.InternalFailure(), null);
             }
         }
 
@@ -44,6 +44,11 @@ namespace XWave.Services.Defaults
             try
             {
                 var category = await DbContext.Category.FindAsync(id);
+                if (category == null)
+                {
+                    return ServiceResult.Failure($"Category with ID {id} not found.");
+                }
+                
                 var categoryName = category.Name;
                 DbContext.Category.Remove(category);
                 await DbContext.SaveChangesAsync();
@@ -55,7 +60,7 @@ namespace XWave.Services.Defaults
             }
             catch (Exception e)
             {
-                return ServiceResult.Failure(e.Message);
+                return ServiceResult.InternalFailure();
             }
         }
 
@@ -74,6 +79,11 @@ namespace XWave.Services.Defaults
             try
             {
                 var category = await DbContext.Category.FindAsync(id);
+                if (category == null)
+                {
+                    return ServiceResult.Failure($"Category with ID {id} not found.");
+                }
+
                 category.Description = updatedCategory.Description;
                 category.Name = updatedCategory.Name;
                 DbContext.Category.Update(category);
@@ -87,7 +97,7 @@ namespace XWave.Services.Defaults
             }
             catch (Exception e)
             {
-                return ServiceResult.Failure(e.Message);
+                return ServiceResult.InternalFailure();
             }
         }
     }

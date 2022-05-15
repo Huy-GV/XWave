@@ -59,7 +59,7 @@ namespace XWave.Services.Defaults
             }
 
             var percentage = discount.Percentage;
-            using var transaction = DbContext.Database.BeginTransaction();
+            await using var transaction = await DbContext.Database.BeginTransactionAsync();
             try
             {
                 // start tracking items to avoid FK constraint errors because Delete.ClientSetNull actually does NOT work
@@ -79,7 +79,7 @@ namespace XWave.Services.Defaults
                 await transaction.RollbackAsync();
                 _logger.LogError(exception.Message);
                 _logger.LogError(exception.StackTrace);
-                return ServiceResult.Failure(exception.Message);
+                return ServiceResult.InternalFailure();
             }
         }
 
@@ -150,8 +150,14 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure($"Discount with ID {discountId} was not found.");
             }
 
-            var appliedProducts = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
-            var productsWithoutDiscount = appliedProducts.Where(p => p.DiscountId == null);
+            var appliedProducts = await DbContext.Product
+                .Where(x => productIds.Contains(x.Id))
+                .ToArrayAsync();
+            
+            var productsWithoutDiscount = appliedProducts
+                .Where(p => p.DiscountId == null)
+                .ToArray();
+            
             if (productsWithoutDiscount.Any())
             {
                 return ServiceResult.Failure($"Discount with ID {discountId} is not applied to product with the following IDs: {string.Join(", ", productsWithoutDiscount.Select(p => p.Id))}.");

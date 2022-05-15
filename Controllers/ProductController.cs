@@ -71,7 +71,7 @@ namespace XWave.Controllers
                 return this.XWaveCreated($"https://localhost:5001/api/product/staff/{productId}");
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpPut("{id}")]
@@ -91,7 +91,7 @@ namespace XWave.Controllers
                 return this.XWaveCreated($"https://localhost:5001/api/product/staff/{id}");
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpPut("{id}/price")]
@@ -124,7 +124,7 @@ namespace XWave.Controllers
                 return this.XWaveUpdated($"https://localhost:5001/api/product/staff/{id}");
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpDelete("{id}")]
@@ -144,7 +144,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpPut("discontinue/{updateSchedule}")]
@@ -158,7 +158,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpPut("{id}/restart-sale/{updateSchedule}")]
@@ -183,7 +183,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpDelete("{id}/cancel")]
@@ -196,7 +196,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
     }
 }

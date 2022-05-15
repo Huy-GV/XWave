@@ -12,12 +12,7 @@ namespace XWave.Extensions
         {
             return controller.StatusCode(201, new { url });
         }
-
-        public static ActionResult XWaveBadRequest(this ControllerBase controller, IEnumerable<string> errors)
-        {
-            return controller.BadRequest(XWaveResponse.Failed(errors.ToArray()));
-        }
-
+        
         public static ActionResult XWaveBadRequest(this ControllerBase controller, params string[] errors)
         {
             return controller.BadRequest(XWaveResponse.Failed(errors));

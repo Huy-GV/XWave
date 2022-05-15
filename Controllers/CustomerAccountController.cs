@@ -63,7 +63,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
     }
 }

@@ -57,12 +57,10 @@ namespace XWave.Services.Defaults
             }
             catch (Exception ex)
             {
-                return (ServiceResult.Failure(ex.Message), null);
+                return (ServiceResult.InternalFailure(), null);
             }
         }
 
-        // todo: make this a scheduled task?
-        // todo: re-check manager roles?
         public async Task<ServiceResult> DeleteProductAsync(int productId, string managerId)
         {
             try
@@ -86,7 +84,7 @@ namespace XWave.Services.Defaults
             catch (Exception exception)
             {
                 _logger.LogError($"Exception: {exception.Message}.");
-                return ServiceResult.Failure($"Failed to delete product with ID {productId}");
+                return ServiceResult.InternalFailure();
             }
         }
 
@@ -179,7 +177,7 @@ namespace XWave.Services.Defaults
             catch (Exception exception)
             {
                 _logger.LogError($"Exception: {exception.Message}.");
-                return ServiceResult.Failure("Failed to update product information.");
+                return ServiceResult.InternalFailure();
             }
         }
 
@@ -208,7 +206,7 @@ namespace XWave.Services.Defaults
             {
                 _logger.LogCritical($"Failed to update stock of product with ID {product.Id}.");
                 _logger.LogDebug($"Exception: {exception.Message}");
-                return ServiceResult.Failure($"Failed to update stock of product with ID {productId} due to internal errors.");
+                return ServiceResult.InternalFailure();
             }
         }
 
@@ -236,7 +234,7 @@ namespace XWave.Services.Defaults
             {
                 _logger.LogError($"Failed to update general information of product with ID {productId}.");
                 _logger.LogDebug($"Exception message: {exception.Message}");
-                return ServiceResult.Failure($"Failed to update price of product with ID {productId} due to internal errors.");
+                return ServiceResult.InternalFailure();
             }
         }
 
@@ -293,13 +291,20 @@ namespace XWave.Services.Defaults
                 .Where(product => productIds.Contains(product.Id))
                 .ToArrayAsync();
 
-            var missingProducts = productIds.Except(productsToDiscontinue.Select(p => p.Id));
+            var missingProducts = productIds
+                .Except(productsToDiscontinue.Select(p => p.Id))
+                .ToArray();
+            
             if (missingProducts.Any())
             {
                 return ServiceResult.Failure($"Failed to discontinue product with the following IDs: {string.Join(", ", missingProducts)} because they were not found.");
             }
 
-            var discontinuedProducts = productsToDiscontinue.Where(p => p.IsDiscontinued).Select(p => p.Id);
+            var discontinuedProducts = productsToDiscontinue
+                .Where(p => p.IsDiscontinued)
+                .Select(p => p.Id)
+                .ToArray();
+            
             if (discontinuedProducts.Any())
             {
                 return ServiceResult.Failure($"Failed to discontinue of product with the following IDs: {string.Join(", ", discontinuedProducts)} because they were already discontinued.");
@@ -371,18 +376,16 @@ namespace XWave.Services.Defaults
 
         public async Task UpdateProductSaleStatusByScheduleAsync(int[] productIds, bool isDiscontinued, DateTime updateSchedule)
         {
-            using var transaction = await DbContext.Database.BeginTransactionAsync();
+            await using var transaction = await DbContext.Database.BeginTransactionAsync();
             try
             {
                 foreach (var productId in productIds)
                 {
                     var product = await DbContext.Product.FindAsync(productId);
-                    if (product != null)
-                    {
-                        product.IsDiscontinued = isDiscontinued;
-                        product.DiscontinuationDate = isDiscontinued ? updateSchedule : null;
-                        await DbContext.SaveChangesAsync();
-                    }
+                    if (product == null) continue;
+                    product.IsDiscontinued = isDiscontinued;
+                    product.DiscontinuationDate = isDiscontinued ? updateSchedule : null;
+                    await DbContext.SaveChangesAsync();
                 }
 
                 await transaction.CommitAsync();

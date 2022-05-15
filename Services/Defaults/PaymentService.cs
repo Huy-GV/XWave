@@ -72,7 +72,7 @@ namespace XWave.Services.Defaults
                 _logger.LogError($"Exception: {exception.Message}");
                 await transaction.RollbackAsync();
 
-                return (ServiceResult.Failure("Failed to add payment account."), null);
+                return (ServiceResult.InternalFailure(), null);
             }
         }
 
@@ -105,23 +105,16 @@ namespace XWave.Services.Defaults
             int id,
             PaymentAccountViewModel updatedPayment)
         {
-            try
+            var payment = await DbContext.PaymentAccount.FindAsync(id);
+            if (payment == null)
             {
-                var payment = await DbContext.PaymentAccount.FindAsync(id);
-                if (payment == null)
-                {
-                    return ServiceResult.Failure($"Payment account for user ID {id} not found.");
-                }
-
-                DbContext.Update(payment).CurrentValues.SetValues(updatedPayment);
-                await DbContext.SaveChangesAsync();
-
-                return ServiceResult.Success();
+                return ServiceResult.Failure($"Payment account for user ID {id} not found.");
             }
-            catch (Exception ex)
-            {
-                return ServiceResult.Failure(ex.Message);
-            }
+
+            DbContext.Update(payment).CurrentValues.SetValues(updatedPayment);
+            await DbContext.SaveChangesAsync();
+
+            return ServiceResult.Success();
         }
 
         public async Task<bool> CustomerHasPaymentAccount(string customerId, int paymentId)
@@ -132,11 +125,11 @@ namespace XWave.Services.Defaults
 
         public async Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId)
         {
-            var orders = DbContext.Order
+            var orders = await DbContext.Order
                 .Include(o => o.OrderDetails)
                 .Where(o => o.CustomerId == customerId)
                 .OrderByDescending(o => o.Date)
-                .AsEnumerable();
+                .ToArrayAsync();
 
             var purchasesByPaymentAccount = orders
                 .GroupBy(o => o.PaymentAccountId)

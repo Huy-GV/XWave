@@ -24,7 +24,7 @@ namespace XWave.Services.Defaults
             _userManager = userManager;
         }
 
-        public async Task<(ServiceResult, string? StaffId)> RegisterStaffAccount(string id, StaffAccountViewModel registerStaffViewModel)
+        public Task<(ServiceResult, string? StaffId)> RegisterStaffAccount(string id, StaffAccountViewModel registerStaffViewModel)
         {
             try
             {
@@ -36,11 +36,11 @@ namespace XWave.Services.Defaults
                     HourlyWage = registerStaffViewModel.HourlyWage
                 });
 
-                return (ServiceResult.Success(), id);
+                return Task.FromResult<(ServiceResult, string? StaffId)>((ServiceResult.Success(), id));
             }
             catch (Exception)
             {
-                return (ServiceResult.Failure("Failed to register user"), null);
+                return Task.FromResult<(ServiceResult, string? StaffId)>((ServiceResult.InternalFailure(), null));
             }
         }
 
@@ -102,18 +102,22 @@ namespace XWave.Services.Defaults
 
         public async Task<ServiceResult> UpdateStaffAccount(string staffId, StaffAccountViewModel updateStaffAccountViewModel)
         {
-            var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
             try
             {
-                var entry = DbContext.StaffAccount.Update(staffAccount);
-                entry.CurrentValues.SetValues(updateStaffAccountViewModel);
+                var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
+                if (staffAccount == null)
+                {
+                    return ServiceResult.Failure($"Staff account with ID {staffId} not found.");
+                }
+                
+                DbContext.StaffAccount.Update(staffAccount).CurrentValues.SetValues(updateStaffAccountViewModel);
                 await DbContext.SaveChangesAsync();
 
                 return ServiceResult.Success();
             }
             catch (Exception ex)
             {
-                return ServiceResult.Failure(ex.Message);
+                return ServiceResult.InternalFailure();
             }
         }
 
@@ -131,7 +135,7 @@ namespace XWave.Services.Defaults
                 return ServiceResult.Failure($"Unable to find user with id {staffId}.");
             }
 
-            using var transaction = DbContext.Database.BeginTransaction();
+            await using var transaction = await DbContext.Database.BeginTransactionAsync();
             try
             {
                 var lockoutResult = await _userManager.SetLockoutEnabledAsync(staffUser, true);
@@ -157,7 +161,7 @@ namespace XWave.Services.Defaults
             {
                 await transaction.RollbackAsync();
 
-                return ServiceResult.Failure(ex.Message);
+                return ServiceResult.InternalFailure();
             }
         }
     }

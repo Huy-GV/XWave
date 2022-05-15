@@ -35,15 +35,14 @@ namespace XWave.Services.Defaults
 
         public async Task<OrderDto?> FindOrderByIdAsync(string customerId, int orderId)
         {
-            var orderDTOs = await FindAllOrdersAsync(customerId);
-            return orderDTOs.FirstOrDefault(o => o.Id == orderId);
+            return (await FindAllOrdersAsync(customerId)).SingleOrDefault(o => o.Id == orderId);
         }
 
         public async Task<(ServiceResult, int? OrderId)> AddOrderAsync(
             PurchaseViewModel purchaseViewModel,
             string customerId)
         {
-            using var transaction = _dbContext.Database.BeginTransaction();
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
                 if (!await _dbContext.CustomerAccount.AnyAsync(c => c.CustomerId == customerId) ||
@@ -76,7 +75,9 @@ namespace XWave.Services.Defaults
                     .Where(p => productIdsToPurchase.Contains(p.Id))
                     .ToDictionaryAsync(p => p.Id);
 
-                var missingProductNames = productIdsToPurchase.Except(productsToPurchase.Select(p => p.Key));
+                var missingProductNames = productIdsToPurchase
+                    .Except(productsToPurchase.Select(p => p.Key))
+                    .ToArray();
                 if (missingProductNames.Any())
                 {
                     return (ServiceResult.Failure($"Error: the following products were not found: {string.Join(", ", missingProductNames)}."), null);
@@ -105,11 +106,8 @@ namespace XWave.Services.Defaults
                         errorMessages.Add($"Price has been changed during the transaction. Please view the latest price for the item {product.Name}.");
                     }
 
-                    if (errorMessages.Any())
-                    {
-                        // move to validate remaining products without processing any of them.
-                        continue;
-                    }
+                    // move to validate remaining products without processing any of them.
+                    if (errorMessages.Any()) continue;
 
                     var purchasePrice = product.Discount == null
                         ? product.Price
@@ -146,7 +144,7 @@ namespace XWave.Services.Defaults
                 _logger.LogError($"Failed to place order for customer ID {customerId}");
                 _logger.LogError($"Exception message: {exception.Message}");
 
-                return (ServiceResult.Failure("An error occured when placing your order."), null);
+                return (ServiceResult.InternalFailure(), null);
             }
         }
 

@@ -39,17 +39,15 @@ namespace XWave.Services.Defaults
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user == null)
             {
-                authenticationResult.Error = $"User with {model.Username} does not exist";
-                return authenticationResult;
+                return authenticationResult with { Error = $"User with {model.Username} does not exist" };
             }
 
             if (!await _userManager.CheckPasswordAndLockoutStatusAsync(user, model.Password))
             {
-                authenticationResult.Error = $"Unable to sign in user {model.Username}.";
-                return authenticationResult;
+                return authenticationResult with { Error = $"Unable to sign in user {model.Username}." };
             }
 
-            string role = (await _userManager.GetRolesAsync(user)).First();
+            var role = (await _userManager.GetRolesAsync(user)).First();
             var token = await CreateJwtTokenAsync(user, role);
 
             return new AuthenticationResult()
@@ -112,12 +110,8 @@ namespace XWave.Services.Defaults
             };
 
             var result = await _userManager.CreateAsync(appUser, registerUserViewModel.Password);
-            if (result.Succeeded)
-            {
-                return new AuthenticationResult() { Succeeded = true };
-            }
 
-            return new AuthenticationResult() { Succeeded = false };
+            return new AuthenticationResult() { Succeeded = result.Succeeded };
         }
 
         public async Task<bool> UserExists(string userId)

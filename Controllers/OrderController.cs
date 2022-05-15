@@ -69,7 +69,7 @@ namespace XWave.Controllers
 
             if (!result.Succeeded)
             {
-                return this.XWaveBadRequest(result.Errors);
+                return UnprocessableEntity(result.Errors);
             }
 
             return Ok("");

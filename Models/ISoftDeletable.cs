@@ -6,11 +6,5 @@ namespace XWave.Models
     {
         public bool IsDeleted { get; set; }
         public DateTime? DeleteDate { get; set; }
-
-        public void SoftDelete()
-        {
-            DeleteDate = DateTime.Now;
-            IsDeleted = true;
-        }
     }
 }

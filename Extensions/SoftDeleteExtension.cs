@@ -6,7 +6,8 @@ namespace XWave.Extensions
     {
         public static void SoftDelete<TEntity>(this TEntity entity) where TEntity : ISoftDeletable
         {
-            entity.SoftDelete();
+            entity.DeleteDate = System.DateTime.Now;
+            entity.IsDeleted = true;
         }
     }
 }

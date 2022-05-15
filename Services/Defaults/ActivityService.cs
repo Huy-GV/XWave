@@ -15,7 +15,7 @@ namespace XWave.Services.Defaults
 {
     public class ActivityService : ServiceBase, IActivityService
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<ActivityService> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public ActivityService(
@@ -51,7 +51,7 @@ namespace XWave.Services.Defaults
             catch (Exception e)
             {
                 _logger.LogError($"Failed to log activiy create for staff ID {staffId}.");
-                return ServiceResult.Failure(e.Message);
+                return ServiceResult.InternalFailure();
             }
         }
 
@@ -70,7 +70,7 @@ namespace XWave.Services.Defaults
 
         public async Task<ActivityLogDto?> FindActivityLogAsync(int id)
         {
-            var log = await DbContext.Activity.AsNoTracking().FirstAsync(a => a.Id == id);
+            var log = await DbContext.Activity.FindAsync(id);
             if (log != null)
             {
                 return new ActivityLogDto()
@@ -92,12 +92,9 @@ namespace XWave.Services.Defaults
         private async Task<(string UserName, string FirstName)> GetUserInfo(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return ("deleted", "deleted");
-            }
-
-            return (user.UserName, user.FirstName);
+            return user == null
+                ? ("[Deleted]", "[Deleted]")
+                : (user.UserName, user.FirstName);
         }
     }
 }

@@ -50,8 +50,8 @@ namespace XWave.Controllers
             {
                 return this.XWaveCreated($"https://localhost:5001/api/category/admin/{categoryId}");
             }
-
-            return this.XWaveBadRequest(result.Errors);
+            
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpPut("{id}")]
@@ -71,7 +71,7 @@ namespace XWave.Controllers
                 return this.XWaveUpdated($"https://localhost:5001/api/category/admin/{id}");
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpDelete("{id}")]
@@ -91,7 +91,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
     }
 }

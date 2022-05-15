@@ -26,7 +26,7 @@ namespace XWave.Services.Defaults
 
         public async Task<AuthenticationResult> RegisterCustomerAsync(RegisterCustomerViewModel viewModel)
         {
-            using var transaction = DbContext.Database.BeginTransaction();
+            await using var transaction = await DbContext.Database.BeginTransactionAsync();
             try
             {
                 var customerAccount = new CustomerAccount();
@@ -69,7 +69,7 @@ namespace XWave.Services.Defaults
                 _logger.LogCritical($"Failed to update subscription status of customer ID {id}");
                 _logger.LogError($"Exception message: {exception.Message}");
                 _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
-                return ServiceResult.Failure(exception.Message);
+                return ServiceResult.InternalFailure();
             }
         }
 
@@ -94,7 +94,7 @@ namespace XWave.Services.Defaults
                 _logger.LogError($"Failed to update customer account of user ID {id}");
                 _logger.LogError($"Exception message: {exception.Message}");
                 _logger.LogError($"Exception stacktrace: {exception.StackTrace}");
-                return ServiceResult.Failure(exception.Message);
+                return ServiceResult.InternalFailure();
             }
         }
     }

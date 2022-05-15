@@ -59,7 +59,7 @@ namespace XWave.Controllers
                 return this.XWaveCreated($"https://localhost:5001/api/discount/{productId}");
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpPut("{id}")]
@@ -78,7 +78,7 @@ namespace XWave.Controllers
                 return this.XWaveUpdated($"https://localhost:5001/api/discount/{id}");
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpDelete("{id}")]
@@ -97,7 +97,7 @@ namespace XWave.Controllers
                 return NoContent();
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpPost("{id}/apply")]
@@ -116,7 +116,7 @@ namespace XWave.Controllers
                 return Ok("Discount has been successfully applied to selected products.");
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
 
         [HttpPost("{id}/remove")]
@@ -135,7 +135,7 @@ namespace XWave.Controllers
                 return Ok("Discount has been successfully removed from selected products.");
             }
 
-            return this.XWaveBadRequest(result.Errors);
+            return UnprocessableEntity(result.Errors);
         }
     }
 }
