@@ -62,16 +62,10 @@ namespace XWave.Services.Defaults
         {
             return Task.FromResult(new AuthenticationResult() { Token = string.Empty });
         }
-
-        public async Task<bool> IsUserInRoleAsync(string userId, string role)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            return user != null && await _userManager.IsInRoleAsync(user, role);
-        }
-
+        
         private async Task<JwtSecurityToken> CreateJwtTokenAsync(ApplicationUser user, string role)
         {
-            var userClaims = await _userManager.GetClaimsAsync(user);
+            // var userClaims = await _userManager.GetClaimsAsync(user);
 
             var claims = new[]
             {
@@ -79,9 +73,6 @@ namespace XWave.Services.Defaults
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString(CultureInfo.InvariantCulture)),
                 new Claim(CustomClaimType.UserId, user.Id),
-
-                // todo: add roles through middleware, use jwt for authentication only
-                new Claim(ClaimTypes.Role, role)
             };
 
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
@@ -92,7 +83,7 @@ namespace XWave.Services.Defaults
             var jwtSecurityToken = new JwtSecurityToken(
                 issuer: _jwt.Issuer,
                 audience: _jwt.Audience,
-                claims: claims.Union(userClaims),
+                claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(_jwt.DurationInMinutes),
                 signingCredentials: signingCredentials);
 

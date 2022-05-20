@@ -103,18 +103,16 @@ namespace XWave.Services.Defaults
             return Task.FromResult(productDtos);
         }
 
-        public Task<IEnumerable<DetailedProductDto>> FindAllProductsForStaff(bool includeDiscontinuedProducts)
+        public async Task<IEnumerable<DetailedProductDto>> FindAllProductsForStaff(bool includeDiscontinuedProducts)
         {
-            var products = DbContext.Product
+            var products = await DbContext.Product
                 .AsNoTracking()
                 .Include(p => p.Discount)
                 .Include(p => p.Category)
-                .AsEnumerable()
-                .Where(p => includeDiscontinuedProducts || !p.IsDiscontinued);
+                .Where(p => includeDiscontinuedProducts || !p.IsDiscontinued)
+                .ToListAsync();
 
-            return Task.FromResult(products
-                .Select(p => ProductDtoMapper.MapDetailedProductDto(p))
-                .AsEnumerable());
+            return products.Select(ProductDtoMapper.MapDetailedProductDto);
         }
 
         public async Task<ProductDto?> FindProductByIdForCustomers(int id)
@@ -380,15 +378,15 @@ namespace XWave.Services.Defaults
             await using var transaction = await DbContext.Database.BeginTransactionAsync();
             try
             {
-                foreach (var productId in productIds)
+                var productsToUpdate = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
+                DbContext.UpdateRange(productsToUpdate.Select(x =>
                 {
-                    var product = await DbContext.Product.FindAsync(productId);
-                    if (product == null) continue;
-                    product.IsDiscontinued = isDiscontinued;
-                    product.DiscontinuationDate = isDiscontinued ? updateSchedule : null;
-                    await DbContext.SaveChangesAsync();
-                }
-
+                    x.IsDiscontinued = isDiscontinued;
+                    x.DiscontinuationDate = isDiscontinued ? updateSchedule : null;
+                    return x;
+                }));
+                
+                await DbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
             catch (Exception exception)

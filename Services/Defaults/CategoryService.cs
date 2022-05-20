@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using XWave.Data;
 using XWave.Models;
 using XWave.Services.Interfaces;
@@ -64,9 +65,9 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public Task<IEnumerable<Category>> FindAllCategoriesAsync()
+        public async Task<IEnumerable<Category>> FindAllCategoriesAsync()
         {
-            return Task.FromResult(DbContext.Category.AsEnumerable());
+            return await DbContext.Category.AsNoTracking().ToListAsync();
         }
 
         public async Task<Category?> FindCategoryByIdAsync(int id)

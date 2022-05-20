@@ -125,17 +125,17 @@ namespace XWave.Services.Defaults
             }
 
             var appliedProducts = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
-            foreach (var product in appliedProducts)
-            {
-                product.DiscountId = discountId;
-            }
-
-            DbContext.Product.UpdateRange(appliedProducts);
+            DbContext.Product.UpdateRange(appliedProducts.Select(x => 
+            { 
+                x.DiscountId = discountId;
+                return x;
+            }));
+            
             await DbContext.SaveChangesAsync();
             await _activityService.LogActivityAsync<Discount>(
                 managerId,
                 OperationType.Modify,
-                $"applied discount with ID {discountId} to the following products with IDs: {string.Join(", ", appliedProducts)}.");
+                $"applied discount with ID {discountId} to the following products with IDs: {string.Join(", ", appliedProducts.Select(x => x.Id))}.");
 
             return ServiceResult.Success();
         }

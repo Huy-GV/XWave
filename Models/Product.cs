@@ -26,7 +26,6 @@ namespace XWave.Models
 
         public DateTime? LatestRestock { get; set; } = null;
 
-        // todo: change to a status enum { inactive, active, discontinued }?
         public bool IsDiscontinued { get; set; } = false;
 
         [DataType("datetime")]

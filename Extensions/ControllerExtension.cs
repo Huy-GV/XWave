@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using XWave.Data.Constants;
 using XWave.Controllers;
 using System.Linq;
+using System.Net;
 
 namespace XWave.Extensions
 {
@@ -10,7 +11,7 @@ namespace XWave.Extensions
     {
         public static ActionResult XWaveCreated(this ControllerBase controller, string url)
         {
-            return controller.StatusCode(201, new { url });
+            return controller.StatusCode((int)HttpStatusCode.Created, new { url });
         }
         
         public static ActionResult XWaveBadRequest(this ControllerBase controller, params string[] errors)

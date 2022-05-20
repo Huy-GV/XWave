@@ -57,42 +57,45 @@ namespace XWave.Services.Defaults
 
         public async Task<IEnumerable<ActivityLogDto>> FindAllActivityLogsAsync()
         {
-            return await Task.WhenAll((await DbContext.Activity.AsNoTracking()
-                .ToListAsync())
-            .Select(async a => new ActivityLogDto
-            {
-                Timestamp = a.Timestamp,
-                InfoText = await GenerateInfoText(a.UserId, a.Info)
-            }));
+            return await DbContext.Activity
+                .AsNoTracking()
+                .Include(x => x.AppUser)
+                .Select(a => new ActivityLogDto
+                {
+                    Id = a.Id,
+                    Timestamp = a.Timestamp,
+                    InfoText = CreateInfoText(a.AppUser, a.Info)
+                })
+                .ToListAsync();
         }
 
         public async Task<ActivityLogDto?> FindActivityLogAsync(int id)
         {
-            var log = await DbContext.Activity.FindAsync(id);
+            var log = await DbContext.Activity
+                .Include(x => x.AppUser)
+                .AsNoTracking()
+                .SingleOrDefaultAsync(x => x.Id == id);
+            
             if (log != null)
             {
                 return new ActivityLogDto()
                 {
+                    Id = log.Id,
                     Timestamp = log.Timestamp,
-                    InfoText = await GenerateInfoText(log.UserId, log.Info)
+                    InfoText = CreateInfoText(log.AppUser, log.Info)
                 };
             }
 
             return null;
         }
 
-        private async Task<string> GenerateInfoText(string userId, string infoText)
+        private static string CreateInfoText(ApplicationUser? user, string infoText)
         {
-            var (userName, firstName) = await GetUserInfo(userId);
-            return $"{firstName} ({userName}) {infoText.Trim()}.";
-        }
-
-        private async Task<(string UserName, string FirstName)> GetUserInfo(string userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            return user == null
-                ? ("[Deleted]", "[Deleted]")
-                : (user.UserName, user.FirstName);
+            var (userName, firstName, lastName) = user == null 
+                ? ("[Deleted]", string.Empty, "[Deleted]")
+                : (user.UserName, user.FirstName, user.LastName);
+            
+            return $"{firstName} {lastName} ({userName}) {infoText.Trim()}.";
         }
     }
 }

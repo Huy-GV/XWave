@@ -149,9 +149,9 @@ namespace XWave.Services.Defaults
             }
         }
 
-        public Task<IEnumerable<OrderDto>> FindAllOrdersAsync(string customerId)
+        public async Task<IEnumerable<OrderDto>> FindAllOrdersAsync(string customerId)
         {
-            var orderDtos = _dbContext.Order
+            return await _dbContext.Order
                 .AsNoTracking()
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
@@ -173,9 +173,7 @@ namespace XWave.Services.Defaults
                             ProductName = od.Product.Name
                         })
                 })
-                .AsEnumerable();
-
-            return Task.FromResult(orderDtos);
+                .ToListAsync();
         }
     }
 }

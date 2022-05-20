@@ -19,14 +19,14 @@ namespace XWave.Controllers
     {
         private readonly ICustomerAccountService _customerAccountService;
         private readonly AuthenticationHelper _authenticationHelper;
-        private readonly JwtCookie _jwtCookieConfig;
+        private readonly JwtCookie _jwtCookieOptions;
 
         public CustomerAccountController(
             AuthenticationHelper authenticationHelper,
             ICustomerAccountService customerAccountService,
             IOptions<JwtCookie> jwtCookieOptions)
         {
-            _jwtCookieConfig = jwtCookieOptions.Value;
+            _jwtCookieOptions = jwtCookieOptions.Value;
             _authenticationHelper = authenticationHelper;
             _customerAccountService = customerAccountService;
         }
@@ -41,16 +41,15 @@ namespace XWave.Controllers
                 return this.XWaveBadRequest(result.Error);
             }
             
-            if (Request.Cookies.ContainsKey(_jwtCookieConfig.Name))
+            if (Request.Cookies.ContainsKey(_jwtCookieOptions.Name))
             {
-                Response.Cookies.Delete(_jwtCookieConfig.Name);
+                Response.Cookies.Delete(_jwtCookieOptions.Name);
             }
 
-            var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
-            Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
+            var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieOptions.DurationInDays);
+            Response.Cookies.Append(_jwtCookieOptions.Name, result.Token, cookieOptions);
 
             return Ok(result);
-
         }
 
         [HttpPost("subscribe")]
