@@ -11,6 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Filters;
 using XWave.Configuration;
 using XWave.Data;
 using XWave.Data.Constants;
@@ -18,6 +20,7 @@ using XWave.Models;
 using XWave.Extensions;
 using XWave.Services.Defaults;
 using Serilog;
+using XWave.Middleware;
 
 namespace XWave
 {
@@ -44,10 +47,10 @@ namespace XWave
                 .AddEntityFrameworkStores<XWaveDbContext>();
 
             services.AddScoped<Services.Interfaces.IAuthenticationService, JwtAuthenticationService>();
-
             services.AddControllers();
             services.AddDefaultXWaveServices();
             services.AddDefaultHelpers();
+            
             services.AddHangFireBackgroundServices(Configuration.GetConnectionString("DefaultConnection"));
 
             services
@@ -72,7 +75,7 @@ namespace XWave
                             }
 
                             return Task.CompletedTask;
-                        }
+                        },
                     };
                     
                     options.SaveToken = false;
@@ -95,6 +98,8 @@ namespace XWave
                 options.AddPolicy(Policies.InternalPersonnelOnly,
                     policy => policy.RequireRole(Roles.Staff, Roles.Manager));
             });
+
+            services.AddScoped<RoleAuthorizationMiddleware>();
 
             services.AddDbContext<XWaveDbContext>(options =>
             {
@@ -135,6 +140,7 @@ namespace XWave
 
             app.UseAuthentication();
             //app.UseIdentityServer();
+            app.UseMiddleware<RoleAuthorizationMiddleware>();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
