@@ -1,45 +1,44 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Security.Claims;
 using System.Security.Principal;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using XWave.Data.Constants;
 
-namespace XWave.Utils
+namespace XWave.Utils;
+
+public class AuthenticationHelper
 {
-    public class AuthenticationHelper
+    private ILogger<AuthenticationHelper> _logger;
+
+    public AuthenticationHelper(ILogger<AuthenticationHelper> logger)
     {
-        private ILogger<AuthenticationHelper> _logger;
+        _logger = logger;
+    }
 
-        public AuthenticationHelper(ILogger<AuthenticationHelper> logger)
+    public string GetUserId(IIdentity? identity)
+    {
+        var claimsIdentity = identity as ClaimsIdentity;
+        var userId = claimsIdentity?.FindFirst(XWaveClaimNames.UserId)?.Value ?? string.Empty;
+
+        return userId;
+    }
+
+    public string GetUserName(IIdentity? identity)
+    {
+        var claimsIdentity = identity as ClaimsIdentity;
+        var customerId = claimsIdentity?.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
+
+        return customerId;
+    }
+
+    public CookieOptions CreateCookieOptions(int durationInDays, bool isSecure = true, bool isHttpOnly = true)
+    {
+        return new CookieOptions
         {
-            _logger = logger;
-        }
-
-        public string GetUserId(IIdentity? identity)
-        {
-            ClaimsIdentity? claimsIdentity = identity as ClaimsIdentity;
-            string userId = claimsIdentity?.FindFirst(CustomClaimType.UserId)?.Value ?? string.Empty;
-
-            return userId;
-        }
-
-        public string GetUserName(IIdentity? identity)
-        {
-            ClaimsIdentity? claimsIdentity = identity as ClaimsIdentity;
-            var customerId = claimsIdentity?.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
-
-            return customerId;
-        }
-
-        public CookieOptions CreateCookieOptions(int durationInDays, bool isSecure = true, bool isHttpOnly = true)
-        {
-            return new CookieOptions
-            {
-                Expires = DateTime.UtcNow.AddDays(durationInDays),
-                Secure = isSecure,
-                HttpOnly = isHttpOnly
-            };
-        }
+            Expires = DateTime.UtcNow.AddDays(durationInDays),
+            Secure = isSecure,
+            HttpOnly = isHttpOnly
+        };
     }
 }

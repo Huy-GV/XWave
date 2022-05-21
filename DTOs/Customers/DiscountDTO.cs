@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace XWave.DTOs.Customers
+namespace XWave.DTOs.Customers;
+
+public record DiscountDto
 {
-    public record DiscountDto
-    {
-        public uint Percentage { get; set; }
-        public DateTime EndDate { get; set; }
-    }
+    public uint Percentage { get; set; }
+    public DateTime EndDate { get; set; }
 }

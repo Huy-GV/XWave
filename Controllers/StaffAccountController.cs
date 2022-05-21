@@ -1,59 +1,57 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using XWave.Data.Constants;
 using XWave.DTOs.Management;
 using XWave.Extensions;
 using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
+using XWave.ViewModels.Management;
 
-namespace XWave.Controllers
+namespace XWave.Controllers;
+
+[Route("api/staff-account")]
+[ApiController]
+[Authorize(Roles = nameof(Roles.Manager))]
+public class StaffAccountController : ControllerBase
 {
-    [Route("api/staff-account")]
-    [ApiController]
-    [Authorize(Roles = nameof(Roles.Manager))]
-    public class StaffAccountController : ControllerBase
+    private readonly IStaffAccountService _staffAccountService;
+
+    public StaffAccountController(IStaffAccountService staffAccountService)
     {
-        private readonly IStaffAccountService _staffAccountService;
+        _staffAccountService = staffAccountService;
+    }
 
-        public StaffAccountController(IStaffAccountService staffAccountService)
-        {
-            _staffAccountService = staffAccountService;
-        }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<StaffAccountDto>>> GetStaffAccounts()
+    {
+        return Ok(await _staffAccountService.GetAllStaffAccounts());
+    }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<StaffAccountDto>>> GetStaffAccounts()
-        {
-            return Ok(await _staffAccountService.GetAllStaffAccounts());
-        }
+    [HttpGet("{id}")]
+    public async Task<ActionResult<StaffAccountDto>> GetStaffAccountById(string id)
+    {
+        var staffAccountDto = await _staffAccountService.GetStaffAccountById(id);
+        return staffAccountDto != null ? Ok(staffAccountDto) : NotFound();
+    }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<StaffAccountDto>> GetStaffAccountById(string id)
-        {
-            var staffAccountDto = await _staffAccountService.GetStaffAccountById(id);
-            return staffAccountDto != null ? Ok(staffAccountDto) : NotFound();
-        }
+    [HttpPost("{id}")]
+    public async Task<ActionResult<ServiceResult>> UpdateStaffAccount(string id,
+        StaffAccountViewModel staffAccountViewModel)
+    {
+        var result = await _staffAccountService.UpdateStaffAccount(id, staffAccountViewModel);
+        if (result.Succeeded) return this.XWaveUpdated($"https://localhost:5001/api/staff-account/{id}");
 
-        //[HttpPost("{id}")]
-        //public async Task<ActionResult<ServiceResult>> UpdateStaffAccount(string id, UpdateStaffAccountViewModel updateStaffAccountViewModel)
-        //{
-        //    var result = await _staffAccountService.UpdateStaffAccount(id, updateStaffAccountViewModel);
-        //    if (result.Succeeded)
-        //    {
-        //        return XWaveUpdated($"https://localhost:5001/api/staff-account/{result.ResourceId}");
-        //    }
+        return UnprocessableEntity(result.Errors);
+    }
 
-        //    return BadRequest(result.Error);
-        //}
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<ServiceResult>> DeactivateStaffAccount(string id)
-        {
-            var result = await _staffAccountService.DeactivateStaffAccount(id);
-            return result.Succeeded
-                ? this.XWaveUpdated($"https://localhost:5001/api/staff-account/{id}")
-                : UnprocessableEntity(result.Errors);
-        }
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<ServiceResult>> DeactivateStaffAccount(string id)
+    {
+        var result = await _staffAccountService.DeactivateStaffAccount(id);
+        return result.Succeeded
+            ? this.XWaveUpdated($"https://localhost:5001/api/staff-account/{id}")
+            : UnprocessableEntity(result.Errors);
     }
 }

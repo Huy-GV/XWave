@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace XWave.Models
+namespace XWave.Models;
+
+public interface ISoftDeletable
 {
-    public interface ISoftDeletable
-    {
-        public bool IsDeleted { get; set; }
-        public DateTime? DeleteDate { get; set; }
-    }
+    public bool IsDeleted { get; set; }
+    public DateTime? DeleteDate { get; set; }
 }

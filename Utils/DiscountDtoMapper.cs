@@ -2,21 +2,26 @@
 using XWave.DTOs.Management;
 using XWave.Models;
 
-namespace XWave.Utils
+namespace XWave.Utils;
+
+public class DiscountDtoMapper
 {
-    public class DiscountDtoMapper
+    public static DiscountDto MapCustomerDiscountDto(Discount discount)
     {
-        public static DiscountDto MapCustomerDiscountDto(Discount discount) => new()
+        return new()
         {
             Percentage = discount.Percentage,
-            EndDate = discount.EndDate,
+            EndDate = discount.EndDate
         };
+    }
 
-        public static DetailedDiscountDto MapDetailedDiscountDto(Discount discount) => new()
+    public static DetailedDiscountDto MapDetailedDiscountDto(Discount discount)
+    {
+        return new()
         {
             StartDate = discount.StartDate,
             EndDate = discount.EndDate,
-            Percentage = discount.Percentage,
+            Percentage = discount.Percentage
         };
     }
 }

@@ -1,9 +1,10 @@
-﻿namespace XWave.DTOs.Management
+﻿using System;
+
+namespace XWave.DTOs.Management;
+
+public record ActivityLogDto
 {
-    public record ActivityLogDto
-    {
-        public int Id { get; set; }
-        public string InfoText { get; set; }
-        public System.DateTime Timestamp { get; set; }
-    }
+    public int Id { get; set; }
+    public string InfoText { get; set; }
+    public DateTime Timestamp { get; set; }
 }

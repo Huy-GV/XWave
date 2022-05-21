@@ -1,27 +1,20 @@
-﻿namespace XWave.Data.Constants
+﻿namespace XWave.Data.Constants;
+
+public static class XWaveResponse
 {
-    public static class XWaveResponse
+    public static object Failed(params string[] errors)
     {
-        public static object Created(string url) => new
-        {
-            Status = "Created.",
-            Message = $"Location: {url}."
-        };
-
-        public static object Updated(string url) => new
-        {
-            Status = "Updated.",
-            Message = $"Location: {url}."
-        };
-
-        public static object Failed(params string[] errors) => new
+        return new
         {
             Status = "Failed.",
             Message = "One or more errors occured.",
-            Errors = errors,
+            Errors = errors
         };
+    }
 
-        public static object NonExistentResource() => new
+    public static object NonExistentResource()
+    {
+        return new
         {
             Status = "Aborted.",
             Message = "Operation called on a non-existing resource."

@@ -1,18 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace XWave.ViewModels.Authentication
+namespace XWave.ViewModels.Authentication;
+
+public class UpdatePasswordViewModel
 {
-    public class UpdatePasswordViewModel
-    {
-        [Required]
-        [DataType(DataType.Password)]
-        public string CurrentPassword { get; set; }
+    [Required]
+    [DataType(DataType.Password)]
+    public string CurrentPassword { get; set; }
 
-        [DataType(DataType.Password)]
-        public string NewPassword { get; set; }
+    [DataType(DataType.Password)] public string NewPassword { get; set; }
 
-        [DataType(DataType.Password)]
-        [Compare(nameof(NewPassword), ErrorMessage = "Password must match")]
-        public string ConfirmPassword { get; set; }
-    }
+    [DataType(DataType.Password)]
+    [Compare(nameof(NewPassword), ErrorMessage = "Password must match")]
+    public string ConfirmPassword { get; set; }
 }

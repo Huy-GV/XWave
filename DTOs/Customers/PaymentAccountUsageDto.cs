@@ -1,11 +1,12 @@
-﻿namespace XWave.DTOs.Customers
+﻿using System;
+
+namespace XWave.DTOs.Customers;
+
+public record PaymentAccountUsageDto
 {
-    public record PaymentAccountUsageDto()
-    {
-        public string Provider { get; init; }
-        public string AccountNumber { get; init; }
-        public decimal TotalSpending { get; init; }
-        public ushort PurchaseCount { get; init; }
-        public System.DateTime LatestPurchase { get; init; }
-    }
+    public string Provider { get; init; }
+    public string AccountNumber { get; init; }
+    public decimal TotalSpending { get; init; }
+    public ushort PurchaseCount { get; init; }
+    public DateTime LatestPurchase { get; init; }
 }

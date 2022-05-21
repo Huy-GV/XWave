@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using XWave.Data;
 using XWave.DTOs.Customers;
 using XWave.Extensions;
@@ -12,156 +12,150 @@ using XWave.Services.Interfaces;
 using XWave.Services.ResultTemplate;
 using XWave.ViewModels.Customer;
 
-namespace XWave.Services.Defaults
+namespace XWave.Services.Defaults;
+
+public class PaymentService : ServiceBase, IPaymentService
 {
-    public class PaymentService : ServiceBase, IPaymentService
+    private readonly ILogger<PaymentService> _logger;
+
+    public PaymentService(
+        XWaveDbContext dbContext,
+        ILogger<PaymentService> logger) : base(dbContext)
     {
-        private readonly ILogger<PaymentService> _logger;
+        _logger = logger;
+    }
 
-        public PaymentService(
-            XWaveDbContext dbContext,
-            ILogger<PaymentService> logger) : base(dbContext)
+    public async Task<(ServiceResult, int? PaymentAccountId)> AddPaymentAccountAsync(string customerId,
+        PaymentAccountViewModel inputPayment)
+    {
+        await using var transaction = await DbContext.Database.BeginTransactionAsync();
+        try
         {
-            _logger = logger;
-        }
+            var existingPaymentAccount = await DbContext.PaymentAccount
+                .SingleOrDefaultAsync(x =>
+                    x.AccountNumber == inputPayment.AccountNumber &&
+                    x.Provider == inputPayment.Provider &&
+                    x.IsDeleted);
 
-        public async Task<(ServiceResult, int? PaymentAccountId)> AddPaymentAccountAsync(string customerId, PaymentAccountViewModel inputPayment)
-        {
-            await using var transaction = await DbContext.Database.BeginTransactionAsync();
-            try
+            if (existingPaymentAccount != null)
             {
-                var existingPaymentAccount = await DbContext.PaymentAccount
-                    .SingleOrDefaultAsync(x =>
-                        x.AccountNumber == inputPayment.AccountNumber &&
-                        x.Provider == inputPayment.Provider &&
-                        x.IsDeleted);
+                DbContext.PaymentAccount.Update(existingPaymentAccount);
+                existingPaymentAccount.IsDeleted = false;
+                existingPaymentAccount.DeleteDate = null;
 
-                if (existingPaymentAccount != null)
-                {
-                    DbContext.PaymentAccount.Update(existingPaymentAccount);
-                    existingPaymentAccount.IsDeleted = false;
-                    existingPaymentAccount.DeleteDate = null;
-
-                    return (ServiceResult.Success(), existingPaymentAccount.Id);
-                }
-
-                var newPayment = new PaymentAccount()
-                {
-                    AccountNumber = inputPayment.AccountNumber,
-                    Provider = inputPayment.Provider,
-                    ExpiryDate = inputPayment.ExpiryDate,
-                };
-
-                DbContext.PaymentAccount.Add(newPayment);
-                await DbContext.SaveChangesAsync();
-
-                var newTransactionDetails = new PaymentAccountDetails()
-                {
-                    CustomerId = customerId,
-                    PaymentAccountId = newPayment.Id,
-                };
-
-                DbContext.PaymentAccountDetails.Add(newTransactionDetails);
-                await DbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return (ServiceResult.Success(), newPayment.Id);
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError($"Exception: {exception.Message}");
-                await transaction.RollbackAsync();
-
-                return (ServiceResult.InternalFailure(), null);
-            }
-        }
-
-        public async Task<ServiceResult> RemovePaymentAccountAsync(string customer, int paymentId)
-        {
-            var paymentAccountToRemove = await DbContext.PaymentAccount.FindAsync(paymentId);
-            if (paymentAccountToRemove == null)
-            {
-                return ServiceResult.Failure("Payment account could not be found.");
+                return (ServiceResult.Success(), existingPaymentAccount.Id);
             }
 
-            DbContext.Update(paymentAccountToRemove);
-            paymentAccountToRemove.SoftDelete();
+            var newPayment = new PaymentAccount
+            {
+                AccountNumber = inputPayment.AccountNumber,
+                Provider = inputPayment.Provider,
+                ExpiryDate = inputPayment.ExpiryDate
+            };
+
+            DbContext.PaymentAccount.Add(newPayment);
             await DbContext.SaveChangesAsync();
 
-            return ServiceResult.Success();
-        }
-
-        public Task<IEnumerable<PaymentAccount>> FindAllTransactionDetailsForStaffAsync()
-        {
-            return Task.FromResult(DbContext.PaymentAccount
-                .AsNoTracking()
-                .Include(pd => pd.PaymentAccountDetails)
-                .ThenInclude(pd => pd.Customer)
-                .AsEnumerable());
-        }
-
-        public async Task<ServiceResult> UpdatePaymentAccountAsync(
-            string customerId,
-            int id,
-            PaymentAccountViewModel updatedPayment)
-        {
-            var payment = await DbContext.PaymentAccount.FindAsync(id);
-            if (payment == null)
+            var newTransactionDetails = new PaymentAccountDetails
             {
-                return ServiceResult.Failure($"Payment account for user ID {id} not found.");
-            }
+                CustomerId = customerId,
+                PaymentAccountId = newPayment.Id
+            };
 
-            DbContext.Update(payment).CurrentValues.SetValues(updatedPayment);
+            DbContext.PaymentAccountDetails.Add(newTransactionDetails);
             await DbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
 
-            return ServiceResult.Success();
+            return (ServiceResult.Success(), newPayment.Id);
         }
-
-        public async Task<bool> CustomerHasPaymentAccount(string customerId, int paymentId)
+        catch (Exception exception)
         {
-            return await DbContext.PaymentAccountDetails.AnyAsync(
-                td => td.CustomerId == customerId && td.PaymentAccountId == paymentId);
+            _logger.LogError($"Exception: {exception.Message}");
+            await transaction.RollbackAsync();
+
+            return (ServiceResult.InternalFailure(), null);
         }
+    }
 
-        public async Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId)
-        {
-            var orders = await DbContext.Order
-                .Include(o => o.OrderDetails)
-                .Where(o => o.CustomerId == customerId)
-                .OrderByDescending(o => o.Date)
-                .ToArrayAsync();
+    public async Task<ServiceResult> RemovePaymentAccountAsync(string customer, int paymentId)
+    {
+        var paymentAccountToRemove = await DbContext.PaymentAccount.FindAsync(paymentId);
+        if (paymentAccountToRemove == null) return ServiceResult.Failure("Payment account could not be found.");
 
-            var purchasesByPaymentAccount = orders
-                .GroupBy(o => o.PaymentAccountId)
-                .Select(g => new
-                {
-                    PaymentAccountId = g.Key,
-                    Date = g.Max(o => o.Date),
-                    PurchaseCount = g.Count()
-                })
-                .ToDictionary(x => x.PaymentAccountId);
+        DbContext.Update(paymentAccountToRemove);
+        paymentAccountToRemove.SoftDelete();
+        await DbContext.SaveChangesAsync();
 
-            var totalSpending = orders
-                .GroupBy(o => o.PaymentAccountId)
-                .Select(g => new
-                {
-                    PaymentAccountId = g.Key,
-                    TotalSpending = g.Sum(o => o.OrderDetails.Sum(od => od.Quantity * od.PriceAtOrder))
-                })
-                .ToDictionary(x => x.PaymentAccountId);
+        return ServiceResult.Success();
+    }
 
-            return await DbContext.PaymentAccount
-                .Include(p => p.PaymentAccountDetails)
-                .Where(p => p.PaymentAccountDetails.CustomerId == customerId)
-                .Select(p => new PaymentAccountUsageDto
-                {
-                    Provider = p.Provider,
-                    AccountNumber = p.AccountNumber,
-                    LatestPurchase = purchasesByPaymentAccount[p.Id].Date,
-                    TotalSpending = totalSpending[p.Id].TotalSpending,
-                    PurchaseCount = (ushort)purchasesByPaymentAccount[p.Id].PurchaseCount
-                })
-                .ToListAsync();
-        }
+    public Task<IEnumerable<PaymentAccount>> FindAllTransactionDetailsForStaffAsync()
+    {
+        return Task.FromResult(DbContext.PaymentAccount
+            .AsNoTracking()
+            .Include(pd => pd.PaymentAccountDetails)
+            .ThenInclude(pd => pd.Customer)
+            .AsEnumerable());
+    }
+
+    public async Task<ServiceResult> UpdatePaymentAccountAsync(
+        string customerId,
+        int id,
+        PaymentAccountViewModel updatedPayment)
+    {
+        var payment = await DbContext.PaymentAccount.FindAsync(id);
+        if (payment == null) return ServiceResult.Failure($"Payment account for user ID {id} not found.");
+
+        DbContext.Update(payment).CurrentValues.SetValues(updatedPayment);
+        await DbContext.SaveChangesAsync();
+
+        return ServiceResult.Success();
+    }
+
+    public async Task<bool> CustomerHasPaymentAccount(string customerId, int paymentId)
+    {
+        return await DbContext.PaymentAccountDetails.AnyAsync(
+            td => td.CustomerId == customerId && td.PaymentAccountId == paymentId);
+    }
+
+    public async Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId)
+    {
+        var orders = await DbContext.Order
+            .Include(o => o.OrderDetails)
+            .Where(o => o.CustomerId == customerId)
+            .OrderByDescending(o => o.Date)
+            .ToArrayAsync();
+
+        var purchasesByPaymentAccount = orders
+            .GroupBy(o => o.PaymentAccountId)
+            .Select(g => new
+            {
+                PaymentAccountId = g.Key,
+                Date = g.Max(o => o.Date),
+                PurchaseCount = g.Count()
+            })
+            .ToDictionary(x => x.PaymentAccountId);
+
+        var totalSpending = orders
+            .GroupBy(o => o.PaymentAccountId)
+            .Select(g => new
+            {
+                PaymentAccountId = g.Key,
+                TotalSpending = g.Sum(o => o.OrderDetails.Sum(od => od.Quantity * od.PriceAtOrder))
+            })
+            .ToDictionary(x => x.PaymentAccountId);
+
+        return await DbContext.PaymentAccount
+            .Include(p => p.PaymentAccountDetails)
+            .Where(p => p.PaymentAccountDetails.CustomerId == customerId)
+            .Select(p => new PaymentAccountUsageDto
+            {
+                Provider = p.Provider,
+                AccountNumber = p.AccountNumber,
+                LatestPurchase = purchasesByPaymentAccount[p.Id].Date,
+                TotalSpending = totalSpending[p.Id].TotalSpending,
+                PurchaseCount = (ushort)purchasesByPaymentAccount[p.Id].PurchaseCount
+            })
+            .ToListAsync();
     }
 }

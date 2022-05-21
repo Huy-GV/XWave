@@ -1,24 +1,22 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using XWave.Configuration;
-using XWave.Data.Constants;
 using XWave.Models;
 
 namespace XWave.Middleware;
 
 public class RoleAuthorizationMiddleware : IMiddleware
 {
+    private readonly JwtCookie _jwtCookieOptions;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly JwtCookie _jwtCookieOptions; 
+
     public RoleAuthorizationMiddleware(
-        UserManager<ApplicationUser> userManager, 
+        UserManager<ApplicationUser> userManager,
         IOptions<JwtCookie> jwtCookieOptions)
     {
         _userManager = userManager;

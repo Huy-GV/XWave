@@ -1,7 +1,6 @@
-﻿namespace XWave.Data.Constants
+﻿namespace XWave.Data.Constants;
+
+public class Policies
 {
-    public class Policies
-    {
-        public static string InternalPersonnelOnly => "InternalPersonnelOnly";
-    }
+    public static string InternalPersonnelOnly => "InternalPersonnelOnly";
 }

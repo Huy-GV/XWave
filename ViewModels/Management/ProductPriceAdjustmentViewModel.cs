@@ -1,12 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
-namespace XWave.ViewModels.Management
+namespace XWave.ViewModels.Management;
+
+public class ProductPriceAdjustmentViewModel
 {
-    public class ProductPriceAdjustmentViewModel
-    {
-        [Required]
-        public uint UpdatedPrice { get; set; }
+    [Required] public uint UpdatedPrice { get; set; }
 
-        public System.DateTime? Schedule { get; set; } = null;
-    }
+    public DateTime? Schedule { get; set; } = null;
 }

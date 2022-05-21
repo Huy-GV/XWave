@@ -1,9 +1,8 @@
-namespace XWave.Data.Constants
+namespace XWave.Data.Constants;
+
+public static class Roles
 {
-    public static class Roles
-    {
-        public static string Manager => "Manager";
-        public static string Staff => "Staff";
-        public static string Customer => "Customer";
-    }
+    public const string Manager = "Manager";
+    public const string Staff = "Staff";
+    public const string Customer = "Customer";
 }
