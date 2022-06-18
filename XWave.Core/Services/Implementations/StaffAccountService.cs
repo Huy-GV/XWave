@@ -10,7 +10,7 @@ using XWave.Core.ViewModels.Management;
 
 namespace XWave.Core.Services.Implementations;
 
-public class StaffAccountService : ServiceBase, IStaffAccountService
+internal class StaffAccountService : ServiceBase, IStaffAccountService
 {
     private readonly UserManager<ApplicationUser> _userManager;
 

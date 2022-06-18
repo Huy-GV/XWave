@@ -4,7 +4,7 @@ using XWave.Core.Services.ResultTemplate;
 
 namespace XWave.Core.Services.Implementations;
 
-public class HangFireBackgroundJobService : IBackgroundJobService
+internal class HangFireBackgroundJobService : IBackgroundJobService
 {
     public Task<ServiceResult> CancelJobAsync(object jobId)
     {

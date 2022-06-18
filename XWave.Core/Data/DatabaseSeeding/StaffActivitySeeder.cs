@@ -7,7 +7,7 @@ using XWave.Core.Models;
 
 namespace XWave.Core.Data.DatabaseSeeding;
 
-public class StaffActivitySeeder
+internal class StaffActivitySeeder
 {
     public static void SeedData(IServiceProvider serviceProvider)
     {

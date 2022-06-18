@@ -6,9 +6,8 @@ namespace XWave.Core.Services.Interfaces;
 
 public interface ICustomerAccountService
 {
-    public Task<AuthenticationResult> RegisterCustomerAsync(RegisterCustomerViewModel viewModel);
-
-    public Task<ServiceResult> UpdateCustomerAccountAsync(string id, CustomerAccountViewModel viewModel);
+    Task<AuthenticationResult> RegisterCustomerAsync(RegisterCustomerViewModel viewModel);
+    Task<ServiceResult> UpdateCustomerAccountAsync(string id, CustomerAccountViewModel viewModel);
 
     /// <summary>
     ///     Update subscription to promotion.
@@ -16,5 +15,5 @@ public interface ICustomerAccountService
     /// <param name="customerId">ID of customer.</param>
     /// <param name="isSubscribed">Subscription status.</param>
     /// <returns></returns>
-    public Task<ServiceResult> UpdateSubscriptionAsync(string customerId, bool isSubscribed);
+    Task<ServiceResult> UpdateSubscriptionAsync(string customerId, bool isSubscribed);
 }

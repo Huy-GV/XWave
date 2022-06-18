@@ -5,7 +5,7 @@ using XWave.Core.Models;
 
 namespace XWave.Core.Data;
 
-public class XWaveDbContext : IdentityDbContext<ApplicationUser>
+internal class XWaveDbContext : IdentityDbContext<ApplicationUser>
 {
     public XWaveDbContext(DbContextOptions<XWaveDbContext> options) : base(options)
     {

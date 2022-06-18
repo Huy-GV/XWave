@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using XWave.Core.Configuration;
 using XWave.Web.Extensions;
 using XWave.Core.Data.Constants;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Services.ResultTemplate;
 using XWave.Core.ViewModels.Authentication;
-using XWave.Web.Configuration;
 using XWave.Web.Utils;
 
 namespace XWave.Web.Controllers;

@@ -10,7 +10,7 @@ using XWave.Core.ViewModels.Management;
 
 namespace XWave.Core.Services.Implementations;
 
-public class DiscountService : ServiceBase, IDiscountService
+internal class DiscountService : ServiceBase, IDiscountService
 {
     private readonly IActivityService _activityService;
     private readonly ILogger<DiscountService> _logger;

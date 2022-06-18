@@ -9,7 +9,7 @@ using XWave.Core.ViewModels.Customers;
 
 namespace XWave.Core.Services.Implementations;
 
-public class OrderService : ServiceBase, IOrderService
+internal class OrderService : ServiceBase, IOrderService
 {
     private readonly IAuthenticationService _authenticationService;
     private readonly ILogger<OrderService> _logger;

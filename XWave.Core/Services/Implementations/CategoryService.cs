@@ -6,7 +6,7 @@ using XWave.Core.Services.ResultTemplate;
 
 namespace XWave.Core.Services.Implementations;
 
-public class CategoryService : ServiceBase, ICategoryService
+internal class CategoryService : ServiceBase, ICategoryService
 {
     private readonly IActivityService _activityService;
 

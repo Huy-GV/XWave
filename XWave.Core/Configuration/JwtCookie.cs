@@ -1,4 +1,4 @@
-﻿namespace XWave.Web.Configuration;
+﻿namespace XWave.Core.Configuration;
 
 public class JwtCookie
 {

@@ -12,11 +12,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using XWave.Core.Configuration;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
 using XWave.Core.Extension;
 using XWave.Core.Models;
-using XWave.Web.Configuration;
 using XWave.Web.Data;
 using XWave.Web.Middleware;
 using XWave.Web.Utils;
@@ -38,14 +38,10 @@ public class Startup
         services.Configure<Jwt>(Configuration.GetSection("Jwt"));
         services.Configure<JwtCookie>(Configuration.GetSection("JwtCookie"));
 
-        services
-            .AddIdentity<ApplicationUser, IdentityRole>(options => { options.Lockout.AllowedForNewUsers = false; })
-            .AddEntityFrameworkStores<XWaveDbContext>();
-
         services.AddTransient<AuthenticationHelper>();
         services.AddControllers();
         services.AddDefaultXWaveServices();
-        services.AddDefaultHelpers();
+        services.AddDatabase(Configuration);
 
         services.AddHangFireBackgroundServices(Configuration.GetConnectionString("DefaultConnection"));
 
@@ -94,19 +90,7 @@ public class Startup
         });
 
         services.AddScoped<RoleAuthorizationMiddleware>();
-
-        services.AddDbContext<XWaveDbContext>(options =>
-        {
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-        });
-
         services.AddDatabaseDeveloperPageExceptionFilter();
-
-        // In production, the React files will be served from this directory
-        //services.AddSpaStaticFiles(configuration =>
-        //{
-        //    configuration.RootPath = "ClientApp/build";
-        //});
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -128,7 +112,6 @@ public class Startup
         app.UseSerilogRequestLogging();
         app.UseHttpsRedirection();
         app.UseStaticFiles();
-        //app.UseSpaStaticFiles();
 
         app.UseRouting();
 
@@ -142,15 +125,5 @@ public class Startup
                 "default",
                 "{controller}/{action=Index}/{id?}");
         });
-
-        //app.UseSpa(spa =>
-        //{
-        //    spa.Options.SourcePath = "ClientApp";
-
-        //    if (env.IsDevelopment())
-        //    {
-        //        spa.UseReactDevelopmentServer(npmScript: "start");
-        //    }
-        //});
     }
 }

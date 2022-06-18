@@ -1,9 +1,12 @@
 ﻿using System.Runtime.CompilerServices;
 using Hangfire;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using XWave.Core.Data;
 using XWave.Core.Data.DatabaseSeeding;
+using XWave.Core.Models;
 using XWave.Core.Services.Implementations;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Utils;
@@ -23,11 +26,22 @@ public static class XWaveServiceExtension
         services.AddScoped<IStaffAccountService, StaffAccountService>();
         services.AddScoped<ICustomerAccountService, CustomerAccountService>();
         services.AddScoped<IAuthenticationService, JwtAuthenticationService>();
+        services.AddTransient<ProductDtoMapper>();
     }
 
-    public static void AddDefaultHelpers(this IServiceCollection services)
+    public static void AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<ProductDtoMapper>();
+        services
+            .AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Lockout.AllowedForNewUsers = false;
+            })
+            .AddEntityFrameworkStores<XWaveDbContext>();
+        
+        services.AddDbContext<XWaveDbContext>(options =>
+        {
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+        });
     }
 
     public static void SeedDatabase(this IServiceProvider services)
@@ -46,7 +60,6 @@ public static class XWaveServiceExtension
     {
         services.AddTransient<IBackgroundJobService, HangFireBackgroundJobService>();
         services.AddHangfire(config => { config.UseSqlServerStorage(dbConnectionString); });
-
         services.AddHangfireServer(options => { options.SchedulePollingInterval = TimeSpan.FromMinutes(1); });
     }
 }

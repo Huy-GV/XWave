@@ -7,7 +7,7 @@ using XWave.Core.Models;
 
 namespace XWave.Core.Data.DatabaseSeeding;
 
-public class UserSeeder
+internal class UserSeeder
 {
     public static void SeedData(IServiceProvider serviceProvider)
     {

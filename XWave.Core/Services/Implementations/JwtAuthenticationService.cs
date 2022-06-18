@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using XWave.Core.Configuration;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
 using XWave.Core.Extension;
@@ -12,11 +13,10 @@ using XWave.Core.Models;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Services.ResultTemplate;
 using XWave.Core.ViewModels.Authentication;
-using XWave.Web.Configuration;
 
 namespace XWave.Core.Services.Implementations;
 
-public class JwtAuthenticationService : ServiceBase, IAuthenticationService
+internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
 {
     private readonly Jwt _jwt;
     private readonly UserManager<ApplicationUser> _userManager;

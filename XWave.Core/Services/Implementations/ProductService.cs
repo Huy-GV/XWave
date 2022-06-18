@@ -13,7 +13,7 @@ using XWave.Core.ViewModels.Management;
 
 namespace XWave.Core.Services.Implementations;
 
-public class ProductService : ServiceBase, IProductService
+internal class ProductService : ServiceBase, IProductService
 {
     private readonly IActivityService _activityService;
     private readonly ILogger<ProductService> _logger;

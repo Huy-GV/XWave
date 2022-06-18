@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using XWave.Web.Configuration;
+using XWave.Core.Configuration;
 
 namespace XWave.Web.Middleware;
 

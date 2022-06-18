@@ -5,9 +5,9 @@ namespace XWave.Core.Services.Implementations;
 /// <summary>
 ///     Abstract class that defines EF Core database context.
 /// </summary>
-public abstract class ServiceBase
+internal abstract class ServiceBase
 {
-    public ServiceBase(XWaveDbContext dbContext)
+    internal ServiceBase(XWaveDbContext dbContext)
     {
         DbContext = dbContext;
     }

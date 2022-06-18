@@ -10,7 +10,7 @@ using XWave.Core.ViewModels.Customers;
 
 namespace XWave.Core.Services.Implementations;
 
-public class PaymentService : ServiceBase, IPaymentService
+internal class PaymentService : ServiceBase, IPaymentService
 {
     private readonly ILogger<PaymentService> _logger;
 

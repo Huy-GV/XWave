@@ -8,7 +8,7 @@ using XWave.Core.ViewModels.Customers;
 
 namespace XWave.Core.Services.Implementations;
 
-public class CustomerAccountService : ServiceBase, ICustomerAccountService
+internal class CustomerAccountService : ServiceBase, ICustomerAccountService
 {
     private readonly IAuthenticationService _authenticationService;
     private readonly ILogger<CustomerAccountService> _logger;

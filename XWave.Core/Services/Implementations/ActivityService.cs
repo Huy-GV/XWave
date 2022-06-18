@@ -8,7 +8,7 @@ using XWave.Core.Services.ResultTemplate;
 
 namespace XWave.Core.Services.Implementations;
 
-public class ActivityService : ServiceBase, IActivityService
+internal class ActivityService : ServiceBase, IActivityService
 {
     private readonly ILogger<ActivityService> _logger;
 
