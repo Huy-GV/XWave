@@ -1,4 +1,4 @@
-﻿namespace XWave.Core.Services.ResultTemplate;
+﻿namespace XWave.Core.Services.Communication;
 
 // convert to record and move methods to helper objects
 public record ServiceResult

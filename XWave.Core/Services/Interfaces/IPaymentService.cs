@@ -1,6 +1,6 @@
 ﻿using XWave.Core.DTOs.Customers;
 using XWave.Core.Models;
-using XWave.Core.Services.ResultTemplate;
+using XWave.Core.Services.Communication;
 using XWave.Core.ViewModels.Customers;
 
 namespace XWave.Core.Services.Interfaces;

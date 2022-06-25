@@ -1,6 +1,6 @@
 ﻿using Hangfire;
+using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
-using XWave.Core.Services.ResultTemplate;
 
 namespace XWave.Core.Services.Implementations;
 

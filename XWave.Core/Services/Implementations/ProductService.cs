@@ -6,8 +6,8 @@ using XWave.Core.DTOs.Customers;
 using XWave.Core.DTOs.Management;
 using XWave.Core.Extension;
 using XWave.Core.Models;
+using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
-using XWave.Core.Services.ResultTemplate;
 using XWave.Core.Utils;
 using XWave.Core.ViewModels.Management;
 
@@ -17,7 +17,7 @@ internal class ProductService : ServiceBase, IProductService
 {
     private readonly IActivityService _activityService;
     private readonly ILogger<ProductService> _logger;
-    private readonly ProductDtoMapper _productHelper;
+    private readonly ProductDtoMapper _productDtoMapper;
 
     public ProductService(
         XWaveDbContext dbContext,
@@ -25,7 +25,7 @@ internal class ProductService : ServiceBase, IProductService
         ProductDtoMapper productHelper,
         ILogger<ProductService> logger) : base(dbContext)
     {
-        _productHelper = productHelper;
+        _productDtoMapper = productHelper;
         _activityService = activityService;
         _logger = logger;
     }
@@ -91,8 +91,8 @@ internal class ProductService : ServiceBase, IProductService
             .Where(p => !p.IsDiscontinued)
             .AsEnumerable()
             .Select(p => p.Discount == null
-                ? ProductDtoMapper.MapCustomerProductDto(p)
-                : ProductDtoMapper.MapCustomerProductDto(p, CalculateDiscountedPrice(p)));
+                ? _productDtoMapper.MapCustomerProductDto(p)
+                : _productDtoMapper.MapCustomerProductDto(p, CalculateDiscountedPrice(p)));
 
         return Task.FromResult(productDtos);
     }
@@ -106,7 +106,7 @@ internal class ProductService : ServiceBase, IProductService
             .Where(p => includeDiscontinuedProducts || !p.IsDiscontinued)
             .ToListAsync();
 
-        return products.Select(ProductDtoMapper.MapDetailedProductDto);
+        return products.Select(_productDtoMapper.MapDetailedProductDto);
     }
 
     public async Task<ProductDto?> FindProductByIdForCustomers(int id)
@@ -120,8 +120,8 @@ internal class ProductService : ServiceBase, IProductService
         if (product == null) return null;
 
         return product.Discount == null
-            ? ProductDtoMapper.MapCustomerProductDto(product)
-            : ProductDtoMapper.MapCustomerProductDto(product, CalculateDiscountedPrice(product));
+            ? _productDtoMapper.MapCustomerProductDto(product)
+            : _productDtoMapper.MapCustomerProductDto(product, CalculateDiscountedPrice(product));
     }
 
     public async Task<DetailedProductDto?> FindProductByIdForStaff(int id)
@@ -132,7 +132,7 @@ internal class ProductService : ServiceBase, IProductService
             .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.Id == id);
 
-        return product == null ? null : ProductDtoMapper.MapDetailedProductDto(product);
+        return product == null ? null : _productDtoMapper.MapDetailedProductDto(product);
     }
 
     public async Task<ServiceResult> UpdateProductAsync(
@@ -140,26 +140,33 @@ internal class ProductService : ServiceBase, IProductService
         int productId,
         ProductViewModel updatedProductViewModel)
     {
+        _logger.LogInformation($"User with ID {staffId} is attempting to update product ID {productId}");
+        var product = await DbContext.Product.FindAsync(productId);
+        if (product == null)
+        {
+            return ServiceResult.Failure($"Product with ID {productId} not found");
+        }
+
+        if (product.IsDiscontinued || product.IsDeleted)
+        {
+            return ServiceResult.Failure("Product has been discontinued or removed.");
+        }
+
         try
         {
-            _logger.LogInformation($"User with ID {staffId} is attempting to update product ID {productId}");
-            var product = await DbContext.Product.FindAsync(productId);
-            if (product == null) return ServiceResult.Failure($"Product with ID {productId} not found");
-
-            if (product.IsDiscontinued || product.IsDeleted)
-                return ServiceResult.Failure("Product has been discontinued or removed.");
-
             DbContext.Update(product).CurrentValues.SetValues(updatedProductViewModel);
             await DbContext.SaveChangesAsync();
             await _activityService.LogActivityAsync<Product>(
                 staffId,
                 OperationType.Modify,
                 $"updated general information of product named {product.Name}.");
+
             return ServiceResult.Success();
         }
         catch (Exception exception)
         {
-            _logger.LogError($"Failed to update product with ID {productId}: {exception.Message}.");
+            _logger.LogError($"Failed to update product with ID {productId}");
+            _logger.LogDebug(exception, exception.Message);
             return ServiceResult.InternalFailure();
         }
     }
@@ -168,8 +175,9 @@ internal class ProductService : ServiceBase, IProductService
     {
         var product = await DbContext.Product.FindAsync(productId);
         if (product == null)
-            return ServiceResult.Failure(
-                $"Failed to update stock of product with ID {productId} because it was not found.");
+        {
+            return ServiceResult.Failure($"Failed to update stock of product with ID {productId} because it was not found.");
+        }
 
         try
         {
@@ -188,7 +196,7 @@ internal class ProductService : ServiceBase, IProductService
         catch (Exception exception)
         {
             _logger.LogCritical($"Failed to update stock of product with ID {product.Id}.");
-            _logger.LogDebug($"Exception: {exception.Message}");
+            _logger.LogDebug(exception, exception.Message);
             return ServiceResult.InternalFailure();
         }
     }
@@ -197,8 +205,9 @@ internal class ProductService : ServiceBase, IProductService
     {
         var product = await DbContext.Product.FindAsync(productId);
         if (product == null)
-            return ServiceResult.Failure(
-                $"Failed to update price of product with ID {productId} because it was not found.");
+        {
+            return ServiceResult.Failure($"Failed to update price of product with ID {productId} because it was not found.");
+        }
 
         try
         {
@@ -216,7 +225,7 @@ internal class ProductService : ServiceBase, IProductService
         catch (Exception exception)
         {
             _logger.LogError($"Failed to update general information of product with ID {productId}.");
-            _logger.LogDebug($"Exception message: {exception.Message}");
+            _logger.LogDebug(exception, exception.Message);
             return ServiceResult.InternalFailure();
         }
     }
@@ -274,7 +283,7 @@ internal class ProductService : ServiceBase, IProductService
 
         if (discontinuedProducts.Any())
             return ServiceResult.Failure(
-                $"Failed to discontinue of product with the following IDs: {string.Join(", ", discontinuedProducts)} because they were already discontinued.");
+                $"Failed to discontinue product with the following IDs: {string.Join(", ", discontinuedProducts)} because they were already discontinued.");
 
         var now = DateTime.Now;
         if (updateSchedule < now)

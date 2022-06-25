@@ -7,7 +7,7 @@ namespace XWave.Core.Utils;
 
 public class ProductDtoMapper
 {
-    public static DetailedProductDto MapDetailedProductDto(Product product)
+    public DetailedProductDto MapDetailedProductDto(Product product)
     {
         return new DetailedProductDto
         {
@@ -23,7 +23,7 @@ public class ProductDtoMapper
         };
     }
 
-    public static ProductDto MapCustomerProductDto(Product product, decimal? discountedPrice = null)
+    public ProductDto MapCustomerProductDto(Product product, decimal? discountedPrice = null)
     {
         DiscountDto? discountDto = null;
         if (product.Discount != null && DateTime.Now.IsBetween(product.Discount.StartDate, product.Discount.EndDate))

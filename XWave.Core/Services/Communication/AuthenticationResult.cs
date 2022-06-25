@@ -1,4 +1,4 @@
-﻿namespace XWave.Core.Services.ResultTemplate;
+﻿namespace XWave.Core.Services.Communication;
 
 public record AuthenticationResult
 {

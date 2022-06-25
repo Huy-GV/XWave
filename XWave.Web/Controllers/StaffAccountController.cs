@@ -6,8 +6,8 @@ using XWave.Web.Extensions;
 using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Management;
 using XWave.Core.Services.Interfaces;
-using XWave.Core.Services.ResultTemplate;
 using XWave.Core.ViewModels.Management;
+using XWave.Core.Services.Communication;
 
 namespace XWave.Web.Controllers;
 

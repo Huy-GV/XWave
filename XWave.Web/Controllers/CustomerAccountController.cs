@@ -6,9 +6,9 @@ using XWave.Core.Configuration;
 using XWave.Web.Extensions;
 using XWave.Core.Data.Constants;
 using XWave.Core.Services.Interfaces;
-using XWave.Core.Services.ResultTemplate;
 using XWave.Core.ViewModels.Authentication;
 using XWave.Web.Utils;
+using XWave.Core.Services.Communication;
 
 namespace XWave.Web.Controllers;
 

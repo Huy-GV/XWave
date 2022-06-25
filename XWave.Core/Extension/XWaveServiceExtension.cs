@@ -10,6 +10,7 @@ using XWave.Core.Models;
 using XWave.Core.Services.Implementations;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Utils;
+using XWave.Core.Data.DatabaseSeeding.Seeders;
 
 namespace XWave.Core.Extension;
 

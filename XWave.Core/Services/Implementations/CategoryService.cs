@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using XWave.Core.Data;
 using XWave.Core.Models;
+using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
-using XWave.Core.Services.ResultTemplate;
 
 namespace XWave.Core.Services.Implementations;
 

@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.DTOs.Customers;
 using XWave.Core.Models;
+using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
-using XWave.Core.Services.ResultTemplate;
 using XWave.Core.ViewModels.Customers;
 
 namespace XWave.Core.Services.Implementations;

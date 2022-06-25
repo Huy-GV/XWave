@@ -5,7 +5,9 @@ VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave.Web", "XWave.Web\XWave.Web.csproj", "{530C0622-7967-41C5-840F-894BE86087A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XWave.Core", "XWave.Core\XWave.Core.csproj", "{1F7F7438-3DD0-4638-882C-99CBB218339E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave.Core", "XWave.Core\XWave.Core.csproj", "{1F7F7438-3DD0-4638-882C-99CBB218339E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XWave.Test", "XWave.Test\XWave.Test\XWave.Test.csproj", "{7F335F9B-9098-4511-8B42-F9A28D6D2047}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{1F7F7438-3DD0-4638-882C-99CBB218339E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F7F7438-3DD0-4638-882C-99CBB218339E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F7F7438-3DD0-4638-882C-99CBB218339E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F335F9B-9098-4511-8B42-F9A28D6D2047}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F335F9B-9098-4511-8B42-F9A28D6D2047}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F335F9B-9098-4511-8B42-F9A28D6D2047}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F335F9B-9098-4511-8B42-F9A28D6D2047}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,4 @@
-﻿using XWave.Core.Services.ResultTemplate;
+﻿using XWave.Core.Services.Communication;
 using XWave.Core.ViewModels.Authentication;
 
 namespace XWave.Core.Services.Interfaces;

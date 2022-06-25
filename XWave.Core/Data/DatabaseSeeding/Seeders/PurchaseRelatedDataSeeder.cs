@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Models;
 
-namespace XWave.Core.Data.DatabaseSeeding;
+namespace XWave.Core.Data.DatabaseSeeding.Seeders;
 
 internal class PurchaseRelatedDataSeeder
 {
