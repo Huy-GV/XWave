@@ -18,6 +18,7 @@ namespace XWave.Test.Services
     public class ProductServiceTest : BaseTest
     {
         private readonly IProductService _productService;
+        private readonly Mock<IBackgroundJobService> _mockBackgroundJobService = new();
         private readonly Mock<ILogger<ProductService>> _mockLog = new();
         private readonly Mock<IActivityService> _mockActivityService = new();
         private readonly ProductDtoMapper _productMapper = new();
@@ -42,6 +43,7 @@ namespace XWave.Test.Services
             _productService = new ProductService(
                 dbContext,
                 _mockActivityService.Object,
+                _mockBackgroundJobService.Object,
                 _productMapper,
                 _mockLog.Object);
         }
@@ -57,7 +59,11 @@ namespace XWave.Test.Services
                 DateTime.MaxValue)
                 .Result
                 .Should()
-                .BeEquivalentTo(ServiceResult.Failure($"Failed to discontinue product with the following IDs: {string.Join(", ", new[] { nonExistentProductId })} because they were not found."));
+                .BeEquivalentTo(ServiceResult.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityInvalidState,
+                    Message = $"Products with the following IDs not found: {string.Join(", ", new[] { nonExistentProductId })}.",
+                }));
         }
 
         [TestMethod]
@@ -70,7 +76,11 @@ namespace XWave.Test.Services
                 DateTime.MaxValue)
                 .Result
                 .Should()
-                .BeEquivalentTo(ServiceResult.Failure($"Failed to discontinue product with the following IDs: {string.Join(", ", new[] { discontinuedProductId })} because they were already discontinued."));
+                .BeEquivalentTo(ServiceResult.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityInvalidState,
+                    Message = $"Failed to discontinue product with the following IDs: {string.Join(", ", new[] { discontinuedProductId })} because they were already discontinued."
+                }));
         }
 
         [TestMethod]
@@ -85,7 +95,11 @@ namespace XWave.Test.Services
                 DateTime.Now.AddDays(-10))
                 .Result
                 .Should()
-                .BeEquivalentTo(ServiceResult.Failure("Scheduled sale discontinuation date must be in the future."));
+                .BeEquivalentTo(ServiceResult.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.InvalidUserRequest,
+                    Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
+                }));
         }
 
         [TestMethod]
@@ -101,7 +115,11 @@ namespace XWave.Test.Services
                 DateTime.Now.AddDays(randomDay))
                 .Result
                 .Should()
-                .BeEquivalentTo(ServiceResult.Failure("Scheduled sale discontinuation date must be at least 1 week in the future."));
+                .BeEquivalentTo(ServiceResult.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.InvalidUserRequest,
+                    Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
+                }));
         }
     }
 }
