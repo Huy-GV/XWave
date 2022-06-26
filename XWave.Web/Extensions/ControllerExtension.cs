@@ -11,11 +11,6 @@ public static class ControllerExtension
         return controller.StatusCode((int)HttpStatusCode.Created, new { url });
     }
 
-    public static ActionResult XWaveBadRequest(this ControllerBase controller, params string[] errors)
-    {
-        return controller.BadRequest(XWaveResponse.Failed(errors));
-    }
-
     public static ActionResult XWaveUpdated(this ControllerBase controller, string url)
     {
         return controller.Ok(url);

@@ -14,11 +14,15 @@ internal class HangFireBackgroundJobService : IBackgroundJobService
 
     public Task<ServiceResult> CancelJobAsync(object jobId)
     {
-        if (jobId is string hangfireJobId)
-            return Task.FromResult(BackgroundJob.Delete(hangfireJobId)
-                ? ServiceResult.Success()
-                : ServiceResult.Failure($"Failed to remove background job ID {hangfireJobId}."));
+        if (jobId is string hangfireJobId && BackgroundJob.Delete(hangfireJobId))
+        {
+            return Task.FromResult(ServiceResult.Success());
+        }
 
-        return Task.FromResult(ServiceResult.Failure("Invalid scheduled job ID."));
+        return Task.FromResult(ServiceResult.Failure(new Error
+        {
+            ErrorCode = ErrorCode.EntityNotFound,
+            Message = $"Failed to remove background job ID {jobId}."
+        }));
     }
 }

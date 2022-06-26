@@ -24,7 +24,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         _activityService = activityService;
     }
 
-    public async Task<(ServiceResult, int? DiscountId)> CreateDiscountAsync(string managerId,
+    public async Task<ServiceResult<int>> CreateDiscountAsync(string managerId,
         DiscountViewModel discountViewModel)
     {
         var newDiscount = new Discount();
@@ -36,7 +36,7 @@ internal class DiscountService : ServiceBase, IDiscountService
             OperationType.Create,
             $"created discount with ID {newDiscount.Id}.");
 
-        return (ServiceResult.Success(), newDiscount.Id);
+        return ServiceResult<int>.Success(newDiscount.Id);
     }
 
     public async Task<IEnumerable<Product>> FindProductsWithDiscountIdAsync(int discountId)
@@ -46,23 +46,30 @@ internal class DiscountService : ServiceBase, IDiscountService
             .ToListAsync();
     }
 
-    public async Task<ServiceResult> RemoveDiscountAsync(string managerId, int id)
+    public async Task<ServiceResult> RemoveDiscountAsync(string managerId, int discountId)
     {
-        var discount = await DbContext.Discount.FindAsync(id);
-        if (discount == null) return ServiceResult.Failure($"Discount with ID {id} not found.");
+        var discount = await DbContext.Discount.FindAsync(discountId);
+        if (discount == null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"Discount with ID {discountId} was not found.",
+            });
+        }
 
         var percentage = discount.Percentage;
         await using var transaction = await DbContext.Database.BeginTransactionAsync();
         try
         {
             // start tracking items to avoid FK constraint errors because Delete.ClientSetNull actually does NOT work
-            await DbContext.Product.Where(d => d.DiscountId == id).LoadAsync();
+            await DbContext.Product.Where(d => d.DiscountId == discountId).LoadAsync();
             DbContext.Discount.Remove(discount);
             await DbContext.SaveChangesAsync();
             await _activityService.LogActivityAsync<Discount>(
                 managerId,
                 OperationType.Delete,
-                $"removed a {percentage} discount with ID {id}.");
+                $"removed a {percentage} discount with ID {discountId}.");
 
             await transaction.CommitAsync();
             return ServiceResult.Success();
@@ -70,9 +77,9 @@ internal class DiscountService : ServiceBase, IDiscountService
         catch (Exception exception)
         {
             await transaction.RollbackAsync();
-            _logger.LogError($"Failed to remove discount with ID {id}");
+            _logger.LogError($"Failed to remove discount with ID {discountId}");
             _logger.LogError(exception.Message);
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 
@@ -90,11 +97,18 @@ internal class DiscountService : ServiceBase, IDiscountService
         return discount == null ? null : DiscountDtoMapper.MapDetailedDiscountDto(discount);
     }
 
-    public async Task<ServiceResult> UpdateDiscountAsync(string managerId, int id,
+    public async Task<ServiceResult> UpdateDiscountAsync(string managerId, int discountId,
         DiscountViewModel updatedDiscountViewModel)
     {
-        var discount = await DbContext.Discount.FindAsync(id);
-        if (discount == null) return ServiceResult.Failure("Not found");
+        var discount = await DbContext.Discount.FindAsync(discountId);
+        if (discount == null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"Discount with ID {discountId} was not found.",
+            });
+        }
 
         var entry = DbContext.Discount.Update(discount);
         entry.CurrentValues.SetValues(updatedDiscountViewModel);
@@ -102,7 +116,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         await _activityService.LogActivityAsync<Discount>(
             managerId,
             OperationType.Delete,
-            $"removed discount with ID {id}.");
+            $"removed discount with ID {discountId}.");
 
         return ServiceResult.Success();
     }
@@ -111,7 +125,14 @@ internal class DiscountService : ServiceBase, IDiscountService
         IEnumerable<int> productIds)
     {
         var discount = await DbContext.Discount.FindAsync(discountId);
-        if (discount == null) return ServiceResult.Failure($"Discount with ID {discountId} was not found.");
+        if (discount == null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"Discount with ID {discountId} was not found.",
+            });
+        }
 
         var appliedProducts = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
         DbContext.Product.UpdateRange(appliedProducts.Select(x =>
@@ -135,7 +156,14 @@ internal class DiscountService : ServiceBase, IDiscountService
         var discount = await DbContext.Discount
             .SingleOrDefaultAsync(d => d.Id == discountId);
 
-        if (discount == null) return ServiceResult.Failure($"Discount with ID {discountId} was not found.");
+        if (discount == null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"Discount with ID {discountId} was not found.",
+            });
+        }
 
         var appliedProducts = await DbContext.Product
             .Where(x => productIds.Contains(x.Id))
@@ -146,8 +174,13 @@ internal class DiscountService : ServiceBase, IDiscountService
             .ToArray();
 
         if (productsWithoutDiscount.Any())
-            return ServiceResult.Failure(
-                $"Discount with ID {discountId} is not applied to product with the following IDs: {string.Join(", ", productsWithoutDiscount.Select(p => p.Id))}.");
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityInconsistentStates,
+                Message = $"Discount with ID {discountId} is not applied to the following products: {string.Join(", ", productsWithoutDiscount.Select(p => p.Name))}.",
+            });
+        }
 
         DbContext.Product.UpdateRange(appliedProducts.Select(p =>
         {

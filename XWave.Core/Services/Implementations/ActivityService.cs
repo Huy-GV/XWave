@@ -44,7 +44,7 @@ internal class ActivityService : ServiceBase, IActivityService
         {
             _logger.LogError($"Failed to log activiy create for staff ID {staffId}.");
             _logger.LogError($"Exception message: {exception}.");
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 

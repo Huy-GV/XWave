@@ -21,7 +21,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         _userManager = userManager;
     }
 
-    public Task<(ServiceResult, string? StaffId)> RegisterStaffAccount(string id,
+    public Task<ServiceResult<string>> RegisterStaffAccount(string id,
         StaffAccountViewModel registerStaffViewModel)
     {
         try
@@ -34,11 +34,11 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
                 HourlyWage = registerStaffViewModel.HourlyWage
             });
 
-            return Task.FromResult<(ServiceResult, string? StaffId)>((ServiceResult.Success(), id));
+            return Task.FromResult(ServiceResult<string>.Success(id));
         }
         catch (Exception)
         {
-            return Task.FromResult<(ServiceResult, string? StaffId)>((ServiceResult.InternalFailure(), null));
+            return Task.FromResult(ServiceResult<string>.DefaultFailure());
         }
     }
 
@@ -75,7 +75,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         }
         catch
         {
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 
@@ -111,7 +111,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         {
             await transaction.RollbackAsync();
 
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 

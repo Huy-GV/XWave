@@ -55,9 +55,9 @@ public class DiscountController : ControllerBase
     public async Task<ActionResult> CreateAsync([FromBody] DiscountViewModel newDiscount)
     {
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        var (result, productId) = await _discountService.CreateDiscountAsync(userId, newDiscount);
+        var result = await _discountService.CreateDiscountAsync(userId, newDiscount);
         return result.Succeeded
-            ? this.XWaveCreated($"https://localhost:5001/api/discount/{productId}")
+            ? this.XWaveCreated($"https://localhost:5001/api/discount/{result.Value}")
             : UnprocessableEntity(result.Errors);
     }
 

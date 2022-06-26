@@ -1,5 +1,8 @@
-﻿namespace XWave.Web.Data;
+﻿using System;
 
+namespace XWave.Web.Data;
+
+[Obsolete]
 public static class XWaveResponse
 {
     public static object Failed(params string[] errors)

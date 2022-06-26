@@ -36,7 +36,7 @@ public class CustomerAccountController : ControllerBase
         [FromBody] RegisterCustomerViewModel viewModel)
     {
         var result = await _customerAccountService.RegisterCustomerAsync(viewModel);
-        if (!result.Succeeded) return this.XWaveBadRequest(result.Error);
+        if (!result.Succeeded) return BadRequest(result.Error);
 
         if (Request.Cookies.ContainsKey(_jwtCookieOptions.Name)) Response.Cookies.Delete(_jwtCookieOptions.Name);
 

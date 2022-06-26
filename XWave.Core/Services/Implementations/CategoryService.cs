@@ -17,7 +17,7 @@ internal class CategoryService : ServiceBase, ICategoryService
         _activityService = activityService;
     }
 
-    public async Task<(ServiceResult, int? CategoryId)> AddCategoryAsync(string managerUserName, Category category)
+    public async Task<ServiceResult<int>> AddCategoryAsync(string managerUserName, Category category)
     {
         try
         {
@@ -28,11 +28,11 @@ internal class CategoryService : ServiceBase, ICategoryService
                 OperationType.Create,
                 $"created a category named {category.Name}");
 
-            return (ServiceResult.Success(), category.Id);
+            return ServiceResult<int>.Success(category.Id);
         }
         catch
         {
-            return (ServiceResult.InternalFailure(), null);
+            return ServiceResult<int>.DefaultFailure();
         }
     }
 
@@ -41,7 +41,14 @@ internal class CategoryService : ServiceBase, ICategoryService
         try
         {
             var category = await DbContext.Category.FindAsync(id);
-            if (category == null) return ServiceResult.Failure($"Category with ID {id} not found.");
+            if (category == null)
+            {
+                return ServiceResult.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityNotFound,
+                    Message = $"Category with ID {id} not found.",
+                });
+            }
 
             var categoryName = category.Name;
             DbContext.Category.Remove(category);
@@ -54,7 +61,7 @@ internal class CategoryService : ServiceBase, ICategoryService
         }
         catch
         {
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 
@@ -73,7 +80,14 @@ internal class CategoryService : ServiceBase, ICategoryService
         try
         {
             var category = await DbContext.Category.FindAsync(id);
-            if (category == null) return ServiceResult.Failure($"Category with ID {id} not found.");
+            if (category == null)
+            {
+                return ServiceResult.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityNotFound,
+                    Message = $"Category with ID {id} not found.",
+                });
+            }
 
             category.Description = updatedCategory.Description;
             category.Name = updatedCategory.Name;
@@ -88,7 +102,7 @@ internal class CategoryService : ServiceBase, ICategoryService
         }
         catch
         {
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 }

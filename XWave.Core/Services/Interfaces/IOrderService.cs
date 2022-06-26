@@ -12,7 +12,7 @@ public interface IOrderService
     /// <param name="purchaseViewModel">ViewModel containing details of a purchase.</param>
     /// <param name="customerId">ID of customer who made the purchase.</param>
     /// <returns></returns>
-    Task<(ServiceResult, int? OrderId)> AddOrderAsync(PurchaseViewModel purchaseViewModel, string customerId);
+    Task<ServiceResult<int>> AddOrderAsync(PurchaseViewModel purchaseViewModel, string customerId);
 
     /// <summary>
     ///     Find all orders made by a customer.

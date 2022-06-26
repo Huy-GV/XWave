@@ -31,7 +31,7 @@ internal class OrderService : ServiceBase, IOrderService
         return (await FindAllOrdersAsync(customerId)).SingleOrDefault(o => o.Id == orderId);
     }
 
-    public async Task<(ServiceResult, int? OrderId)> AddOrderAsync(
+    public async Task<ServiceResult<int>> AddOrderAsync(
         PurchaseViewModel purchaseViewModel,
         string customerId)
     {
@@ -40,13 +40,33 @@ internal class OrderService : ServiceBase, IOrderService
         {
             if (!await DbContext.CustomerAccount.AnyAsync(c => c.CustomerId == customerId) ||
                 !await _authenticationService.UserExists(customerId))
-                return (ServiceResult.Failure("Customer account not found."), null);
+            {
+                // todo: move to another static class to avoid duplicate generic parameter?
+                return ServiceResult<int>.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityNotFound,
+                    Message = "Customer account not found."
+                });
+            }
 
             var paymentAccount = await DbContext.PaymentAccount.FindAsync(purchaseViewModel.PaymentAccountId);
-            if (paymentAccount == null) return (ServiceResult.Failure("Payment account not found."), null);
+            if (paymentAccount == null)
+            {
+                return ServiceResult<int>.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityNotFound,
+                    Message = "Payment account not found."
+                });
+            }
 
             if (paymentAccount.ExpiryDate > DateTime.Now)
-                return (ServiceResult.Failure("Could not proceed because selected payment account expired."), null);
+            {
+                return ServiceResult<int>.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityInvalidState,
+                    Message = "Selected payment account expired."
+                });
+            }
 
             var order = new Order
             {
@@ -66,32 +86,51 @@ internal class OrderService : ServiceBase, IOrderService
                 .ToArray();
 
             if (missingProductNames.Any())
-                return (
-                    ServiceResult.Failure(
-                        $"Error: the following products were not found: {string.Join(", ", missingProductNames)}."),
-                    null);
+            {
+                return ServiceResult<int>.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityNotFound,
+                    Message = $"The following products were not found: { string.Join(", ", missingProductNames) }.",
+                });
+            }
 
             var purchasedProducts = new List<Product>();
             var orderDetails = new List<OrderDetails>();
-            var errorMessages = new List<string>();
+            var errors = new List<Error>();
 
             foreach (var productInCart in purchaseViewModel.Cart)
             {
                 var product = productsToPurchase[productInCart.ProductId];
                 if (product.Quantity < productInCart.Quantity)
-                    errorMessages.Add($"Quantity of product named {product.Name} exceeded existing stock.");
+                {
+                    errors.Add(new Error
+                    {
+                        ErrorCode = ErrorCode.EntityInvalidState,
+                        Message = $"Quantity of product {product.Name} exceeded existing stock.",
+                    });
+                }
 
                 //prevent customers from ordering based on incorrect data
                 if (product.Discount?.Percentage != productInCart.DisplayedDiscountPercentage)
-                    errorMessages.Add(
-                        $"Discount percentage has been changed during the transaction. Please view the latest price for the item {product.Name}.");
+                {
+                    errors.Add(new Error
+                    {
+                        ErrorCode = ErrorCode.EntityInconsistentStates,
+                        Message = $"Discount percentage of product {product.Name} has been changed during the transaction.",
+                    });
+                }
 
                 if (product.Price != productInCart.DisplayedPrice)
-                    errorMessages.Add(
-                        $"Price has been changed during the transaction. Please view the latest price for the item {product.Name}.");
+                {
+                    errors.Add(new Error
+                    {
+                        ErrorCode = ErrorCode.EntityInconsistentStates,
+                        Message = $"Price of product {product.Name} has been changed during the transaction.",
+                    });
+                }
 
                 // move to validate remaining products without processing any of them.
-                if (errorMessages.Any()) continue;
+                if (errors.Count > 0) continue;
 
                 var purchasePrice = product.Discount == null
                     ? product.Price
@@ -107,7 +146,10 @@ internal class OrderService : ServiceBase, IOrderService
                 });
             }
 
-            if (errorMessages.Any()) return (ServiceResult.Failure(errorMessages.ToArray()), null);
+            if (errors.Count > 0)
+            {
+                return ServiceResult<int>.Failure(errors);
+            }
 
             DbContext.Order.Add(order);
             await DbContext.SaveChangesAsync();
@@ -121,7 +163,7 @@ internal class OrderService : ServiceBase, IOrderService
             await DbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return (ServiceResult.Success(), order.Id);
+            return ServiceResult<int>.Success(order.Id);
         }
         catch (Exception exception)
         {
@@ -129,7 +171,7 @@ internal class OrderService : ServiceBase, IOrderService
             _logger.LogError($"Failed to place order for customer ID {customerId}");
             _logger.LogError($"Exception message: {exception.Message}");
 
-            return (ServiceResult.InternalFailure(), null);
+            return ServiceResult<int>.Failure(Error.Default());
         }
     }
 

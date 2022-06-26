@@ -42,7 +42,7 @@ public class PaymentAccountController : ControllerBase
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         return string.IsNullOrEmpty(customerId)
-            ? this.XWaveBadRequest("Customer Id is empty.")
+            ? Forbid()
             : Ok(await _paymentService.FindPaymentAccountSummary(customerId));
     }
 
@@ -56,7 +56,10 @@ public class PaymentAccountController : ControllerBase
 
         var result = await _paymentService.RemovePaymentAccountAsync(customerId, paymentId);
 
-        if (!result.Succeeded) return this.XWaveBadRequest(result.Errors.ToArray());
+        if (!result.Succeeded)
+        {
+            return UnprocessableEntity(result.Errors);
+        };
 
         return NoContent();
     }
@@ -71,7 +74,7 @@ public class PaymentAccountController : ControllerBase
 
         var result = await _paymentService.UpdatePaymentAccountAsync(customerId, id, viewModel);
         return !result.Succeeded
-            ? this.XWaveBadRequest(result.Errors.ToArray())
+            ? UnprocessableEntity(result.Errors)
             : this.XWaveUpdated($"https://localhost:5001/api/payment/details/{id}");
     }
 
@@ -80,10 +83,10 @@ public class PaymentAccountController : ControllerBase
     public async Task<ActionResult> CreatePaymentAsync([FromBody] PaymentAccountViewModel inputPayment)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        var (result, paymentAccountId) = await _paymentService.AddPaymentAccountAsync(customerId, inputPayment);
+        var result = await _paymentService.AddPaymentAccountAsync(customerId, inputPayment);
 
         return !result.Succeeded
-            ? this.XWaveBadRequest(result.Errors.ToArray())
-            : this.XWaveCreated($"https://localhost:5001/api/payment/details/{paymentAccountId}");
+            ? UnprocessableEntity(result.Errors)
+            : this.XWaveCreated($"https://localhost:5001/api/payment/details/{result.Value}");
     }
 }

@@ -33,7 +33,7 @@ public interface IProductService
     /// <returns>A DTO containing details of the product.</returns>
     Task<DetailedProductDto?> FindProductByIdForStaff(int id);
 
-    Task<(ServiceResult, int? ProductId)> AddProductAsync(string staffId, ProductViewModel productViewModel);
+    Task<ServiceResult<int>> AddProductAsync(string staffId, ProductViewModel productViewModel);
 
     /// <summary>
     ///     Update general information (Name, Description, and Price) of a product.

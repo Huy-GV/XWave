@@ -21,7 +21,7 @@ internal class PaymentService : ServiceBase, IPaymentService
         _logger = logger;
     }
 
-    public async Task<(ServiceResult, int? PaymentAccountId)> AddPaymentAccountAsync(string customerId,
+    public async Task<ServiceResult<int>> AddPaymentAccountAsync(string customerId,
         PaymentAccountViewModel inputPayment)
     {
         await using var transaction = await DbContext.Database.BeginTransactionAsync();
@@ -39,37 +39,37 @@ internal class PaymentService : ServiceBase, IPaymentService
                 existingPaymentAccount.IsDeleted = false;
                 existingPaymentAccount.DeleteDate = null;
 
-                return (ServiceResult.Success(), existingPaymentAccount.Id);
+                return ServiceResult<int>.Success(existingPaymentAccount.Id);
             }
 
-            var newPayment = new PaymentAccount
+            var newPaymentAccount = new PaymentAccount
             {
                 AccountNumber = inputPayment.AccountNumber,
                 Provider = inputPayment.Provider,
                 ExpiryDate = inputPayment.ExpiryDate
             };
 
-            DbContext.PaymentAccount.Add(newPayment);
+            DbContext.PaymentAccount.Add(newPaymentAccount);
             await DbContext.SaveChangesAsync();
 
             var newTransactionDetails = new PaymentAccountDetails
             {
                 CustomerId = customerId,
-                PaymentAccountId = newPayment.Id
+                PaymentAccountId = newPaymentAccount.Id
             };
 
             DbContext.PaymentAccountDetails.Add(newTransactionDetails);
             await DbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return (ServiceResult.Success(), newPayment.Id);
+            return ServiceResult<int>.Success(newPaymentAccount.Id);
         }
         catch (Exception exception)
         {
             _logger.LogError($"Exception: {exception.Message}");
             await transaction.RollbackAsync();
 
-            return (ServiceResult.InternalFailure(), null);
+            return ServiceResult<int>.DefaultFailure();
         }
     }
 
@@ -100,7 +100,14 @@ internal class PaymentService : ServiceBase, IPaymentService
         PaymentAccountViewModel updatedPayment)
     {
         var payment = await DbContext.PaymentAccount.FindAsync(id);
-        if (payment == null) return ServiceResult.Failure($"Payment account for user ID {id} not found.");
+        if (payment == null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"Payment account for user ID {id} not found.",
+            });
+        }
 
         DbContext.Update(payment).CurrentValues.SetValues(updatedPayment);
         await DbContext.SaveChangesAsync();

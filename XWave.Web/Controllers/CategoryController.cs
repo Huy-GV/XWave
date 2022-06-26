@@ -44,9 +44,9 @@ public class CategoryController : ControllerBase
     public async Task<ActionResult> CreateAsync([FromBody] Category newCategory)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        var (result, categoryId) = await _categoryService.AddCategoryAsync(managerId, newCategory);
+        var result = await _categoryService.AddCategoryAsync(managerId, newCategory);
         return result.Succeeded
-            ? this.XWaveCreated($"https://localhost:5001/api/category/admin/{categoryId}")
+            ? this.XWaveCreated($"https://localhost:5001/api/category/admin/{result.Value}")
             : UnprocessableEntity(result.Errors);
     }
 

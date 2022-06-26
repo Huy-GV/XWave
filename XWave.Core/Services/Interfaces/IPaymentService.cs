@@ -7,7 +7,7 @@ namespace XWave.Core.Services.Interfaces;
 
 public interface IPaymentService
 {
-    Task<(ServiceResult, int? PaymentAccountId)> AddPaymentAccountAsync(string customerId,
+    Task<ServiceResult<int>> AddPaymentAccountAsync(string customerId,
         PaymentAccountViewModel newPaymentAccount);
 
     /// <summary>

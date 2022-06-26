@@ -32,15 +32,22 @@ internal class ProductService : ServiceBase, IProductService
         _logger = logger;
     }
 
-    public async Task<(ServiceResult, int? ProductId)> AddProductAsync(string staffId,
+    public async Task<ServiceResult<int>> AddProductAsync(string staffId,
         ProductViewModel productViewModel)
     {
         try
         {
             _logger.LogInformation(
                 $"User with ID {staffId} is attempting to add product named {productViewModel.Name}");
+
             if (!await DbContext.Category.AnyAsync(c => c.Id == productViewModel.CategoryId))
-                return (ServiceResult.Failure("Category not found"), null);
+            {
+                return ServiceResult<int>.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityNotFound,
+                    Message = "Category not found",
+                });
+            }
 
             var newProduct = new Product();
             var entry = DbContext.Product.Add(newProduct);
@@ -51,12 +58,12 @@ internal class ProductService : ServiceBase, IProductService
                 OperationType.Create,
                 $"added product named {newProduct.Name} and priced ${newProduct.Price}");
 
-            return (ServiceResult.Success(), newProduct.Id);
+            return ServiceResult<int>.Success(newProduct.Id);
         }
         catch (Exception exception)
         {
             _logger.LogError($"Failed to create product: {exception.Message}.");
-            return (ServiceResult.InternalFailure(), null);
+            return ServiceResult<int>.DefaultFailure();
         }
     }
 
@@ -80,7 +87,7 @@ internal class ProductService : ServiceBase, IProductService
         catch (Exception exception)
         {
             _logger.LogError($"Failed to delete product: {exception.Message}.");
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 
@@ -169,7 +176,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             _logger.LogError($"Failed to update product with ID {productId}");
             _logger.LogDebug(exception, exception.Message);
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 
@@ -199,7 +206,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             _logger.LogCritical($"Failed to update stock of product with ID {product.Id}.");
             _logger.LogDebug(exception, exception.Message);
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 
@@ -228,7 +235,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             _logger.LogError($"Failed to update general information of product with ID {productId}.");
             _logger.LogDebug(exception, exception.Message);
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 

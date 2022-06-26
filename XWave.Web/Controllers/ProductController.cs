@@ -65,9 +65,9 @@ public class ProductController : ControllerBase
     public async Task<ActionResult> CreateAsync([FromBody] ProductViewModel productViewModel)
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        var (result, productId) = await _productService.AddProductAsync(staffId, productViewModel);
+        var result = await _productService.AddProductAsync(staffId, productViewModel);
         return result.Succeeded
-            ? this.XWaveCreated($"https://localhost:5001/api/product/staff/{productId}")
+            ? this.XWaveCreated($"https://localhost:5001/api/product/staff/{result.Value}")
             : UnprocessableEntity(result.Errors);
     }
 
@@ -130,7 +130,7 @@ public class ProductController : ControllerBase
         var result = await _productService.DiscontinueProductAsync(managerId, ids, updateSchedule);
         return result.Succeeded
             ? NoContent()
-            : UnprocessableEntity(result.Errors);
+            : UnprocessableEntity(result.ErrorMessages);
     }
 
     [HttpPut("{id:int}/restart-sale/{updateSchedule:datetime}")]

@@ -10,6 +10,7 @@
         <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
         <AssemblyName>XWave.Web</AssemblyName>
         <RootNamespace>XWave.Web</RootNamespace>
+        <Configurations>Debug;Release;Test</Configurations>
     </PropertyGroup>
 
     <ItemGroup>

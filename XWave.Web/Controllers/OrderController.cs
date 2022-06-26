@@ -54,12 +54,15 @@ public class OrderController : ControllerBase
     public async Task<IActionResult> CreateOrder([FromBody] PurchaseViewModel purchaseViewModel)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        if (string.IsNullOrEmpty(customerId)) return this.XWaveBadRequest("Customer ID not found.");
+        if (string.IsNullOrEmpty(customerId))
+        {
+            return Forbid();
+        }
 
-        var (result, orderId) = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
+        var result = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
 
         if (!result.Succeeded) return UnprocessableEntity(result.Errors);
 
-        return this.XWaveCreated($"https://localhost:5001/api/order/{orderId}");
+        return this.XWaveCreated($"https://localhost:5001/api/order/{result.Value}");
     }
 }

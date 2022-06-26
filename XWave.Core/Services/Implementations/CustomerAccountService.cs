@@ -48,7 +48,14 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         try
         {
             var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
-            if (customerAccount == null) return ServiceResult.Failure("User account not found.");
+            if (customerAccount == null)
+            {
+                return ServiceResult.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityNotFound,
+                    Message = $"Customer account with ID {id} not found.",
+                });
+            }
 
             DbContext.CustomerAccount.Update(customerAccount);
             customerAccount.IsSubscribedToPromotions = isSubscribed;
@@ -60,7 +67,7 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         {
             _logger.LogCritical($"Failed to update subscription status of customer ID {id}");
             _logger.LogError($"Exception message: {exception.Message}");
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 
@@ -69,7 +76,14 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         try
         {
             var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
-            if (customerAccount == null) return ServiceResult.Failure("User account not found.");
+            if (customerAccount == null)
+            {
+                return ServiceResult.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityNotFound,
+                    Message = $"Customer account with ID {id} not found.",
+                });
+            }
 
             var entry = DbContext.CustomerAccount.Update(customerAccount);
             entry.CurrentValues.SetValues(viewModel);
@@ -81,7 +95,7 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         {
             _logger.LogError($"Failed to update customer account of user ID {id}");
             _logger.LogError($"Exception message: {exception.Message}");
-            return ServiceResult.InternalFailure();
+            return ServiceResult.DefaultFailure();
         }
     }
 }
