@@ -72,7 +72,14 @@ internal class ProductService : ServiceBase, IProductService
         try
         {
             var product = await DbContext.Product.FindAsync(productId);
-            if (product == null) return ServiceResult.Failure($"Product with ID {productId} not found");
+            if (product == null)
+            {
+                return ServiceResult<int>.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityNotFound,
+                    Message = "Product not found",
+                });
+            }
 
             DbContext.Product.Update(product);
             product.SoftDelete();
@@ -153,12 +160,20 @@ internal class ProductService : ServiceBase, IProductService
         var product = await DbContext.Product.FindAsync(productId);
         if (product == null)
         {
-            return ServiceResult.Failure($"Product with ID {productId} not found");
+            return ServiceResult<int>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = "Product not found.",
+            });
         }
 
         if (product.IsDiscontinued || product.IsDeleted)
         {
-            return ServiceResult.Failure("Product has been discontinued or removed.");
+            return ServiceResult<int>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityInvalidState,
+                Message = "Product removed or discontinued.",
+            });
         }
 
         try
@@ -185,7 +200,11 @@ internal class ProductService : ServiceBase, IProductService
         var product = await DbContext.Product.FindAsync(productId);
         if (product == null)
         {
-            return ServiceResult.Failure($"Failed to update stock of product with ID {productId} because it was not found.");
+            return ServiceResult<int>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = "Product not found.",
+            });
         }
 
         try
@@ -215,7 +234,11 @@ internal class ProductService : ServiceBase, IProductService
         var product = await DbContext.Product.FindAsync(productId);
         if (product == null)
         {
-            return ServiceResult.Failure($"Failed to update price of product with ID {productId} because it was not found.");
+            return ServiceResult<int>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = "Product not found.",
+            });
         }
 
         try
@@ -244,19 +267,21 @@ internal class ProductService : ServiceBase, IProductService
     {
         if (!await DbContext.Product.AnyAsync(p => p.Id == productId))
         {
-            return ServiceResult.Failure(
-                $"Failed to update price of product with ID {productId} because it was not found.");
+            return ServiceResult<int>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = "Product not found.",
+            });
         }
 
         var now = DateTime.Now;
-        if (updateSchedule < now)
+        if (updateSchedule < now || updateSchedule < now.AddDays(7))
         {
-            return ServiceResult.Failure("Scheduled update date must be in the future.");
-        }
-
-        if (updateSchedule < now.AddDays(1))
-        {
-            return ServiceResult.Failure("Scheduled update date must be at least 1 day in the future.");
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.InvalidUserRequest,
+                Message = "Scheduled price change date must be at least 1 week in the future."
+            });
         }
 
         _backgroundJobService
@@ -291,8 +316,13 @@ internal class ProductService : ServiceBase, IProductService
             .ToArray();
 
         if (missingProducts.Any())
-            return ServiceResult.Failure(
-                $"Failed to discontinue product with the following IDs: {string.Join(", ", missingProducts)} because they were not found.");
+        {
+            return ServiceResult<int>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"Products with the following IDs not found: {string.Join(", ", missingProducts)}.",
+            });
+        }
 
         var discontinuedProducts = productsToDiscontinue
             .Where(p => p.IsDiscontinued)
@@ -300,15 +330,23 @@ internal class ProductService : ServiceBase, IProductService
             .ToArray();
 
         if (discontinuedProducts.Any())
-            return ServiceResult.Failure(
-                $"Failed to discontinue product with the following IDs: {string.Join(", ", discontinuedProducts)} because they were already discontinued.");
+        {
+            return ServiceResult<int>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityInvalidState,
+                Message = $"Products with the following IDs already discontinued: {string.Join(", ", discontinuedProducts)}.",
+            });
+        }
 
         var now = DateTime.Now;
-        if (updateSchedule < now)
-            return ServiceResult.Failure("Scheduled sale discontinuation date must be in the future.");
-
-        if (updateSchedule < now.AddDays(7))
-            return ServiceResult.Failure("Scheduled sale discontinuation date must be at least 1 week in the future.");
+        if (updateSchedule < now || updateSchedule < now.AddDays(7))
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.InvalidUserRequest,
+                Message = "Scheduled sale discontinuation date must be at least 1 week in the future."
+            });
+        }
 
         _backgroundJobService
             .AddBackgroundJobAsync(
@@ -327,14 +365,23 @@ internal class ProductService : ServiceBase, IProductService
     public async Task<ServiceResult> RestartProductSaleAsync(string managerId, int productId, DateTime updateSchedule)
     {
         if (!await DbContext.Product.AnyAsync(p => p.Id == productId))
-            return ServiceResult.Failure(
-                $"Failed to update price of product with ID {productId} because it was not found.");
+        {
+            return ServiceResult<int>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = "Product not found.",
+            });
+        }
 
         var now = DateTime.Now;
-        if (updateSchedule < now) return ServiceResult.Failure("Scheduled sale restart date must be in the future.");
-
-        if (updateSchedule < now.AddDays(7))
-            return ServiceResult.Failure("Scheduled sale restart date must be at least 1 week in the future.");
+        if (updateSchedule < now || updateSchedule < now.AddDays(7))
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.InvalidUserRequest,
+                Message = "Scheduled sale restart date must be at least 1 week in the future."
+            });
+        }
 
         _backgroundJobService
             .AddBackgroundJobAsync(

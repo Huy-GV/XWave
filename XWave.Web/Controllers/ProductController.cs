@@ -130,7 +130,7 @@ public class ProductController : ControllerBase
         var result = await _productService.DiscontinueProductAsync(managerId, ids, updateSchedule);
         return result.Succeeded
             ? NoContent()
-            : UnprocessableEntity(result.ErrorMessages);
+            : UnprocessableEntity(result.Errors);
     }
 
     [HttpPut("{id:int}/restart-sale/{updateSchedule:datetime}")]

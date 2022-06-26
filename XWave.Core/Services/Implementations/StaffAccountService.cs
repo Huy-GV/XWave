@@ -66,7 +66,14 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         try
         {
             var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
-            if (staffAccount == null) return ServiceResult.Failure($"Staff account with ID {staffId} not found.");
+            if (staffAccount == null)
+            {
+                return ServiceResult.Failure(new Error
+                {
+                    ErrorCode = ErrorCode.EntityNotFound,
+                    Message = $"Staff account with ID {staffId} not found."
+                });
+            }
 
             DbContext.StaffAccount.Update(staffAccount).CurrentValues.SetValues(updateStaffAccountViewModel);
             await DbContext.SaveChangesAsync();
@@ -82,10 +89,15 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
     public async Task<ServiceResult> DeactivateStaffAccount(string staffId)
     {
         var staffUser = await _userManager.FindByIdAsync(staffId);
-        if (staffUser == null) return ServiceResult.Failure($"Unable to find user with id {staffId};");
-
         var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
-        if (staffAccount == null) return ServiceResult.Failure($"Unable to find user with id {staffId}.");
+        if (staffUser == null || staffAccount == null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"Staff account with ID {staffId} not found."
+            });
+        }
 
         await using var transaction = await DbContext.Database.BeginTransactionAsync();
         try
@@ -99,7 +111,9 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
                 Guid.NewGuid().ToString());
 
             if (!lockoutResult.Succeeded || !lockoutEndDateResult.Succeeded || !resetPasswordResult.Succeeded)
-                return ServiceResult.Failure("Deactivation process failed.");
+            {
+                return ServiceResult.DefaultFailure();
+            }
 
             staffAccount.SoftDelete();
             await DbContext.SaveChangesAsync();

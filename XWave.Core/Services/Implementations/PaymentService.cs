@@ -73,10 +73,17 @@ internal class PaymentService : ServiceBase, IPaymentService
         }
     }
 
-    public async Task<ServiceResult> RemovePaymentAccountAsync(string customer, int paymentId)
+    public async Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId)
     {
         var paymentAccountToRemove = await DbContext.PaymentAccount.FindAsync(paymentId);
-        if (paymentAccountToRemove == null) return ServiceResult.Failure("Payment account could not be found.");
+        if (paymentAccountToRemove == null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"Payment account for customer ID {customerId} not found.",
+            });
+        }
 
         DbContext.Update(paymentAccountToRemove);
         paymentAccountToRemove.SoftDelete();

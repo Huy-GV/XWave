@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace XWave.Core.Services.Communication
+﻿namespace XWave.Core.Services.Communication
 {
     public record ServiceResult<TResult> : ServiceResult where TResult : notnull
     {
@@ -38,14 +32,9 @@ namespace XWave.Core.Services.Communication
             };
         }
 
-        public static ServiceResult<TResult> DefaultFailure()
+        public static new ServiceResult<TResult> DefaultFailure()
         {
-            return new ServiceResult<TResult>()
-            {
-                Value = default,
-                Succeeded = false,
-                Errors = new List<Error> { Error.Default() },
-            };
+            return Failure(Error.Default());
         }
     }
 }
