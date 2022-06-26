@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\XWave.Core\XWave.Core.csproj" />
+    <ProjectReference Include="..\XWave.Core\XWave.Core.csproj" />
   </ItemGroup>
 
 </Project>
