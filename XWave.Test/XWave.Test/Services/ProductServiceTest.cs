@@ -1,15 +1,10 @@
 ﻿using FluentAssertions;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XWave.Core.Data;
 using XWave.Core.Data.DatabaseSeeding.Factories;
 using XWave.Core.Models;
 using XWave.Core.Services.Communication;
@@ -37,8 +32,6 @@ namespace XWave.Test.Services
             _testProducts[randomIndex].DiscontinuationDate = DateTime.Now.AddDays(-7);
 
             var dbContext = CreateDbContext();
-            dbContext.Database.EnsureDeleted();
-            dbContext.Database.EnsureCreated();
             dbContext.Category.AddRange(_testCategories);
             dbContext.SaveChanges();
             dbContext.Discount.AddRange(TestDiscountFactory.Discounts());
@@ -98,7 +91,7 @@ namespace XWave.Test.Services
         [TestMethod]
         public void DiscontinueProductShouldFailIfScheduleIsUnderOneWeek()
         {
-            var randomDay = Math.Abs(new Random().NextInt64()) % 7;
+            var randomDay = Math.Abs(new Random().NextInt64()) % 6;
             var testProductIds = _testProducts
                 .Where(x => !x.IsDiscontinued)
                 .Select(x => x.Id).ToArray();

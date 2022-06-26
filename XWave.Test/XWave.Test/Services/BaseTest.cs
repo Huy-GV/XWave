@@ -1,11 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using XWave.Core.Data;
 
 namespace XWave.Test.Services
@@ -19,16 +15,20 @@ namespace XWave.Test.Services
 
         protected BaseTest()
         {
-            InMemoryDbConnection = new SqliteConnection("Filename=:memory:");
+            InMemoryDbConnection = new SqliteConnection("DataSource=:memory:;");
             InMemoryDbConnection.Open();
         }
 
         internal XWaveDbContext CreateDbContext()
         {
-            return new XWaveDbContext(
+            var dbContext = new XWaveDbContext(
                 new DbContextOptionsBuilder<XWaveDbContext>()
                 .UseSqlite(InMemoryDbConnection)
                 .Options);
+
+            dbContext.Database.EnsureDeleted();
+            dbContext.Database.EnsureCreated();
+            return dbContext;
         }
 
         public void Dispose()

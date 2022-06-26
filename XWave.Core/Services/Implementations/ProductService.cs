@@ -1,5 +1,4 @@
-﻿using Hangfire;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.DTOs.Customers;
@@ -16,17 +15,20 @@ namespace XWave.Core.Services.Implementations;
 internal class ProductService : ServiceBase, IProductService
 {
     private readonly IActivityService _activityService;
+    private readonly IBackgroundJobService _backgroundJobService;
     private readonly ILogger<ProductService> _logger;
     private readonly ProductDtoMapper _productDtoMapper;
 
     public ProductService(
         XWaveDbContext dbContext,
         IActivityService activityService,
+        IBackgroundJobService backgroundJobService,
         ProductDtoMapper productHelper,
         ILogger<ProductService> logger) : base(dbContext)
     {
         _productDtoMapper = productHelper;
         _activityService = activityService;
+        _backgroundJobService = backgroundJobService;
         _logger = logger;
     }
 
@@ -234,18 +236,27 @@ internal class ProductService : ServiceBase, IProductService
         DateTime updateSchedule)
     {
         if (!await DbContext.Product.AnyAsync(p => p.Id == productId))
+        {
             return ServiceResult.Failure(
                 $"Failed to update price of product with ID {productId} because it was not found.");
+        }
 
         var now = DateTime.Now;
-        if (updateSchedule < now) return ServiceResult.Failure("Scheduled update date must be in the future.");
+        if (updateSchedule < now)
+        {
+            return ServiceResult.Failure("Scheduled update date must be in the future.");
+        }
 
         if (updateSchedule < now.AddDays(1))
+        {
             return ServiceResult.Failure("Scheduled update date must be at least 1 day in the future.");
+        }
 
-        BackgroundJob.Schedule(
-            () => ScheduledUpdateProductPrice(staffId, productId, updatedPrice),
-            updateSchedule - now);
+        _backgroundJobService
+            .AddBackgroundJobAsync(
+                () => ScheduledUpdateProductPrice(staffId, productId, updatedPrice),
+                new DateTimeOffset(updateSchedule))
+            .Wait();
 
         await _activityService.LogActivityAsync<Product>(
             staffId,
@@ -292,9 +303,11 @@ internal class ProductService : ServiceBase, IProductService
         if (updateSchedule < now.AddDays(7))
             return ServiceResult.Failure("Scheduled sale discontinuation date must be at least 1 week in the future.");
 
-        BackgroundJob.Schedule(
-            () => UpdateProductSaleStatusByScheduleAsync(productIds, false, updateSchedule),
-            updateSchedule - now);
+        _backgroundJobService
+            .AddBackgroundJobAsync(
+                () => UpdateProductSaleStatusByScheduleAsync(productIds, false, updateSchedule),
+                new DateTimeOffset(updateSchedule))
+            .Wait();
 
         await _activityService.LogActivityAsync<Product>(
             managerId,
@@ -316,9 +329,11 @@ internal class ProductService : ServiceBase, IProductService
         if (updateSchedule < now.AddDays(7))
             return ServiceResult.Failure("Scheduled sale restart date must be at least 1 week in the future.");
 
-        BackgroundJob.Schedule(
-            () => UpdateProductSaleStatusByScheduleAsync(productId, false, updateSchedule),
-            updateSchedule - now);
+        _backgroundJobService
+            .AddBackgroundJobAsync(
+                () => UpdateProductSaleStatusByScheduleAsync(productId, false, updateSchedule),
+                new DateTimeOffset(updateSchedule))
+            .Wait();
 
         await _activityService.LogActivityAsync<Product>(
             managerId,

@@ -1,18 +1,17 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using XWave.Web.Extensions;
 using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Customers;
 using XWave.Core.DTOs.Management;
+using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
-using XWave.Core.Utils;
 using XWave.Core.ViewModels.Management;
 using XWave.Web.Data;
+using XWave.Web.Extensions;
 using XWave.Web.Utils;
-using XWave.Core.Services.Communication;
 
 namespace XWave.Web.Controllers;
 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XWave.Core.Models;
+﻿using XWave.Core.Models;
 
 namespace XWave.Core.Data.DatabaseSeeding.Factories
 {

@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XWave.Core.Models;
+﻿using XWave.Core.Models;
 
 namespace XWave.Core.Data.DatabaseSeeding.Factories
 {
     public class TestProductFactory
     {
+        // todo: pass categories and discount here to prevent FK errors
+
         public static List<Product> Products()
         {
             return new List<Product>
