@@ -8,7 +8,7 @@ public class RegisterUserViewModel
 
     [Required] public string LastName { get; set; }
 
-    [Required] public string Username { get; set; }
+    [Required] public string UserName { get; set; }
 
     //[Required]
     //public string Email { get; set; }

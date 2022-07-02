@@ -22,7 +22,7 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         _authenticationService = authenticationService;
     }
 
-    public async Task<AuthenticationResult> RegisterCustomerAsync(RegisterCustomerViewModel viewModel)
+    public async Task<ServiceResult<string>> RegisterCustomerAsync(RegisterCustomerViewModel viewModel)
     {
         await using var transaction = await DbContext.Database.BeginTransactionAsync();
         try
@@ -32,14 +32,20 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
             entry.CurrentValues.SetValues(viewModel.CustomerAccountViewModel);
             await DbContext.SaveChangesAsync();
             var authenticationResult = await _authenticationService.RegisterUserAsync(viewModel.UserViewModel);
-            if (authenticationResult.Succeeded) await transaction.CommitAsync();
+            if (authenticationResult.Succeeded)
+            {
+                await transaction.CommitAsync();
+                return ServiceResult<string>.Success(authenticationResult.Value ?? string.Empty);
+            }
 
             return authenticationResult;
         }
-        catch
+        catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            return new AuthenticationResult();
+            _logger.LogInformation("Failed to register user account.");
+            _logger.LogDebug(ex, ex.Message);
+            return ServiceResult<string>.DefaultFailure();
         }
     }
 

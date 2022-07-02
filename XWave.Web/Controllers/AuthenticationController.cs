@@ -14,7 +14,7 @@ namespace XWave.Web.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly AuthenticationHelper _authenticationHelper;
-    private readonly IAuthenticationService _authService;
+    private readonly IAuthenticationService _authenticationService;
     private readonly JwtCookie _jwtCookieConfig;
 
     public AuthenticationController(
@@ -23,19 +23,19 @@ public class AuthenticationController : ControllerBase
         IOptions<JwtCookie> jwtCookieOptions)
     {
         _jwtCookieConfig = jwtCookieOptions.Value;
-        _authService = authenticationService;
+        _authenticationService = authenticationService;
         _authenticationHelper = authenticationHelper;
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<AuthenticationResult>> LogInAsync([FromBody] SignInViewModel model)
+    public async Task<ActionResult<ServiceResult<string>>> LogInAsync([FromBody] SignInViewModel model)
     {
-        var result = await _authService.SignInAsync(model);
-        if (!result.Succeeded) return Unauthorized(result);
+        var result = await _authenticationService.SignInAsync(model);
+        if (!result.Succeeded) return Unauthorized(result.Errors);
 
         Response.Cookies.Delete(_jwtCookieConfig.Name);
         var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
-        Response.Cookies.Append(_jwtCookieConfig.Name, result.Token, cookieOptions);
+        Response.Cookies.Append(_jwtCookieConfig.Name, result.Value!, cookieOptions);
 
         return Ok(result);
     }

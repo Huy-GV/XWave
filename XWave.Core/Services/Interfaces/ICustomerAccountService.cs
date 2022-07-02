@@ -6,7 +6,8 @@ namespace XWave.Core.Services.Interfaces;
 
 public interface ICustomerAccountService
 {
-    Task<AuthenticationResult> RegisterCustomerAsync(RegisterCustomerViewModel viewModel);
+    Task<ServiceResult<string>> RegisterCustomerAsync(RegisterCustomerViewModel viewModel);
+
     Task<ServiceResult> UpdateCustomerAccountAsync(string id, CustomerAccountViewModel viewModel);
 
     /// <summary>

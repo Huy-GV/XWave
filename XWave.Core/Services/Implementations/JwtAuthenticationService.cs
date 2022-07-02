@@ -30,43 +30,60 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
         _jwt = jwt.Value;
     }
 
-    public async Task<AuthenticationResult> SignInAsync(SignInViewModel viewModel)
+    public async Task<ServiceResult<string>> SignInAsync(SignInViewModel viewModel)
     {
-        var authenticationResult = new AuthenticationResult();
         var user = await _userManager.FindByNameAsync(viewModel.Username);
-        var errorMessage = $"User with {viewModel.Username} does not exist";
-        if (user == null ||
-            !await _userManager.CheckPasswordAndLockoutStatusAsync(user, viewModel.Password))
-            return authenticationResult with { Error = errorMessage };
 
-        var token = CreateJwtTokenAsync(user);
+        if (user == null)
+        {
+            return ServiceResult<string>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"User with {viewModel.Username} not found",
+            });
+        }
+
+        if (!await _userManager.CheckPasswordAndLockoutStatusAsync(user, viewModel.Password))
+        {
+            return ServiceResult<string>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.InvalidUserRequest,
+                Message = $"User with {viewModel.Username} locked out",
+            });
+        }
+
+        var token = CreateJwtToken(user);
         var serializedToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-        return new AuthenticationResult
-        {
-            Succeeded = true,
-            Token = serializedToken
-        };
+        return ServiceResult<string>.Success(serializedToken);
     }
 
-    public Task<AuthenticationResult> SignOutAsync(string userId)
+    public Task<ServiceResult> SignOutAsync(string userId)
     {
-        return Task.FromResult(new AuthenticationResult { Token = string.Empty });
+        return Task.FromResult(ServiceResult.Success());
     }
 
-    public async Task<AuthenticationResult> RegisterUserAsync(RegisterUserViewModel registerUserViewModel)
+    public async Task<ServiceResult<string>> RegisterUserAsync(RegisterUserViewModel registerUserViewModel)
     {
         var appUser = new ApplicationUser
         {
-            UserName = registerUserViewModel.Username,
+            UserName = registerUserViewModel.UserName,
             FirstName = registerUserViewModel.FirstName,
             LastName = registerUserViewModel.LastName,
             RegistrationDate = DateTime.UtcNow.Date
         };
 
         var result = await _userManager.CreateAsync(appUser, registerUserViewModel.Password);
+        if (result.Succeeded)
+        {
+            return ServiceResult<string>.Success(registerUserViewModel.UserName);
+        }
 
-        return new AuthenticationResult { Succeeded = result.Succeeded };
+        return ServiceResult<string>.Failure(new Error
+        {
+            ErrorCode = ErrorCode.Undefined,
+            Message = string.Join(", ", result.Errors)
+        }); ;
     }
 
     public async Task<bool> UserExists(string userId)
@@ -80,7 +97,7 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
         return (await _userManager.GetRolesAsync(user)).ToArray();
     }
 
-    private JwtSecurityToken CreateJwtTokenAsync(ApplicationUser user)
+    private JwtSecurityToken CreateJwtToken(ApplicationUser user)
     {
         var claims = new[]
         {

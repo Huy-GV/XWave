@@ -10,16 +10,15 @@ public interface IPaymentService
     Task<ServiceResult<int>> AddPaymentAccountAsync(string customerId,
         PaymentAccountViewModel newPaymentAccount);
 
-    /// <summary>
-    ///     Check if a customer has a payment account.
-    /// </summary>
-    /// <param name="customerId">ID of customer.</param>
-    /// <param name="paymentAccountId">ID of the searched payment account.</param>
-    /// <returns></returns>
     Task<bool> CustomerHasPaymentAccount(string customerId, int paymentAccountId);
 
     Task<IEnumerable<PaymentAccount>> FindAllTransactionDetailsForStaffAsync();
 
+    /// <summary>
+    /// Find the summaraized usage history of a payment account.
+    /// </summary>
+    /// <param name="customerId">ID of the payment account owner.</param>
+    /// <returns>An enumerable of <see cref="PaymentAccountUsageDto"/> which contains account usage information.</returns>
     Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId);
 
     Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId);

@@ -32,16 +32,16 @@ public class CustomerAccountController : ControllerBase
 
     [HttpPost("register/customer")]
     [Authorize(Roles = nameof(Roles.Customer))]
-    public async Task<ActionResult<AuthenticationResult>> RegisterCustomerAsync(
+    public async Task<ActionResult<ServiceResult<string>>> RegisterCustomerAsync(
         [FromBody] RegisterCustomerViewModel viewModel)
     {
         var result = await _customerAccountService.RegisterCustomerAsync(viewModel);
-        if (!result.Succeeded) return BadRequest(result.Error);
+        if (!result.Succeeded) return BadRequest(result.Errors);
 
         if (Request.Cookies.ContainsKey(_jwtCookieOptions.Name)) Response.Cookies.Delete(_jwtCookieOptions.Name);
 
         var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieOptions.DurationInDays);
-        Response.Cookies.Append(_jwtCookieOptions.Name, result.Token, cookieOptions);
+        Response.Cookies.Append(_jwtCookieOptions.Name, result.Value!, cookieOptions);
 
         return Ok(result);
     }
