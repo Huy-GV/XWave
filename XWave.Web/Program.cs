@@ -26,7 +26,8 @@ public class Program
                 .ReadFrom.Services(services)
                 .Enrich.FromLogContext()
                 .WriteTo.File(
-                    Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "XWave.Log"))
+                    Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "XWave.Log"),
+                    shared: true)
                 .WriteTo.Console())
             .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
     }

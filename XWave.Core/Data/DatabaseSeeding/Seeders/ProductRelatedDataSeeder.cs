@@ -9,6 +9,8 @@ namespace XWave.Core.Data.DatabaseSeeding.Seeders;
 
 internal class ProductRelatedDataSeeder
 {
+    private static string SetIdentityInsertQuery(bool status, string tableName) => $"SET IDENTITY_INSERT dbo.{tableName} {(status ? "ON" : "OFF")}";
+
     public static void SeedData(IServiceProvider serviceProvider)
     {
         using var context = new XWaveDbContext(
@@ -20,46 +22,72 @@ internal class ProductRelatedDataSeeder
         try
         {
             context.Database.OpenConnection();
-            foreach (var tableName in tableNames)
-            {
-                context.Database.ExecuteSqlRaw($"SET IDENTITY_INSERT ${tableName} ON");
-            }
-
-            CreateCategories(context);
-            CreateDiscounts(context);
-            CreateProducts(context);
+            var categories = CreateCategories(context);
+            var discounts = CreateDiscounts(context);
+            CreateProducts(context, categories, discounts);
         }
         catch (Exception ex)
         {
             var logger = serviceProvider.GetRequiredService<ILogger<ProductRelatedDataSeeder>>();
-            logger.LogError(ex, "An error occurred while seeding product data");
-            logger.LogError(ex.Message);
+            logger.LogError("An error occurred while seeding product related data");
+            logger.LogDebug(ex.Message, ex);
         }
         finally
         {
-            foreach (var tableName in tableNames)
-            {
-                context.Database.ExecuteSqlRaw($"SET IDENTITY_INSERT ${tableName} OFF");
-            }
             context.Database.CloseConnection();
         }
     }
 
-    public static void CreateCategories(XWaveDbContext dbContext)
+    public static List<Category> CreateCategories(XWaveDbContext dbContext)
     {
-        dbContext.Category.AddRange(TestCategoryFactory.Categories());
-        dbContext.SaveChanges();
+        try
+        {
+            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(true, "Category"));
+
+            var categories = TestCategoryFactory.Categories();
+            dbContext.Category.AddRange(categories);
+            dbContext.SaveChanges();
+            return categories;
+        }
+        finally
+        {
+            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(false, "Category"));
+        }
     }
 
-    public static void CreateProducts(XWaveDbContext dbContext)
+    public static List<Product> CreateProducts(
+        XWaveDbContext dbContext,
+        List<Category> categories,
+        List<Discount> discounts)
     {
-        dbContext.Product.AddRange(TestProductFactory.Products());
-        dbContext.SaveChanges();
+        try
+        {
+            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(true, "Product"));
+            var products = TestProductFactory.Products(categories, discounts);
+            dbContext.Product.AddRange(products);
+            dbContext.SaveChanges();
+            return products;
+        }
+        finally
+        {
+            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(false, "Product"));
+        }
     }
 
-    public static void CreateDiscounts(XWaveDbContext dbContext)
+    public static List<Discount> CreateDiscounts(XWaveDbContext dbContext)
     {
-        dbContext.Discount.AddRange(TestDiscountFactory.Discounts());
-        dbContext.SaveChanges();
+        try
+        {
+            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(true, "Discount"));
+
+            var discounts = TestDiscountFactory.Discounts();
+            dbContext.Discount.AddRange(discounts);
+            dbContext.SaveChanges();
+            return discounts;
+        }
+        finally
+        {
+            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(false, "Discount"));
+        }
     }
 }

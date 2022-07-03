@@ -23,20 +23,22 @@ namespace XWave.Test.Services
         private readonly Mock<IActivityService> _mockActivityService = new();
         private readonly ProductDtoMapper _productMapper = new();
 
-        private readonly List<Product> _testProducts = TestProductFactory.Products();
+        private readonly List<Discount> _testDiscounts = TestDiscountFactory.Discounts();
         private readonly List<Category> _testCategories = TestCategoryFactory.Categories();
+        private readonly List<Product> _testProducts = new();
 
         public ProductServiceTest() : base()
         {
-            var randomIndex = new Random().Next() % _testProducts.Count;
-            _testProducts[randomIndex].IsDiscontinued = true;
-            _testProducts[randomIndex].DiscontinuationDate = DateTime.Now.AddDays(-7);
-
             var dbContext = CreateDbContext();
             dbContext.Category.AddRange(_testCategories);
             dbContext.SaveChanges();
-            dbContext.Discount.AddRange(TestDiscountFactory.Discounts());
+            dbContext.Discount.AddRange(_testDiscounts);
             dbContext.SaveChanges();
+
+            _testProducts = TestProductFactory.Products(_testCategories, _testDiscounts);
+            var randomIndex = new Random().Next(1, int.MaxValue) % _testProducts.Count;
+            _testProducts[randomIndex].IsDiscontinued = true;
+            _testProducts[randomIndex].DiscontinuationDate = DateTime.Now.AddDays(-7);
             dbContext.Product.AddRange(_testProducts);
             dbContext.SaveChanges();
 
@@ -61,7 +63,7 @@ namespace XWave.Test.Services
                 .Should()
                 .BeEquivalentTo(ServiceResult.Failure(new Error
                 {
-                    ErrorCode = ErrorCode.EntityInvalidState,
+                    ErrorCode = ErrorCode.EntityNotFound,
                     Message = $"Products with the following IDs not found: {string.Join(", ", new[] { nonExistentProductId })}.",
                 }));
         }
@@ -79,7 +81,7 @@ namespace XWave.Test.Services
                 .BeEquivalentTo(ServiceResult.Failure(new Error
                 {
                     ErrorCode = ErrorCode.EntityInvalidState,
-                    Message = $"Failed to discontinue product with the following IDs: {string.Join(", ", new[] { discontinuedProductId })} because they were already discontinued."
+                    Message = $"Products with the following IDs already discontinued: {string.Join(", ", new[] { discontinuedProductId })}."
                 }));
         }
 
