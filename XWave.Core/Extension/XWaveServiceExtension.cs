@@ -38,7 +38,7 @@ public static class XWaveServiceExtension
                 options.Lockout.AllowedForNewUsers = false;
             })
             .AddEntityFrameworkStores<XWaveDbContext>();
-        
+
         services.AddDbContext<XWaveDbContext>(options =>
         {
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));

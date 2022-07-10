@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using XWave.Core.Data.DatabaseSeeding.Factories;
 using XWave.Core.Models;
 
 namespace XWave.Core.Data.DatabaseSeeding.Seeders;
@@ -18,16 +19,31 @@ internal class PurchaseRelatedDataSeeder
 
         try
         {
-            CreatePayments(context);
-            CreateOrders(context, userManager).Wait();
-            CreateOrderDetail(context);
-            CreatePaymentDetail(context, userManager).Wait();
+            var user1 = userManager.FindByNameAsync("john_customer").Result;
+            var user2 = userManager.FindByNameAsync("jake_customer").Result;
+
+            if (user1 == null || user2 == null)
+            {
+                throw new InvalidOperationException("Users are not seeded yet");
+            }
+
+            var products = context.Product.ToList();
+
+            if (products.Count == 0)
+            {
+                throw new InvalidOperationException("Products are not seeded yet");
+            }
+
+            var users = new List<ApplicationUser> { user1, user2 };
+            var paymentAccounts = CreatePaymentAccounts(context);
+            var orders = CreateOrders(context, paymentAccounts, users);
+            CreateOrderDetail(context, orders, products);
+            CreatePaymentDetail(context, users, paymentAccounts);
         }
         catch (Exception ex)
         {
             var logger = serviceProvider.GetRequiredService<ILogger<PurchaseRelatedDataSeeder>>();
             logger.LogError(ex, "An error occurred while seeding purchase data");
-            logger.LogError(ex.Message);
         }
         finally
         {
@@ -35,172 +51,38 @@ internal class PurchaseRelatedDataSeeder
         }
     }
 
-    private static void CreatePayments(XWaveDbContext dbContext)
+    private static List<PaymentAccount> CreatePaymentAccounts(XWaveDbContext dbContext)
     {
-        var payments = new List<PaymentAccount>
-        {
-            new()
-            {
-                Provider = "mastercard",
-                AccountNumber = "12345678",
-                ExpiryDate = DateTime.Parse("2/5/2023")
-            },
-            new()
-            {
-                Provider = "visa",
-                AccountNumber = "24681357",
-                ExpiryDate = DateTime.Parse("1/2/2023")
-            },
-            new()
-            {
-                Provider = "visa",
-                AccountNumber = "01010101",
-                ExpiryDate = DateTime.Parse("1/8/2023")
-            }
-        };
-
-        dbContext.PaymentAccount.AddRange(payments);
+        var paymentAccounts = TestPaymentAccountFactory.PaymentAccounts();
+        dbContext.PaymentAccount.AddRange(paymentAccounts);
         dbContext.SaveChanges();
+        return paymentAccounts;
     }
 
-    private static async Task CreateOrders(
+    private static List<Order> CreateOrders(
         XWaveDbContext dbContext,
-        UserManager<ApplicationUser> userManager)
+        List<PaymentAccount> paymentAccounts,
+        List<ApplicationUser> users)
     {
-        var user1 = await userManager.FindByNameAsync("john_customer");
-        var user2 = await userManager.FindByNameAsync("jake_customer");
-
-        var orders = new List<Order>
-        {
-            new()
-            {
-                Date = DateTime.Parse("15/11/2021"),
-                CustomerId = user1.Id,
-                PaymentAccountId = 1,
-                DeliveryAddress = "2 Collins St, Melbourne"
-            },
-            new()
-            {
-                Date = DateTime.Parse("21/10/2021"),
-                CustomerId = user1.Id,
-                PaymentAccountId = 1,
-                DeliveryAddress = "3 Collins St, Melbourne"
-            },
-            new()
-            {
-                Date = DateTime.Parse("16/9/2021"),
-                CustomerId = user2.Id,
-                PaymentAccountId = 2,
-                DeliveryAddress = "4 Collins St, Melbourne"
-            },
-            new()
-            {
-                Date = DateTime.Parse("21/11/2021"),
-                CustomerId = user1.Id,
-                PaymentAccountId = 3,
-                DeliveryAddress = "3 Collins St, Melbourne"
-            }
-        };
-
+        var orders = TestOrderFactory.Orders(users, paymentAccounts);
         dbContext.Order.AddRange(orders);
         dbContext.SaveChanges();
+        return orders;
     }
 
-    private static void CreateOrderDetail(XWaveDbContext dbContext)
+    private static void CreateOrderDetail(XWaveDbContext dbContext, List<Order> orders, List<Product> products)
     {
-        var orderDetail = new List<OrderDetails>
-        {
-            new()
-            {
-                OrderId = 1,
-                ProductId = 1,
-                PriceAtOrder = 200,
-                Quantity = 1
-            },
-            new()
-            {
-                OrderId = 1,
-                ProductId = 3,
-                PriceAtOrder = 90,
-                Quantity = 2
-            },
-            new()
-            {
-                OrderId = 2,
-                ProductId = 4,
-                PriceAtOrder = 1600,
-                Quantity = 1
-            },
-            new()
-            {
-                OrderId = 3,
-                ProductId = 4,
-                PriceAtOrder = 1600,
-                Quantity = 4
-            },
-            new()
-            {
-                OrderId = 3,
-                ProductId = 2,
-                PriceAtOrder = 40,
-                Quantity = 9
-            },
-            new()
-            {
-                OrderId = 3,
-                ProductId = 3,
-                PriceAtOrder = 600,
-                Quantity = 15
-            },
-            new()
-            {
-                OrderId = 4,
-                ProductId = 3,
-                PriceAtOrder = 100,
-                Quantity = 2
-            },
-            new()
-            {
-                OrderId = 4,
-                ProductId = 2,
-                PriceAtOrder = 200,
-                Quantity = 3
-            }
-        };
-
-        dbContext.OrderDetails.AddRange(orderDetail);
+        dbContext.OrderDetails.AddRange(TestOrderFactory.OrderDetails(products, orders));
         dbContext.SaveChanges();
     }
 
-    private static async Task CreatePaymentDetail(
+    private static void CreatePaymentDetail(
         XWaveDbContext dbContext,
-        UserManager<ApplicationUser> userManager)
+        List<ApplicationUser> users,
+        List<PaymentAccount> paymentAccounts)
     {
-        var user1 = await userManager.FindByNameAsync("john_customer");
-        var user2 = await userManager.FindByNameAsync("jake_customer");
-        var paymentDetail = new List<PaymentAccountDetails>
-        {
-            new()
-            {
-                PaymentAccountId = 1,
-                CustomerId = user1.Id,
-                FirstRegistration = DateTime.Parse("5/1/2020")
-            },
-            new()
-            {
-                PaymentAccountId = 3,
-                CustomerId = user1.Id,
-                FirstRegistration = DateTime.Parse("5/1/2020")
-            },
-            new()
-            {
-                CustomerId = user2.Id,
-                PaymentAccountId = 2,
-                FirstRegistration = DateTime.Parse("5/7/2019")
-            }
-        };
-
-        dbContext.PaymentAccountDetails.AddRange(paymentDetail);
+        var paymentAccountDetails = TestPaymentAccountFactory.PaymentAccountDetails(paymentAccounts, users);
+        dbContext.PaymentAccountDetails.AddRange(paymentAccountDetails);
         dbContext.SaveChanges();
     }
 }

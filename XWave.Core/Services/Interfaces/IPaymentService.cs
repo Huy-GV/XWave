@@ -10,7 +10,7 @@ public interface IPaymentService
     Task<ServiceResult<int>> AddPaymentAccountAsync(string customerId,
         PaymentAccountViewModel newPaymentAccount);
 
-    Task<bool> CustomerHasPaymentAccount(string customerId, int paymentAccountId);
+    Task<bool> CustomerHasPaymentAccount(string customerId, int paymentAccountId, bool includeExpiredAccounts = false);
 
     Task<IEnumerable<PaymentAccount>> FindAllTransactionDetailsForStaffAsync();
 

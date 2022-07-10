@@ -6,6 +6,7 @@ namespace XWave.Core.Data.DatabaseSeeding.Factories
     {
         public static List<Product> Products(List<Category> categories, List<Discount> discounts)
         {
+            // todo: use indexes instead?
             var randomIndex = new Random();
             var minCategoryPK = categories.Select(x => x.Id).Min();
             var minDiscountPK = discounts.Select(x => x.Id).Min();
@@ -13,7 +14,6 @@ namespace XWave.Core.Data.DatabaseSeeding.Factories
             {
                 new()
                 {
-                    Id = 1,
                     Name = "HD Pro Monitor",
                     Description = "Monitor suitable for daily tasks",
                     Price = 200,
@@ -23,7 +23,6 @@ namespace XWave.Core.Data.DatabaseSeeding.Factories
                 },
                 new ()
                 {
-                    Id = 2,
                     Name = "ROG RAM Card",
                     Description = "Monitor suitable for daily tasks",
                     Price = 80,
@@ -34,7 +33,6 @@ namespace XWave.Core.Data.DatabaseSeeding.Factories
 
                 new ()
                 {
-                    Id= 3,
                     Name = "Corsair SSD 4GB",
                     Description = "Monitor suitable for daily tasks",
                     Price = 160,
@@ -46,7 +44,6 @@ namespace XWave.Core.Data.DatabaseSeeding.Factories
 
                 new()
                 {
-                    Id = 4,
                     Name = "NVIDIA GTX 3080",
                     Description = "Monitor suitable for daily tasks",
                     Price = 1800,

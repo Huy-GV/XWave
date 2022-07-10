@@ -17,7 +17,6 @@ internal class ProductRelatedDataSeeder
             serviceProvider.GetRequiredService<DbContextOptions<XWaveDbContext>>());
 
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var tableNames = new[] { "Category", "Product", "Discount" }.Select(x => $"dbo.{x}");
 
         try
         {
@@ -40,19 +39,10 @@ internal class ProductRelatedDataSeeder
 
     public static List<Category> CreateCategories(XWaveDbContext dbContext)
     {
-        try
-        {
-            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(true, "Category"));
-
-            var categories = TestCategoryFactory.Categories();
-            dbContext.Category.AddRange(categories);
-            dbContext.SaveChanges();
-            return categories;
-        }
-        finally
-        {
-            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(false, "Category"));
-        }
+        var categories = TestCategoryFactory.Categories();
+        dbContext.Category.AddRange(categories);
+        dbContext.SaveChanges();
+        return categories;
     }
 
     public static List<Product> CreateProducts(
@@ -60,34 +50,17 @@ internal class ProductRelatedDataSeeder
         List<Category> categories,
         List<Discount> discounts)
     {
-        try
-        {
-            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(true, "Product"));
-            var products = TestProductFactory.Products(categories, discounts);
-            dbContext.Product.AddRange(products);
-            dbContext.SaveChanges();
-            return products;
-        }
-        finally
-        {
-            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(false, "Product"));
-        }
+        var products = TestProductFactory.Products(categories, discounts);
+        dbContext.Product.AddRange(products);
+        dbContext.SaveChanges();
+        return products;
     }
 
     public static List<Discount> CreateDiscounts(XWaveDbContext dbContext)
     {
-        try
-        {
-            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(true, "Discount"));
-
-            var discounts = TestDiscountFactory.Discounts();
-            dbContext.Discount.AddRange(discounts);
-            dbContext.SaveChanges();
-            return discounts;
-        }
-        finally
-        {
-            dbContext.Database.ExecuteSqlRaw(SetIdentityInsertQuery(false, "Discount"));
-        }
+        var discounts = TestDiscountFactory.Discounts();
+        dbContext.Discount.AddRange(discounts);
+        dbContext.SaveChanges();
+        return discounts;
     }
 }
