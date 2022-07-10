@@ -103,16 +103,16 @@ internal class PaymentService : ServiceBase, IPaymentService
 
     public async Task<ServiceResult> UpdatePaymentAccountAsync(
         string customerId,
-        int id,
+        int paymentAccountId,
         PaymentAccountViewModel updatedPayment)
     {
-        var payment = await DbContext.PaymentAccount.FindAsync(id);
+        var payment = await DbContext.PaymentAccount.FindAsync(paymentAccountId);
         if (payment == null)
         {
             return ServiceResult.Failure(new Error
             {
                 ErrorCode = ErrorCode.EntityNotFound,
-                Message = $"Payment account for user ID {id} not found.",
+                Message = $"Payment account ID {paymentAccountId} not found.",
             });
         }
 
@@ -122,10 +122,17 @@ internal class PaymentService : ServiceBase, IPaymentService
         return ServiceResult.Success();
     }
 
-    public async Task<bool> CustomerHasPaymentAccount(string customerId, int paymentId)
+    public async Task<bool> CustomerHasPaymentAccount(
+        string customerId,
+        int paymentId,
+        bool includeExpiredAccounts = false)
     {
-        return await DbContext.PaymentAccountDetails.AnyAsync(
-            td => td.CustomerId == customerId && td.PaymentAccountId == paymentId);
+        return await DbContext.PaymentAccountDetails
+            .Include(x => x.Payment)
+            .AnyAsync(
+                x => x.CustomerId == customerId &&
+                x.PaymentAccountId == paymentId &&
+                (x.Payment.ExpiryDate < DateTime.Now || includeExpiredAccounts));
     }
 
     public async Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId)

@@ -14,16 +14,22 @@ internal class OrderService : ServiceBase, IOrderService
     private readonly IAuthenticationService _authenticationService;
     private readonly ILogger<OrderService> _logger;
     private readonly IProductService _productService;
+    private readonly ICustomerAccountService _customerAccountService;
+    private readonly IPaymentService _paymentService;
 
     public OrderService(
         XWaveDbContext dbContext,
         ILogger<OrderService> logger,
         IAuthenticationService authenticationService,
-        IProductService productService) : base(dbContext)
+        IProductService productService,
+        ICustomerAccountService customerAccountService,
+        IPaymentService paymentService) : base(dbContext)
     {
         _logger = logger;
         _authenticationService = authenticationService;
         _productService = productService;
+        _customerAccountService = customerAccountService;
+        _paymentService = paymentService;
     }
 
     public async Task<OrderDto?> FindOrderByIdAsync(string customerId, int orderId)
@@ -38,10 +44,8 @@ internal class OrderService : ServiceBase, IOrderService
         await using var transaction = await DbContext.Database.BeginTransactionAsync();
         try
         {
-            if (!await DbContext.CustomerAccount.AnyAsync(c => c.CustomerId == customerId) ||
-                !await _authenticationService.UserExists(customerId))
+            if (!await _customerAccountService.CustomerAccountExists(customerId))
             {
-                // todo: move to another static class to avoid duplicate generic parameter?
                 return ServiceResult<int>.Failure(new Error
                 {
                     ErrorCode = ErrorCode.EntityNotFound,
@@ -49,22 +53,12 @@ internal class OrderService : ServiceBase, IOrderService
                 });
             }
 
-            var paymentAccount = await DbContext.PaymentAccount.FindAsync(purchaseViewModel.PaymentAccountId);
-            if (paymentAccount == null)
+            if (!await _paymentService.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId))
             {
                 return ServiceResult<int>.Failure(new Error
                 {
                     ErrorCode = ErrorCode.EntityNotFound,
-                    Message = "Payment account not found."
-                });
-            }
-
-            if (paymentAccount.ExpiryDate > DateTime.Now)
-            {
-                return ServiceResult<int>.Failure(new Error
-                {
-                    ErrorCode = ErrorCode.EntityInvalidState,
-                    Message = "Selected payment account expired."
+                    Message = "Valid payment account not found."
                 });
             }
 

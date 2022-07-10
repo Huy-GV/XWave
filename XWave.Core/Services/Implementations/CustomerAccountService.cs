@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.Models;
 using XWave.Core.Services.Communication;
@@ -103,5 +104,11 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
             _logger.LogError($"Exception message: {exception.Message}");
             return ServiceResult.DefaultFailure();
         }
+    }
+
+    public async Task<bool> CustomerAccountExists(string id)
+    {
+        return await _authenticationService.UserExists(id) &&
+            await DbContext.CustomerAccount.AnyAsync(x => x.CustomerId == id);
     }
 }

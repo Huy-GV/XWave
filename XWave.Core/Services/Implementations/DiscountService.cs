@@ -135,6 +135,17 @@ internal class DiscountService : ServiceBase, IDiscountService
         }
 
         var appliedProducts = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
+        var missingProductIds = productIds.Except(appliedProducts.Select(x => x.Id));
+
+        if (missingProductIds.Any())
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"Products with IDs {string.Join(", ", missingProductIds)} not found"
+            });
+        }
+
         DbContext.Product.UpdateRange(appliedProducts.Select(x =>
         {
             x.DiscountId = discountId;
@@ -187,6 +198,7 @@ internal class DiscountService : ServiceBase, IDiscountService
             p.Discount = null;
             return p;
         }));
+
         await DbContext.SaveChangesAsync();
         await _activityService.LogActivityAsync<Discount>(
             managerId,

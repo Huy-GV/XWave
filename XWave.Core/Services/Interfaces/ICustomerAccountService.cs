@@ -17,4 +17,6 @@ public interface ICustomerAccountService
     /// <param name="isSubscribed">Subscription status.</param>
     /// <returns></returns>
     Task<ServiceResult> UpdateSubscriptionAsync(string customerId, bool isSubscribed);
+
+    Task<bool> CustomerAccountExists(string id);
 }
