@@ -49,7 +49,7 @@ internal class OrderService : ServiceBase, IOrderService
                 return ServiceResult<int>.Failure(new Error
                 {
                     ErrorCode = ErrorCode.EntityNotFound,
-                    Message = "Customer account not found."
+                    Message = "Customer account not found"
                 });
             }
 
@@ -58,7 +58,7 @@ internal class OrderService : ServiceBase, IOrderService
                 return ServiceResult<int>.Failure(new Error
                 {
                     ErrorCode = ErrorCode.EntityNotFound,
-                    Message = "Valid payment account not found."
+                    Message = "Valid payment account not found"
                 });
             }
 

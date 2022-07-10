@@ -51,7 +51,7 @@ namespace XWave.Test.Services
         }
 
         [TestMethod]
-        public void DiscontinueProductShouldFailIfOneProductIsMissing()
+        public void DiscontinueProduct_ShouldFail_IfOneProductIsMissing()
         {
             var nonExistentProductId = _testProducts.Sum(x => x.Id);
             var testProductIds = new List<int>(_testProducts.Select(x => x.Id)) { nonExistentProductId };
@@ -69,7 +69,7 @@ namespace XWave.Test.Services
         }
 
         [TestMethod]
-        public void DiscontinueProductShouldFailIfProductIsAlreadyDiscontinued()
+        public void DiscontinueProduct_ShouldFail_IfProductIsAlreadyDiscontinued()
         {
             var discontinuedProductId = _testProducts.First(x => x.IsDiscontinued).Id;
             _productService.DiscontinueProductAsync(
@@ -86,7 +86,7 @@ namespace XWave.Test.Services
         }
 
         [TestMethod]
-        public void DiscontinueProductShouldFailIfScheduleIsNotFuture()
+        public void DiscontinueProduct_ShouldFail_IfScheduleIsNotFuture()
         {
             var testProductIds = _testProducts
                 .Where(x => !x.IsDiscontinued)
@@ -105,7 +105,7 @@ namespace XWave.Test.Services
         }
 
         [TestMethod]
-        public void DiscontinueProductShouldFailIfScheduleIsUnderOneWeek()
+        public void DiscontinueProduct_ShouldFail_IfScheduleIsUnderOneWeek()
         {
             var randomDay = Math.Abs(new Random().NextInt64()) % 6;
             var testProductIds = _testProducts
