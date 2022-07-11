@@ -11,6 +11,7 @@ using XWave.Core.Services.Implementations;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Utils;
 using XWave.Core.Data.DatabaseSeeding.Seeders;
+using Newtonsoft.Json;
 
 namespace XWave.Core.Extension;
 
@@ -20,7 +21,7 @@ public static class XWaveServiceExtension
     {
         services.AddScoped<IActivityService, ActivityService>();
         services.AddScoped<IOrderService, OrderService>();
-        services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IPaymentAccountService, PaymentAccountService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IDiscountService, DiscountService>();
@@ -60,7 +61,13 @@ public static class XWaveServiceExtension
     public static void AddHangFireBackgroundServices(this IServiceCollection services, string dbConnectionString)
     {
         services.AddTransient<IBackgroundJobService, HangFireBackgroundJobService>();
-        services.AddHangfire(config => { config.UseSqlServerStorage(dbConnectionString); });
-        services.AddHangfireServer(options => { options.SchedulePollingInterval = TimeSpan.FromMinutes(1); });
+        services.AddHangfire(config =>
+        {
+            config.UseSqlServerStorage(dbConnectionString);
+        });
+        services.AddHangfireServer(options =>
+        {
+            options.SchedulePollingInterval = TimeSpan.FromMinutes(1);
+        });
     }
 }

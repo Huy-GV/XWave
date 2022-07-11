@@ -19,10 +19,10 @@ namespace XWave.Web.Controllers;
 public class PaymentAccountController : ControllerBase
 {
     private readonly AuthenticationHelper _authenticationHelper;
-    private readonly IPaymentService _paymentService;
+    private readonly IPaymentAccountService _paymentService;
 
     public PaymentAccountController(
-        IPaymentService paymentService,
+        IPaymentAccountService paymentService,
         AuthenticationHelper authenticationHelper)
     {
         _paymentService = paymentService;

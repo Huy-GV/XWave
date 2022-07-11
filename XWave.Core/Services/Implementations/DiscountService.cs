@@ -13,15 +13,18 @@ namespace XWave.Core.Services.Implementations;
 internal class DiscountService : ServiceBase, IDiscountService
 {
     private readonly IActivityService _activityService;
+    private readonly IBackgroundJobService _backgroundJobService;
     private readonly ILogger<DiscountService> _logger;
 
     public DiscountService(
         XWaveDbContext dbContext,
         IActivityService activityService,
-        ILogger<DiscountService> logger) : base(dbContext)
+        ILogger<DiscountService> logger,
+        IBackgroundJobService backgroundJobService) : base(dbContext)
     {
         _logger = logger;
         _activityService = activityService;
+        _backgroundJobService = backgroundJobService;
     }
 
     public async Task<ServiceResult<int>> CreateDiscountAsync(string managerId,
@@ -83,12 +86,15 @@ internal class DiscountService : ServiceBase, IDiscountService
         }
     }
 
-    public async Task<IEnumerable<DetailedDiscountDto>> FindAllDiscountsAsync()
+    public Task<IEnumerable<DetailedDiscountDto>> FindAllDiscountsAsync()
     {
-        return await DbContext.Discount
+        var discounts = DbContext.Discount
+            .AsEnumerable()
             .Select(d => DiscountDtoMapper.MapDetailedDiscountDto(d))
             .OrderBy(d => d.IsActive)
-            .ToListAsync();
+            .AsEnumerable();
+
+        return Task.FromResult(discounts);
     }
 
     public async Task<DetailedDiscountDto?> FindDiscountByIdAsync(int id)
@@ -153,6 +159,9 @@ internal class DiscountService : ServiceBase, IDiscountService
         }));
 
         await DbContext.SaveChangesAsync();
+        await _backgroundJobService.AddBackgroundJobAsync(
+            () => RemoveDiscountFromProducts(appliedProducts.Select(x => x.Id), discount.EndDate),
+            new DateTimeOffset(discount.EndDate));
         await _activityService.LogActivityAsync<Discount>(
             managerId,
             OperationType.Modify,
@@ -203,8 +212,24 @@ internal class DiscountService : ServiceBase, IDiscountService
         await _activityService.LogActivityAsync<Discount>(
             managerId,
             OperationType.Modify,
-            $"removed discount with ID {discountId} from products with the following IDs: {string.Join(", ", appliedProducts.Select(p => p.Id))}.");
+            $"manually removed discount with ID {discountId} from products with the following IDs: {string.Join(", ", appliedProducts.Select(p => p.Id))}.");
 
         return ServiceResult.Success();
+    }
+
+    public async Task RemoveDiscountFromProducts(IEnumerable<int> appliedProductIds, DateTime schedule)
+    {
+        var products = await DbContext.Product
+            .IgnoreAutoIncludes()
+            .Where(x => appliedProductIds.Contains(x.Id))
+            .ToListAsync();
+
+        DbContext.Product.UpdateRange(products.Select(x =>
+        {
+            x.Discount = null;
+            return x;
+        }));
+
+        await DbContext.SaveChangesAsync();
     }
 }

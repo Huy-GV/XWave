@@ -10,13 +10,13 @@ using XWave.Core.ViewModels.Customers;
 
 namespace XWave.Core.Services.Implementations;
 
-internal class PaymentService : ServiceBase, IPaymentService
+internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 {
-    private readonly ILogger<PaymentService> _logger;
+    private readonly ILogger<PaymentAccountService> _logger;
 
-    public PaymentService(
+    public PaymentAccountService(
         XWaveDbContext dbContext,
-        ILogger<PaymentService> logger) : base(dbContext)
+        ILogger<PaymentAccountService> logger) : base(dbContext)
     {
         _logger = logger;
     }

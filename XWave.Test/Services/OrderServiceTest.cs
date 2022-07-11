@@ -21,7 +21,7 @@ namespace XWave.Test.Services
         private readonly Mock<IAuthenticationService> _mockAuthService = new();
         private readonly Mock<ICustomerAccountService> _mockCustomerAccountService = new();
         private readonly Mock<IProductService> _mockProductService = new();
-        private readonly Mock<IPaymentService> _mockPaymentService = new();
+        private readonly Mock<IPaymentAccountService> _mockPaymentService = new();
         private readonly Mock<ILogger<OrderService>> _mockLog = new();
 
         private readonly List<Product> _testProducts;

@@ -9,6 +9,7 @@ internal class HangFireBackgroundJobService : IBackgroundJobService
 {
     public Task<string> AddBackgroundJobAsync(Expression<Func<Task>> function, DateTimeOffset schedule)
     {
+        // leaky abstraction because HangFire requires a public method
         return Task.FromResult(BackgroundJob.Schedule(function, schedule));
     }
 

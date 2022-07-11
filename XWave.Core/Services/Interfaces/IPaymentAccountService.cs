@@ -5,7 +5,7 @@ using XWave.Core.ViewModels.Customers;
 
 namespace XWave.Core.Services.Interfaces;
 
-public interface IPaymentService
+public interface IPaymentAccountService
 {
     Task<ServiceResult<int>> AddPaymentAccountAsync(string customerId,
         PaymentAccountViewModel newPaymentAccount);

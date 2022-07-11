@@ -15,7 +15,7 @@ internal class OrderService : ServiceBase, IOrderService
     private readonly ILogger<OrderService> _logger;
     private readonly IProductService _productService;
     private readonly ICustomerAccountService _customerAccountService;
-    private readonly IPaymentService _paymentService;
+    private readonly IPaymentAccountService _paymentService;
 
     public OrderService(
         XWaveDbContext dbContext,
@@ -23,7 +23,7 @@ internal class OrderService : ServiceBase, IOrderService
         IAuthenticationService authenticationService,
         IProductService productService,
         ICustomerAccountService customerAccountService,
-        IPaymentService paymentService) : base(dbContext)
+        IPaymentAccountService paymentService) : base(dbContext)
     {
         _logger = logger;
         _authenticationService = authenticationService;
