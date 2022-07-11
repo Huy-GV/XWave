@@ -75,16 +75,16 @@ internal class OrderService : ServiceBase, IOrderService
                 .Where(p => productIdsToPurchase.Contains(p.Id))
                 .ToDictionaryAsync(p => p.Id);
 
-            var missingProductNames = productIdsToPurchase
+            var missingProductIds = productIdsToPurchase
                 .Except(productsToPurchase.Select(p => p.Key))
                 .ToArray();
 
-            if (missingProductNames.Any())
+            if (missingProductIds.Any())
             {
                 return ServiceResult<int>.Failure(new Error
                 {
                     ErrorCode = ErrorCode.EntityNotFound,
-                    Message = $"The following products were not found: { string.Join(", ", missingProductNames) }.",
+                    Message = $"The following products were not found: { string.Join(", ", missingProductIds) }.",
                 });
             }
 
