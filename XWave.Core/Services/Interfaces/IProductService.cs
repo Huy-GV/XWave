@@ -13,7 +13,7 @@ public interface IProductService
     /// </summary>
     /// <param name="product">Product with a discount</param>
     /// <returns>Discounted price</returns>
-    decimal CalculateDiscountedPrice(Product product);
+    decimal CalculatePriceAfterDiscount(Product product);
 
     Task<IEnumerable<ProductDto>> FindAllProductsForCustomers();
 

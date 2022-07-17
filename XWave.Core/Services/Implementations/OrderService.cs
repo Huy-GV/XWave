@@ -128,7 +128,7 @@ internal class OrderService : ServiceBase, IOrderService
 
                 var purchasePrice = product.Discount == null
                     ? product.Price
-                    : _productService.CalculateDiscountedPrice(product);
+                    : _productService.CalculatePriceAfterDiscount(product);
 
                 product.Quantity -= productInCart.Quantity;
                 purchasedProducts.Add(product);

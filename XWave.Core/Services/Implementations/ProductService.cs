@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
+using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Customers;
 using XWave.Core.DTOs.Management;
 using XWave.Core.Extension;
@@ -18,23 +19,45 @@ internal class ProductService : ServiceBase, IProductService
     private readonly IBackgroundJobService _backgroundJobService;
     private readonly ILogger<ProductService> _logger;
     private readonly ProductDtoMapper _productDtoMapper;
+    private readonly IAuthorizationService _authorizationService;
+
+    private readonly string[] staffRoles = new[] { Roles.Staff, Roles.Manager };
+
+    private readonly Error _unauthorizedError = new()
+    {
+        ErrorCode = ErrorCode.InvalidUserRequest,
+        Message = "Only staff are authorized to modify products"
+    };
 
     public ProductService(
         XWaveDbContext dbContext,
         IActivityService activityService,
         IBackgroundJobService backgroundJobService,
         ProductDtoMapper productHelper,
-        ILogger<ProductService> logger) : base(dbContext)
+        ILogger<ProductService> logger,
+        IAuthorizationService authorizationService) : base(dbContext)
     {
         _productDtoMapper = productHelper;
         _activityService = activityService;
+        _authorizationService = authorizationService;
         _backgroundJobService = backgroundJobService;
         _logger = logger;
+    }
+
+    private async Task<bool> IsUserAuthorized(string userId)
+    {
+        var roles = await _authorizationService.GetRolesByUserId(userId);
+        return roles.Intersect(staffRoles).Any();
     }
 
     public async Task<ServiceResult<int>> AddProductAsync(string staffId,
         ProductViewModel productViewModel)
     {
+        if (!await IsUserAuthorized(staffId))
+        {
+            return ServiceResult<int>.Failure(_unauthorizedError);
+        }
+
         try
         {
             _logger.LogInformation(
@@ -69,6 +92,11 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> DeleteProductAsync(int productId, string managerId)
     {
+        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        {
+            return ServiceResult<int>.Failure(_unauthorizedError);
+        }
+
         try
         {
             var product = await DbContext.Product.FindAsync(productId);
@@ -108,7 +136,7 @@ internal class ProductService : ServiceBase, IProductService
             .AsEnumerable()
             .Select(p => p.Discount == null
                 ? _productDtoMapper.MapCustomerProductDto(p)
-                : _productDtoMapper.MapCustomerProductDto(p, CalculateDiscountedPrice(p)));
+                : _productDtoMapper.MapCustomerProductDto(p, CalculatePriceAfterDiscount(p)));
 
         return Task.FromResult(productDtos);
     }
@@ -137,7 +165,7 @@ internal class ProductService : ServiceBase, IProductService
 
         return product.Discount == null
             ? _productDtoMapper.MapCustomerProductDto(product)
-            : _productDtoMapper.MapCustomerProductDto(product, CalculateDiscountedPrice(product));
+            : _productDtoMapper.MapCustomerProductDto(product, CalculatePriceAfterDiscount(product));
     }
 
     public async Task<DetailedProductDto?> FindProductByIdForStaff(int id)
@@ -156,6 +184,11 @@ internal class ProductService : ServiceBase, IProductService
         int productId,
         ProductViewModel updatedProductViewModel)
     {
+        if (!await IsUserAuthorized(staffId))
+        {
+            return ServiceResult<int>.Failure(_unauthorizedError);
+        }
+
         _logger.LogInformation($"User with ID {staffId} is attempting to update product ID {productId}");
         var product = await DbContext.Product.FindAsync(productId);
         if (product == null)
@@ -197,6 +230,11 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> UpdateStockAsync(string staffId, int productId, uint updatedStock)
     {
+        if (!await IsUserAuthorized(staffId))
+        {
+            return ServiceResult<int>.Failure(_unauthorizedError);
+        }
+
         var product = await DbContext.Product.FindAsync(productId);
         if (product == null)
         {
@@ -231,6 +269,11 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice)
     {
+        if (!await IsUserAuthorized(staffId))
+        {
+            return ServiceResult<int>.Failure(_unauthorizedError);
+        }
+
         var product = await DbContext.Product.FindAsync(productId);
         if (product == null)
         {
@@ -265,6 +308,11 @@ internal class ProductService : ServiceBase, IProductService
     public async Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice,
         DateTime updateSchedule)
     {
+        if (!await IsUserAuthorized(staffId))
+        {
+            return ServiceResult<int>.Failure(_unauthorizedError);
+        }
+
         if (!await DbContext.Product.AnyAsync(p => p.Id == productId))
         {
             return ServiceResult<int>.Failure(new Error
@@ -307,6 +355,11 @@ internal class ProductService : ServiceBase, IProductService
     public async Task<ServiceResult> DiscontinueProductAsync(string managerId, int[] productIds,
         DateTime updateSchedule)
     {
+        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        {
+            return ServiceResult<int>.Failure(_unauthorizedError);
+        }
+
         var productsToDiscontinue = await DbContext.Product
             .Where(product => productIds.Contains(product.Id))
             .ToArrayAsync();
@@ -364,6 +417,11 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> RestartProductSaleAsync(string managerId, int productId, DateTime updateSchedule)
     {
+        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        {
+            return ServiceResult<int>.Failure(_unauthorizedError);
+        }
+
         if (!await DbContext.Product.AnyAsync(p => p.Id == productId))
         {
             return ServiceResult<int>.Failure(new Error
@@ -397,7 +455,7 @@ internal class ProductService : ServiceBase, IProductService
         return ServiceResult.Success();
     }
 
-    public decimal CalculateDiscountedPrice(Product product)
+    public decimal CalculatePriceAfterDiscount(Product product)
     {
         if (product.Discount == null)
             throw new InvalidOperationException($"Product ID {product.Id} does not have any discount");
