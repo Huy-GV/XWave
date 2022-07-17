@@ -9,22 +9,36 @@ namespace XWave.Core.Services.Implementations;
 internal class CategoryService : ServiceBase, ICategoryService
 {
     private readonly IActivityService _activityService;
+    private readonly IAuthorizationService _authorizationService;
+
+    private readonly Error _unauthorizedOperationError = new()
+    {
+        ErrorCode = ErrorCode.InvalidUserRequest,
+        Message = "Only managers are authorized to modify Categories",
+    };
 
     public CategoryService(
         XWaveDbContext dbContext,
-        IActivityService activityService) : base(dbContext)
+        IActivityService activityService,
+        IAuthorizationService authorizationService) : base(dbContext)
     {
         _activityService = activityService;
+        _authorizationService = authorizationService;
     }
 
-    public async Task<ServiceResult<int>> AddCategoryAsync(string managerUserName, Category category)
+    public async Task<ServiceResult<int>> AddCategoryAsync(string managerId, Category category)
     {
+        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        {
+            return ServiceResult<int>.Failure(_unauthorizedOperationError);
+        }
+
         try
         {
             DbContext.Category.Add(category);
             await DbContext.SaveChangesAsync();
             await _activityService.LogActivityAsync<Category>(
-                managerUserName,
+                managerId,
                 OperationType.Create,
                 $"created a category named {category.Name}");
 
@@ -38,6 +52,11 @@ internal class CategoryService : ServiceBase, ICategoryService
 
     public async Task<ServiceResult> DeleteCategoryAsync(string managerId, int id)
     {
+        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        {
+            return ServiceResult.Failure(_unauthorizedOperationError);
+        }
+
         try
         {
             var category = await DbContext.Category.FindAsync(id);
@@ -77,6 +96,11 @@ internal class CategoryService : ServiceBase, ICategoryService
 
     public async Task<ServiceResult> UpdateCategoryAsync(string managerId, int id, Category updatedCategory)
     {
+        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        {
+            return ServiceResult.Failure(_unauthorizedOperationError);
+        }
+
         try
         {
             var category = await DbContext.Category.FindAsync(id);

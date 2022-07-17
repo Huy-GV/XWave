@@ -8,7 +8,7 @@ public interface ICustomerAccountService
 {
     Task<ServiceResult<string>> RegisterCustomerAsync(RegisterCustomerViewModel viewModel);
 
-    Task<ServiceResult> UpdateCustomerAccountAsync(string id, CustomerAccountViewModel viewModel);
+    Task<ServiceResult> UpdateCustomerAccountAsync(string customerId, CustomerAccountViewModel viewModel);
 
     /// <summary>
     ///     Update subscription to promotion.
@@ -18,5 +18,5 @@ public interface ICustomerAccountService
     /// <returns></returns>
     Task<ServiceResult> UpdateSubscriptionAsync(string customerId, bool isSubscribed);
 
-    Task<bool> CustomerAccountExists(string id);
+    Task<bool> CustomerAccountExists(string customerId);
 }

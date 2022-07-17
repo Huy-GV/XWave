@@ -91,12 +91,6 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
         return await _userManager.FindByIdAsync(userId) != null;
     }
 
-    public async Task<string[]> GetRoles(string userName)
-    {
-        var user = await _userManager.FindByNameAsync(userName);
-        return (await _userManager.GetRolesAsync(user)).ToArray();
-    }
-
     private JwtSecurityToken CreateJwtToken(ApplicationUser user)
     {
         var claims = new[]

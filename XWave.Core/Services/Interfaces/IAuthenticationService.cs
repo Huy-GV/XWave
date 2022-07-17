@@ -27,6 +27,4 @@ public interface IAuthenticationService
     public Task<ServiceResult<string>> RegisterUserAsync(RegisterUserViewModel registerUserViewModel);
 
     public Task<bool> UserExists(string userId);
-
-    public Task<string[]> GetRoles(string userName);
 }

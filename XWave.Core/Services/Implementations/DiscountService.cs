@@ -15,21 +15,35 @@ internal class DiscountService : ServiceBase, IDiscountService
     private readonly IActivityService _activityService;
     private readonly IBackgroundJobService _backgroundJobService;
     private readonly ILogger<DiscountService> _logger;
+    private readonly IAuthorizationService _authorizationService;
+
+    private readonly Error _unauthorizedOperationError = new()
+    {
+        ErrorCode = ErrorCode.InvalidUserRequest,
+        Message = "Only managers are authorized to modify/ assign Discounts",
+    };
 
     public DiscountService(
         XWaveDbContext dbContext,
         IActivityService activityService,
+        IAuthorizationService authorizationService,
         ILogger<DiscountService> logger,
         IBackgroundJobService backgroundJobService) : base(dbContext)
     {
         _logger = logger;
         _activityService = activityService;
+        _authorizationService = authorizationService;
         _backgroundJobService = backgroundJobService;
     }
 
     public async Task<ServiceResult<int>> CreateDiscountAsync(string managerId,
         DiscountViewModel discountViewModel)
     {
+        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        {
+            return ServiceResult<int>.Failure(_unauthorizedOperationError);
+        }
+
         var newDiscount = new Discount();
         var entry = DbContext.Add(newDiscount);
         entry.CurrentValues.SetValues(discountViewModel);
@@ -51,6 +65,11 @@ internal class DiscountService : ServiceBase, IDiscountService
 
     public async Task<ServiceResult> RemoveDiscountAsync(string managerId, int discountId)
     {
+        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        {
+            return ServiceResult.Failure(_unauthorizedOperationError);
+        }
+
         var discount = await DbContext.Discount.FindAsync(discountId);
         if (discount == null)
         {
@@ -130,6 +149,11 @@ internal class DiscountService : ServiceBase, IDiscountService
     public async Task<ServiceResult> ApplyDiscountToProducts(string managerId, int discountId,
         IEnumerable<int> productIds)
     {
+        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        {
+            return ServiceResult.Failure(_unauthorizedOperationError);
+        }
+
         var discount = await DbContext.Discount.FindAsync(discountId);
         if (discount == null)
         {
@@ -160,7 +184,7 @@ internal class DiscountService : ServiceBase, IDiscountService
 
         await DbContext.SaveChangesAsync();
         await _backgroundJobService.AddBackgroundJobAsync(
-            () => RemoveDiscountFromProducts(appliedProducts.Select(x => x.Id), discount.EndDate),
+            () => RemoveDiscountFromProducts(appliedProducts.Select(x => x.Id)),
             new DateTimeOffset(discount.EndDate));
         await _activityService.LogActivityAsync<Discount>(
             managerId,
@@ -173,6 +197,11 @@ internal class DiscountService : ServiceBase, IDiscountService
     public async Task<ServiceResult> RemoveDiscountFromProductsAsync(string managerId, int discountId,
         IEnumerable<int> productIds)
     {
+        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        {
+            return ServiceResult.Failure(_unauthorizedOperationError);
+        }
+
         var discount = await DbContext.Discount
             .SingleOrDefaultAsync(d => d.Id == discountId);
 
@@ -217,7 +246,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         return ServiceResult.Success();
     }
 
-    public async Task RemoveDiscountFromProducts(IEnumerable<int> appliedProductIds, DateTime schedule)
+    public async Task RemoveDiscountFromProducts(IEnumerable<int> appliedProductIds)
     {
         var products = await DbContext.Product
             .IgnoreAutoIncludes()
