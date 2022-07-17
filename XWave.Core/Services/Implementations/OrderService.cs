@@ -69,13 +69,13 @@ internal class OrderService : ServiceBase, IOrderService
                 DeliveryAddress = purchaseViewModel.DeliveryAddress
             };
 
-            var productIdsToPurchase = purchaseViewModel.Cart.Select(p => p.ProductId);
+            var productsToPurchaseIds = purchaseViewModel.Cart.Select(p => p.ProductId);
             var productsToPurchase = await DbContext.Product
                 .Include(p => p.Discount)
-                .Where(p => productIdsToPurchase.Contains(p.Id))
+                .Where(p => productsToPurchaseIds.Contains(p.Id))
                 .ToDictionaryAsync(p => p.Id);
 
-            var missingProductIds = productIdsToPurchase
+            var missingProductIds = productsToPurchaseIds
                 .Except(productsToPurchase.Select(p => p.Key))
                 .ToArray();
 

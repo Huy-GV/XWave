@@ -44,7 +44,7 @@ internal class ProductService : ServiceBase, IProductService
         _logger = logger;
     }
 
-    private async Task<bool> IsUserAuthorized(string userId)
+    private async Task<bool> IsStaffIdValid(string userId)
     {
         var roles = await _authorizationService.GetRolesByUserId(userId);
         return roles.Intersect(staffRoles).Any();
@@ -53,7 +53,7 @@ internal class ProductService : ServiceBase, IProductService
     public async Task<ServiceResult<int>> AddProductAsync(string staffId,
         ProductViewModel productViewModel)
     {
-        if (!await IsUserAuthorized(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -184,7 +184,7 @@ internal class ProductService : ServiceBase, IProductService
         int productId,
         ProductViewModel updatedProductViewModel)
     {
-        if (!await IsUserAuthorized(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -230,7 +230,7 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> UpdateStockAsync(string staffId, int productId, uint updatedStock)
     {
-        if (!await IsUserAuthorized(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -269,7 +269,7 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice)
     {
-        if (!await IsUserAuthorized(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -305,10 +305,13 @@ internal class ProductService : ServiceBase, IProductService
         }
     }
 
-    public async Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice,
+    public async Task<ServiceResult> UpdateProductPriceAsync(
+        string staffId,
+        int productId,
+        uint updatedPrice,
         DateTime updateSchedule)
     {
-        if (!await IsUserAuthorized(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -352,7 +355,9 @@ internal class ProductService : ServiceBase, IProductService
     ///     products is already discontinued. However, it does not check for products that are already scheduled for
     ///     discontinuation.
     /// </remarks>
-    public async Task<ServiceResult> DiscontinueProductAsync(string managerId, int[] productIds,
+    public async Task<ServiceResult> DiscontinueProductAsync(
+        string managerId,
+        int[] productIds,
         DateTime updateSchedule)
     {
         if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))

@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using FsCheck;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -55,12 +56,11 @@ namespace XWave.Test.Services
         [TestMethod]
         public void AddOrder_ShouldFail_IfCustomerAccountDoesNotExist()
         {
-            var purchaseViewModel = new PurchaseViewModel();
-            var customerId = new Guid().ToString();
+            var customerId = Guid.NewGuid().ToString();
             _mockCustomerAccountService
                 .Setup(x => x.CustomerAccountExists(customerId).Result)
                 .Returns(false);
-            _orderService.AddOrderAsync(purchaseViewModel, customerId)
+            _orderService.AddOrderAsync(It.IsAny<PurchaseViewModel>(), customerId)
                 .Result
                 .Should()
                 .BeEquivalentTo(ServiceResult<int>.Failure(new Error()
@@ -73,59 +73,74 @@ namespace XWave.Test.Services
         [TestMethod]
         public void AddOrder_ShouldFail_IfPaymentAccountIsInvalid()
         {
-            var purchaseViewModel = new PurchaseViewModel() { PaymentAccountId = new Random().Next() };
-            var customerId = new Guid().ToString();
-            _mockCustomerAccountService
-                .Setup(x => x.CustomerAccountExists(customerId).Result)
-                .Returns(true);
-            _mockPaymentService
-                .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
-                .Returns(false);
-            _orderService.AddOrderAsync(purchaseViewModel, customerId)
-                .Result
-                .Should()
-                .BeEquivalentTo(ServiceResult<int>.Failure(new Error
-                {
-                    ErrorCode = ErrorCode.EntityNotFound,
-                    Message = "Valid payment account not found"
-                }));
+            Prop.ForAll(
+                Arb.Default.Int32(),
+                (paymentAccountId) =>
+            {
+                var purchaseViewModel = new PurchaseViewModel() { PaymentAccountId = paymentAccountId };
+                var customerId = Guid.NewGuid().ToString();
+                _mockCustomerAccountService
+                    .Setup(x => x.CustomerAccountExists(customerId).Result)
+                    .Returns(true);
+                _mockPaymentService
+                    .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
+                    .Returns(false);
+                _orderService.AddOrderAsync(purchaseViewModel, customerId)
+                    .Result
+                    .Should()
+                    .BeEquivalentTo(ServiceResult<int>.Failure(new Error
+                    {
+                        ErrorCode = ErrorCode.EntityNotFound,
+                        Message = "Valid payment account not found"
+                    }));
+            }).QuickCheckThrowOnFailure();
         }
 
         [TestMethod]
         public void AddOrder_ShouldFail_IfPurchasedProductsNotFound()
         {
             var existingProductIds = _testProducts.Select(x => x.Id).ToList();
-            var idSum = existingProductIds.Sum();
-            var randomMissingIds = new[] { idSum * 2, idSum * 4, idSum * 8, idSum * 10 };
-            var itemsToPurchase = randomMissingIds
-                .Select(x => new PurchaseViewModel.PurchasedItems
-                {
-                    ProductId = x,
-                })
-                .ToList();
+            var randomNonExistentProductIdGen = Gen
+                .ArrayOf(100, Arb.Default.Int32().Generator)
+                .Where(x => !existingProductIds.Intersect(x).Any())
+                .Select(x => x.Distinct())
+                .ToArbitrary();
 
-            var purchaseViewModel = new PurchaseViewModel()
+            Prop.ForAll(
+                randomNonExistentProductIdGen,
+                Arb.Default.Int32(),
+                (randomMissingIds, paymentAccountId) =>
             {
-                PaymentAccountId = new Random().Next(),
-                Cart = itemsToPurchase
-            };
+                var itemsToPurchase = randomMissingIds
+                    .Select(x => new PurchaseViewModel.PurchasedItems
+                    {
+                        ProductId = x,
+                    })
+                    .ToList();
 
-            var customerId = new Guid().ToString();
-            _mockCustomerAccountService
-                .Setup(x => x.CustomerAccountExists(customerId).Result)
-                .Returns(true);
-            _mockPaymentService
-                .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
-                .Returns(true);
-
-            _orderService.AddOrderAsync(purchaseViewModel, customerId)
-                .Result
-                .Should()
-                .BeEquivalentTo(ServiceResult<int>.Failure(new Error
+                var purchaseViewModel = new PurchaseViewModel()
                 {
-                    ErrorCode = ErrorCode.EntityNotFound,
-                    Message = $"The following products were not found: { string.Join(", ", randomMissingIds) }.",
-                }));
+                    PaymentAccountId = paymentAccountId,
+                    Cart = itemsToPurchase
+                };
+
+                var customerId = Guid.NewGuid().ToString();
+                _mockCustomerAccountService
+                    .Setup(x => x.CustomerAccountExists(customerId).Result)
+                    .Returns(true);
+                _mockPaymentService
+                    .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
+                    .Returns(true);
+
+                _orderService.AddOrderAsync(purchaseViewModel, customerId)
+                    .Result
+                    .Should()
+                    .BeEquivalentTo(ServiceResult<int>.Failure(new Error
+                    {
+                        ErrorCode = ErrorCode.EntityNotFound,
+                        Message = $"The following products were not found: { string.Join(", ", randomMissingIds) }.",
+                    }));
+            }).QuickCheckThrowOnFailure();
         }
     }
 }
