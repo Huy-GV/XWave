@@ -132,7 +132,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
             .AnyAsync(
                 x => x.CustomerId == customerId &&
                 x.PaymentAccountId == paymentId &&
-                (x.Payment.ExpiryDate < DateTime.Now || includeExpiredAccounts));
+                (x.Payment.ExpiryDate > DateTime.Now || includeExpiredAccounts));
     }
 
     public async Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId)

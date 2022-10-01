@@ -9,6 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave.Web", "XWave.Web\XWav
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave.Test", "XWave.Test\XWave.Test.csproj", "{92DD85AA-F057-48B1-B2B7-024A27024DAE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F540061B-46B7-4ED7-81ED-A2CFD516FC4E}"
+	ProjectSection(SolutionItems) = preProject
+		TODO.txt = TODO.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

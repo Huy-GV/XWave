@@ -105,7 +105,7 @@ internal class OrderService : ServiceBase, IOrderService
                 }
 
                 //prevent customers from ordering based on incorrect data
-                if (product.Discount?.Percentage != productInCart.DisplayedDiscountPercentage)
+                if ((product.Discount?.Percentage ?? 0) != productInCart.DisplayedDiscountPercentage)
                 {
                     errors.Add(new Error
                     {
