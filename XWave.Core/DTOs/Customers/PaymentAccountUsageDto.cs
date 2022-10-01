@@ -2,9 +2,9 @@
 
 public record PaymentAccountUsageDto
 {
-    public string Provider { get; init; }
-    public string AccountNumber { get; init; }
+    public string Provider { get; init; } = string.Empty;
+    public string AccountNumber { get; init; } = string.Empty;
     public decimal TotalSpending { get; init; }
     public ushort PurchaseCount { get; init; }
-    public DateTime LatestPurchase { get; init; }
+    public DateTime? LatestPurchase { get; init; }
 }

@@ -137,13 +137,13 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 
     public async Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId)
     {
-        var orders = await DbContext.Order
+        var purchasesByCustomer = await DbContext.Order
             .Include(o => o.OrderDetails)
             .Where(o => o.CustomerId == customerId)
             .OrderByDescending(o => o.Date)
             .ToArrayAsync();
 
-        var purchasesByPaymentAccount = orders
+        var purchasesByPaymentAccount = purchasesByCustomer
             .GroupBy(o => o.PaymentAccountId)
             .Select(g => new
             {
@@ -153,7 +153,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
             })
             .ToDictionary(x => x.PaymentAccountId);
 
-        var totalSpending = orders
+        var totalSpendingByPaymentAccount = purchasesByCustomer
             .GroupBy(o => o.PaymentAccountId)
             .Select(g => new
             {
@@ -169,9 +169,16 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
             {
                 Provider = p.Provider,
                 AccountNumber = p.AccountNumber,
-                LatestPurchase = purchasesByPaymentAccount[p.Id].Date,
-                TotalSpending = totalSpending[p.Id].TotalSpending,
-                PurchaseCount = (ushort)purchasesByPaymentAccount[p.Id].PurchaseCount
+                LatestPurchase = purchasesByPaymentAccount.ContainsKey(p.Id)
+                    ? purchasesByPaymentAccount[p.Id].Date
+                    : null,
+                TotalSpending = totalSpendingByPaymentAccount.ContainsKey(p.Id)
+                    ? totalSpendingByPaymentAccount[p.Id].TotalSpending
+                    : 0,
+                PurchaseCount = purchasesByPaymentAccount.ContainsKey(p.Id)
+                    ? (ushort)purchasesByPaymentAccount[p.Id].PurchaseCount
+                    : (ushort)0
+                
             })
             .ToListAsync();
     }
