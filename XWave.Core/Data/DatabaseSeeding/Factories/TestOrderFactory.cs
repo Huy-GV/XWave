@@ -1,122 +1,116 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XWave.Core.Models;
+﻿using XWave.Core.Models;
 
-namespace XWave.Core.Data.DatabaseSeeding.Factories
+namespace XWave.Core.Data.DatabaseSeeding.Factories;
+
+public static class TestOrderFactory
 {
-    public static class TestOrderFactory
+    public static List<Order> Orders(List<ApplicationUser> users, List<PaymentAccount> paymentAccounts)
     {
-        public static List<Order> Orders(List<ApplicationUser> users, List<PaymentAccount> paymentAccounts)
+        var paymentAccountIds = paymentAccounts.Select(x => x.Id).ToList();
+        var userIds = users.Select(x => x.Id).ToList();
+        var randomIndex = new Random();
+        var orders = new List<Order>
         {
-            var paymentAccountIds = paymentAccounts.Select(x => x.Id).ToList();
-            var userIds = users.Select(x => x.Id).ToList();
-            var randomIndex = new Random();
-            var orders = new List<Order>
+            new()
             {
-                new()
-                {
-                    Date = DateTime.Parse("15/11/2021"),
-                    CustomerId = userIds[randomIndex.Next(userIds.Count)],
-                    PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
-                    DeliveryAddress = "2 Collins St, Melbourne"
-                },
-                new()
-                {
-                    Date = DateTime.Parse("21/10/2021"),
-                    CustomerId = userIds[randomIndex.Next(userIds.Count)],
-                    PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
-                    DeliveryAddress = "3 Collins St, Melbourne"
-                },
-                new()
-                {
-                    Date = DateTime.Parse("16/9/2021"),
-                    CustomerId = userIds[randomIndex.Next(userIds.Count)],
-                    PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
-                    DeliveryAddress = "4 Collins St, Melbourne"
-                },
-                new()
-                {
-                    Date = DateTime.Parse("21/11/2021"),
-                    CustomerId = userIds[randomIndex.Next(userIds.Count)],
-                    PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
-                    DeliveryAddress = "3 Collins St, Melbourne"
-                }
-            };
+                Date = DateTime.Parse("15/11/2021"),
+                CustomerId = userIds[randomIndex.Next(userIds.Count)],
+                PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
+                DeliveryAddress = "2 Collins St, Melbourne"
+            },
+            new()
+            {
+                Date = DateTime.Parse("21/10/2021"),
+                CustomerId = userIds[randomIndex.Next(userIds.Count)],
+                PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
+                DeliveryAddress = "3 Collins St, Melbourne"
+            },
+            new()
+            {
+                Date = DateTime.Parse("16/9/2021"),
+                CustomerId = userIds[randomIndex.Next(userIds.Count)],
+                PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
+                DeliveryAddress = "4 Collins St, Melbourne"
+            },
+            new()
+            {
+                Date = DateTime.Parse("21/11/2021"),
+                CustomerId = userIds[randomIndex.Next(userIds.Count)],
+                PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
+                DeliveryAddress = "3 Collins St, Melbourne"
+            }
+        };
 
-            return orders;
-        }
+        return orders;
+    }
 
-        public static List<OrderDetails> OrderDetails(
-            List<Product> products,
-            List<Order> orders)
+    public static List<OrderDetails> OrderDetails(
+        List<Product> products,
+        List<Order> orders)
+    {
+        var productIds = products.Select(x => x.Id).ToList();
+        var orderIds = orders.Select(x => x.Id).ToList();
+        var randomIndex = new Random();
+        var orderDetail = new List<OrderDetails>
         {
-            var productIds = products.Select(x => x.Id).ToList();
-            var orderIds = orders.Select(x => x.Id).ToList();
-            var randomIndex = new Random();
-            var orderDetail = new List<OrderDetails>
+            new()
             {
-                new()
-                {
-                    OrderId = orderIds[randomIndex.Next(orderIds.Count)],
-                    ProductId = productIds[randomIndex.Next(productIds.Count)],
-                    PriceAtOrder = 200,
-                    Quantity = 1
-                },
-                new()
-                {
-                    OrderId = orderIds[randomIndex.Next(orderIds.Count)],
-                    ProductId = productIds[randomIndex.Next(productIds.Count)],
-                    PriceAtOrder = 90,
-                    Quantity = 2
-                },
-                new()
-                {
-                    OrderId = orderIds[randomIndex.Next(orderIds.Count)],
-                    ProductId = productIds[randomIndex.Next(productIds.Count)],
-                    PriceAtOrder = 1600,
-                    Quantity = 1
-                },
-                new()
-                {
-                    OrderId = orderIds[randomIndex.Next(orderIds.Count)],
-                    ProductId = productIds[randomIndex.Next(productIds.Count)],
-                    PriceAtOrder = 1600,
-                    Quantity = 4
-                },
-                new()
-                {
-                    OrderId = orderIds[randomIndex.Next(orderIds.Count)],
-                    ProductId = productIds[randomIndex.Next(productIds.Count)],
-                    PriceAtOrder = 40,
-                    Quantity = 9
-                },
-                new()
-                {
-                    OrderId = orderIds[randomIndex.Next(orderIds.Count)],
-                    ProductId = productIds[randomIndex.Next(productIds.Count)],
-                    PriceAtOrder = 600,
-                    Quantity = 15
-                },
-                new()
-                {
-                    OrderId = orderIds[randomIndex.Next(orderIds.Count)],
-                    ProductId = productIds[randomIndex.Next(productIds.Count)] ,
-                    PriceAtOrder = 100,
-                    Quantity = 2
-                },
-                new()
-                {
-                    OrderId = orderIds[randomIndex.Next(orderIds.Count)],
-                    ProductId = productIds[randomIndex.Next(productIds.Count)],
-                    PriceAtOrder = 200,
-                    Quantity = 3
-                }
-            };
+                OrderId = orderIds[randomIndex.Next(orderIds.Count)],
+                ProductId = productIds[randomIndex.Next(productIds.Count)],
+                PriceAtOrder = 200,
+                Quantity = 1
+            },
+            new()
+            {
+                OrderId = orderIds[randomIndex.Next(orderIds.Count)],
+                ProductId = productIds[randomIndex.Next(productIds.Count)],
+                PriceAtOrder = 90,
+                Quantity = 2
+            },
+            new()
+            {
+                OrderId = orderIds[randomIndex.Next(orderIds.Count)],
+                ProductId = productIds[randomIndex.Next(productIds.Count)],
+                PriceAtOrder = 1600,
+                Quantity = 1
+            },
+            new()
+            {
+                OrderId = orderIds[randomIndex.Next(orderIds.Count)],
+                ProductId = productIds[randomIndex.Next(productIds.Count)],
+                PriceAtOrder = 1600,
+                Quantity = 4
+            },
+            new()
+            {
+                OrderId = orderIds[randomIndex.Next(orderIds.Count)],
+                ProductId = productIds[randomIndex.Next(productIds.Count)],
+                PriceAtOrder = 40,
+                Quantity = 9
+            },
+            new()
+            {
+                OrderId = orderIds[randomIndex.Next(orderIds.Count)],
+                ProductId = productIds[randomIndex.Next(productIds.Count)],
+                PriceAtOrder = 600,
+                Quantity = 15
+            },
+            new()
+            {
+                OrderId = orderIds[randomIndex.Next(orderIds.Count)],
+                ProductId = productIds[randomIndex.Next(productIds.Count)] ,
+                PriceAtOrder = 100,
+                Quantity = 2
+            },
+            new()
+            {
+                OrderId = orderIds[randomIndex.Next(orderIds.Count)],
+                ProductId = productIds[randomIndex.Next(productIds.Count)],
+                PriceAtOrder = 200,
+                Quantity = 3
+            }
+        };
 
-            return orderDetail.DistinctBy(x => new { x.OrderId, x.ProductId }).ToList(); ;
-        }
+        return orderDetail.DistinctBy(x => new { x.OrderId, x.ProductId }).ToList(); ;
     }
 }

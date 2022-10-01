@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +6,6 @@ using XWave.Web.Extensions;
 using XWave.Core.Data.Constants;
 using XWave.Core.Models;
 using XWave.Core.Services.Interfaces;
-using XWave.Core.Utils;
 using XWave.Core.ViewModels.Customers;
 using XWave.Web.Data;
 using XWave.Web.Utils;

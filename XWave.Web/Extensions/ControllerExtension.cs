@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using XWave.Web.Data;
 
 namespace XWave.Web.Extensions;
 

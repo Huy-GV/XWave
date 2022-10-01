@@ -2,42 +2,41 @@
 using XWave.Core.Models;
 using XWave.Core.Services.Interfaces;
 
-namespace XWave.Core.Services.Implementations
+namespace XWave.Core.Services.Implementations;
+
+internal class AuthorizationService : IAuthorizationService
 {
-    internal class AuthorizationService : IAuthorizationService
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public AuthorizationService(UserManager<ApplicationUser> userManager)
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        _userManager = userManager;
+    }
 
-        public AuthorizationService(UserManager<ApplicationUser> userManager)
+    public async Task<string[]> GetRolesByUserId(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
         {
-            _userManager = userManager;
+            return Array.Empty<string>();
         }
 
-        public async Task<string[]> GetRolesByUserId(string userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user is null)
-            {
-                return Array.Empty<string>();
-            }
+        return (await _userManager.GetRolesAsync(user)).ToArray();
+    }
 
-            return (await _userManager.GetRolesAsync(user)).ToArray();
+    public async Task<string[]> GetRolesByUserName(string userName)
+    {
+        var user = await _userManager.FindByNameAsync(userName);
+        if (user is null)
+        {
+            return Array.Empty<string>();
         }
 
-        public async Task<string[]> GetRolesByUserName(string userName)
-        {
-            var user = await _userManager.FindByNameAsync(userName);
-            if (user is null)
-            {
-                return Array.Empty<string>();
-            }
+        return (await _userManager.GetRolesAsync(user)).ToArray();
+    }
 
-            return (await _userManager.GetRolesAsync(user)).ToArray();
-        }
-
-        public async Task<bool> IsUserInRole(string userId, string role)
-        {
-            return (await GetRolesByUserId(userId)).Contains(role);
-        }
+    public async Task<bool> IsUserInRole(string userId, string role)
+    {
+        return (await GetRolesByUserId(userId)).Contains(role);
     }
 }

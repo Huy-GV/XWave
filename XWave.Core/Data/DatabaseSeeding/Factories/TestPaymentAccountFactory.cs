@@ -1,71 +1,65 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XWave.Core.Models;
+﻿using XWave.Core.Models;
 
-namespace XWave.Core.Data.DatabaseSeeding.Factories
+namespace XWave.Core.Data.DatabaseSeeding.Factories;
+
+public static class TestPaymentAccountFactory
 {
-    public static class TestPaymentAccountFactory
+    public static List<PaymentAccount> PaymentAccounts()
     {
-        public static List<PaymentAccount> PaymentAccounts()
+        var accounts = new List<PaymentAccount>
         {
-            var accounts = new List<PaymentAccount>
+            new()
             {
-                new()
-                {
-                    Provider = "mastercard",
-                    AccountNumber = "12345678",
-                    ExpiryDate = DateTime.Parse("2/5/2023")
-                },
-                new()
-                {
-                    Provider = "visa",
-                    AccountNumber = "24681357",
-                    ExpiryDate = DateTime.Parse("1/2/2023")
-                },
-                new()
-                {
-                    Provider = "visa",
-                    AccountNumber = "01010101",
-                    ExpiryDate = DateTime.Parse("1/8/2023")
-                }
-            };
+                Provider = "mastercard",
+                AccountNumber = "12345678",
+                ExpiryDate = DateTime.Parse("2/5/2023")
+            },
+            new()
+            {
+                Provider = "visa",
+                AccountNumber = "24681357",
+                ExpiryDate = DateTime.Parse("1/2/2023")
+            },
+            new()
+            {
+                Provider = "visa",
+                AccountNumber = "01010101",
+                ExpiryDate = DateTime.Parse("1/8/2023")
+            }
+        };
 
-            return accounts;
-        }
+        return accounts;
+    }
 
-        public static List<PaymentAccountDetails> PaymentAccountDetails(List<PaymentAccount> paymentAccounts, List<ApplicationUser> users)
+    public static List<PaymentAccountDetails> PaymentAccountDetails(List<PaymentAccount> paymentAccounts, List<ApplicationUser> users)
+    {
+        var random = new Random();
+        var userIds = users.Select(x => x.Id).ToList();
+        var paymentAccountIds = paymentAccounts.Select(x => x.Id).ToList();
+        var paymentDetail = new List<PaymentAccountDetails>
         {
-            var random = new Random();
-            var userIds = users.Select(x => x.Id).ToList();
-            var paymentAccountIds = paymentAccounts.Select(x => x.Id).ToList();
-            var paymentDetail = new List<PaymentAccountDetails>
+            new()
             {
-                new()
-                {
-                    PaymentAccountId = paymentAccountIds[random.Next(paymentAccountIds.Count)],
-                    CustomerId = userIds[random.Next(userIds.Count)],
-                    FirstRegistration = DateTime.Parse("5/1/2020")
-                },
-                new()
-                {
-                    PaymentAccountId = paymentAccountIds[random.Next(paymentAccountIds.Count)],
-                    CustomerId = userIds[random.Next(userIds.Count)],
-                    FirstRegistration = DateTime.Parse("5/1/2020")
-                },
-                new()
-                {
-                    CustomerId = userIds[random.Next(userIds.Count)],
-                    PaymentAccountId = paymentAccountIds[random.Next(paymentAccountIds.Count)],
-                    FirstRegistration = DateTime.Parse("5/7/2019")
-                }
-            };
+                PaymentAccountId = paymentAccountIds[random.Next(paymentAccountIds.Count)],
+                CustomerId = userIds[random.Next(userIds.Count)],
+                FirstRegistration = DateTime.Parse("5/1/2020")
+            },
+            new()
+            {
+                PaymentAccountId = paymentAccountIds[random.Next(paymentAccountIds.Count)],
+                CustomerId = userIds[random.Next(userIds.Count)],
+                FirstRegistration = DateTime.Parse("5/1/2020")
+            },
+            new()
+            {
+                CustomerId = userIds[random.Next(userIds.Count)],
+                PaymentAccountId = paymentAccountIds[random.Next(paymentAccountIds.Count)],
+                FirstRegistration = DateTime.Parse("5/7/2019")
+            }
+        };
 
-            return paymentDetail
-                .DistinctBy(x => new { x.PaymentAccountId, x.CustomerId })
-                .ToList();
-        }
+        return paymentDetail
+            .DistinctBy(x => new { x.PaymentAccountId, x.CustomerId })
+            .ToList();
     }
 }

@@ -1,41 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace XWave.Core.Services.Communication;
 
-namespace XWave.Core.Services.Communication
+public enum ErrorCode
 {
-    public enum ErrorCode
-    {
-        /// <summary>
-        /// Undefined error.
-        /// </summary>
-        Undefined = 0,
+    /// <summary>
+    /// Undefined error.
+    /// </summary>
+    Undefined = 0,
 
-        /// <summary>
-        /// Requested entity not found.
-        /// </summary>
-        EntityNotFound,
+    /// <summary>
+    /// Requested entity not found.
+    /// </summary>
+    EntityNotFound,
 
-        /// <summary>
-        /// Entity already exists.
-        /// </summary>
-        EntityAlreadyExist,
+    /// <summary>
+    /// Entity already exists.
+    /// </summary>
+    EntityAlreadyExist,
 
-        /// <summary>
-        /// Entity is in an invalid state.
-        /// </summary>
-        EntityInvalidState,
+    /// <summary>
+    /// Entity is in an invalid state.
+    /// </summary>
+    EntityInvalidState,
 
-        /// <summary>
-        /// Stored entity and entity from request are inconsistent.
-        /// </summary>
-        EntityInconsistentStates,
+    /// <summary>
+    /// Stored entity and entity from request are inconsistent.
+    /// </summary>
+    EntityInconsistentStates,
 
-        /// <summary>
-        /// User request not valid.
-        /// </summary>
-        InvalidUserRequest,
-    }
+    /// <summary>
+    /// User request not valid.
+    /// </summary>
+    InvalidUserRequest,
 }

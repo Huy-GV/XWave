@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Hangfire;
+﻿using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
