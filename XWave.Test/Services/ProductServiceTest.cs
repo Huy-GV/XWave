@@ -14,7 +14,6 @@ using XWave.Core.Services.Implementations;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Utils;
 using XWave.Core.ViewModels.Management;
-using XWave.Test.Generators;
 
 namespace XWave.Test.Services
 {

@@ -34,7 +34,7 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
     {
         var user = await _userManager.FindByNameAsync(viewModel.Username);
 
-        if (user == null)
+        if (user is null)
         {
             return ServiceResult<string>.Failure(new Error
             {
@@ -88,7 +88,7 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
 
     public async Task<bool> UserExists(string userId)
     {
-        return await _userManager.FindByIdAsync(userId) != null;
+        return await _userManager.FindByIdAsync(userId) is not null;
     }
 
     private JwtSecurityToken CreateJwtToken(ApplicationUser user)

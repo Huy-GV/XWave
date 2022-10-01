@@ -60,7 +60,7 @@ internal class CategoryService : ServiceBase, ICategoryService
         try
         {
             var category = await DbContext.Category.FindAsync(id);
-            if (category == null)
+            if (category is null)
             {
                 return ServiceResult.Failure(new Error
                 {
@@ -104,7 +104,7 @@ internal class CategoryService : ServiceBase, ICategoryService
         try
         {
             var category = await DbContext.Category.FindAsync(id);
-            if (category == null)
+            if (category is null)
             {
                 return ServiceResult.Failure(new Error
                 {

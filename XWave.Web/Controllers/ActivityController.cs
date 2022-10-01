@@ -31,6 +31,6 @@ public class ActivityController : ControllerBase
     public async Task<ActionResult<Activity>> Get(int id)
     {
         var activity = await _staffActivityService.FindActivityLogAsync(id);
-        return activity != null ? Ok(activity) : NotFound();
+        return activity is not null ? Ok(activity) : NotFound();
     }
 }

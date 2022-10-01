@@ -19,14 +19,14 @@ public class ProductDtoMapper
             Quantity = product.Quantity,
             CategoryId = product.Category.Id,
             LatestRestock = product.LatestRestock,
-            Discount = product.Discount == null ? null : DiscountDtoMapper.MapDetailedDiscountDto(product.Discount)
+            Discount = product.Discount is null ? null : DiscountDtoMapper.MapDetailedDiscountDto(product.Discount)
         };
     }
 
     public ProductDto MapCustomerProductDto(Product product, decimal? discountedPrice = null)
     {
         DiscountDto? discountDto = null;
-        if (product.Discount != null && DateTime.Now.IsBetween(product.Discount.StartDate, product.Discount.EndDate))
+        if (product.Discount is not null && DateTime.Now.IsBetween(product.Discount.StartDate, product.Discount.EndDate))
             discountDto = DiscountDtoMapper.MapCustomerDiscountDto(product.Discount);
 
         return new ProductDto

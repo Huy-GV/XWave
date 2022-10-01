@@ -47,7 +47,7 @@ public class DiscountController : ControllerBase
     public async Task<ActionResult<Discount>> GetAsync(int id)
     {
         var discount = await _discountService.FindDiscountByIdAsync(id);
-        return discount != null ? Ok(discount) : NotFound();
+        return discount is not null ? Ok(discount) : NotFound();
     }
 
     [HttpPost]
@@ -65,7 +65,7 @@ public class DiscountController : ControllerBase
     [Authorize(Roles = nameof(Roles.Manager))]
     public async Task<ActionResult> UpdateAsync(int id, [FromBody] DiscountViewModel updatedDiscount)
     {
-        if (await _discountService.FindDiscountByIdAsync(id) == null)
+        if (await _discountService.FindDiscountByIdAsync(id) is null)
             return NotFound(XWaveResponse.NonExistentResource());
 
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -79,7 +79,7 @@ public class DiscountController : ControllerBase
     [Authorize(Roles = nameof(Roles.Manager))]
     public async Task<ActionResult> Delete(int id)
     {
-        if (await _discountService.FindDiscountByIdAsync(id) == null)
+        if (await _discountService.FindDiscountByIdAsync(id) is null)
             return NotFound(XWaveResponse.NonExistentResource());
 
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -93,7 +93,7 @@ public class DiscountController : ControllerBase
     [Authorize(Roles = nameof(Roles.Manager))]
     public async Task<ActionResult> ApplyDiscountToProduct(int id, [FromBody] int[] productIds)
     {
-        if (await _discountService.FindDiscountByIdAsync(id) == null)
+        if (await _discountService.FindDiscountByIdAsync(id) is null)
             return NotFound(XWaveResponse.NonExistentResource());
 
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -107,7 +107,7 @@ public class DiscountController : ControllerBase
     [Authorize(Roles = nameof(Roles.Manager))]
     public async Task<ActionResult> RemoveDiscountFromProducts(int id, [FromBody] int[] productIds)
     {
-        if (await _discountService.FindDiscountByIdAsync(id) == null)
+        if (await _discountService.FindDiscountByIdAsync(id) is null)
             return NotFound(XWaveResponse.NonExistentResource());
 
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);

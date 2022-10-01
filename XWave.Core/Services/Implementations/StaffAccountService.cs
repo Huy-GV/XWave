@@ -45,7 +45,10 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
     public async Task<StaffAccountDto?> GetStaffAccountById(string id)
     {
         var staffUser = await _userManager.FindByIdAsync(id);
-        if (staffUser != null) return await BuildStaffAccountDto(staffUser);
+        if (staffUser is not null)
+        {
+            return await BuildStaffAccountDto(staffUser);
+        };
 
         return null;
     }
@@ -66,7 +69,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         try
         {
             var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
-            if (staffAccount == null)
+            if (staffAccount is null)
             {
                 return ServiceResult.Failure(new Error
                 {
@@ -75,7 +78,10 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
                 });
             }
 
-            DbContext.StaffAccount.Update(staffAccount).CurrentValues.SetValues(updateStaffAccountViewModel);
+            DbContext.StaffAccount
+                .Update(staffAccount)
+                .CurrentValues
+                .SetValues(updateStaffAccountViewModel);
             await DbContext.SaveChangesAsync();
 
             return ServiceResult.Success();
@@ -90,7 +96,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
     {
         var staffUser = await _userManager.FindByIdAsync(staffId);
         var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
-        if (staffUser == null || staffAccount == null)
+        if (staffUser is null || staffAccount is null)
         {
             return ServiceResult.Failure(new Error
             {
@@ -132,10 +138,10 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
     private async Task<StaffAccountDto?> BuildStaffAccountDto(ApplicationUser staffUser)
     {
         var staffAccount = await DbContext.StaffAccount.FindAsync(staffUser.Id);
-        if (staffAccount == null) return null;
+        if (staffAccount is null) return null;
 
         var manager = await _userManager.FindByIdAsync(staffAccount.ImmediateManagerId);
-        var managerFullName = manager == null
+        var managerFullName = manager is null
             ? string.Empty
             : $"{manager.FirstName} {manager.LastName}";
 

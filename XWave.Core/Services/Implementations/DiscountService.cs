@@ -71,7 +71,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         }
 
         var discount = await DbContext.Discount.FindAsync(discountId);
-        if (discount == null)
+        if (discount is null)
         {
             return ServiceResult.Failure(new Error
             {
@@ -119,14 +119,14 @@ internal class DiscountService : ServiceBase, IDiscountService
     public async Task<DetailedDiscountDto?> FindDiscountByIdAsync(int id)
     {
         var discount = await DbContext.Discount.FindAsync(id);
-        return discount == null ? null : DiscountDtoMapper.MapDetailedDiscountDto(discount);
+        return discount is null ? null : DiscountDtoMapper.MapDetailedDiscountDto(discount);
     }
 
     public async Task<ServiceResult> UpdateDiscountAsync(string managerId, int discountId,
         DiscountViewModel updatedDiscountViewModel)
     {
         var discount = await DbContext.Discount.FindAsync(discountId);
-        if (discount == null)
+        if (discount is null)
         {
             return ServiceResult.Failure(new Error
             {
@@ -155,7 +155,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         }
 
         var discount = await DbContext.Discount.FindAsync(discountId);
-        if (discount == null)
+        if (discount is null)
         {
             return ServiceResult.Failure(new Error
             {
@@ -205,7 +205,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         var discount = await DbContext.Discount
             .SingleOrDefaultAsync(d => d.Id == discountId);
 
-        if (discount == null)
+        if (discount is null)
         {
             return ServiceResult.Failure(new Error
             {
@@ -219,7 +219,7 @@ internal class DiscountService : ServiceBase, IDiscountService
             .ToArrayAsync();
 
         var productsWithoutDiscount = appliedProducts
-            .Where(p => p.DiscountId == null)
+            .Where(p => p.DiscountId is null)
             .ToArray();
 
         if (productsWithoutDiscount.Any())

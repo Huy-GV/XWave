@@ -73,8 +73,10 @@ internal class ProductService : ServiceBase, IProductService
             }
 
             var newProduct = new Product();
-            var entry = DbContext.Product.Add(newProduct);
-            entry.CurrentValues.SetValues(productViewModel);
+            DbContext.Product
+                .Add(newProduct)
+                .CurrentValues
+                .SetValues(productViewModel);
             await DbContext.SaveChangesAsync();
             await _activityService.LogActivityAsync<Product>(
                 staffId,
@@ -100,7 +102,7 @@ internal class ProductService : ServiceBase, IProductService
         try
         {
             var product = await DbContext.Product.FindAsync(productId);
-            if (product == null)
+            if (product is null)
             {
                 return ServiceResult<int>.Failure(new Error
                 {
@@ -134,7 +136,7 @@ internal class ProductService : ServiceBase, IProductService
             .Include(p => p.Category)
             .Where(p => !p.IsDiscontinued)
             .AsEnumerable()
-            .Select(p => p.Discount == null
+            .Select(p => p.Discount is null
                 ? _productDtoMapper.MapCustomerProductDto(p)
                 : _productDtoMapper.MapCustomerProductDto(p, CalculatePriceAfterDiscount(p)));
 
@@ -161,9 +163,9 @@ internal class ProductService : ServiceBase, IProductService
             .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.Id == id);
 
-        if (product == null) return null;
+        if (product is null) return null;
 
-        return product.Discount == null
+        return product.Discount is null
             ? _productDtoMapper.MapCustomerProductDto(product)
             : _productDtoMapper.MapCustomerProductDto(product, CalculatePriceAfterDiscount(product));
     }
@@ -176,7 +178,7 @@ internal class ProductService : ServiceBase, IProductService
             .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.Id == id);
 
-        return product == null ? null : _productDtoMapper.MapDetailedProductDto(product);
+        return product is null ? null : _productDtoMapper.MapDetailedProductDto(product);
     }
 
     public async Task<ServiceResult> UpdateProductAsync(
@@ -191,7 +193,7 @@ internal class ProductService : ServiceBase, IProductService
 
         _logger.LogInformation($"User with ID {staffId} is attempting to update product ID {productId}");
         var product = await DbContext.Product.FindAsync(productId);
-        if (product == null)
+        if (product is null)
         {
             return ServiceResult<int>.Failure(new Error
             {
@@ -236,7 +238,7 @@ internal class ProductService : ServiceBase, IProductService
         }
 
         var product = await DbContext.Product.FindAsync(productId);
-        if (product == null)
+        if (product is null)
         {
             return ServiceResult<int>.Failure(new Error
             {
@@ -275,7 +277,7 @@ internal class ProductService : ServiceBase, IProductService
         }
 
         var product = await DbContext.Product.FindAsync(productId);
-        if (product == null)
+        if (product is null)
         {
             return ServiceResult<int>.Failure(new Error
             {
@@ -462,7 +464,7 @@ internal class ProductService : ServiceBase, IProductService
 
     public decimal CalculatePriceAfterDiscount(Product product)
     {
-        if (product.Discount == null)
+        if (product.Discount is null)
             throw new InvalidOperationException($"Product ID {product.Id} does not have any discount");
 
         return product.Price - product.Price * product.Discount.Percentage / 100;
@@ -471,7 +473,7 @@ internal class ProductService : ServiceBase, IProductService
     public async Task ScheduledUpdateProductPrice(string staffId, int productId, uint updatedPrice)
     {
         var product = await DbContext.Product.FindAsync(productId);
-        if (product != null)
+        if (product is not null)
         {
             product.Price = updatedPrice;
             await DbContext.SaveChangesAsync();
@@ -486,7 +488,7 @@ internal class ProductService : ServiceBase, IProductService
         DateTime updateSchedule)
     {
         var product = await DbContext.Product.FindAsync(productId);
-        if (product != null)
+        if (product is not null)
         {
             product.IsDiscontinued = isDiscontinued;
             product.DiscontinuationDate = isDiscontinued ? updateSchedule : null;

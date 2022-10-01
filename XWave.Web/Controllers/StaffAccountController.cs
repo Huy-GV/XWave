@@ -33,7 +33,7 @@ public class StaffAccountController : ControllerBase
     public async Task<ActionResult<StaffAccountDto>> GetStaffAccountById(string id)
     {
         var staffAccountDto = await _staffAccountService.GetStaffAccountById(id);
-        return staffAccountDto != null ? Ok(staffAccountDto) : NotFound();
+        return staffAccountDto is not null ? Ok(staffAccountDto) : NotFound();
     }
 
     [HttpPost("{id}")]

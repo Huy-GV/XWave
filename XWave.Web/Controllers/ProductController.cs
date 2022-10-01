@@ -50,14 +50,14 @@ public class ProductController : ControllerBase
     public async Task<ActionResult<ProductDto>> GetById(int id)
     {
         var productDto = await _productService.FindProductByIdForCustomers(id);
-        return productDto != null ? Ok(productDto) : NotFound();
+        return productDto is not null ? Ok(productDto) : NotFound();
     }
 
     [HttpGet("{id:int}/private")]
     public async Task<ActionResult<DetailedProductDto>> GetByIdForStaff(int id)
     {
         var productDto = await _productService.FindProductByIdForStaff(id);
-        return productDto != null ? Ok(productDto) : NotFound();
+        return productDto is not null ? Ok(productDto) : NotFound();
     }
 
     [HttpPost]
@@ -76,7 +76,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult> UpdateAsync(int id, [FromBody] ProductViewModel updatedProduct)
     {
         var product = await _productService.FindProductByIdForStaff(id);
-        if (product == null) return BadRequest(XWaveResponse.NonExistentResource());
+        if (product is null) return BadRequest(XWaveResponse.NonExistentResource());
 
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.UpdateProductAsync(staffId, id, updatedProduct);
@@ -90,11 +90,11 @@ public class ProductController : ControllerBase
     public async Task<ActionResult> UpdatePriceAsync(int id, [FromBody] ProductPriceAdjustmentViewModel viewModel)
     {
         var product = await _productService.FindProductByIdForStaff(id);
-        if (product == null) return BadRequest(XWaveResponse.NonExistentResource());
+        if (product is null) return BadRequest(XWaveResponse.NonExistentResource());
 
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         ServiceResult result;
-        if (viewModel.Schedule == null)
+        if (viewModel.Schedule is null)
             result = await _productService.UpdateProductPriceAsync(staffId, id, viewModel.UpdatedPrice);
         else
             result = await _productService.UpdateProductPriceAsync(
@@ -113,7 +113,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult> DeleteAsync(int id)
     {
         var product = await _productService.FindProductByIdForStaff(id);
-        if (product == null) return NotFound(XWaveResponse.NonExistentResource());
+        if (product is null) return NotFound(XWaveResponse.NonExistentResource());
 
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.DeleteProductAsync(id, managerId);
@@ -138,7 +138,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult> RestartProductSaleAsync(int id, DateTime updateSchedule)
     {
         var product = await _productService.FindProductByIdForStaff(id);
-        if (product == null) return NotFound(XWaveResponse.NonExistentResource());
+        if (product is null) return NotFound(XWaveResponse.NonExistentResource());
 
         if (!product.IsDiscontinued) return BadRequest(XWaveResponse.Failed("Product is currently in sale."));
 

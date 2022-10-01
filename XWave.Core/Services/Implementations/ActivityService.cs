@@ -69,7 +69,7 @@ internal class ActivityService : ServiceBase, IActivityService
             .AsNoTracking()
             .SingleOrDefaultAsync(x => x.Id == id);
 
-        if (log != null)
+        if (log is not null)
             return new ActivityLogDto
             {
                 Id = log.Id,
@@ -82,7 +82,7 @@ internal class ActivityService : ServiceBase, IActivityService
 
     private static string CreateInfoText(ApplicationUser? user, string infoText)
     {
-        var (userName, firstName, lastName) = user == null
+        var (userName, firstName, lastName) = user is null
             ? ("[Deleted]", string.Empty, "[Deleted]")
             : (user.UserName, user.FirstName, user.LastName);
 

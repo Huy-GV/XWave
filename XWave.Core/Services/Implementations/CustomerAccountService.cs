@@ -55,7 +55,7 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         try
         {
             var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
-            if (customerAccount == null)
+            if (customerAccount is null)
             {
                 return ServiceResult.Failure(new Error
                 {
@@ -83,7 +83,7 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         try
         {
             var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
-            if (customerAccount == null)
+            if (customerAccount is null)
             {
                 return ServiceResult.Failure(new Error
                 {

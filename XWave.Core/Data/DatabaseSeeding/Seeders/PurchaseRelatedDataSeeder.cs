@@ -22,7 +22,7 @@ internal class PurchaseRelatedDataSeeder
             var user1 = userManager.FindByNameAsync("john_customer").Result;
             var user2 = userManager.FindByNameAsync("jake_customer").Result;
 
-            if (user1 == null || user2 == null)
+            if (user1 is null || user2 is null)
             {
                 throw new InvalidOperationException("Users are not seeded yet");
             }

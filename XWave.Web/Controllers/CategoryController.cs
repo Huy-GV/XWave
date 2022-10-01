@@ -36,7 +36,7 @@ public class CategoryController : ControllerBase
     public async Task<ActionResult<Category>> Get(int id)
     {
         var category = await _categoryService.FindCategoryByIdAsync(id);
-        return category != null ? Ok(category) : NotFound();
+        return category is not null ? Ok(category) : NotFound();
     }
 
     [HttpPost]
@@ -55,7 +55,7 @@ public class CategoryController : ControllerBase
     public async Task<ActionResult> UpdateAsync(int id, [FromBody] Category updatedCategory)
     {
         var category = await _categoryService.FindCategoryByIdAsync(id);
-        if (category == null) return NotFound(XWaveResponse.NonExistentResource());
+        if (category is null) return NotFound(XWaveResponse.NonExistentResource());
 
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
@@ -69,7 +69,7 @@ public class CategoryController : ControllerBase
     public async Task<ActionResult> Delete(int id)
     {
         var category = await _categoryService.FindCategoryByIdAsync(id);
-        if (category == null) return NotFound(XWaveResponse.NonExistentResource());
+        if (category is null) return NotFound(XWaveResponse.NonExistentResource());
 
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _categoryService.DeleteCategoryAsync(managerId, id);

@@ -33,7 +33,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
                     x.Provider == inputPayment.Provider &&
                     x.IsDeleted);
 
-            if (existingPaymentAccount != null)
+            if (existingPaymentAccount is not null)
             {
                 DbContext.PaymentAccount.Update(existingPaymentAccount);
                 existingPaymentAccount.IsDeleted = false;
@@ -76,7 +76,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
     public async Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId)
     {
         var paymentAccountToRemove = await DbContext.PaymentAccount.FindAsync(paymentId);
-        if (paymentAccountToRemove == null)
+        if (paymentAccountToRemove is null)
         {
             return ServiceResult.Failure(new Error
             {
@@ -107,7 +107,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         PaymentAccountViewModel updatedPayment)
     {
         var payment = await DbContext.PaymentAccount.FindAsync(paymentAccountId);
-        if (payment == null)
+        if (payment is null)
         {
             return ServiceResult.Failure(new Error
             {

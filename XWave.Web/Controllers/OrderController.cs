@@ -46,7 +46,7 @@ public class OrderController : ControllerBase
         if (string.IsNullOrEmpty(customerId)) return BadRequest(XWaveResponse.Failed("Customer ID not found."));
 
         var orderDto = await _orderService.FindOrderByIdAsync(customerId, id);
-        return orderDto != null ? Ok(orderDto) : NotFound();
+        return orderDto is not null ? Ok(orderDto) : NotFound();
     }
 
     [HttpPost]
