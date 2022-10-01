@@ -121,7 +121,7 @@ namespace XWave.Test.Services
                 var purchaseViewModel = new PurchaseViewModel()
                 {
                     PaymentAccountId = paymentAccountId,
-                    Cart = itemsToPurchase
+                    ProductCart = itemsToPurchase
                 };
 
                 var customerId = Guid.NewGuid().ToString();

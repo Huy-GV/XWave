@@ -4,6 +4,7 @@ namespace XWave.Core.ViewModels.Authentication;
 
 public class RegisterCustomerViewModel
 {
-    public RegisterUserViewModel UserViewModel { get; set; }
-    public CustomerAccountViewModel CustomerAccountViewModel { get; set; }
+    public RegisterUserViewModel UserViewModel { get; set; } = new();
+
+    public CustomerAccountViewModel CustomerAccountViewModel { get; set; } = new();
 }

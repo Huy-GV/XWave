@@ -11,9 +11,9 @@ public class PaymentAccountViewModel : IValidatableObject
         "visa"
     };
 
-    [Required] public string AccountNumber { get; set; }
+    [Required] public string AccountNumber { get; set; } = string.Empty;
 
-    [Required] public string Provider { get; set; }
+    [Required] public string Provider { get; set; } = string.Empty;
 
     [Required] [DataType(DataType.Date)] public DateTime ExpiryDate { get; set; }
 

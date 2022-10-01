@@ -69,7 +69,7 @@ internal class OrderService : ServiceBase, IOrderService
                 DeliveryAddress = purchaseViewModel.DeliveryAddress
             };
 
-            var productsToPurchaseIds = purchaseViewModel.Cart.Select(p => p.ProductId);
+            var productsToPurchaseIds = purchaseViewModel.ProductCart.Select(p => p.ProductId);
             var productsToPurchase = await DbContext.Product
                 .Include(p => p.Discount)
                 .Where(p => productsToPurchaseIds.Contains(p.Id))
@@ -92,7 +92,7 @@ internal class OrderService : ServiceBase, IOrderService
             var orderDetails = new List<OrderDetails>();
             var errors = new List<Error>();
 
-            foreach (var productInCart in purchaseViewModel.Cart)
+            foreach (var productInCart in purchaseViewModel.ProductCart)
             {
                 var product = productsToPurchase[productInCart.ProductId];
                 if (product.Quantity < productInCart.Quantity)

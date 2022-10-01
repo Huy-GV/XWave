@@ -10,5 +10,6 @@ public class Category : IEntity
     [StringLength(10, MinimumLength = 2)]
     public string Name { get; set; }
 
-    [StringLength(50, MinimumLength = 5)] public string Description { get; set; }
+    [StringLength(50, MinimumLength = 5)] 
+    public string Description { get; set; }
 }

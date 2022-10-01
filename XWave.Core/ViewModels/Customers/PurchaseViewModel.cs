@@ -4,12 +4,12 @@ namespace XWave.Core.ViewModels.Customers;
 
 public class PurchaseViewModel
 {
-    public IList<PurchasedItems> Cart { get; set; }
+    public IEnumerable<PurchasedItems> ProductCart { get; set; } = Enumerable.Empty<PurchasedItems>();
     public int PaymentAccountId { get; set; }
 
     [Required(ErrorMessage = "Delivery address is empty")]
     [MaxLength(100)]
-    public string DeliveryAddress { get; set; }
+    public string DeliveryAddress { get; set; } = string.Empty;
 
     public record PurchasedItems
     {

@@ -11,7 +11,6 @@ using XWave.Core.Services.Implementations;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Utils;
 using XWave.Core.Data.DatabaseSeeding.Seeders;
-using Newtonsoft.Json;
 
 namespace XWave.Core.Extension;
 
@@ -28,6 +27,7 @@ public static class XWaveServiceExtension
         services.AddScoped<IStaffAccountService, StaffAccountService>();
         services.AddScoped<ICustomerAccountService, CustomerAccountService>();
         services.AddScoped<IAuthenticationService, JwtAuthenticationService>();
+        services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddTransient<ProductDtoMapper>();
     }
 

@@ -15,8 +15,10 @@ public class DiscountViewModel
     public IEnumerable<ValidationResult> Validate(ValidationContext _)
     {
         if (StartDate > EndDate)
+        {
             yield return new ValidationResult(
-                "Start date must be before end date.",
-                new[] { nameof(StartDate), nameof(EndDate) });
+               "Start date must be before end date.",
+               new[] { nameof(StartDate), nameof(EndDate) });
+        }  
     }
 }
