@@ -10,7 +10,8 @@ public interface IStaffAccountService
 
     Task<IEnumerable<StaffAccountDto>> GetAllStaffAccounts();
 
-    Task<ServiceResult<string>> RegisterStaffAccount(string staffId,
+    Task<ServiceResult<string>> RegisterStaffAccount(
+        string staffId,
         StaffAccountViewModel registerStaffViewModel);
 
     Task<ServiceResult> UpdateStaffAccount(string staffId, StaffAccountViewModel updateUserViewModel);

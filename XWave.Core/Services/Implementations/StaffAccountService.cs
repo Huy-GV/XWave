@@ -21,7 +21,8 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         _userManager = userManager;
     }
 
-    public Task<ServiceResult<string>> RegisterStaffAccount(string id,
+    public Task<ServiceResult<string>> RegisterStaffAccount(
+        string id,
         StaffAccountViewModel registerStaffViewModel)
     {
         try

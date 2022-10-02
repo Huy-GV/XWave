@@ -31,7 +31,11 @@ public class PaymentAccountController : ControllerBase
     [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
     public async Task<ActionResult> Get()
     {
-        return Ok(await _paymentService.FindAllTransactionDetailsForStaffAsync());
+        var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _paymentService.FindAllTransactionDetailsForStaffAsync(staffId);
+
+        // todo: create mapping for errors
+        return Ok(result.Value);
     }
 
     [HttpGet("usage")]

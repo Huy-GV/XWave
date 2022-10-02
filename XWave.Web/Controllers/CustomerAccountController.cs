@@ -35,14 +35,20 @@ public class CustomerAccountController : ControllerBase
         [FromBody] RegisterCustomerViewModel viewModel)
     {
         var result = await _customerAccountService.RegisterCustomerAsync(viewModel);
-        if (!result.Succeeded) return BadRequest(result.Errors);
+        if (!result.Succeeded) 
+        {
+            return BadRequest(result.Errors);
+        }
 
-        if (Request.Cookies.ContainsKey(_jwtCookieOptions.Name)) Response.Cookies.Delete(_jwtCookieOptions.Name);
+        if (Request.Cookies.ContainsKey(_jwtCookieOptions.Name))
+        {
+            Response.Cookies.Delete(_jwtCookieOptions.Name);
+        }
 
         var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieOptions.DurationInDays);
         Response.Cookies.Append(_jwtCookieOptions.Name, result.Value!, cookieOptions);
 
-        return Ok(result);
+        return Ok(result.Value);
     }
 
     [HttpPost("subscribe")]
@@ -51,7 +57,10 @@ public class CustomerAccountController : ControllerBase
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _customerAccountService.UpdateSubscriptionAsync(customerId, isSubscribed);
-        if (result.Succeeded) return NoContent();
+        if (result.Succeeded)
+        {
+            return NoContent();
+        }
 
         return UnprocessableEntity(result.Errors);
     }

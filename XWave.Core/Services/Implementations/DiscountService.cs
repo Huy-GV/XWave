@@ -36,7 +36,8 @@ internal class DiscountService : ServiceBase, IDiscountService
         _backgroundJobService = backgroundJobService;
     }
 
-    public async Task<ServiceResult<int>> CreateDiscountAsync(string managerId,
+    public async Task<ServiceResult<int>> CreateDiscountAsync(
+        string managerId,
         DiscountViewModel discountViewModel)
     {
         if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
@@ -122,9 +123,16 @@ internal class DiscountService : ServiceBase, IDiscountService
         return discount is null ? null : DiscountDtoMapper.MapDetailedDiscountDto(discount);
     }
 
-    public async Task<ServiceResult> UpdateDiscountAsync(string managerId, int discountId,
+    public async Task<ServiceResult> UpdateDiscountAsync(
+        string managerId, 
+        int discountId,
         DiscountViewModel updatedDiscountViewModel)
     {
+        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        {
+            return ServiceResult.Failure(_unauthorizedOperationError);
+        }
+
         var discount = await DbContext.Discount.FindAsync(discountId);
         if (discount is null)
         {

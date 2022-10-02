@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
+using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Customers;
 using XWave.Core.Extension;
 using XWave.Core.Models;
@@ -13,17 +14,29 @@ namespace XWave.Core.Services.Implementations;
 internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 {
     private readonly ILogger<PaymentAccountService> _logger;
+    private readonly IAuthorizationService _authorizationService;
 
     public PaymentAccountService(
         XWaveDbContext dbContext,
-        ILogger<PaymentAccountService> logger) : base(dbContext)
+        ILogger<PaymentAccountService> logger,
+        IAuthorizationService authorizationService) : base(dbContext)
     {
         _logger = logger;
+        _authorizationService = authorizationService;
     }
 
-    public async Task<ServiceResult<int>> AddPaymentAccountAsync(string customerId,
+    public async Task<ServiceResult<int>> AddPaymentAccountAsync(
+        string customerId,
         PaymentAccountViewModel inputPayment)
     {
+        if (! await _authorizationService.IsUserInRole(customerId, Roles.Customer)) 
+        {
+            return ServiceResult<int>.Failure(new Error 
+            {
+                ErrorCode = ErrorCode.InvalidUserRequest,
+            });
+        }
+
         await using var transaction = await DbContext.Database.BeginTransactionAsync();
         try
         {
@@ -75,6 +88,14 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 
     public async Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId)
     {
+        if (! await _authorizationService.IsUserInRole(customerId, Roles.Customer)) 
+        {
+            return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error 
+            {
+                ErrorCode = ErrorCode.InvalidUserRequest,
+            });
+        }
+
         var paymentAccountToRemove = await DbContext.PaymentAccount.FindAsync(paymentId);
         if (paymentAccountToRemove is null)
         {
@@ -92,13 +113,23 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         return ServiceResult.Success();
     }
 
-    public Task<IEnumerable<PaymentAccount>> FindAllTransactionDetailsForStaffAsync()
+    public async Task<ServiceResult<IEnumerable<PaymentAccount>>> FindAllTransactionDetailsForStaffAsync(string staffId)
     {
-        return Task.FromResult(DbContext.PaymentAccount
+        if (! await _authorizationService.IsUserInRole(staffId, Roles.Staff)) 
+        {
+            return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error 
+            {
+                ErrorCode = ErrorCode.InvalidUserRequest,
+            });
+        }
+
+        var transactions = DbContext.PaymentAccount
             .AsNoTracking()
             .Include(pd => pd.PaymentAccountDetails)
             .ThenInclude(pd => pd.Customer)
-            .AsEnumerable());
+            .AsEnumerable();
+
+        return ServiceResult<IEnumerable<PaymentAccount>>.Success(transactions);
     }
 
     public async Task<ServiceResult> UpdatePaymentAccountAsync(

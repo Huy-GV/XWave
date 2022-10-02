@@ -44,7 +44,7 @@ internal class ProductService : ServiceBase, IProductService
         _logger = logger;
     }
 
-    private async Task<bool> IsStaffIdValid(string userId)
+    private async Task<bool> IsUserStaff(string userId)
     {
         var roles = await _authorizationService.GetRolesByUserId(userId);
         return roles.Intersect(staffRoles).Any();
@@ -53,7 +53,7 @@ internal class ProductService : ServiceBase, IProductService
     public async Task<ServiceResult<int>> AddProductAsync(string staffId,
         ProductViewModel productViewModel)
     {
-        if (!await IsStaffIdValid(staffId))
+        if (!await IsUserStaff(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -143,8 +143,15 @@ internal class ProductService : ServiceBase, IProductService
         return Task.FromResult(productDtos);
     }
 
-    public async Task<IEnumerable<DetailedProductDto>> FindAllProductsForStaff(bool includeDiscontinuedProducts)
+    public async Task<ServiceResult<IEnumerable<DetailedProductDto>>> FindAllProductsForStaff(
+        bool includeDiscontinuedProducts,
+        string staffId)
     {
+        if (!await IsUserStaff(staffId))
+        {
+            return ServiceResult<IEnumerable<DetailedProductDto>>.Failure(_unauthorizedError);
+        }
+
         var products = await DbContext.Product
             .AsNoTracking()
             .Include(p => p.Discount)
@@ -152,7 +159,9 @@ internal class ProductService : ServiceBase, IProductService
             .Where(p => includeDiscontinuedProducts || !p.IsDiscontinued)
             .ToListAsync();
 
-        return products.Select(_productDtoMapper.MapDetailedProductDto);
+        var productDtos = products.Select(_productDtoMapper.MapDetailedProductDto);
+        
+        return ServiceResult<IEnumerable<DetailedProductDto>>.Success(productDtos);
     }
 
     public async Task<ProductDto?> FindProductByIdForCustomers(int id)
@@ -186,7 +195,7 @@ internal class ProductService : ServiceBase, IProductService
         int productId,
         ProductViewModel updatedProductViewModel)
     {
-        if (!await IsStaffIdValid(staffId))
+        if (!await IsUserStaff(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -232,7 +241,7 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> UpdateStockAsync(string staffId, int productId, uint updatedStock)
     {
-        if (!await IsStaffIdValid(staffId))
+        if (!await IsUserStaff(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -271,7 +280,7 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice)
     {
-        if (!await IsStaffIdValid(staffId))
+        if (!await IsUserStaff(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -313,7 +322,7 @@ internal class ProductService : ServiceBase, IProductService
         uint updatedPrice,
         DateTime updateSchedule)
     {
-        if (!await IsStaffIdValid(staffId))
+        if (!await IsUserStaff(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -464,9 +473,11 @@ internal class ProductService : ServiceBase, IProductService
 
     public decimal CalculatePriceAfterDiscount(Product product)
     {
-        if (product.Discount is null)
+        if (product.Discount is null) 
+        {
             throw new InvalidOperationException($"Product ID {product.Id} does not have any discount");
-
+        }
+        
         return product.Price - product.Price * product.Discount.Percentage / 100;
     }
 

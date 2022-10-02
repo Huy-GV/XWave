@@ -43,7 +43,12 @@ public class ProductController : ControllerBase
     [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
     public async Task<ActionResult<IEnumerable<DetailedProductDto>>> GetAllForStaff()
     {
-        return Ok(await _productService.FindAllProductsForStaff());
+        var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _productService.FindAllProductsForStaff(false, staffId);
+
+        return result.Succeeded 
+            ? Ok(result.Value)
+            : UnprocessableEntity();
     }
 
     [HttpGet("{id:int}")]

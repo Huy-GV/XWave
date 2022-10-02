@@ -41,26 +41,27 @@ internal class OrderService : ServiceBase, IOrderService
         PurchaseViewModel purchaseViewModel,
         string customerId)
     {
+        if (!await _customerAccountService.CustomerAccountExists(customerId))
+        {
+            return ServiceResult<int>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = "Customer account not found"
+            });
+        }
+
+        if (!await _paymentService.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId))
+        {
+            return ServiceResult<int>.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = "Valid payment account not found"
+            });
+        }
+
         await using var transaction = await DbContext.Database.BeginTransactionAsync();
         try
         {
-            if (!await _customerAccountService.CustomerAccountExists(customerId))
-            {
-                return ServiceResult<int>.Failure(new Error
-                {
-                    ErrorCode = ErrorCode.EntityNotFound,
-                    Message = "Customer account not found"
-                });
-            }
-
-            if (!await _paymentService.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId))
-            {
-                return ServiceResult<int>.Failure(new Error
-                {
-                    ErrorCode = ErrorCode.EntityNotFound,
-                    Message = "Valid payment account not found"
-                });
-            }
 
             var order = new Order
             {

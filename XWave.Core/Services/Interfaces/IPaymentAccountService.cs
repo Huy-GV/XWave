@@ -7,15 +7,16 @@ namespace XWave.Core.Services.Interfaces;
 
 public interface IPaymentAccountService
 {
-    Task<ServiceResult<int>> AddPaymentAccountAsync(string customerId,
+    Task<ServiceResult<int>> AddPaymentAccountAsync(
+        string customerId,
         PaymentAccountViewModel newPaymentAccount);
 
     Task<bool> CustomerHasPaymentAccount(string customerId, int paymentAccountId, bool includeExpiredAccounts = false);
 
-    Task<IEnumerable<PaymentAccount>> FindAllTransactionDetailsForStaffAsync();
+    Task<ServiceResult<IEnumerable<PaymentAccount>>> FindAllTransactionDetailsForStaffAsync(string staffId);
 
     /// <summary>
-    /// Find the summaraized usage history of a payment account.
+    /// Find the summarized usage history of a payment account.
     /// </summary>
     /// <param name="customerId">ID of the payment account owner.</param>
     /// <returns>An enumerable of <see cref="PaymentAccountUsageDto"/> which contains account usage information.</returns>

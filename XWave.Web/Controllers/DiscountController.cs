@@ -79,11 +79,16 @@ public class DiscountController : ControllerBase
     public async Task<ActionResult> Delete(int id)
     {
         if (await _discountService.FindDiscountByIdAsync(id) is null)
+        {
             return NotFound(XWaveResponse.NonExistentResource());
-
+        }
+            
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountAsync(managerId, id);
-        if (result.Succeeded) return NoContent();
+        if (result.Succeeded)
+        {
+            return NoContent();
+        }
 
         return UnprocessableEntity(result.Errors);
     }
@@ -93,11 +98,16 @@ public class DiscountController : ControllerBase
     public async Task<ActionResult> ApplyDiscountToProduct(int id, [FromBody] int[] productIds)
     {
         if (await _discountService.FindDiscountByIdAsync(id) is null)
+        {
             return NotFound(XWaveResponse.NonExistentResource());
+        }
 
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.ApplyDiscountToProducts(userId, id, productIds);
-        if (result.Succeeded) return Ok("Discount has been successfully applied to selected products.");
+        if (result.Succeeded)
+        { 
+            return Ok("Discount has been successfully applied to selected products.");
+        }
 
         return UnprocessableEntity(result.Errors);
     }

@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave.Core", "XWave.Core\XWave.Core.csproj", "{1F7F7438-3DD0-4638-882C-99CBB218339E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave.Web", "XWave.Web\XWave.Web.csproj", "{87CD5A25-565A-4812-86FE-4943876C3B59}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave.Test", "XWave.Test\XWave.Test.csproj", "{92DD85AA-F057-48B1-B2B7-024A27024DAE}"
@@ -21,12 +19,6 @@ Global
 		Test|Any CPU = Test|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1F7F7438-3DD0-4638-882C-99CBB218339E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1F7F7438-3DD0-4638-882C-99CBB218339E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1F7F7438-3DD0-4638-882C-99CBB218339E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1F7F7438-3DD0-4638-882C-99CBB218339E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1F7F7438-3DD0-4638-882C-99CBB218339E}.Test|Any CPU.ActiveCfg = Test|Any CPU
-		{1F7F7438-3DD0-4638-882C-99CBB218339E}.Test|Any CPU.Build.0 = Test|Any CPU
 		{87CD5A25-565A-4812-86FE-4943876C3B59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{87CD5A25-565A-4812-86FE-4943876C3B59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87CD5A25-565A-4812-86FE-4943876C3B59}.Release|Any CPU.ActiveCfg = Release|Any CPU

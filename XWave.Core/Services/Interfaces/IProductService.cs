@@ -17,7 +17,9 @@ public interface IProductService
 
     Task<IEnumerable<ProductDto>> FindAllProductsForCustomers();
 
-    Task<IEnumerable<DetailedProductDto>> FindAllProductsForStaff(bool includeDiscontinuedProducts = false);
+    Task<ServiceResult<IEnumerable<DetailedProductDto>>> FindAllProductsForStaff(
+        bool includeDiscontinuedProducts,
+        string staffId);
 
     /// <summary>
     ///     Find a product by its ID with limited details for customers.
