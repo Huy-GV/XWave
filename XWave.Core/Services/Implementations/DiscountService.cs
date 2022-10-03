@@ -19,7 +19,7 @@ internal class DiscountService : ServiceBase, IDiscountService
 
     private readonly Error _unauthorizedOperationError = new()
     {
-        ErrorCode = ErrorCode.InvalidUserRequest,
+        ErrorCode = ErrorCode.AuthorizationError,
         Message = "Only managers are authorized to modify/ assign Discounts",
     };
 
@@ -154,7 +154,9 @@ internal class DiscountService : ServiceBase, IDiscountService
         return ServiceResult.Success();
     }
 
-    public async Task<ServiceResult> ApplyDiscountToProducts(string managerId, int discountId,
+    public async Task<ServiceResult> ApplyDiscountToProducts(
+        string managerId, 
+        int discountId,
         IEnumerable<int> productIds)
     {
         if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
@@ -202,7 +204,9 @@ internal class DiscountService : ServiceBase, IDiscountService
         return ServiceResult.Success();
     }
 
-    public async Task<ServiceResult> RemoveDiscountFromProductsAsync(string managerId, int discountId,
+    public async Task<ServiceResult> RemoveDiscountFromProductsAsync(
+        string managerId, 
+        int discountId,
         IEnumerable<int> productIds)
     {
         if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
@@ -234,7 +238,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityInconsistentStates,
+                ErrorCode = ErrorCode.InvalidState,
                 Message = $"Discount with ID {discountId} is not applied to the following products: {string.Join(", ", productsWithoutDiscount.Select(p => p.Name))}.",
             });
         }

@@ -91,7 +91,7 @@ public class ProductServiceTest : BaseTest
             .Should()
             .BeEquivalentTo(ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityInvalidState,
+                ErrorCode = ErrorCode.InvalidState,
                 Message = $"Products with the following IDs already discontinued: {string.Join(", ", new[] { discontinuedProductId })}."
             }));
     }
@@ -113,7 +113,7 @@ public class ProductServiceTest : BaseTest
             .Should()
             .BeEquivalentTo(ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidUserRequest,
+                ErrorCode = ErrorCode.InvalidArgument,
                 Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
             }));
     }
@@ -136,7 +136,7 @@ public class ProductServiceTest : BaseTest
             .Should()
             .BeEquivalentTo(ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidUserRequest,
+                ErrorCode = ErrorCode.InvalidArgument,
                 Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
             }));
     }
@@ -159,7 +159,7 @@ public class ProductServiceTest : BaseTest
                 .Should()
                 .BeEquivalentTo(new Error()
                 {
-                    ErrorCode = ErrorCode.InvalidUserRequest,
+                    ErrorCode = ErrorCode.AuthorizationError,
                     Message = "Only staff are authorized to modify products"
                 });
         });
@@ -175,14 +175,14 @@ public class ProductServiceTest : BaseTest
         {
             var userId = guid.ToString();
             _mockAuthorizationService
-                            .Setup(x => x.GetRolesByUserId(userId).Result)
-                            .Returns(invalidRoles);
+                .Setup(x => x.GetRolesByUserId(userId).Result)
+                .Returns(invalidRoles);
             _productService.UpdateProductPriceAsync(userId, It.IsAny<int>(), It.IsAny<uint>())
                 .Result.Errors.Single()
                 .Should()
                 .BeEquivalentTo(new Error()
                 {
-                    ErrorCode = ErrorCode.InvalidUserRequest,
+                    ErrorCode = ErrorCode.AuthorizationError,
                     Message = "Only staff are authorized to modify products"
                 });
         });
@@ -205,7 +205,7 @@ public class ProductServiceTest : BaseTest
                     .Should()
                     .BeEquivalentTo(new Error()
                     {
-                        ErrorCode = ErrorCode.InvalidUserRequest,
+                        ErrorCode = ErrorCode.AuthorizationError,
                         Message = "Only staff are authorized to modify products"
                     });
             });
@@ -228,7 +228,7 @@ public class ProductServiceTest : BaseTest
                     .Should()
                     .BeEquivalentTo(new Error()
                     {
-                        ErrorCode = ErrorCode.InvalidUserRequest,
+                        ErrorCode = ErrorCode.AuthorizationError,
                         Message = "Only staff are authorized to modify products"
                     });
             });

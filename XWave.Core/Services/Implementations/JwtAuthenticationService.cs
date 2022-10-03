@@ -33,12 +33,11 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
     public async Task<ServiceResult<string>> SignInAsync(SignInViewModel viewModel)
     {
         var user = await _userManager.FindByNameAsync(viewModel.Username);
-
         if (user is null)
         {
             return ServiceResult<string>.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                ErrorCode = ErrorCode.AuthenticationError,
                 Message = $"User with {viewModel.Username} not found",
             });
         }
@@ -47,7 +46,7 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
         {
             return ServiceResult<string>.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidUserRequest,
+                ErrorCode = ErrorCode.AuthorizationError,
                 Message = $"User with {viewModel.Username} locked out",
             });
         }

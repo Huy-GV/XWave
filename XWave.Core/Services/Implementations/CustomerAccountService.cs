@@ -52,18 +52,18 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
 
     public async Task<ServiceResult> UpdateSubscriptionAsync(string id, bool isSubscribed)
     {
+        var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
+        if (customerAccount is null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"Customer account with ID {id} not found.",
+            });
+        }
+
         try
         {
-            var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
-            if (customerAccount is null)
-            {
-                return ServiceResult.Failure(new Error
-                {
-                    ErrorCode = ErrorCode.EntityNotFound,
-                    Message = $"Customer account with ID {id} not found.",
-                });
-            }
-
             DbContext.CustomerAccount.Update(customerAccount);
             customerAccount.IsSubscribedToPromotions = isSubscribed;
             await DbContext.SaveChangesAsync();
@@ -78,22 +78,25 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         }
     }
 
-    public async Task<ServiceResult> UpdateCustomerAccountAsync(string id, CustomerAccountViewModel viewModel)
+    public async Task<ServiceResult> UpdateCustomerAccountAsync(
+        string id, 
+        CustomerAccountViewModel viewModel)
     {
+        var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
+        if (customerAccount is null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                ErrorCode = ErrorCode.EntityNotFound,
+                Message = $"Customer account with ID {id} not found.",
+            });
+        }
+
         try
         {
-            var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
-            if (customerAccount is null)
-            {
-                return ServiceResult.Failure(new Error
-                {
-                    ErrorCode = ErrorCode.EntityNotFound,
-                    Message = $"Customer account with ID {id} not found.",
-                });
-            }
-
-            var entry = DbContext.CustomerAccount.Update(customerAccount);
-            entry.CurrentValues.SetValues(viewModel);
+            DbContext.CustomerAccount
+                .Update(customerAccount)
+                .CurrentValues.SetValues(viewModel);
             await DbContext.SaveChangesAsync();
 
             return ServiceResult.Success();

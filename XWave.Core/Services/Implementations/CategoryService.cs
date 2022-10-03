@@ -13,7 +13,7 @@ internal class CategoryService : ServiceBase, ICategoryService
 
     private readonly Error _unauthorizedOperationError = new()
     {
-        ErrorCode = ErrorCode.InvalidUserRequest,
+        ErrorCode = ErrorCode.AuthorizationError,
         Message = "Only managers are authorized to modify Categories",
     };
 

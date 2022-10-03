@@ -33,7 +33,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         {
             return ServiceResult<int>.Failure(new Error 
             {
-                ErrorCode = ErrorCode.InvalidUserRequest,
+                ErrorCode = ErrorCode.AuthorizationError,
             });
         }
 
@@ -92,7 +92,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         {
             return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error 
             {
-                ErrorCode = ErrorCode.InvalidUserRequest,
+                ErrorCode = ErrorCode.AuthorizationError,
             });
         }
 
@@ -119,7 +119,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         {
             return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error 
             {
-                ErrorCode = ErrorCode.InvalidUserRequest,
+                ErrorCode = ErrorCode.AuthorizationError,
             });
         }
 

@@ -45,16 +45,18 @@ internal class OrderService : ServiceBase, IOrderService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                ErrorCode = ErrorCode.AuthorizationError,
                 Message = "Customer account not found"
             });
         }
 
-        if (!await _paymentService.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId))
+        if (!await _paymentService.CustomerHasPaymentAccount(
+            customerId, 
+            purchaseViewModel.PaymentAccountId))
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                ErrorCode = ErrorCode.InvalidState,
                 Message = "Valid payment account not found"
             });
         }
@@ -62,7 +64,6 @@ internal class OrderService : ServiceBase, IOrderService
         await using var transaction = await DbContext.Database.BeginTransactionAsync();
         try
         {
-
             var order = new Order
             {
                 CustomerId = customerId,
@@ -91,6 +92,8 @@ internal class OrderService : ServiceBase, IOrderService
 
             var purchasedProducts = new List<Product>();
             var orderDetails = new List<OrderDetails>();
+
+            // todo: return error on the first encounter
             var errors = new List<Error>();
 
             foreach (var productInCart in purchaseViewModel.ProductCart)
@@ -100,7 +103,7 @@ internal class OrderService : ServiceBase, IOrderService
                 {
                     errors.Add(new Error
                     {
-                        ErrorCode = ErrorCode.EntityInvalidState,
+                        ErrorCode = ErrorCode.InvalidState,
                         Message = $"Quantity of product {product.Name} exceeded existing stock.",
                     });
                 }
@@ -110,7 +113,7 @@ internal class OrderService : ServiceBase, IOrderService
                 {
                     errors.Add(new Error
                     {
-                        ErrorCode = ErrorCode.EntityInconsistentStates,
+                        ErrorCode = ErrorCode.ConflictingState,
                         Message = $"Discount percentage of product {product.Name} has been changed during the transaction.",
                     });
                 }
@@ -119,7 +122,7 @@ internal class OrderService : ServiceBase, IOrderService
                 {
                     errors.Add(new Error
                     {
-                        ErrorCode = ErrorCode.EntityInconsistentStates,
+                        ErrorCode = ErrorCode.ConflictingState,
                         Message = $"Price of product {product.Name} has been changed during the transaction.",
                     });
                 }

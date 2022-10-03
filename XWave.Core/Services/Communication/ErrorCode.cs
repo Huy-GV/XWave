@@ -20,15 +20,25 @@ public enum ErrorCode
     /// <summary>
     /// Entity is in an invalid state.
     /// </summary>
-    EntityInvalidState,
-
-    /// <summary>
-    /// Stored entity and entity from request are inconsistent.
-    /// </summary>
-    EntityInconsistentStates,
+    InvalidState,
 
     /// <summary>
     /// User request not valid.
     /// </summary>
-    InvalidUserRequest,
+    InvalidArgument,
+
+    /// <summary>
+    /// User request in conflict with existing data.
+    /// </summary>
+    ConflictingState,
+
+    /// <summary>
+    /// User unauthorized.
+    /// </summary>
+    AuthorizationError,
+
+    /// <summary>
+    /// User unauthenticated.
+    /// </summary>
+    AuthenticationError,
 }

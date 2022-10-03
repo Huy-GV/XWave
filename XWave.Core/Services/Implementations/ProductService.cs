@@ -25,7 +25,7 @@ internal class ProductService : ServiceBase, IProductService
 
     private readonly Error _unauthorizedError = new()
     {
-        ErrorCode = ErrorCode.InvalidUserRequest,
+        ErrorCode = ErrorCode.AuthorizationError,
         Message = "Only staff are authorized to modify products"
     };
 
@@ -215,7 +215,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityInvalidState,
+                ErrorCode = ErrorCode.InvalidState,
                 Message = "Product removed or discontinued.",
             });
         }
@@ -341,7 +341,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidUserRequest,
+                ErrorCode = ErrorCode.InvalidArgument,
                 Message = "Scheduled price change date must be at least 1 week in the future."
             });
         }
@@ -402,7 +402,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityInvalidState,
+                ErrorCode = ErrorCode.InvalidState,
                 Message = $"Products with the following IDs already discontinued: {string.Join(", ", discontinuedProducts)}.",
             });
         }
@@ -412,7 +412,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidUserRequest,
+                ErrorCode = ErrorCode.InvalidArgument,
                 Message = "Scheduled sale discontinuation date must be at least 1 week in the future."
             });
         }
@@ -452,7 +452,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidUserRequest,
+                ErrorCode = ErrorCode.InvalidArgument,
                 Message = "Scheduled sale restart date must be at least 1 week in the future."
             });
         }

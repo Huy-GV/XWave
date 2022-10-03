@@ -2,12 +2,11 @@
 
 public record Error
 {
-    public string Message { get; init; }
+    public string Message { get; init; } = "An internal error occurred";
     public ErrorCode ErrorCode { get; init; }
 
     public static Error Default() => new Error()
     {
-        Message = "An internal error occurred",
         ErrorCode = ErrorCode.Undefined,
     };
 }
