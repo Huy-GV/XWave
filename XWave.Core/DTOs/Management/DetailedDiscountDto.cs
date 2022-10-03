@@ -2,7 +2,7 @@
 
 public record DetailedDiscountDto
 {
-    public string ManagerName { get; set; }
+    public string ManagerName { get; set; } = string.Empty;
     public uint Percentage { get; set; }
     public bool IsActive => EndDate > DateTime.Today && DateTime.Today > StartDate;
     public DateTime StartDate { get; set; }

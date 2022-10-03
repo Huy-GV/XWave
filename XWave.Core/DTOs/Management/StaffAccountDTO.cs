@@ -2,12 +2,12 @@
 
 public record StaffAccountDto
 {
-    public string StaffId { get; set; }
-    public string FullName { get; set; }
+    public string StaffId { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
     public DateTime ContractStartDate { get; set; }
     public DateTime ContractEndDate { get; set; }
 
-    public int RemaningDaysInContract
+    public int RemainingDaysInContract
     {
         get
         {
@@ -18,5 +18,5 @@ public record StaffAccountDto
     }
 
     public uint HourlyWage { get; set; }
-    public string ImmediateManagerFullName { get; set; }
+    public string ImmediateManagerFullName { get; set; } = string.Empty;
 }
