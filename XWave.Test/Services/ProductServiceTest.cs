@@ -155,7 +155,7 @@ public class ProductServiceTest : BaseTest
                 .Returns(invalidRoles);
 
             _productService.UpdateProductAsync(userId, It.IsAny<int>(), It.IsAny<ProductViewModel>())
-                .Result.Errors.Single()
+                .Result.Error
                 .Should()
                 .BeEquivalentTo(new Error()
                 {
@@ -178,7 +178,7 @@ public class ProductServiceTest : BaseTest
                 .Setup(x => x.GetRolesByUserId(userId).Result)
                 .Returns(invalidRoles);
             _productService.UpdateProductPriceAsync(userId, It.IsAny<int>(), It.IsAny<uint>())
-                .Result.Errors.Single()
+                .Result.Error
                 .Should()
                 .BeEquivalentTo(new Error()
                 {
@@ -201,7 +201,7 @@ public class ProductServiceTest : BaseTest
                                 .Setup(x => x.GetRolesByUserId(userId).Result)
                                 .Returns(invalidRoles);
                 _productService.UpdateStockAsync(userId, It.IsAny<int>(), It.IsAny<uint>())
-                    .Result.Errors.Single()
+                    .Result.Error
                     .Should()
                     .BeEquivalentTo(new Error()
                     {
@@ -224,7 +224,7 @@ public class ProductServiceTest : BaseTest
                     .Setup(x => x.GetRolesByUserId(userId).Result)
                     .Returns(invalidRoles);
                 _productService.RestartProductSaleAsync(userId, It.IsAny<int>(), It.IsAny<DateTime>())
-                    .Result.Errors.Single()
+                    .Result.Error
                     .Should()
                     .BeEquivalentTo(new Error()
                     {

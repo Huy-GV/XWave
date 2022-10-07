@@ -47,7 +47,7 @@ public class CategoryController : ControllerBase
         var result = await _categoryService.AddCategoryAsync(managerId, newCategory);
         return result.Succeeded
             ? this.Created($"https://localhost:5001/api/category/admin/{result.Value}")
-            : UnprocessableEntity(result.Errors);
+            : UnprocessableEntity(result.Error);
     }
 
     [HttpPut("{id:int}")]
@@ -58,7 +58,7 @@ public class CategoryController : ControllerBase
         var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
         return result.Succeeded
             ? this.Updated($"https://localhost:5001/api/category/admin/{id}")
-            : UnprocessableEntity(result.Errors);
+            : UnprocessableEntity(result.Error);
     }
 
     [HttpDelete("{id:int}")]
@@ -77,6 +77,6 @@ public class CategoryController : ControllerBase
             return NoContent();
         }
 
-        return UnprocessableEntity(result.Errors);
+        return UnprocessableEntity(result.Error);
     }
 }

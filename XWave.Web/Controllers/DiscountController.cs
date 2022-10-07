@@ -57,7 +57,7 @@ public class DiscountController : ControllerBase
         var result = await _discountService.CreateDiscountAsync(userId, newDiscount);
         return result.Succeeded
             ? this.Created($"https://localhost:5001/api/discount/{result.Value}")
-            : UnprocessableEntity(result.Errors);
+            : UnprocessableEntity(result.Error);
     }
 
     [HttpPut("{id:int}")]
@@ -68,7 +68,7 @@ public class DiscountController : ControllerBase
         var result = await _discountService.UpdateDiscountAsync(managerId, id, updatedDiscount);
         return result.Succeeded
             ? this.Updated($"https://localhost:5001/api/discount/{id}")
-            : UnprocessableEntity(result.Errors);
+            : UnprocessableEntity(result.Error);
     }
 
     [HttpDelete("{id:int}")]
@@ -82,7 +82,7 @@ public class DiscountController : ControllerBase
             return NoContent();
         }
 
-        return UnprocessableEntity(result.Errors);
+        return UnprocessableEntity(result.Error);
     }
 
     [HttpPost("{id:int}/apply")]
@@ -101,7 +101,7 @@ public class DiscountController : ControllerBase
             return Ok("Discount has been successfully applied to selected products.");
         }
 
-        return UnprocessableEntity(result.Errors);
+        return UnprocessableEntity(result.Error);
     }
 
     [HttpPost("{id}/remove")]
@@ -112,6 +112,6 @@ public class DiscountController : ControllerBase
         var result = await _discountService.RemoveDiscountFromProductsAsync(userId, id, productIds);
         if (result.Succeeded) return Ok("Discount has been successfully removed from selected products.");
 
-        return UnprocessableEntity(result.Errors);
+        return UnprocessableEntity(result.Error);
     }
 }

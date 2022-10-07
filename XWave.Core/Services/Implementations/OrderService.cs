@@ -95,41 +95,29 @@ internal class OrderService : ServiceBase, IOrderService
             var orderDetails = new List<OrderDetails>();
 
             // todo: return error on the first encounter
-            var errors = new List<Error>();
+            var errorMessages = new List<string>();
 
             foreach (var productInCart in purchaseViewModel.ProductCart)
             {
                 var product = productsToPurchase[productInCart.ProductId];
                 if (product.Quantity < productInCart.Quantity)
                 {
-                    errors.Add(new Error
-                    {
-                        Code = ErrorCode.InvalidState,
-                        Message = $"Quantity of product {product.Name} exceeded existing stock.",
-                    });
+                    errorMessages.Add($"Quantity of product {product.Name} exceeded existing stock.");
                 }
 
                 //prevent customers from ordering based on incorrect data
                 if ((product.Discount?.Percentage ?? 0) != productInCart.DisplayedDiscountPercentage)
                 {
-                    errors.Add(new Error
-                    {
-                        Code = ErrorCode.ConflictingState,
-                        Message = $"Discount percentage of product {product.Name} has been changed during the transaction.",
-                    });
+                    errorMessages.Add($"Discount percentage of product {product.Name} has been changed during the transaction.");
                 }
 
                 if (product.Price != productInCart.DisplayedPrice)
                 {
-                    errors.Add(new Error
-                    {
-                        Code = ErrorCode.ConflictingState,
-                        Message = $"Price of product {product.Name} has been changed during the transaction.",
-                    });
+                    errorMessages.Add($"Price of product {product.Name} has been changed during the transaction.");
                 }
 
                 // move to validate remaining products without processing any of them.
-                if (errors.Count > 0) continue;
+                if (errorMessages.Count > 0) continue;
 
                 var purchasePrice = product.Discount is null
                     ? product.Price
@@ -145,9 +133,13 @@ internal class OrderService : ServiceBase, IOrderService
                 });
             }
 
-            if (errors.Count > 0)
+            if (errorMessages.Count > 0)
             {
-                return ServiceResult<int>.Failure(errors);
+                return ServiceResult<int>.Failure(new Error 
+                {
+                    Code = ErrorCode.ConflictingState,
+                    Message = string.Join("\n", errorMessages)
+                });
             }
 
             DbContext.Order.Add(order);

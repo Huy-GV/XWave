@@ -58,7 +58,7 @@ public class OrderController : ControllerBase
 
         if (!result.Succeeded) 
         {
-            return UnprocessableEntity(result.Errors);
+            return UnprocessableEntity(result.Error);
         }
 
         return this.Created($"https://localhost:5001/api/order/{result.Value}");

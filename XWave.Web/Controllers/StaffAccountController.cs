@@ -43,7 +43,7 @@ public class StaffAccountController : ControllerBase
         var result = await _staffAccountService.UpdateStaffAccount(id, staffAccountViewModel);
         if (result.Succeeded) return this.Updated($"https://localhost:5001/api/staff-account/{id}");
 
-        return UnprocessableEntity(result.Errors);
+        return UnprocessableEntity(result.Error);
     }
 
     [HttpDelete("{id}")]
@@ -52,6 +52,6 @@ public class StaffAccountController : ControllerBase
         var result = await _staffAccountService.DeactivateStaffAccount(id);
         return result.Succeeded
             ? this.Updated($"https://localhost:5001/api/staff-account/{id}")
-            : UnprocessableEntity(result.Errors);
+            : UnprocessableEntity(result.Error);
     }
 }

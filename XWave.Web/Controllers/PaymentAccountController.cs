@@ -57,7 +57,7 @@ public class PaymentAccountController : ControllerBase
 
         if (!result.Succeeded)
         {
-            return UnprocessableEntity(result.Errors);
+            return UnprocessableEntity(result.Error);
         };
 
         return NoContent();
@@ -70,7 +70,7 @@ public class PaymentAccountController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.UpdatePaymentAccountAsync(customerId, id, viewModel);
         return !result.Succeeded
-            ? UnprocessableEntity(result.Errors)
+            ? UnprocessableEntity(result.Error)
             : this.Updated($"https://localhost:5001/api/payment/details/{id}");
     }
 
@@ -82,7 +82,7 @@ public class PaymentAccountController : ControllerBase
         var result = await _paymentService.AddPaymentAccountAsync(customerId, inputPayment);
 
         return !result.Succeeded
-            ? UnprocessableEntity(result.Errors)
+            ? UnprocessableEntity(result.Error)
             : this.Created($"https://localhost:5001/api/payment/details/{result.Value}");
     }
 }

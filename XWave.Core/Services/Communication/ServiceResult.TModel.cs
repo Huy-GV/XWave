@@ -18,17 +18,7 @@ public record ServiceResult<TResult> : ServiceResult where TResult : notnull
         {
             Value = default,
             Succeeded = false,
-            Errors = new List<Error> { error },
-        };
-    }
-
-    public static new ServiceResult<TResult> Failure(IEnumerable<Error> errors)
-    {
-        return new ServiceResult<TResult>()
-        {
-            Value = default,
-            Succeeded = false,
-            Errors = errors.ToList(),
+            Error =  error ,
         };
     }
 

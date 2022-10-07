@@ -37,7 +37,7 @@ public class CustomerAccountController : ControllerBase
         var result = await _customerAccountService.RegisterCustomerAsync(viewModel);
         if (!result.Succeeded) 
         {
-            return BadRequest(result.Errors);
+            return BadRequest(result.Error);
         }
 
         if (Request.Cookies.ContainsKey(_jwtCookieOptions.Name))
@@ -62,6 +62,6 @@ public class CustomerAccountController : ControllerBase
             return NoContent();
         }
 
-        return UnprocessableEntity(result.Errors);
+        return UnprocessableEntity(result.Error);
     }
 }
