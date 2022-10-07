@@ -71,7 +71,7 @@ public class ProductServiceTest : BaseTest
             .Should()
             .BeEquivalentTo(ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = $"Products with the following IDs not found: {string.Join(", ", new[] { nonExistentProductId })}.",
             }));
     }
@@ -91,7 +91,7 @@ public class ProductServiceTest : BaseTest
             .Should()
             .BeEquivalentTo(ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidState,
+                Code = ErrorCode.InvalidState,
                 Message = $"Products with the following IDs already discontinued: {string.Join(", ", new[] { discontinuedProductId })}."
             }));
     }
@@ -113,7 +113,7 @@ public class ProductServiceTest : BaseTest
             .Should()
             .BeEquivalentTo(ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidArgument,
+                Code = ErrorCode.InvalidArgument,
                 Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
             }));
     }
@@ -136,7 +136,7 @@ public class ProductServiceTest : BaseTest
             .Should()
             .BeEquivalentTo(ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidArgument,
+                Code = ErrorCode.InvalidArgument,
                 Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
             }));
     }
@@ -159,7 +159,7 @@ public class ProductServiceTest : BaseTest
                 .Should()
                 .BeEquivalentTo(new Error()
                 {
-                    ErrorCode = ErrorCode.AuthorizationError,
+                    Code = ErrorCode.AuthorizationError,
                     Message = "Only staff are authorized to modify products"
                 });
         });
@@ -182,7 +182,7 @@ public class ProductServiceTest : BaseTest
                 .Should()
                 .BeEquivalentTo(new Error()
                 {
-                    ErrorCode = ErrorCode.AuthorizationError,
+                    Code = ErrorCode.AuthorizationError,
                     Message = "Only staff are authorized to modify products"
                 });
         });
@@ -205,7 +205,7 @@ public class ProductServiceTest : BaseTest
                     .Should()
                     .BeEquivalentTo(new Error()
                     {
-                        ErrorCode = ErrorCode.AuthorizationError,
+                        Code = ErrorCode.AuthorizationError,
                         Message = "Only staff are authorized to modify products"
                     });
             });
@@ -228,7 +228,7 @@ public class ProductServiceTest : BaseTest
                     .Should()
                     .BeEquivalentTo(new Error()
                     {
-                        ErrorCode = ErrorCode.AuthorizationError,
+                        Code = ErrorCode.AuthorizationError,
                         Message = "Only staff are authorized to modify products"
                     });
             });

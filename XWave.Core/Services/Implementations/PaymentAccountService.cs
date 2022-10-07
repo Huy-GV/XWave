@@ -33,7 +33,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         {
             return ServiceResult<int>.Failure(new Error 
             {
-                ErrorCode = ErrorCode.AuthorizationError,
+                Code = ErrorCode.AuthorizationError,
             });
         }
 
@@ -86,23 +86,35 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         }
     }
 
-    public async Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId)
+    public async Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentAccountId)
     {
         if (! await _authorizationService.IsUserInRole(customerId, Roles.Customer)) 
         {
             return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error 
             {
-                ErrorCode = ErrorCode.AuthorizationError,
+                Code = ErrorCode.AuthorizationError,
             });
         }
 
-        var paymentAccountToRemove = await DbContext.PaymentAccount.FindAsync(paymentId);
+        var paymentAccountToRemove = await DbContext.PaymentAccount
+            .Include(x => x.PaymentAccountDetails)
+            .FirstOrDefaultAsync(x => x.PaymentAccountDetails.PaymentAccountId == paymentAccountId);
+
         if (paymentAccountToRemove is null)
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = $"Payment account for customer ID {customerId} not found.",
+            });
+        }
+
+        if (paymentAccountToRemove.PaymentAccountDetails.CustomerId != customerId)
+        { 
+            return ServiceResult.Failure(new Error
+            {
+                Code = ErrorCode.AuthenticationError,
+                Message = $"Payment account ID {paymentAccountId} does not belong to customer ID {customerId}.",
             });
         }
 
@@ -119,7 +131,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         {
             return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error 
             {
-                ErrorCode = ErrorCode.AuthorizationError,
+                Code = ErrorCode.AuthorizationError,
             });
         }
 
@@ -137,17 +149,28 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         int paymentAccountId,
         PaymentAccountViewModel updatedPayment)
     {
-        var payment = await DbContext.PaymentAccount.FindAsync(paymentAccountId);
-        if (payment is null)
+        var paymentAccount = await DbContext.PaymentAccount
+            .Include(x => x.PaymentAccountDetails)
+            .FirstOrDefaultAsync(x => x.PaymentAccountDetails.PaymentAccountId == paymentAccountId);
+        if (paymentAccount is null)
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = $"Payment account ID {paymentAccountId} not found.",
             });
         }
 
-        DbContext.Update(payment).CurrentValues.SetValues(updatedPayment);
+        if (paymentAccount.PaymentAccountDetails.CustomerId != customerId)
+        { 
+            return ServiceResult.Failure(new Error
+            {
+                Code = ErrorCode.AuthenticationError,
+                Message = $"Payment account ID {paymentAccountId} does not belong to customer ID {customerId}.",
+            });
+        }
+
+        DbContext.Update(paymentAccount).CurrentValues.SetValues(updatedPayment);
         await DbContext.SaveChangesAsync();
 
         return ServiceResult.Success();

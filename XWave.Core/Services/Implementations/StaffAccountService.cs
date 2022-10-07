@@ -74,7 +74,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
             {
                 return ServiceResult.Failure(new Error
                 {
-                    ErrorCode = ErrorCode.EntityNotFound,
+                    Code = ErrorCode.EntityNotFound,
                     Message = $"Staff account with ID {staffId} not found."
                 });
             }
@@ -101,7 +101,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = $"Staff account with ID {staffId} not found."
             });
         }

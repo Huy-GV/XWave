@@ -56,7 +56,7 @@ public class DiscountController : ControllerBase
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.CreateDiscountAsync(userId, newDiscount);
         return result.Succeeded
-            ? this.XWaveCreated($"https://localhost:5001/api/discount/{result.Value}")
+            ? this.Created($"https://localhost:5001/api/discount/{result.Value}")
             : UnprocessableEntity(result.Errors);
     }
 
@@ -64,25 +64,17 @@ public class DiscountController : ControllerBase
     [Authorize(Roles = nameof(Roles.Manager))]
     public async Task<ActionResult> UpdateAsync(int id, [FromBody] DiscountViewModel updatedDiscount)
     {
-        if (await _discountService.FindDiscountByIdAsync(id) is null)
-            return NotFound(XWaveResponse.NonExistentResource());
-
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.UpdateDiscountAsync(managerId, id, updatedDiscount);
         return result.Succeeded
-            ? this.XWaveUpdated($"https://localhost:5001/api/discount/{id}")
+            ? this.Updated($"https://localhost:5001/api/discount/{id}")
             : UnprocessableEntity(result.Errors);
     }
 
     [HttpDelete("{id:int}")]
     [Authorize(Roles = nameof(Roles.Manager))]
     public async Task<ActionResult> Delete(int id)
-    {
-        if (await _discountService.FindDiscountByIdAsync(id) is null)
-        {
-            return NotFound(XWaveResponse.NonExistentResource());
-        }
-            
+    { 
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountAsync(managerId, id);
         if (result.Succeeded)
@@ -97,12 +89,12 @@ public class DiscountController : ControllerBase
     [Authorize(Roles = nameof(Roles.Manager))]
     public async Task<ActionResult> ApplyDiscountToProduct(int id, [FromBody] int[] productIds)
     {
-        if (await _discountService.FindDiscountByIdAsync(id) is null)
+        var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        if (string.IsNullOrEmpty(userId))
         {
-            return NotFound(XWaveResponse.NonExistentResource());
+            return Unauthorized();
         }
 
-        var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.ApplyDiscountToProducts(userId, id, productIds);
         if (result.Succeeded)
         { 
@@ -116,9 +108,6 @@ public class DiscountController : ControllerBase
     [Authorize(Roles = nameof(Roles.Manager))]
     public async Task<ActionResult> RemoveDiscountFromProducts(int id, [FromBody] int[] productIds)
     {
-        if (await _discountService.FindDiscountByIdAsync(id) is null)
-            return NotFound(XWaveResponse.NonExistentResource());
-
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountFromProductsAsync(userId, id, productIds);
         if (result.Succeeded) return Ok("Discount has been successfully removed from selected products.");

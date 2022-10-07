@@ -13,7 +13,7 @@ internal class CategoryService : ServiceBase, ICategoryService
 
     private readonly Error _unauthorizedOperationError = new()
     {
-        ErrorCode = ErrorCode.AuthorizationError,
+        Code = ErrorCode.AuthorizationError,
         Message = "Only managers are authorized to modify Categories",
     };
 
@@ -57,18 +57,18 @@ internal class CategoryService : ServiceBase, ICategoryService
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
 
+        var category = await DbContext.Category.FindAsync(id);
+        if (category is null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                Code = ErrorCode.EntityNotFound,
+                Message = $"Category with ID {id} not found.",
+            });
+        }
+
         try
         {
-            var category = await DbContext.Category.FindAsync(id);
-            if (category is null)
-            {
-                return ServiceResult.Failure(new Error
-                {
-                    ErrorCode = ErrorCode.EntityNotFound,
-                    Message = $"Category with ID {id} not found.",
-                });
-            }
-
             var categoryName = category.Name;
             DbContext.Category.Remove(category);
             await DbContext.SaveChangesAsync();
@@ -94,25 +94,28 @@ internal class CategoryService : ServiceBase, ICategoryService
         return await DbContext.Category.FindAsync(id);
     }
 
-    public async Task<ServiceResult> UpdateCategoryAsync(string managerId, int id, Category updatedCategory)
+    public async Task<ServiceResult> UpdateCategoryAsync(
+        string managerId, 
+        int id, 
+        Category updatedCategory)
     {
         if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
 
+        var category = await DbContext.Category.FindAsync(id);
+        if (category is null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                Code = ErrorCode.EntityNotFound,
+                Message = $"Category with ID {id} not found.",
+            });
+        }
+
         try
         {
-            var category = await DbContext.Category.FindAsync(id);
-            if (category is null)
-            {
-                return ServiceResult.Failure(new Error
-                {
-                    ErrorCode = ErrorCode.EntityNotFound,
-                    Message = $"Category with ID {id} not found.",
-                });
-            }
-
             category.Description = updatedCategory.Description;
             category.Name = updatedCategory.Name;
             DbContext.Category.Update(category);

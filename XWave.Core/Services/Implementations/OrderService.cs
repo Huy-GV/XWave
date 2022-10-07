@@ -32,6 +32,7 @@ internal class OrderService : ServiceBase, IOrderService
         _paymentService = paymentService;
     }
 
+    // todo: change to ServiceResult<T>
     public async Task<OrderDto?> FindOrderByIdAsync(string customerId, int orderId)
     {
         return (await FindAllOrdersAsync(customerId)).SingleOrDefault(o => o.Id == orderId);
@@ -45,7 +46,7 @@ internal class OrderService : ServiceBase, IOrderService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.AuthorizationError,
+                Code = ErrorCode.AuthorizationError,
                 Message = "Customer account not found"
             });
         }
@@ -56,7 +57,7 @@ internal class OrderService : ServiceBase, IOrderService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidState,
+                Code = ErrorCode.InvalidState,
                 Message = "Valid payment account not found"
             });
         }
@@ -85,7 +86,7 @@ internal class OrderService : ServiceBase, IOrderService
             {
                 return ServiceResult<int>.Failure(new Error
                 {
-                    ErrorCode = ErrorCode.EntityNotFound,
+                    Code = ErrorCode.InvalidState,
                     Message = $"The following products were not found: { string.Join(", ", missingProductIds) }.",
                 });
             }
@@ -103,7 +104,7 @@ internal class OrderService : ServiceBase, IOrderService
                 {
                     errors.Add(new Error
                     {
-                        ErrorCode = ErrorCode.InvalidState,
+                        Code = ErrorCode.InvalidState,
                         Message = $"Quantity of product {product.Name} exceeded existing stock.",
                     });
                 }
@@ -113,7 +114,7 @@ internal class OrderService : ServiceBase, IOrderService
                 {
                     errors.Add(new Error
                     {
-                        ErrorCode = ErrorCode.ConflictingState,
+                        Code = ErrorCode.ConflictingState,
                         Message = $"Discount percentage of product {product.Name} has been changed during the transaction.",
                     });
                 }
@@ -122,7 +123,7 @@ internal class OrderService : ServiceBase, IOrderService
                 {
                     errors.Add(new Error
                     {
-                        ErrorCode = ErrorCode.ConflictingState,
+                        Code = ErrorCode.ConflictingState,
                         Message = $"Price of product {product.Name} has been changed during the transaction.",
                     });
                 }
@@ -175,6 +176,8 @@ internal class OrderService : ServiceBase, IOrderService
 
     public async Task<IEnumerable<OrderDto>> FindAllOrdersAsync(string customerId)
     {
+        // TODO: ADD CHECK FOR CUSTOMER
+
         return await DbContext.Order
             .AsNoTracking()
             .Include(o => o.OrderDetails)

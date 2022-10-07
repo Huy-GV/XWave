@@ -13,11 +13,6 @@ public enum ErrorCode
     EntityNotFound,
 
     /// <summary>
-    /// Entity already exists.
-    /// </summary>
-    EntityAlreadyExist,
-
-    /// <summary>
     /// Entity is in an invalid state.
     /// </summary>
     InvalidState,

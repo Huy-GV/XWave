@@ -19,7 +19,7 @@ internal class DiscountService : ServiceBase, IDiscountService
 
     private readonly Error _unauthorizedOperationError = new()
     {
-        ErrorCode = ErrorCode.AuthorizationError,
+        Code = ErrorCode.AuthorizationError,
         Message = "Only managers are authorized to modify/ assign Discounts",
     };
 
@@ -76,7 +76,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = $"Discount with ID {discountId} was not found.",
             });
         }
@@ -138,7 +138,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = $"Discount with ID {discountId} was not found.",
             });
         }
@@ -169,7 +169,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = $"Discount with ID {discountId} was not found.",
             });
         }
@@ -181,7 +181,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.InvalidState,
                 Message = $"Products with IDs {string.Join(", ", missingProductIds)} not found"
             });
         }
@@ -221,7 +221,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = $"Discount with ID {discountId} was not found.",
             });
         }
@@ -238,7 +238,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidState,
+                Code = ErrorCode.InvalidState,
                 Message = $"Discount with ID {discountId} is not applied to the following products: {string.Join(", ", productsWithoutDiscount.Select(p => p.Name))}.",
             });
         }

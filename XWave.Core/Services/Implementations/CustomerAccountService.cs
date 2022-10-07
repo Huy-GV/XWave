@@ -57,7 +57,7 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = $"Customer account with ID {id} not found.",
             });
         }
@@ -87,7 +87,7 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = $"Customer account with ID {id} not found.",
             });
         }

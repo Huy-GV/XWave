@@ -45,7 +45,7 @@ public class ProductController : ControllerBase
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.FindAllProductsForStaff(false, staffId);
-
+    
         return result.Succeeded 
             ? Ok(result.Value)
             : UnprocessableEntity();
@@ -72,7 +72,7 @@ public class ProductController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.AddProductAsync(staffId, productViewModel);
         return result.Succeeded
-            ? this.XWaveCreated($"https://localhost:5001/api/product/staff/{result.Value}")
+            ? this.Created($"https://localhost:5001/api/product/staff/{result.Value}")
             : UnprocessableEntity(result.Errors);
     }
 
@@ -80,13 +80,10 @@ public class ProductController : ControllerBase
     [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
     public async Task<ActionResult> UpdateAsync(int id, [FromBody] ProductViewModel updatedProduct)
     {
-        var product = await _productService.FindProductByIdForStaff(id);
-        if (product is null) return BadRequest(XWaveResponse.NonExistentResource());
-
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.UpdateProductAsync(staffId, id, updatedProduct);
         return result.Succeeded
-            ? this.XWaveCreated($"https://localhost:5001/api/product/staff/{id}")
+            ? this.Created($"https://localhost:5001/api/product/staff/{id}")
             : UnprocessableEntity(result.Errors);
     }
 
@@ -94,22 +91,17 @@ public class ProductController : ControllerBase
     [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
     public async Task<ActionResult> UpdatePriceAsync(int id, [FromBody] ProductPriceAdjustmentViewModel viewModel)
     {
-        var product = await _productService.FindProductByIdForStaff(id);
-        if (product is null) return BadRequest(XWaveResponse.NonExistentResource());
-
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        ServiceResult result;
-        if (viewModel.Schedule is null)
-            result = await _productService.UpdateProductPriceAsync(staffId, id, viewModel.UpdatedPrice);
-        else
-            result = await _productService.UpdateProductPriceAsync(
+        var result = viewModel.Schedule is null
+            ? await _productService.UpdateProductPriceAsync(staffId, id, viewModel.UpdatedPrice)
+            : await _productService.UpdateProductPriceAsync(
                 staffId,
                 id,
                 viewModel.UpdatedPrice,
                 viewModel.Schedule.Value);
 
         return result.Succeeded
-            ? this.XWaveUpdated($"https://localhost:5001/api/product/staff/{id}")
+            ? this.Updated($"https://localhost:5001/api/product/staff/{id}")
             : UnprocessableEntity(result.Errors);
     }
 
@@ -117,9 +109,6 @@ public class ProductController : ControllerBase
     [Authorize(Roles = nameof(Roles.Manager))]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        var product = await _productService.FindProductByIdForStaff(id);
-        if (product is null) return NotFound(XWaveResponse.NonExistentResource());
-
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.DeleteProductAsync(id, managerId);
         return result.Succeeded
@@ -142,11 +131,6 @@ public class ProductController : ControllerBase
     [Authorize(Roles = nameof(Roles.Manager))]
     public async Task<ActionResult> RestartProductSaleAsync(int id, DateTime updateSchedule)
     {
-        var product = await _productService.FindProductByIdForStaff(id);
-        if (product is null) return NotFound(XWaveResponse.NonExistentResource());
-
-        if (!product.IsDiscontinued) return BadRequest(XWaveResponse.Failed("Product is currently in sale."));
-
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.RestartProductSaleAsync(managerId, id, updateSchedule);
         return result.Succeeded

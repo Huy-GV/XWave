@@ -41,7 +41,7 @@ public class StaffAccountController : ControllerBase
         StaffAccountViewModel staffAccountViewModel)
     {
         var result = await _staffAccountService.UpdateStaffAccount(id, staffAccountViewModel);
-        if (result.Succeeded) return this.XWaveUpdated($"https://localhost:5001/api/staff-account/{id}");
+        if (result.Succeeded) return this.Updated($"https://localhost:5001/api/staff-account/{id}");
 
         return UnprocessableEntity(result.Errors);
     }
@@ -51,7 +51,7 @@ public class StaffAccountController : ControllerBase
     {
         var result = await _staffAccountService.DeactivateStaffAccount(id);
         return result.Succeeded
-            ? this.XWaveUpdated($"https://localhost:5001/api/staff-account/{id}")
+            ? this.Updated($"https://localhost:5001/api/staff-account/{id}")
             : UnprocessableEntity(result.Errors);
     }
 }

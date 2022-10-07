@@ -11,6 +11,5 @@ internal abstract class ServiceBase
     {
         DbContext = dbContext;
     }
-
     protected XWaveDbContext DbContext { get; }
 }

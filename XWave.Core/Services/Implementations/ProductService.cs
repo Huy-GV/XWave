@@ -25,7 +25,7 @@ internal class ProductService : ServiceBase, IProductService
 
     private readonly Error _unauthorizedError = new()
     {
-        ErrorCode = ErrorCode.AuthorizationError,
+        Code = ErrorCode.AuthorizationError,
         Message = "Only staff are authorized to modify products"
     };
 
@@ -67,7 +67,7 @@ internal class ProductService : ServiceBase, IProductService
             {
                 return ServiceResult<int>.Failure(new Error
                 {
-                    ErrorCode = ErrorCode.EntityNotFound,
+                    Code = ErrorCode.InvalidState,
                     Message = "Category not found",
                 });
             }
@@ -99,18 +99,18 @@ internal class ProductService : ServiceBase, IProductService
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
 
+        var product = await DbContext.Product.FindAsync(productId);
+        if (product is null)
+        {
+            return ServiceResult<int>.Failure(new Error
+            {
+                Code = ErrorCode.EntityNotFound,
+                Message = "Product not found",
+            });
+        }
+
         try
         {
-            var product = await DbContext.Product.FindAsync(productId);
-            if (product is null)
-            {
-                return ServiceResult<int>.Failure(new Error
-                {
-                    ErrorCode = ErrorCode.EntityNotFound,
-                    Message = "Product not found",
-                });
-            }
-
             DbContext.Product.Update(product);
             product.SoftDelete();
             await DbContext.SaveChangesAsync();
@@ -206,7 +206,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = "Product not found.",
             });
         }
@@ -215,7 +215,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidState,
+                Code = ErrorCode.ConflictingState,
                 Message = "Product removed or discontinued.",
             });
         }
@@ -251,7 +251,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = "Product not found.",
             });
         }
@@ -290,7 +290,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = "Product not found.",
             });
         }
@@ -331,7 +331,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = "Product not found.",
             });
         }
@@ -341,7 +341,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidArgument,
+                Code = ErrorCode.InvalidArgument,
                 Message = "Scheduled price change date must be at least 1 week in the future."
             });
         }
@@ -388,7 +388,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = $"Products with the following IDs not found: {string.Join(", ", missingProducts)}.",
             });
         }
@@ -402,7 +402,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidState,
+                Code = ErrorCode.InvalidState,
                 Message = $"Products with the following IDs already discontinued: {string.Join(", ", discontinuedProducts)}.",
             });
         }
@@ -412,7 +412,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidArgument,
+                Code = ErrorCode.InvalidArgument,
                 Message = "Scheduled sale discontinuation date must be at least 1 week in the future."
             });
         }
@@ -442,7 +442,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult<int>.Failure(new Error
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = "Product not found.",
             });
         }
@@ -452,7 +452,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             return ServiceResult.Failure(new Error
             {
-                ErrorCode = ErrorCode.InvalidArgument,
+                Code = ErrorCode.InvalidArgument,
                 Message = "Scheduled sale restart date must be at least 1 week in the future."
             });
         }

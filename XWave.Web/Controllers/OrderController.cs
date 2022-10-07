@@ -32,11 +32,6 @@ public class OrderController : ControllerBase
     public async Task<ActionResult<OrderDetails>> GetOrdersAsync()
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        if (string.IsNullOrEmpty(customerId)) 
-        {
-            return BadRequest(XWaveResponse.Failed("Customer ID not found."));
-        }
-
         return Ok(await _orderService.FindAllOrdersAsync(customerId));
     }
 
@@ -45,11 +40,6 @@ public class OrderController : ControllerBase
     public async Task<ActionResult<OrderDto>> GetOrderById(int id)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        if (string.IsNullOrEmpty(customerId))
-        {
-            return BadRequest(XWaveResponse.Failed("Customer ID not found."));
-        }
-
         var orderDto = await _orderService.FindOrderByIdAsync(customerId, id);
         return orderDto is not null ? Ok(orderDto) : NotFound();
     }
@@ -71,6 +61,6 @@ public class OrderController : ControllerBase
             return UnprocessableEntity(result.Errors);
         }
 
-        return this.XWaveCreated($"https://localhost:5001/api/order/{result.Value}");
+        return this.Created($"https://localhost:5001/api/order/{result.Value}");
     }
 }

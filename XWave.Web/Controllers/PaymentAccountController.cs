@@ -53,9 +53,6 @@ public class PaymentAccountController : ControllerBase
     public async Task<ActionResult> Delete(int paymentId)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        if (!await _paymentService.CustomerHasPaymentAccount(customerId, paymentId))
-            return BadRequest(XWaveResponse.NonExistentResource());
-
         var result = await _paymentService.RemovePaymentAccountAsync(customerId, paymentId);
 
         if (!result.Succeeded)
@@ -71,13 +68,10 @@ public class PaymentAccountController : ControllerBase
     public async Task<ActionResult> UpdatePaymentAccountAsync(int id, [FromBody] PaymentAccountViewModel viewModel)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        if (!await _paymentService.CustomerHasPaymentAccount(customerId, id))
-            return BadRequest(XWaveResponse.NonExistentResource());
-
         var result = await _paymentService.UpdatePaymentAccountAsync(customerId, id, viewModel);
         return !result.Succeeded
             ? UnprocessableEntity(result.Errors)
-            : this.XWaveUpdated($"https://localhost:5001/api/payment/details/{id}");
+            : this.Updated($"https://localhost:5001/api/payment/details/{id}");
     }
 
     [HttpPost]
@@ -89,6 +83,6 @@ public class PaymentAccountController : ControllerBase
 
         return !result.Succeeded
             ? UnprocessableEntity(result.Errors)
-            : this.XWaveCreated($"https://localhost:5001/api/payment/details/{result.Value}");
+            : this.Created($"https://localhost:5001/api/payment/details/{result.Value}");
     }
 }

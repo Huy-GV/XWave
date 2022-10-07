@@ -22,7 +22,7 @@ internal class HangFireBackgroundJobService : IBackgroundJobService
 
         return Task.FromResult(ServiceResult.Failure(new Error
         {
-            ErrorCode = ErrorCode.EntityNotFound,
+            Code = ErrorCode.EntityNotFound,
             Message = $"Failed to remove background job ID {jobId}."
         }));
     }

@@ -65,7 +65,7 @@ public class OrderServiceTest : BaseTest
             .Should()
             .BeEquivalentTo(ServiceResult<int>.Failure(new Error()
             {
-                ErrorCode = ErrorCode.EntityNotFound,
+                Code = ErrorCode.EntityNotFound,
                 Message = "Customer account not found"
             }));
     }
@@ -90,7 +90,7 @@ public class OrderServiceTest : BaseTest
                 .Should()
                 .BeEquivalentTo(ServiceResult<int>.Failure(new Error
                 {
-                    ErrorCode = ErrorCode.EntityNotFound,
+                    Code = ErrorCode.EntityNotFound,
                     Message = "Valid payment account not found"
                 }));
         }).QuickCheckThrowOnFailure();
@@ -137,7 +137,7 @@ public class OrderServiceTest : BaseTest
                 .Should()
                 .BeEquivalentTo(ServiceResult<int>.Failure(new Error
                 {
-                    ErrorCode = ErrorCode.EntityNotFound,
+                    Code = ErrorCode.EntityNotFound,
                     Message = $"The following products were not found: { string.Join(", ", randomMissingIds) }.",
                 }));
         }).QuickCheckThrowOnFailure();

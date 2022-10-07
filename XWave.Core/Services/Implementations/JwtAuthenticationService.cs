@@ -37,7 +37,7 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
         {
             return ServiceResult<string>.Failure(new Error
             {
-                ErrorCode = ErrorCode.AuthenticationError,
+                Code = ErrorCode.AuthenticationError,
                 Message = $"User with {viewModel.Username} not found",
             });
         }
@@ -46,7 +46,7 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
         {
             return ServiceResult<string>.Failure(new Error
             {
-                ErrorCode = ErrorCode.AuthorizationError,
+                Code = ErrorCode.AuthorizationError,
                 Message = $"User with {viewModel.Username} locked out",
             });
         }
@@ -80,7 +80,7 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
 
         return ServiceResult<string>.Failure(new Error
         {
-            ErrorCode = ErrorCode.Undefined,
+            Code = ErrorCode.Undefined,
             Message = string.Join(", ", result.Errors)
         }); ;
     }
