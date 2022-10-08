@@ -55,12 +55,10 @@ public class PaymentAccountController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.RemovePaymentAccountAsync(customerId, paymentId);
 
-        if (!result.Succeeded)
-        {
-            return UnprocessableEntity(result.Error);
-        };
-
-        return NoContent();
+        return result.MapResult(
+            NoContent(),
+            this.MapErrorCodeToHttpCode
+        );
     }
 
     [HttpPut("{id:int}")]
@@ -69,9 +67,11 @@ public class PaymentAccountController : ControllerBase
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.UpdatePaymentAccountAsync(customerId, id, viewModel);
-        return !result.Succeeded
-            ? UnprocessableEntity(result.Error)
-            : this.Updated($"https://localhost:5001/api/payment/details/{id}");
+
+        return result.MapResult(
+            this.Updated($"https://localhost:5001/api/payment/details/{id}"),
+            this.MapErrorCodeToHttpCode
+        );
     }
 
     [HttpPost]
@@ -81,8 +81,9 @@ public class PaymentAccountController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.AddPaymentAccountAsync(customerId, inputPayment);
 
-        return !result.Succeeded
-            ? UnprocessableEntity(result.Error)
-            : this.Created($"https://localhost:5001/api/payment/details/{result.Value}");
+        return result.MapResult(
+            this.Created($"https://localhost:5001/api/payment/details/{result.Value}"),
+            this.MapErrorCodeToHttpCode
+        );
     }
 }

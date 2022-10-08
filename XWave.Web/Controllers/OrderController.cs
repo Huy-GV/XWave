@@ -55,12 +55,9 @@ public class OrderController : ControllerBase
         }
 
         var result = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
-
-        if (!result.Succeeded) 
-        {
-            return UnprocessableEntity(result.Error);
-        }
-
-        return this.Created($"https://localhost:5001/api/order/{result.Value}");
+        return result.MapResult(
+            this.Created($"https://localhost:5001/api/order/{result.Value}"),
+            this.MapErrorCodeToHttpCode
+        );
     }
 }

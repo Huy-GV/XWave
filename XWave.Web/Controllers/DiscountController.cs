@@ -55,9 +55,11 @@ public class DiscountController : ControllerBase
     {
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.CreateDiscountAsync(userId, newDiscount);
-        return result.Succeeded
-            ? this.Created($"https://localhost:5001/api/discount/{result.Value}")
-            : UnprocessableEntity(result.Error);
+
+        return result.MapResult(
+            this.Created($"https://localhost:5001/api/discount/{result.Value}"),
+            this.MapErrorCodeToHttpCode
+        );
     }
 
     [HttpPut("{id:int}")]
@@ -66,9 +68,11 @@ public class DiscountController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.UpdateDiscountAsync(managerId, id, updatedDiscount);
-        return result.Succeeded
-            ? this.Updated($"https://localhost:5001/api/discount/{id}")
-            : UnprocessableEntity(result.Error);
+
+        return result.MapResult(
+            this.Updated($"https://localhost:5001/api/discount/{id}"),
+            this.MapErrorCodeToHttpCode
+        );
     }
 
     [HttpDelete("{id:int}")]
@@ -77,12 +81,10 @@ public class DiscountController : ControllerBase
     { 
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountAsync(managerId, id);
-        if (result.Succeeded)
-        {
-            return NoContent();
-        }
-
-        return UnprocessableEntity(result.Error);
+        return result.MapResult(
+            NoContent(),
+            this.MapErrorCodeToHttpCode
+        );
     }
 
     [HttpPost("{id:int}/apply")]
@@ -96,12 +98,10 @@ public class DiscountController : ControllerBase
         }
 
         var result = await _discountService.ApplyDiscountToProducts(userId, id, productIds);
-        if (result.Succeeded)
-        { 
-            return Ok("Discount has been successfully applied to selected products.");
-        }
-
-        return UnprocessableEntity(result.Error);
+        return result.MapResult(
+            Ok(),
+            this.MapErrorCodeToHttpCode
+        );
     }
 
     [HttpPost("{id}/remove")]
@@ -110,8 +110,9 @@ public class DiscountController : ControllerBase
     {
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountFromProductsAsync(userId, id, productIds);
-        if (result.Succeeded) return Ok("Discount has been successfully removed from selected products.");
-
-        return UnprocessableEntity(result.Error);
+        return result.MapResult(
+            Ok(),
+            this.MapErrorCodeToHttpCode
+        );
     }
 }

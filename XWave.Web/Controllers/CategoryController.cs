@@ -45,9 +45,11 @@ public class CategoryController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _categoryService.AddCategoryAsync(managerId, newCategory);
-        return result.Succeeded
-            ? this.Created($"https://localhost:5001/api/category/admin/{result.Value}")
-            : UnprocessableEntity(result.Error);
+
+        return result.MapResult(
+            this.Created($"https://localhost:5001/api/category/admin/{result.Value}"),
+            this.MapErrorCodeToHttpCode
+        ); 
     }
 
     [HttpPut("{id:int}")]
@@ -56,9 +58,11 @@ public class CategoryController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
-        return result.Succeeded
-            ? this.Updated($"https://localhost:5001/api/category/admin/{id}")
-            : UnprocessableEntity(result.Error);
+
+        return result.MapResult(
+            this.Updated($"https://localhost:5001/api/category/admin/{id}"),
+            this.MapErrorCodeToHttpCode
+        ); 
     }
 
     [HttpDelete("{id:int}")]
@@ -72,11 +76,10 @@ public class CategoryController : ControllerBase
         }
 
         var result = await _categoryService.DeleteCategoryAsync(managerId, id);
-        if (result.Succeeded) 
-        {
-            return NoContent();
-        }
 
-        return UnprocessableEntity(result.Error);
+        return result.MapResult(
+            this.NoContent(),
+            this.MapErrorCodeToHttpCode
+        ); 
     }
 }

@@ -41,17 +41,20 @@ public class StaffAccountController : ControllerBase
         StaffAccountViewModel staffAccountViewModel)
     {
         var result = await _staffAccountService.UpdateStaffAccount(id, staffAccountViewModel);
-        if (result.Succeeded) return this.Updated($"https://localhost:5001/api/staff-account/{id}");
 
-        return UnprocessableEntity(result.Error);
+        return result.MapResult(
+            this.Updated($"https://localhost:5001/api/staff-account/{id}"),
+            this.MapErrorCodeToHttpCode
+        ); 
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult<ServiceResult>> DeactivateStaffAccount(string id)
     {
         var result = await _staffAccountService.DeactivateStaffAccount(id);
-        return result.Succeeded
-            ? this.Updated($"https://localhost:5001/api/staff-account/{id}")
-            : UnprocessableEntity(result.Error);
+        return result.MapResult(
+            this.Updated($"https://localhost:5001/api/staff-account/{id}"),
+            this.MapErrorCodeToHttpCode
+        ); 
     }
 }
