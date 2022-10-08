@@ -24,6 +24,6 @@ public record ServiceResult<TResult> : ServiceResult where TResult : notnull
 
     public static new ServiceResult<TResult> DefaultFailure()
     {
-        return Failure(Error.Default());
+        return Failure(Error.UndefinedError());
     }
 }

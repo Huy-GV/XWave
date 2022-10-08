@@ -162,7 +162,7 @@ internal class OrderService : ServiceBase, IOrderService
             _logger.LogError($"Failed to place order for customer ID {customerId}");
             _logger.LogError($"Exception message: {exception.Message}");
 
-            return ServiceResult<int>.Failure(Error.Default());
+            return ServiceResult<int>.Failure(Error.UndefinedError());
         }
     }
 

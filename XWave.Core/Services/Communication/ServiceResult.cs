@@ -4,7 +4,7 @@ public record ServiceResult
 {
     public bool Succeeded { get; protected init; }
 
-    public Error Error { get; protected init; }
+    public Error Error { get; protected init; } = Error.UndefinedError();
 
     public static ServiceResult Failure(Error error)
     {
@@ -21,7 +21,7 @@ public record ServiceResult
     /// <returns></returns>
     public static ServiceResult DefaultFailure()
     {
-        return Failure(Error.Default());
+        return Failure(Error.UndefinedError());
     }
 
     /// <summary>

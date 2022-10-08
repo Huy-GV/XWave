@@ -37,7 +37,7 @@ public class AuthenticationController : ControllerBase
         var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
         Response.Cookies.Append(_jwtCookieConfig.Name, result.Value!, cookieOptions);
 
-        return Ok(result);
+        return Ok(new { Token = result.Value });
     }
 
     [HttpPost]
