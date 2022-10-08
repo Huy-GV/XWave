@@ -55,10 +55,7 @@ public class PaymentAccountController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.RemovePaymentAccountAsync(customerId, paymentId);
 
-        return result.MapResult(
-            NoContent(),
-            this.MapErrorCodeToHttpCode
-        );
+        return result.MapResult(NoContent());
     }
 
     [HttpPut("{id:int}")]
@@ -69,9 +66,7 @@ public class PaymentAccountController : ControllerBase
         var result = await _paymentService.UpdatePaymentAccountAsync(customerId, id, viewModel);
 
         return result.MapResult(
-            this.Updated($"https://localhost:5001/api/payment/details/{id}"),
-            this.MapErrorCodeToHttpCode
-        );
+            this.Updated($"https://localhost:5001/api/payment/details/{id}"));
     }
 
     [HttpPost]
@@ -82,8 +77,6 @@ public class PaymentAccountController : ControllerBase
         var result = await _paymentService.AddPaymentAccountAsync(customerId, inputPayment);
 
         return result.MapResult(
-            this.Created($"https://localhost:5001/api/payment/details/{result.Value}"),
-            this.MapErrorCodeToHttpCode
-        );
+            this.Created($"https://localhost:5001/api/payment/details/{result.Value}"));
     }
 }

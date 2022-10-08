@@ -1,5 +1,3 @@
-using System;
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using XWave.Core.Services.Communication;
 
@@ -9,21 +7,19 @@ public static class ServiceResultExtension
 {
     public static ActionResult MapResult<T>(
         this ServiceResult<T> result, 
-        ActionResult successfulResult,
-        Func<Error, ActionResult> errorMapper) where T : notnull
+        ActionResult successfulResult) where T : notnull
     {
         return result.Succeeded
             ? successfulResult
-            : errorMapper(result.Error);
+            : ResultMapper.MapErrorToHttpCode(result.Error);
     }
 
     public static ActionResult MapResult(
         this ServiceResult result, 
-        ActionResult successfulResult,
-        Func<Error, ActionResult> errorMapper)
+        ActionResult successfulResult)
     {
         return result.Succeeded
             ? successfulResult
-            : errorMapper(result.Error);
+            : ResultMapper.MapErrorToHttpCode(result.Error);
     }
 }

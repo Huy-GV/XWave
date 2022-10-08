@@ -57,9 +57,7 @@ public class DiscountController : ControllerBase
         var result = await _discountService.CreateDiscountAsync(userId, newDiscount);
 
         return result.MapResult(
-            this.Created($"https://localhost:5001/api/discount/{result.Value}"),
-            this.MapErrorCodeToHttpCode
-        );
+            this.Created($"https://localhost:5001/api/discount/{result.Value}"));
     }
 
     [HttpPut("{id:int}")]
@@ -70,9 +68,7 @@ public class DiscountController : ControllerBase
         var result = await _discountService.UpdateDiscountAsync(managerId, id, updatedDiscount);
 
         return result.MapResult(
-            this.Updated($"https://localhost:5001/api/discount/{id}"),
-            this.MapErrorCodeToHttpCode
-        );
+            this.Updated($"https://localhost:5001/api/discount/{id}"));
     }
 
     [HttpDelete("{id:int}")]
@@ -81,10 +77,7 @@ public class DiscountController : ControllerBase
     { 
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountAsync(managerId, id);
-        return result.MapResult(
-            NoContent(),
-            this.MapErrorCodeToHttpCode
-        );
+        return result.MapResult(NoContent());
     }
 
     [HttpPost("{id:int}/apply")]
@@ -98,10 +91,7 @@ public class DiscountController : ControllerBase
         }
 
         var result = await _discountService.ApplyDiscountToProducts(userId, id, productIds);
-        return result.MapResult(
-            Ok(),
-            this.MapErrorCodeToHttpCode
-        );
+        return result.MapResult(Ok());
     }
 
     [HttpPost("{id}/remove")]
@@ -110,9 +100,6 @@ public class DiscountController : ControllerBase
     {
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountFromProductsAsync(userId, id, productIds);
-        return result.MapResult(
-            Ok(),
-            this.MapErrorCodeToHttpCode
-        );
+        return result.MapResult(Ok());
     }
 }

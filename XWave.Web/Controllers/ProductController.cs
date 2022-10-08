@@ -48,7 +48,7 @@ public class ProductController : ControllerBase
     
         return result.Succeeded 
             ? Ok(result.Value)
-            : UnprocessableEntity();
+            : NotFound();
     }
 
     [HttpGet("{id:int}")]
@@ -72,10 +72,7 @@ public class ProductController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.AddProductAsync(staffId, productViewModel);
 
-        return result.MapResult(
-            this.Created($"https://localhost:5001/api/product/staff/{result.Value}"),
-            this.MapErrorCodeToHttpCode
-        );
+        return result.MapResult(this.Created($"https://localhost:5001/api/product/staff/{result.Value}"));
     }
 
     [HttpPut("{id:int}")]
@@ -86,9 +83,7 @@ public class ProductController : ControllerBase
         var result = await _productService.UpdateProductAsync(staffId, id, updatedProduct);
 
         return result.MapResult(
-            this.Created($"https://localhost:5001/api/product/staff/{id}"),
-            this.MapErrorCodeToHttpCode
-        );
+            this.Created($"https://localhost:5001/api/product/staff/{id}"));
     }
 
     [HttpPut("{id:int}/price")]
@@ -105,9 +100,7 @@ public class ProductController : ControllerBase
                 viewModel.Schedule.Value);
 
         return result.MapResult(
-            this.Created($"https://localhost:5001/api/product/staff/{id}"),
-            this.MapErrorCodeToHttpCode
-        );
+            this.Created($"https://localhost:5001/api/product/staff/{id}"));
     }
 
     [HttpDelete("{id:int}")]
@@ -116,10 +109,7 @@ public class ProductController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.DeleteProductAsync(id, managerId);
-        return result.MapResult(
-            NoContent(),
-            this.MapErrorCodeToHttpCode
-        );
+        return result.MapResult(NoContent());
     }
 
     [HttpPut("discontinue/{updateSchedule}")]
@@ -128,10 +118,7 @@ public class ProductController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.DiscontinueProductAsync(managerId, ids, updateSchedule);
-        return result.MapResult(
-            NoContent(),
-            this.MapErrorCodeToHttpCode
-        );
+        return result.MapResult(NoContent());
     }
 
     [HttpPut("{id:int}/restart-sale/{updateSchedule:datetime}")]
@@ -140,10 +127,7 @@ public class ProductController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.RestartProductSaleAsync(managerId, id, updateSchedule);
-        return result.MapResult(
-            NoContent(),
-            this.MapErrorCodeToHttpCode
-        );
+        return result.MapResult(NoContent());
     }
 
     [HttpDelete("{id}/cancel")]
@@ -151,9 +135,6 @@ public class ProductController : ControllerBase
     public async Task<ActionResult> CancelBackgroundTaskAsync(string id)
     {
         var result = await _backgroundJobService.CancelJobAsync(id);
-        return result.MapResult(
-            NoContent(),
-            this.MapErrorCodeToHttpCode
-        );
+        return result.MapResult( NoContent());
     }
 }

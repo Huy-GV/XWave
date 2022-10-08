@@ -56,8 +56,6 @@ public class OrderController : ControllerBase
 
         var result = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
         return result.MapResult(
-            this.Created($"https://localhost:5001/api/order/{result.Value}"),
-            this.MapErrorCodeToHttpCode
-        );
+            this.Created($"https://localhost:5001/api/order/{result.Value}"));
     }
 }

@@ -43,9 +43,7 @@ public class StaffAccountController : ControllerBase
         var result = await _staffAccountService.UpdateStaffAccount(id, staffAccountViewModel);
 
         return result.MapResult(
-            this.Updated($"https://localhost:5001/api/staff-account/{id}"),
-            this.MapErrorCodeToHttpCode
-        ); 
+            this.Updated($"https://localhost:5001/api/staff-account/{id}")); 
     }
 
     [HttpDelete("{id}")]
@@ -53,8 +51,6 @@ public class StaffAccountController : ControllerBase
     {
         var result = await _staffAccountService.DeactivateStaffAccount(id);
         return result.MapResult(
-            this.Updated($"https://localhost:5001/api/staff-account/{id}"),
-            this.MapErrorCodeToHttpCode
-        ); 
+            this.Updated($"https://localhost:5001/api/staff-account/{id}")); 
     }
 }

@@ -47,9 +47,7 @@ public class CategoryController : ControllerBase
         var result = await _categoryService.AddCategoryAsync(managerId, newCategory);
 
         return result.MapResult(
-            this.Created($"https://localhost:5001/api/category/admin/{result.Value}"),
-            this.MapErrorCodeToHttpCode
-        ); 
+            this.Created($"https://localhost:5001/api/category/admin/{result.Value}")); 
     }
 
     [HttpPut("{id:int}")]
@@ -60,9 +58,7 @@ public class CategoryController : ControllerBase
         var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
 
         return result.MapResult(
-            this.Updated($"https://localhost:5001/api/category/admin/{id}"),
-            this.MapErrorCodeToHttpCode
-        ); 
+            this.Updated($"https://localhost:5001/api/category/admin/{id}")); 
     }
 
     [HttpDelete("{id:int}")]
@@ -77,9 +73,6 @@ public class CategoryController : ControllerBase
 
         var result = await _categoryService.DeleteCategoryAsync(managerId, id);
 
-        return result.MapResult(
-            this.NoContent(),
-            this.MapErrorCodeToHttpCode
-        ); 
+        return result.MapResult(NoContent()); 
     }
 }
