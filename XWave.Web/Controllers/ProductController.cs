@@ -72,7 +72,7 @@ public class ProductController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.AddProductAsync(staffId, productViewModel);
 
-        return result.MapResult(this.Created($"https://localhost:5001/api/product/staff/{result.Value}"));
+        return result.MapResult(this.Created($"{this.ApiUrl()}/product/{result.Value}/private"));
     }
 
     [HttpPut("{id:int}")]
@@ -82,8 +82,7 @@ public class ProductController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.UpdateProductAsync(staffId, id, updatedProduct);
 
-        return result.MapResult(
-            this.Created($"https://localhost:5001/api/product/staff/{id}"));
+        return result.MapResult(this.Created($"{this.ApiUrl()}/product/{id}/private"));
     }
 
     [HttpPut("{id:int}/price")]
@@ -99,8 +98,7 @@ public class ProductController : ControllerBase
                 viewModel.UpdatedPrice,
                 viewModel.Schedule.Value);
 
-        return result.MapResult(
-            this.Created($"https://localhost:5001/api/product/staff/{id}"));
+        return result.MapResult(this.Created($"{this.ApiUrl()}/product/{id}/private"));
     }
 
     [HttpDelete("{id:int}")]
@@ -135,6 +133,6 @@ public class ProductController : ControllerBase
     public async Task<ActionResult> CancelBackgroundTaskAsync(string id)
     {
         var result = await _backgroundJobService.CancelJobAsync(id);
-        return result.MapResult( NoContent());
+        return result.MapResult(NoContent());
     }
 }

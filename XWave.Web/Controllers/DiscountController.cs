@@ -57,7 +57,7 @@ public class DiscountController : ControllerBase
         var result = await _discountService.CreateDiscountAsync(userId, newDiscount);
 
         return result.MapResult(
-            this.Created($"https://localhost:5001/api/discount/{result.Value}"));
+            this.Created($"{this.ApiUrl()}/discount/{result.Value}"));
     }
 
     [HttpPut("{id:int}")]
@@ -67,8 +67,7 @@ public class DiscountController : ControllerBase
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.UpdateDiscountAsync(managerId, id, updatedDiscount);
 
-        return result.MapResult(
-            this.Updated($"https://localhost:5001/api/discount/{id}"));
+        return result.MapResult(this.Updated($"{this.ApiUrl()}/discount/{id}"));
     }
 
     [HttpDelete("{id:int}")]

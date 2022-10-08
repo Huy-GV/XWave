@@ -12,6 +12,11 @@ public static class ControllerExtension
 
     public static ActionResult Updated(this ControllerBase controller, string url)
     {
-        return controller.Ok(url);
+        return controller.Ok(new { url });
+    }
+
+    public static string ApiUrl(this ControllerBase controller) 
+    {
+        return $"{controller.Request.Scheme}://{controller.Request.Host.Value}/api";
     }
 }

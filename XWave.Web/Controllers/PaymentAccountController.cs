@@ -65,8 +65,8 @@ public class PaymentAccountController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.UpdatePaymentAccountAsync(customerId, id, viewModel);
 
-        return result.MapResult(
-            this.Updated($"https://localhost:5001/api/payment/details/{id}"));
+        // todo: add URL that returns payment account by ID
+        return result.MapResult(this.Updated($"{this.ApiUrl()}/payment/details/{id}"));
     }
 
     [HttpPost]
@@ -76,7 +76,6 @@ public class PaymentAccountController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.AddPaymentAccountAsync(customerId, inputPayment);
 
-        return result.MapResult(
-            this.Created($"https://localhost:5001/api/payment/details/{result.Value}"));
+        return result.MapResult(this.Created($"{this.ApiUrl()}/payment/details/{result.Value}"));
     }
 }

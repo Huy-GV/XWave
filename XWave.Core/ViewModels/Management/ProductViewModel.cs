@@ -10,5 +10,7 @@ public class ProductViewModel
 
     //TODO: implement image path
     //public string ImagePath { get; set; }
+
+    [Required] 
     public int CategoryId { get; set; }
 }
