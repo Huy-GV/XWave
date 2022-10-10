@@ -147,7 +147,8 @@ internal class OrderService : ServiceBase, IOrderService
                 {
                     Quantity = productInCart.Quantity,
                     ProductId = productInCart.ProductId,
-                    PriceAtOrder = purchasePrice
+                    PriceAtOrder = purchasePrice,
+                    Order = order,
                 });
             }
 
@@ -161,12 +162,7 @@ internal class OrderService : ServiceBase, IOrderService
             }
 
             DbContext.Order.Add(order);
-            await DbContext.SaveChangesAsync();
-            DbContext.OrderDetails.AddRange(orderDetails.Select(x =>
-            {
-                x.OrderId = order.Id;
-                return x;
-            }));
+            DbContext.OrderDetails.AddRange(orderDetails);
             DbContext.Product.UpdateRange(purchasedProducts);
 
             await DbContext.SaveChangesAsync();

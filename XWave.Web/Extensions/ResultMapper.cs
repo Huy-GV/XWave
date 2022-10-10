@@ -9,10 +9,10 @@ public static class ResultMapper
     {
         return error.Code switch 
         {
-            ErrorCode.EntityNotFound => new NotFoundResult(),
-            ErrorCode.AuthenticationError => new UnauthorizedResult(),
+            ErrorCode.EntityNotFound => new NotFoundObjectResult(error),
+            ErrorCode.AuthenticationError => new UnauthorizedObjectResult(error),
             ErrorCode.AuthorizationError => new ForbidResult(),
-            ErrorCode.ConflictingState => new ForbidResult(),
+            ErrorCode.ConflictingState => new ConflictObjectResult(error),
             _ => new BadRequestObjectResult(error),
         };
     }
