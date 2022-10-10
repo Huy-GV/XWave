@@ -7,11 +7,11 @@ namespace XWave.Core.Services.Interfaces;
 
 public interface IDiscountService
 {
-    Task<IEnumerable<DetailedDiscountDto>> FindAllDiscountsAsync();
+    Task<IReadOnlyCollection<DetailedDiscountDto>> FindAllDiscountsAsync();
 
     Task<DetailedDiscountDto?> FindDiscountByIdAsync(int id);
 
-    Task<IEnumerable<Product>> FindProductsWithDiscountIdAsync(int id);
+    Task<IReadOnlyCollection<Product>> FindProductsWithDiscountIdAsync(int id);
 
     Task<ServiceResult<int>> CreateDiscountAsync(string managerId, DiscountViewModel discount);
 

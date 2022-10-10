@@ -34,8 +34,7 @@ public class PaymentAccountController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.FindAllTransactionDetailsForStaffAsync(staffId);
 
-        // todo: create mapping for errors
-        return Ok(result.Value);
+        return result.MapResult(Ok(result.Value));
     }
 
     [HttpGet("usage")]
@@ -43,9 +42,9 @@ public class PaymentAccountController : ControllerBase
     public async Task<ActionResult<IEnumerable<PaymentAccountDetails>>> GetByCustomer()
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        return string.IsNullOrEmpty(customerId)
-            ? Forbid()
-            : Ok(await _paymentService.FindPaymentAccountSummary(customerId));
+        var result = await _paymentService.FindPaymentAccountSummary(customerId);
+
+        return result.MapResult(Ok(result.Value));
     }
 
     [HttpPost("delete/{paymentId:int}")]

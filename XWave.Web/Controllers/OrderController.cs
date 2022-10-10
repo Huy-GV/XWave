@@ -32,7 +32,9 @@ public class OrderController : ControllerBase
     public async Task<ActionResult<OrderDetails>> GetOrdersAsync()
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        return Ok(await _orderService.FindAllOrdersAsync(customerId));
+        var result = await _orderService.FindAllOrdersAsync(customerId);
+
+        return result.MapResult(Ok(result.Value));
     }
 
     [HttpGet("{id:int}")]
@@ -40,8 +42,9 @@ public class OrderController : ControllerBase
     public async Task<ActionResult<OrderDto>> GetOrderById(int id)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        var orderDto = await _orderService.FindOrderByIdAsync(customerId, id);
-        return orderDto is not null ? Ok(orderDto) : NotFound();
+        var result = await _orderService.FindOrderByIdAsync(customerId, id);
+        
+        return result.MapResult(Ok(result.Value));
     }
 
     [HttpPost]

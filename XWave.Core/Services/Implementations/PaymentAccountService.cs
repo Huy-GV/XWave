@@ -16,13 +16,17 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
     private readonly ILogger<PaymentAccountService> _logger;
     private readonly IAuthorizationService _authorizationService;
 
+    private readonly ICustomerAccountService _customerAccountService;
+
     public PaymentAccountService(
         XWaveDbContext dbContext,
         ILogger<PaymentAccountService> logger,
-        IAuthorizationService authorizationService) : base(dbContext)
+        IAuthorizationService authorizationService,
+        ICustomerAccountService customerAccountService) : base(dbContext)
     {
         _logger = logger;
         _authorizationService = authorizationService;
+        _customerAccountService = customerAccountService;
     }
 
     public async Task<ServiceResult<int>> AddPaymentAccountAsync(
@@ -125,23 +129,23 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         return ServiceResult.Success();
     }
 
-    public async Task<ServiceResult<IEnumerable<PaymentAccount>>> FindAllTransactionDetailsForStaffAsync(string staffId)
+    public async Task<ServiceResult<IReadOnlyCollection<PaymentAccount>>> FindAllTransactionDetailsForStaffAsync(string staffId)
     {
         if (! await _authorizationService.IsUserInRole(staffId, Roles.Staff)) 
         {
-            return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error 
+            return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Failure(new Error 
             {
                 Code = ErrorCode.AuthorizationError,
             });
         }
 
-        var transactions = DbContext.PaymentAccount
+        var transactions = await DbContext.PaymentAccount
             .AsNoTracking()
             .Include(pd => pd.PaymentAccountDetails)
             .ThenInclude(pd => pd.Customer)
-            .AsEnumerable();
+            .ToListAsync();
 
-        return ServiceResult<IEnumerable<PaymentAccount>>.Success(transactions);
+        return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Success(transactions.AsIReadonlyCollection());
     }
 
     public async Task<ServiceResult> UpdatePaymentAccountAsync(
@@ -189,8 +193,16 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
                 (x.Payment.ExpiryDate > DateTime.Now || includeExpiredAccounts));
     }
 
-    public async Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId)
+    public async Task<ServiceResult<IReadOnlyCollection<PaymentAccountUsageDto>>> FindPaymentAccountSummary(string customerId)
     {
+        if (! await _customerAccountService.CustomerAccountExists(customerId))
+        {
+            return ServiceResult<IReadOnlyCollection<PaymentAccountUsageDto>>.Failure(new Error
+            {
+                Code = ErrorCode.AuthorizationError,
+            });
+        }
+
         var purchasesByCustomer = await DbContext.Order
             .Include(o => o.OrderDetails)
             .Where(o => o.CustomerId == customerId)
@@ -216,7 +228,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
             })
             .ToDictionary(x => x.PaymentAccountId);
 
-        return await DbContext.PaymentAccount
+        var paymentAccounts = await DbContext.PaymentAccount
             .Include(p => p.PaymentAccountDetails)
             .Where(p => p.PaymentAccountDetails.CustomerId == customerId)
             .Select(p => new PaymentAccountUsageDto
@@ -235,5 +247,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
                 
             })
             .ToListAsync();
+
+        return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Success(paymentAccounts.AsIReadonlyCollection());
     }
 }

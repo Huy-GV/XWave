@@ -19,7 +19,7 @@ public interface IOrderService
     /// </summary>
     /// <param name="customerId">ID of customer.</param>
     /// <returns></returns>
-    Task<IEnumerable<OrderDto>> FindAllOrdersAsync(string customerId);
+    Task<ServiceResult<IReadOnlyCollection<OrderDto>>> FindAllOrdersAsync(string customerId);
 
     /// <summary>
     ///     Find a specific order of a customer
@@ -27,5 +27,5 @@ public interface IOrderService
     /// <param name="customerId">ID of customer.</param>
     /// <param name="orderId">ID of order.</param>
     /// <returns></returns>
-    Task<OrderDto?> FindOrderByIdAsync(string customerId, int orderId);
+    Task<ServiceResult<OrderDto>> FindOrderByIdAsync(string customerId, int orderId);
 }

@@ -12,6 +12,7 @@ public record ServiceResult<TResult> : ServiceResult where TResult : notnull
             Succeeded = true,
         };
     }
+
     public static new ServiceResult<TResult> Failure(Error error)
     {
         return new ServiceResult<TResult>()

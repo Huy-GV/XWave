@@ -15,9 +15,9 @@ public interface IProductService
     /// <returns>Discounted price</returns>
     decimal CalculatePriceAfterDiscount(Product product);
 
-    Task<IEnumerable<ProductDto>> FindAllProductsForCustomers();
+    Task<IReadOnlyCollection<ProductDto>> FindAllProductsForCustomers();
 
-    Task<ServiceResult<IEnumerable<DetailedProductDto>>> FindAllProductsForStaff(
+    Task<ServiceResult<IReadOnlyCollection<DetailedProductDto>>> FindAllProductsForStaff(
         bool includeDiscontinuedProducts,
         string staffId);
 
@@ -32,8 +32,9 @@ public interface IProductService
     ///     Find a product by its ID with full details for staff.
     /// </summary>
     /// <param name="id">Product ID.</param>
+    /// <param name="staffId">Staff ID.</param>
     /// <returns>A DTO containing details of the product.</returns>
-    Task<DetailedProductDto?> FindProductByIdForStaff(int id);
+    Task<ServiceResult<DetailedProductDto>> FindProductByIdForStaff(int id, string staffId);
 
     Task<ServiceResult<int>> AddProductAsync(string staffId, ProductViewModel productViewModel);
 
@@ -47,7 +48,7 @@ public interface IProductService
     Task<ServiceResult> UpdateProductAsync(string staffId, int id, ProductViewModel productViewModel);
 
     /// <summary>
-    ///     Update existing stock due to restocking or erroreneous input.
+    ///     Update existing stock due to restocking or erroneous input.
     /// </summary>
     /// <param name="productId">ID of product to update.</param>
     /// <param name="updatedStockQuantity">New stock quantity.</param>

@@ -13,5 +13,5 @@ public interface ICategoryService
 
     Task<Category?> FindCategoryByIdAsync(int id);
 
-    Task<IEnumerable<Category>> FindAllCategoriesAsync();
+    Task<IReadOnlyCollection<Category>> FindAllCategoriesAsync();
 }

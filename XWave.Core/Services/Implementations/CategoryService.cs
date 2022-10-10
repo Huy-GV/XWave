@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using XWave.Core.Data;
+using XWave.Core.Extension;
 using XWave.Core.Models;
 using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
@@ -84,9 +85,11 @@ internal class CategoryService : ServiceBase, ICategoryService
         }
     }
 
-    public async Task<IEnumerable<Category>> FindAllCategoriesAsync()
+    public async Task<IReadOnlyCollection<Category>> FindAllCategoriesAsync()
     {
-        return await DbContext.Category.AsNoTracking().ToListAsync();
+        var categories = await DbContext.Category.AsNoTracking().ToListAsync();
+
+        return categories.AsIReadonlyCollection();
     }
 
     public async Task<Category?> FindCategoryByIdAsync(int id)

@@ -13,14 +13,14 @@ public interface IPaymentAccountService
 
     Task<bool> CustomerHasPaymentAccount(string customerId, int paymentAccountId, bool includeExpiredAccounts = false);
 
-    Task<ServiceResult<IEnumerable<PaymentAccount>>> FindAllTransactionDetailsForStaffAsync(string staffId);
+    Task<ServiceResult<IReadOnlyCollection<PaymentAccount>>> FindAllTransactionDetailsForStaffAsync(string staffId);
 
     /// <summary>
     /// Find the summarized usage history of a payment account.
     /// </summary>
     /// <param name="customerId">ID of the payment account owner.</param>
     /// <returns>An enumerable of <see cref="PaymentAccountUsageDto"/> which contains account usage information.</returns>
-    Task<IEnumerable<PaymentAccountUsageDto>> FindPaymentAccountSummary(string customerId);
+    Task<ServiceResult<IReadOnlyCollection<PaymentAccountUsageDto>>> FindPaymentAccountSummary(string customerId);
 
     Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId);
 

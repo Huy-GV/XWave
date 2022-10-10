@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.DTOs.Management;
+using XWave.Core.Extension;
 using XWave.Core.Models;
 using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
@@ -57,11 +58,13 @@ internal class DiscountService : ServiceBase, IDiscountService
         return ServiceResult<int>.Success(newDiscount.Id);
     }
 
-    public async Task<IEnumerable<Product>> FindProductsWithDiscountIdAsync(int discountId)
+    public async Task<IReadOnlyCollection<Product>> FindProductsWithDiscountIdAsync(int discountId)
     {
-        return await DbContext.Product
+        var products = await DbContext.Product
             .Where(p => p.DiscountId == discountId)
             .ToListAsync();
+
+        return products.AsIReadonlyCollection();
     }
 
     public async Task<ServiceResult> RemoveDiscountAsync(string managerId, int discountId)
@@ -106,13 +109,14 @@ internal class DiscountService : ServiceBase, IDiscountService
         }
     }
 
-    public Task<IEnumerable<DetailedDiscountDto>> FindAllDiscountsAsync()
+    public Task<IReadOnlyCollection<DetailedDiscountDto>> FindAllDiscountsAsync()
     {
         var discounts = DbContext.Discount
             .AsEnumerable()
             .Select(d => DiscountDtoMapper.MapDetailedDiscountDto(d))
             .OrderBy(d => d.IsActive)
-            .AsEnumerable();
+            .ToList()
+            .AsIReadonlyCollection();
 
         return Task.FromResult(discounts);
     }

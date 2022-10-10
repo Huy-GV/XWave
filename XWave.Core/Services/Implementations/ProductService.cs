@@ -128,7 +128,7 @@ internal class ProductService : ServiceBase, IProductService
         }
     }
 
-    public Task<IEnumerable<ProductDto>> FindAllProductsForCustomers()
+    public Task<IReadOnlyCollection<ProductDto>> FindAllProductsForCustomers()
     {
         var productDtos = DbContext.Product
             .AsNoTracking()
@@ -138,18 +138,19 @@ internal class ProductService : ServiceBase, IProductService
             .AsEnumerable()
             .Select(p => p.Discount is null
                 ? _productDtoMapper.MapCustomerProductDto(p)
-                : _productDtoMapper.MapCustomerProductDto(p, CalculatePriceAfterDiscount(p)));
+                : _productDtoMapper.MapCustomerProductDto(p, CalculatePriceAfterDiscount(p)))
+            .ToList();
 
-        return Task.FromResult(productDtos);
+        return Task.FromResult(productDtos.AsIReadonlyCollection());
     }
 
-    public async Task<ServiceResult<IEnumerable<DetailedProductDto>>> FindAllProductsForStaff(
+    public async Task<ServiceResult<IReadOnlyCollection<DetailedProductDto>>> FindAllProductsForStaff(
         bool includeDiscontinuedProducts,
         string staffId)
     {
         if (!await IsUserStaff(staffId))
         {
-            return ServiceResult<IEnumerable<DetailedProductDto>>.Failure(_unauthorizedError);
+            return ServiceResult<IReadOnlyCollection<DetailedProductDto>>.Failure(_unauthorizedError);
         }
 
         var products = await DbContext.Product
@@ -159,9 +160,11 @@ internal class ProductService : ServiceBase, IProductService
             .Where(p => includeDiscontinuedProducts || !p.IsDiscontinued)
             .ToListAsync();
 
-        var productDtos = products.Select(_productDtoMapper.MapDetailedProductDto);
+        var productDtos = products
+            .Select(_productDtoMapper.MapDetailedProductDto)
+            .ToList();
         
-        return ServiceResult<IEnumerable<DetailedProductDto>>.Success(productDtos);
+        return ServiceResult<IReadOnlyCollection<DetailedProductDto>>.Success(productDtos.AsIReadonlyCollection());
     }
 
     public async Task<ProductDto?> FindProductByIdForCustomers(int id)
@@ -179,15 +182,34 @@ internal class ProductService : ServiceBase, IProductService
             : _productDtoMapper.MapCustomerProductDto(product, CalculatePriceAfterDiscount(product));
     }
 
-    public async Task<DetailedProductDto?> FindProductByIdForStaff(int id)
-    {
+    public async Task<ServiceResult<DetailedProductDto>> FindProductByIdForStaff(int id, string staffId)
+    {       
+        if (!await IsUserStaff(staffId))
+        {
+            return ServiceResult<DetailedProductDto>.Failure(new Error
+            {
+                Code = ErrorCode.AuthorizationError
+            });
+        }
+
         var product = await DbContext.Product
             .AsNoTracking()
             .Include(p => p.Discount)
             .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.Id == id);
 
-        return product is null ? null : _productDtoMapper.MapDetailedProductDto(product);
+        if (product is null)
+        {
+            return ServiceResult<DetailedProductDto>.Failure(new Error
+            {
+                Code = ErrorCode.EntityNotFound,
+                Message = $"Product with ID {id} not found.",
+            });
+        }
+
+        var productDto = _productDtoMapper.MapDetailedProductDto(product);
+
+        return ServiceResult<DetailedProductDto>.Success(productDto);
     }
 
     public async Task<ServiceResult> UpdateProductAsync(

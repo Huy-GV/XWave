@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.ObjectModel;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.DTOs.Customers;
+using XWave.Core.Extension;
 using XWave.Core.Models;
 using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
@@ -32,10 +34,26 @@ internal class OrderService : ServiceBase, IOrderService
         _paymentService = paymentService;
     }
 
-    // todo: change to ServiceResult<T>
-    public async Task<OrderDto?> FindOrderByIdAsync(string customerId, int orderId)
+    public async Task<ServiceResult<OrderDto>> FindOrderByIdAsync(string customerId, int orderId)
     {
-        return (await FindAllOrdersAsync(customerId)).SingleOrDefault(o => o.Id == orderId);
+        if (!await _customerAccountService.CustomerAccountExists(customerId))
+        {
+            return ServiceResult<OrderDto>.Failure(new Error
+            {
+                Code = ErrorCode.AuthorizationError,
+            });
+        }
+
+        var order = await  GetOrderDtosQuery(customerId).FirstOrDefaultAsync(o => o.Id == orderId);
+        if (order is null) 
+        {
+            return ServiceResult<OrderDto>.Failure(new Error
+            {
+                Code = ErrorCode.EntityNotFound,
+            });
+        }
+
+        return ServiceResult<OrderDto>.Success(order);
     }
 
     public async Task<ServiceResult<int>> AddOrderAsync(
@@ -166,11 +184,23 @@ internal class OrderService : ServiceBase, IOrderService
         }
     }
 
-    public async Task<IEnumerable<OrderDto>> FindAllOrdersAsync(string customerId)
+    public async Task<ServiceResult<IReadOnlyCollection<OrderDto>>> FindAllOrdersAsync(string customerId)
     {
-        // TODO: ADD CHECK FOR CUSTOMER
+        if (!await _customerAccountService.CustomerAccountExists(customerId))
+        {
+            return ServiceResult<IReadOnlyCollection<OrderDto>>.Failure(new Error
+            {
+                Code = ErrorCode.AuthorizationError,
+            });
+        }
 
-        return await DbContext.Order
+        var orderDtos = await GetOrderDtosQuery(customerId).ToListAsync();
+        return ServiceResult<ReadOnlyCollection<OrderDto>>.Success(orderDtos.AsIReadonlyCollection());
+    }
+
+    private IQueryable<OrderDto> GetOrderDtosQuery(string customerId)
+    {
+        return DbContext.Order
             .AsNoTracking()
             .Include(o => o.OrderDetails)
             .ThenInclude(od => od.Product)
@@ -191,7 +221,6 @@ internal class OrderService : ServiceBase, IOrderService
                         Price = od.PriceAtOrder,
                         ProductName = od.Product.Name
                     })
-            })
-            .ToListAsync();
+            });
     }
 }

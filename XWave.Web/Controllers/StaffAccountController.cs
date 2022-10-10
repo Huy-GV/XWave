@@ -14,6 +14,7 @@ namespace XWave.Web.Controllers;
 [Route("api/staff-account")]
 [ApiController]
 [Authorize(Roles = nameof(Roles.Manager))]
+// TODO: add security checks at service level
 public class StaffAccountController : ControllerBase
 {
     private readonly IStaffAccountService _staffAccountService;

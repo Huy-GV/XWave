@@ -61,8 +61,10 @@ public class ProductController : ControllerBase
     [HttpGet("{id:int}/private")]
     public async Task<ActionResult<DetailedProductDto>> GetByIdForStaff(int id)
     {
-        var productDto = await _productService.FindProductByIdForStaff(id);
-        return productDto is not null ? Ok(productDto) : NotFound();
+        var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _productService.FindProductByIdForStaff(id, staffId);
+
+        return result.MapResult(Ok(result.Value));
     }
 
     [HttpPost]
