@@ -3,9 +3,15 @@
 public enum ErrorCode
 {
     /// <summary>
+    /// No error occurred. 
+    /// </summary>
+ 
+    None = 0,
+
+    /// <summary>
     /// Undefined error.
     /// </summary>
-    Undefined = 0,
+    Undefined,
 
     /// <summary>
     /// Requested entity not found.

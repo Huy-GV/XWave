@@ -30,6 +30,10 @@ public record ServiceResult
     /// <returns></returns>
     public static ServiceResult Success()
     {
-        return new() { Succeeded = true };
+        return new() 
+        { 
+            Succeeded = true,
+            Error = Error.Empty(),
+        };
     }
 }

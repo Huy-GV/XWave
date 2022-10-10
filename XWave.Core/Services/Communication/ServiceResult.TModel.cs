@@ -10,6 +10,7 @@ public record ServiceResult<TResult> : ServiceResult where TResult : notnull
         {
             Value = value,
             Succeeded = true,
+            Error = Error.Empty(),
         };
     }
 
@@ -19,7 +20,7 @@ public record ServiceResult<TResult> : ServiceResult where TResult : notnull
         {
             Value = default,
             Succeeded = false,
-            Error =  error ,
+            Error =  error,
         };
     }
 
