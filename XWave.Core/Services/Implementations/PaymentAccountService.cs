@@ -41,53 +41,39 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
             });
         }
 
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        try
+        var existingPaymentAccount = await DbContext.PaymentAccount
+            .SingleOrDefaultAsync(x =>
+                x.AccountNumber == inputPayment.AccountNumber &&
+                x.Provider == inputPayment.Provider &&
+                x.IsDeleted);
+
+        if (existingPaymentAccount is not null)
         {
-            var existingPaymentAccount = await DbContext.PaymentAccount
-                .SingleOrDefaultAsync(x =>
-                    x.AccountNumber == inputPayment.AccountNumber &&
-                    x.Provider == inputPayment.Provider &&
-                    x.IsDeleted);
-
-            if (existingPaymentAccount is not null)
-            {
-                DbContext.PaymentAccount.Update(existingPaymentAccount);
-                existingPaymentAccount.IsDeleted = false;
-                existingPaymentAccount.DeleteDate = null;
-
-                return ServiceResult<int>.Success(existingPaymentAccount.Id);
-            }
-
-            var newPaymentAccount = new PaymentAccount
-            {
-                AccountNumber = inputPayment.AccountNumber,
-                Provider = inputPayment.Provider,
-                ExpiryDate = inputPayment.ExpiryDate
-            };
-
-            DbContext.PaymentAccount.Add(newPaymentAccount);
+            DbContext.PaymentAccount.Update(existingPaymentAccount);
+            existingPaymentAccount.IsDeleted = false;
+            existingPaymentAccount.DeleteDate = null;
             await DbContext.SaveChangesAsync();
-
-            var newTransactionDetails = new PaymentAccountDetails
-            {
-                CustomerId = customerId,
-                PaymentAccountId = newPaymentAccount.Id
-            };
-
-            DbContext.PaymentAccountDetails.Add(newTransactionDetails);
-            await DbContext.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return ServiceResult<int>.Success(newPaymentAccount.Id);
+            return ServiceResult<int>.Success(existingPaymentAccount.Id);
         }
-        catch (Exception exception)
+
+        var newPaymentAccount = new PaymentAccount
         {
-            _logger.LogError($"Exception: {exception.Message}");
-            await transaction.RollbackAsync();
+            AccountNumber = inputPayment.AccountNumber,
+            Provider = inputPayment.Provider,
+            ExpiryDate = inputPayment.ExpiryDate
+        };
 
-            return ServiceResult<int>.UnknownFailure();
-        }
+        var newTransactionDetails = new PaymentAccountDetails
+        {
+            CustomerId = customerId,
+            Payment = newPaymentAccount,
+        };
+
+        DbContext.PaymentAccount.Add(newPaymentAccount);
+        DbContext.PaymentAccountDetails.Add(newTransactionDetails);
+        await DbContext.SaveChangesAsync();
+
+        return ServiceResult<int>.Success(newPaymentAccount.Id);
     }
 
     public async Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentAccountId)

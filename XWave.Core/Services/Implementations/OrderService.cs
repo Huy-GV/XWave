@@ -80,104 +80,92 @@ internal class OrderService : ServiceBase, IOrderService
             });
         }
 
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        try
+        var order = new Order
         {
-            var order = new Order
-            {
-                CustomerId = customerId,
-                PaymentAccountId = purchaseViewModel.PaymentAccountId,
-                DeliveryAddress = purchaseViewModel.DeliveryAddress
-            };
+            CustomerId = customerId,
+            PaymentAccountId = purchaseViewModel.PaymentAccountId,
+            DeliveryAddress = purchaseViewModel.DeliveryAddress
+        };
 
-            var productsToPurchaseIds = purchaseViewModel.ProductCart.Select(p => p.ProductId);
-            var productsToPurchase = await DbContext.Product
-                .Include(p => p.Discount)
-                .Where(p => productsToPurchaseIds.Contains(p.Id))
-                .ToDictionaryAsync(p => p.Id);
+        var productsToPurchaseIds = purchaseViewModel.ProductCart.Select(p => p.ProductId);
+        var productsToPurchase = await DbContext.Product
+            .Include(p => p.Discount)
+            .Where(p => productsToPurchaseIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id);
 
-            var missingProductIds = productsToPurchaseIds
-                .Except(productsToPurchase.Select(p => p.Key))
-                .ToArray();
+        var missingProductIds = productsToPurchaseIds
+            .Except(productsToPurchase.Select(p => p.Key))
+            .ToArray();
 
-            if (missingProductIds.Any())
-            {
-                return ServiceResult<int>.Failure(new Error
-                {
-                    Code = ErrorCode.InvalidState,
-                    Message = $"The following products were not found: { string.Join(", ", missingProductIds) }.",
-                });
-            }
-
-            var purchasedProducts = new List<Product>();
-            var orderDetails = new List<OrderDetails>();
-
-            // todo: return error on the first encounter
-            var errorMessages = new List<string>();
-
-            foreach (var productInCart in purchaseViewModel.ProductCart)
-            {
-                var product = productsToPurchase[productInCart.ProductId];
-                if (product.Quantity < productInCart.Quantity)
-                {
-                    errorMessages.Add($"Quantity of product {product.Name} exceeded existing stock.");
-                }
-
-                //prevent customers from ordering based on incorrect data
-                if ((product.Discount?.Percentage ?? 0) != productInCart.DisplayedDiscountPercentage)
-                {
-                    errorMessages.Add($"Discount percentage of product {product.Name} has been changed during the transaction.");
-                }
-
-                if (product.Price != productInCart.DisplayedPrice)
-                {
-                    errorMessages.Add($"Price of product {product.Name} has been changed during the transaction.");
-                }
-
-                // move to validate remaining products without processing any of them.
-                if (errorMessages.Count > 0) continue;
-
-                var purchasePrice = product.Discount is null
-                    ? product.Price
-                    : _productService.CalculatePriceAfterDiscount(product);
-
-                product.Quantity -= productInCart.Quantity;
-                purchasedProducts.Add(product);
-                orderDetails.Add(new OrderDetails
-                {
-                    Quantity = productInCart.Quantity,
-                    ProductId = productInCart.ProductId,
-                    PriceAtOrder = purchasePrice,
-                    Order = order,
-                });
-            }
-
-            if (errorMessages.Count > 0)
-            {
-                return ServiceResult<int>.Failure(new Error 
-                {
-                    Code = ErrorCode.ConflictingState,
-                    Message = string.Join("\n", errorMessages)
-                });
-            }
-
-            DbContext.Order.Add(order);
-            DbContext.OrderDetails.AddRange(orderDetails);
-            DbContext.Product.UpdateRange(purchasedProducts);
-
-            await DbContext.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return ServiceResult<int>.Success(order.Id);
-        }
-        catch (Exception exception)
+        if (missingProductIds.Any())
         {
-            await transaction.RollbackAsync();
-            _logger.LogError($"Failed to place order for customer ID {customerId}");
-            _logger.LogError($"Exception message: {exception.Message}");
-
-            return ServiceResult<int>.Failure(Error.UndefinedError());
+            return ServiceResult<int>.Failure(new Error
+            {
+                Code = ErrorCode.InvalidState,
+                Message = $"The following products were not found: { string.Join(", ", missingProductIds) }.",
+            });
         }
+
+        var purchasedProducts = new List<Product>();
+        var orderDetails = new List<OrderDetails>();
+
+        // todo: return error on the first encounter
+        var errorMessages = new List<string>();
+
+        foreach (var productInCart in purchaseViewModel.ProductCart)
+        {
+            var product = productsToPurchase[productInCart.ProductId];
+            if (product.Quantity < productInCart.Quantity)
+            {
+                errorMessages.Add($"Quantity of product {product.Name} exceeded existing stock.");
+            }
+
+            //prevent customers from ordering based on incorrect data
+            if ((product.Discount?.Percentage ?? 0) != productInCart.DisplayedDiscountPercentage)
+            {
+                errorMessages.Add($"Discount percentage of product {product.Name} has been changed during the transaction.");
+            }
+
+            if (product.Price != productInCart.DisplayedPrice)
+            {
+                errorMessages.Add($"Price of product {product.Name} has been changed during the transaction.");
+            }
+
+            // move to validate remaining products without processing any of them.
+            if (errorMessages.Count > 0) continue;
+
+            var purchasePrice = product.Discount is null
+                ? product.Price
+                : _productService.CalculatePriceAfterDiscount(product);
+
+            product.Quantity -= productInCart.Quantity;
+            purchasedProducts.Add(product);
+            orderDetails.Add(new OrderDetails
+            {
+                Quantity = productInCart.Quantity,
+                ProductId = productInCart.ProductId,
+                PriceAtOrder = purchasePrice,
+                Order = order,
+            });
+        }
+
+        if (errorMessages.Count > 0)
+        {
+            return ServiceResult<int>.Failure(new Error 
+            {
+                Code = ErrorCode.ConflictingState,
+                Message = string.Join("\n", errorMessages)
+            });
+        }
+
+        DbContext.Order.Add(order);
+        DbContext.OrderDetails.AddRange(orderDetails);
+        DbContext.Product.UpdateRange(purchasedProducts);
+
+        await DbContext.SaveChangesAsync();
+
+        return ServiceResult<int>.Success(order.Id);
+        
     }
 
     public async Task<ServiceResult<IReadOnlyCollection<OrderDto>>> FindAllOrdersAsync(string customerId)

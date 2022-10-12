@@ -153,34 +153,23 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
             });
         }
 
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        try
+        var lockoutResult = await _userManager.SetLockoutEnabledAsync(staffUser, true);
+        var lockoutEndDateResult = await _userManager.SetLockoutEndDateAsync(staffUser, DateTime.MaxValue);
+        var resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(staffUser);
+        var resetPasswordResult = await _userManager.ResetPasswordAsync(
+            staffUser,
+            resetPasswordToken,
+            Guid.NewGuid().ToString());
+
+        if (!lockoutResult.Succeeded || !lockoutEndDateResult.Succeeded || !resetPasswordResult.Succeeded)
         {
-            var lockoutResult = await _userManager.SetLockoutEnabledAsync(staffUser, true);
-            var lockoutEndDateResult = await _userManager.SetLockoutEndDateAsync(staffUser, DateTime.MaxValue);
-            var resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(staffUser);
-            var resetPasswordResult = await _userManager.ResetPasswordAsync(
-                staffUser,
-                resetPasswordToken,
-                Guid.NewGuid().ToString());
-
-            if (!lockoutResult.Succeeded || !lockoutEndDateResult.Succeeded || !resetPasswordResult.Succeeded)
-            {
-                return ServiceResult.DefaultFailure();
-            }
-
-            staffAccount.SoftDelete();
-            await DbContext.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return ServiceResult.Success();
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-
             return ServiceResult.DefaultFailure();
         }
+
+        staffAccount.SoftDelete();
+        await DbContext.SaveChangesAsync();
+
+        return ServiceResult.Success();
     }
 
     private async Task<bool> IsManagerIdValid(string userId)

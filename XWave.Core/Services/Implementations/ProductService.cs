@@ -238,7 +238,10 @@ internal class ProductService : ServiceBase, IProductService
 
         try
         {
-            DbContext.Update(product).CurrentValues.SetValues(updatedProductViewModel);
+            DbContext.Product
+                .Update(product)
+                .CurrentValues
+                .SetValues(updatedProductViewModel);
             await DbContext.SaveChangesAsync();
             await _activityService.LogActivityAsync<Product>(
                 staffId,
@@ -526,27 +529,15 @@ internal class ProductService : ServiceBase, IProductService
     public async Task UpdateProductSaleStatusByScheduleAsync(int[] productIds, bool isDiscontinued,
         DateTime updateSchedule)
     {
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        try
+        var productsToUpdate = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
+        DbContext.Product.UpdateRange(productsToUpdate.Select(x =>
         {
-            var productsToUpdate = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
-            DbContext.UpdateRange(productsToUpdate.Select(x =>
-            {
-                x.IsDiscontinued = isDiscontinued;
-                x.DiscontinuationDate = isDiscontinued ? updateSchedule : null;
-                return x;
-            }));
+            x.IsDiscontinued = isDiscontinued;
+            x.DiscontinuationDate = isDiscontinued ? updateSchedule : null;
+            return x;
+        }));
 
-            await DbContext.SaveChangesAsync();
-            await transaction.CommitAsync();
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(
-                "Failed to carry out scheduled product status update for multiple products. Transaction rolled back.");
-            _logger.LogDebug($"Exception message: {exception.Message}");
-            await transaction.RollbackAsync();
-        }
+        await DbContext.SaveChangesAsync();
     }
 
     private async Task<bool> IsStaffIdValid(string userId)
