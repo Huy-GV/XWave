@@ -6,15 +6,16 @@ namespace XWave.Core.Services.Interfaces;
 
 public interface IStaffAccountService
 {
-    Task<StaffAccountDto?> GetStaffAccountById(string id);
+    Task<ServiceResult<StaffAccountDto>> GetStaffAccountById(string id, string managerId);
 
-    Task<IEnumerable<StaffAccountDto>> GetAllStaffAccounts();
+    Task<ServiceResult<IReadOnlyCollection<StaffAccountDto>>> GetAllStaffAccounts(string managerId);
 
     Task<ServiceResult<string>> RegisterStaffAccount(
         string staffId,
+        string managerId,
         StaffAccountViewModel registerStaffViewModel);
 
-    Task<ServiceResult> UpdateStaffAccount(string staffId, StaffAccountViewModel updateUserViewModel);
+    Task<ServiceResult> UpdateStaffAccount(string staffId, string managerId, StaffAccountViewModel updateUserViewModel);
 
-    Task<ServiceResult> DeactivateStaffAccount(string staffId);
+    Task<ServiceResult> DeactivateStaffAccount(string staffId, string managerId);
 }

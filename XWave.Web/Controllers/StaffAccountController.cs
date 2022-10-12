@@ -8,50 +8,63 @@ using XWave.Core.DTOs.Management;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.ViewModels.Management;
 using XWave.Core.Services.Communication;
+using XWave.Web.Utils;
 
 namespace XWave.Web.Controllers;
 
 [Route("api/staff-account")]
 [ApiController]
 [Authorize(Roles = nameof(Roles.Manager))]
-// TODO: add security checks at service level
 public class StaffAccountController : ControllerBase
 {
     private readonly IStaffAccountService _staffAccountService;
+    private readonly AuthenticationHelper _authenticationHelper;
 
-    public StaffAccountController(IStaffAccountService staffAccountService)
+    public StaffAccountController(
+        IStaffAccountService staffAccountService,
+        AuthenticationHelper authenticationHelper)
     {
         _staffAccountService = staffAccountService;
+        _authenticationHelper = authenticationHelper;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<StaffAccountDto>>> GetStaffAccounts()
     {
-        return Ok(await _staffAccountService.GetAllStaffAccounts());
+        var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _staffAccountService.GetAllStaffAccounts(managerId);
+        return result.MapResult(Ok(result.Value));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<StaffAccountDto>> GetStaffAccountById(string id)
     {
-        var staffAccountDto = await _staffAccountService.GetStaffAccountById(id);
-        return staffAccountDto is not null ? Ok(staffAccountDto) : NotFound();
+        var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _staffAccountService.GetStaffAccountById(id, managerId);
+        return result.MapResult(Ok(result.Value));
     }
 
     [HttpPost("{id}")]
-    public async Task<ActionResult<ServiceResult>> UpdateStaffAccount(string id,
+    public async Task<ActionResult<ServiceResult>> UpdateStaffAccount(
+        string staffAccountId,
         StaffAccountViewModel staffAccountViewModel)
     {
-        var result = await _staffAccountService.UpdateStaffAccount(id, staffAccountViewModel);
+        var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _staffAccountService.UpdateStaffAccount(
+            staffAccountId, 
+            managerId, 
+            staffAccountViewModel);
 
         return result.MapResult(
-            this.Updated($"https://localhost:5001/api/staff-account/{id}")); 
+            this.Updated($"{this.ApiUrl()}/staff-account/{staffAccountId}")); 
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<ServiceResult>> DeactivateStaffAccount(string id)
+    public async Task<ActionResult<ServiceResult>> DeactivateStaffAccount(string staffAccountId)
     {
-        var result = await _staffAccountService.DeactivateStaffAccount(id);
+        var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _staffAccountService.DeactivateStaffAccount(staffAccountId, managerId);
         return result.MapResult(
-            this.Updated($"https://localhost:5001/api/staff-account/{id}")); 
+            this.Updated($"{this.ApiUrl()}/staff-account/{staffAccountId}")); 
     }
 }

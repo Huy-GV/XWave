@@ -46,7 +46,7 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
             await transaction.RollbackAsync();
             _logger.LogInformation("Failed to register user account.");
             _logger.LogDebug(ex, ex.Message);
-            return ServiceResult<string>.DefaultFailure();
+            return ServiceResult<string>.UnknownFailure();
         }
     }
 

@@ -44,16 +44,10 @@ internal class ProductService : ServiceBase, IProductService
         _logger = logger;
     }
 
-    private async Task<bool> IsUserStaff(string userId)
-    {
-        var roles = await _authorizationService.GetRolesByUserId(userId);
-        return roles.Intersect(staffRoles).Any();
-    }
-
     public async Task<ServiceResult<int>> AddProductAsync(string staffId,
         ProductViewModel productViewModel)
     {
-        if (!await IsUserStaff(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -88,7 +82,7 @@ internal class ProductService : ServiceBase, IProductService
         catch (Exception exception)
         {
             _logger.LogError($"Failed to create product: {exception.Message}.");
-            return ServiceResult<int>.DefaultFailure();
+            return ServiceResult<int>.UnknownFailure();
         }
     }
 
@@ -148,7 +142,7 @@ internal class ProductService : ServiceBase, IProductService
         bool includeDiscontinuedProducts,
         string staffId)
     {
-        if (!await IsUserStaff(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<IReadOnlyCollection<DetailedProductDto>>.Failure(_unauthorizedError);
         }
@@ -184,7 +178,7 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult<DetailedProductDto>> FindProductByIdForStaff(int id, string staffId)
     {       
-        if (!await IsUserStaff(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<DetailedProductDto>.Failure(new Error
             {
@@ -217,7 +211,7 @@ internal class ProductService : ServiceBase, IProductService
         int productId,
         ProductViewModel updatedProductViewModel)
     {
-        if (!await IsUserStaff(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -263,7 +257,7 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> UpdateStockAsync(string staffId, int productId, uint updatedStock)
     {
-        if (!await IsUserStaff(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -302,7 +296,7 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice)
     {
-        if (!await IsUserStaff(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -344,7 +338,7 @@ internal class ProductService : ServiceBase, IProductService
         uint updatedPrice,
         DateTime updateSchedule)
     {
-        if (!await IsUserStaff(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -553,5 +547,11 @@ internal class ProductService : ServiceBase, IProductService
             _logger.LogDebug($"Exception message: {exception.Message}");
             await transaction.RollbackAsync();
         }
+    }
+
+    private async Task<bool> IsStaffIdValid(string userId)
+    {
+        var roles = await _authorizationService.GetRolesByUserId(userId);
+        return roles.Intersect(staffRoles).Any();
     }
 }

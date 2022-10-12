@@ -86,7 +86,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
             _logger.LogError($"Exception: {exception.Message}");
             await transaction.RollbackAsync();
 
-            return ServiceResult<int>.DefaultFailure();
+            return ServiceResult<int>.UnknownFailure();
         }
     }
 

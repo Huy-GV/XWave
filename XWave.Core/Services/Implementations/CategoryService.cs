@@ -47,7 +47,7 @@ internal class CategoryService : ServiceBase, ICategoryService
         }
         catch
         {
-            return ServiceResult<int>.DefaultFailure();
+            return ServiceResult<int>.UnknownFailure();
         }
     }
 
@@ -119,9 +119,9 @@ internal class CategoryService : ServiceBase, ICategoryService
 
         try
         {
+            DbContext.Category.Update(category);
             category.Description = updatedCategory.Description;
             category.Name = updatedCategory.Name;
-            DbContext.Category.Update(category);
             await DbContext.SaveChangesAsync();
             await _activityService.LogActivityAsync<Category>(
                 managerId,

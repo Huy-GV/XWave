@@ -13,18 +13,32 @@ namespace XWave.Core.Services.Implementations;
 internal class StaffAccountService : ServiceBase, IStaffAccountService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IAuthorizationService _authorizationService;
 
+    private readonly Error _unauthorizedOperationError = new()
+    {
+        Code = ErrorCode.AuthorizationError,
+        Message = "Only managers are authorized to manage staff accounts",
+    };
     public StaffAccountService(
         XWaveDbContext dbContext,
-        UserManager<ApplicationUser> userManager) : base(dbContext)
+        UserManager<ApplicationUser> userManager,
+        IAuthorizationService authorizationService) : base(dbContext)
     {
         _userManager = userManager;
+        _authorizationService = authorizationService;
     }
 
-    public Task<ServiceResult<string>> RegisterStaffAccount(
+    public async Task<ServiceResult<string>> RegisterStaffAccount(
         string id,
+        string managerId,
         StaffAccountViewModel registerStaffViewModel)
     {
+        if (! await IsManagerIdValid(managerId)) 
+        {
+            return ServiceResult<string>.Failure(_unauthorizedOperationError);
+        }
+
         try
         {
             DbContext.StaffAccount.Add(new StaffAccount
@@ -35,50 +49,78 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
                 HourlyWage = registerStaffViewModel.HourlyWage
             });
 
-            return Task.FromResult(ServiceResult<string>.Success(id));
+            await DbContext.SaveChangesAsync();
+            return ServiceResult<string>.Success(id);
         }
         catch (Exception)
         {
-            return Task.FromResult(ServiceResult<string>.DefaultFailure());
+            return ServiceResult<string>.UnknownFailure();
         }
     }
 
-    public async Task<StaffAccountDto?> GetStaffAccountById(string id)
+    public async Task<ServiceResult<StaffAccountDto>> GetStaffAccountById(string id, string managerId)
     {
-        var staffUser = await _userManager.FindByIdAsync(id);
-        if (staffUser is not null)
+        if (! await IsManagerIdValid(managerId)) 
         {
-            return await BuildStaffAccountDto(staffUser);
+            return ServiceResult<StaffAccountDto>.Failure(_unauthorizedOperationError);
+        }
+        
+        var staffUser = await _userManager.FindByIdAsync(id);
+        var staffAccountDto = await MapStaffAccountDtoOrDefault(staffUser);
+        if (staffAccountDto is not null)
+        {
+            return ServiceResult<StaffAccountDto>.Success(staffAccountDto);
         };
 
-        return null;
+        return ServiceResult<StaffAccountDto>.Failure(new Error 
+        {
+            Code = ErrorCode.EntityNotFound,
+        });
     }
 
-    public async Task<IEnumerable<StaffAccountDto>> GetAllStaffAccounts()
+    public async Task<ServiceResult<IReadOnlyCollection<StaffAccountDto>>> GetAllStaffAccounts(string managerId)
     {
+        if (! await IsManagerIdValid(managerId)) 
+        {
+            return ServiceResult<IReadOnlyCollection<StaffAccountDto>>
+                .Failure(_unauthorizedOperationError);
+        }
+
         var staffUsers = await _userManager.GetUsersInRoleAsync(Roles.Staff);
         var staffAccountDtos = await Task.WhenAll(staffUsers
-            .Select(async x => await BuildStaffAccountDto(x)));
-
+            .Select(async x => await MapStaffAccountDtoOrDefault(x)));
+            
         // filter null elements
-        return staffAccountDtos.OfType<StaffAccountDto>();
+        var readonlyCollection = staffAccountDtos
+            .OfType<StaffAccountDto>()
+            .ToList()
+            .AsIReadonlyCollection();
+
+        return ServiceResult<IReadOnlyCollection<StaffAccountDto>>.Success(readonlyCollection);
     }
 
-    public async Task<ServiceResult> UpdateStaffAccount(string staffId,
+    public async Task<ServiceResult> UpdateStaffAccount(
+        string staffId,
+        string managerId,
         StaffAccountViewModel updateStaffAccountViewModel)
     {
+        if (! await IsManagerIdValid(managerId)) 
+        {
+            return ServiceResult.Failure(_unauthorizedOperationError);
+        }
+
+        var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
+        if (staffAccount is null)
+        {
+            return ServiceResult.Failure(new Error
+            {
+                Code = ErrorCode.EntityNotFound,
+                Message = $"Staff account with ID {staffId} not found."
+            });
+        }
+
         try
         {
-            var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
-            if (staffAccount is null)
-            {
-                return ServiceResult.Failure(new Error
-                {
-                    Code = ErrorCode.EntityNotFound,
-                    Message = $"Staff account with ID {staffId} not found."
-                });
-            }
-
             DbContext.StaffAccount
                 .Update(staffAccount)
                 .CurrentValues
@@ -93,8 +135,13 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         }
     }
 
-    public async Task<ServiceResult> DeactivateStaffAccount(string staffId)
+    public async Task<ServiceResult> DeactivateStaffAccount(string staffId, string managerId)
     {
+        if (! await IsManagerIdValid(managerId)) 
+        {
+            return ServiceResult.Failure(_unauthorizedOperationError);
+        }
+
         var staffUser = await _userManager.FindByIdAsync(staffId);
         var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
         if (staffUser is null || staffAccount is null)
@@ -136,10 +183,24 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         }
     }
 
-    private async Task<StaffAccountDto?> BuildStaffAccountDto(ApplicationUser staffUser)
+    private async Task<bool> IsManagerIdValid(string userId)
     {
+        var roles = await _authorizationService.GetRolesByUserId(userId);
+        return roles.FirstOrDefault() == Roles.Manager;
+    }
+
+    private async Task<StaffAccountDto?> MapStaffAccountDtoOrDefault(ApplicationUser? staffUser)
+    {
+        if (staffUser is null)
+        {
+            return null;
+        }
+
         var staffAccount = await DbContext.StaffAccount.FindAsync(staffUser.Id);
-        if (staffAccount is null) return null;
+        if (staffAccount is null)
+        {
+            return null;
+        }
 
         var manager = await _userManager.FindByIdAsync(staffAccount.ImmediateManagerId);
         var managerFullName = manager is null
