@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
+using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Management;
+using XWave.Core.Extension;
 using XWave.Core.Models;
 using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
@@ -11,12 +13,15 @@ namespace XWave.Core.Services.Implementations;
 internal class ActivityService : ServiceBase, IActivityService
 {
     private readonly ILogger<ActivityService> _logger;
+    private readonly IAuthorizationService _authorizationService;
 
     public ActivityService(
         XWaveDbContext dbContext,
-        ILogger<ActivityService> logger) : base(dbContext)
+        ILogger<ActivityService> logger,
+        IAuthorizationService authorizationService) : base(dbContext)
     {
         _logger = logger;
+        _authorizationService = authorizationService;
     }
 
     public async Task<ServiceResult> LogActivityAsync<T>(
@@ -42,15 +47,23 @@ internal class ActivityService : ServiceBase, IActivityService
         }
         catch (Exception exception)
         {
-            _logger.LogError($"Failed to log activiy create for staff ID {staffId}.");
+            _logger.LogError($"Failed to log activity create for staff ID {staffId}.");
             _logger.LogError($"Exception message: {exception}.");
             return ServiceResult.DefaultFailure();
         }
     }
 
-    public async Task<IEnumerable<ActivityLogDto>> FindAllActivityLogsAsync()
+    public async Task<ServiceResult<IReadOnlyCollection<ActivityLogDto>>> FindAllActivityLogsAsync(string staffId)
     {
-        return await DbContext.Activity
+        if (! await IsStaffIdValid(staffId))
+        {
+            return ServiceResult<IReadOnlyCollection<ActivityLogDto>>.Failure(new Error
+            {
+                Code = ErrorCode.AuthenticationError
+            });
+        }
+
+        var activityLogDtos = await DbContext.Activity
             .AsNoTracking()
             .Include(x => x.AppUser)
             .Select(a => new ActivityLogDto
@@ -60,24 +73,47 @@ internal class ActivityService : ServiceBase, IActivityService
                 InfoText = CreateInfoText(a.AppUser, a.Info)
             })
             .ToListAsync();
+
+        return  ServiceResult<IReadOnlyCollection<ActivityLogDto>>.Success(activityLogDtos.AsIReadonlyCollection());
     }
 
-    public async Task<ActivityLogDto?> FindActivityLogAsync(int id)
+    public async Task<ServiceResult<ActivityLogDto>> FindActivityLogAsync(int id, string staffId)
     {
-        var log = await DbContext.Activity
+        if (! await IsStaffIdValid(staffId))
+        {
+            return ServiceResult<ActivityLogDto>.Failure(new Error
+            {
+                Code = ErrorCode.AuthenticationError,
+            });
+        }
+
+        var activityLog = await DbContext.Activity
             .Include(x => x.AppUser)
             .AsNoTracking()
             .SingleOrDefaultAsync(x => x.Id == id);
 
-        if (log is not null)
-            return new ActivityLogDto
+        if (activityLog is null)
+        {
+            return ServiceResult<ActivityLogDto>.Failure(new Error
             {
-                Id = log.Id,
-                Timestamp = log.Timestamp,
-                InfoText = CreateInfoText(log.AppUser, log.Info)
-            };
+                Code = ErrorCode.EntityNotFound,
+            });
+        }
 
-        return null;
+        var activityLogDto = new ActivityLogDto
+        {
+            Id = activityLog.Id,
+            Timestamp = activityLog.Timestamp,
+            InfoText = CreateInfoText(activityLog.AppUser, activityLog.Info)
+        };
+
+        return ServiceResult<ActivityLogDto>.Success(activityLogDto);
+    }
+
+    private async Task<bool> IsStaffIdValid(string userId)
+    {
+        var roles = await _authorizationService.GetRolesByUserId(userId);
+        return roles.Intersect(new [] { Roles.Manager, Roles.Staff }).Any();
     }
 
     private static string CreateInfoText(ApplicationUser? user, string infoText)

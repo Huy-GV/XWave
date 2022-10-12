@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using XWave.Core.Models;
 using XWave.Core.Services.Interfaces;
 using XWave.Web.Data;
+using XWave.Web.Extensions;
+using XWave.Web.Utils;
 
 namespace XWave.Web.Controllers;
 
@@ -14,23 +16,30 @@ namespace XWave.Web.Controllers;
 public class ActivityController : ControllerBase
 {
     private readonly IActivityService _staffActivityService;
+    
+    private readonly AuthenticationHelper _authenticationHelper;
 
     public ActivityController(
-        IActivityService staffActivityService)
+        IActivityService staffActivityService,
+        AuthenticationHelper authenticationHelper)
     {
         _staffActivityService = staffActivityService;
+        _authenticationHelper = authenticationHelper;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Activity>>> Get()
     {
-        return Ok(await _staffActivityService.FindAllActivityLogsAsync());
+        var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _staffActivityService.FindAllActivityLogsAsync(staffId);
+        return result.MapResult(Ok(result.Value));
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Activity>> Get(int id)
     {
-        var activity = await _staffActivityService.FindActivityLogAsync(id);
-        return activity is not null ? Ok(activity) : NotFound();
+        var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _staffActivityService.FindActivityLogAsync(id, staffId);
+        return result.MapResult(Ok(result.Value));
     }
 }

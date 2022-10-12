@@ -16,7 +16,7 @@ public interface IActivityService
     Task<ServiceResult> LogActivityAsync<T>(string staffId, OperationType operationType, string infoText)
         where T : IEntity;
 
-    Task<ActivityLogDto?> FindActivityLogAsync(int id);
+    Task<ServiceResult<ActivityLogDto>> FindActivityLogAsync(int id, string staffId);
 
-    Task<IEnumerable<ActivityLogDto>> FindAllActivityLogsAsync();
+    Task<ServiceResult<IReadOnlyCollection<ActivityLogDto>>> FindAllActivityLogsAsync(string staffId);
 }
