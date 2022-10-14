@@ -44,7 +44,7 @@ internal class OrderService : ServiceBase, IOrderService
             });
         }
 
-        var order = await  GetOrderDtosQuery(customerId).FirstOrDefaultAsync(o => o.Id == orderId);
+        var order = await GetOrderDtosQuery(customerId).FirstOrDefaultAsync(o => o.Id == orderId);
         if (order is null) 
         {
             return ServiceResult<OrderDto>.Failure(new Error

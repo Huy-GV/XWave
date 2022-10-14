@@ -9,11 +9,11 @@ public static class ResultErrorExtension
     {
         return error.Code switch 
         {
-            ErrorCode.EntityNotFound => new NotFoundObjectResult(error),
-            ErrorCode.AuthenticationError => new UnauthorizedObjectResult(error),
+            ErrorCode.EntityNotFound => new NotFoundObjectResult(new { error }),
+            ErrorCode.AuthenticationError => new UnauthorizedObjectResult(new { error }),
             ErrorCode.AuthorizationError => new ForbidResult(),
-            ErrorCode.ConflictingState => new ConflictObjectResult(error),
-            _ => new BadRequestObjectResult(error),
+            ErrorCode.ConflictingState => new ConflictObjectResult(new { error }),
+            _ => new BadRequestObjectResult(new { error }),
         };
     }
 }
