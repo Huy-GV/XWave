@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
@@ -21,13 +22,21 @@ public class Program
 
     public static IHostBuilder CreateHostBuilder(string[] args)
     {
+        var logFileName = "XWave.log";
+        var logDirectory = Environment.GetEnvironmentVariable("dev_log", EnvironmentVariableTarget.User)
+            ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        var logFilePath = Path.Combine(logDirectory, logFileName);
+
         return Host.CreateDefaultBuilder(args)
             .UseSerilog((_, services, configuration) => configuration
                 .ReadFrom.Services(services)
-                .Enrich.FromLogContext()
                 .WriteTo.File(
-                    Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "XWave.Log"),
-                    shared: true)
+                    logFilePath,
+                    shared: false,
+                    retainedFileCountLimit: 3,
+                    rollOnFileSizeLimit: true,
+                    fileSizeLimitBytes: 500 * 1000,
+                    outputTemplate: "{Timestamp:dd-MM-yyyy HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
                 .WriteTo.Console())
             .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
     }

@@ -11,13 +11,13 @@ public static class ServiceResultExtension
     /// <param name="result">Result to map.</param>
     /// <param name="successfulResult">Value to return if result is successful.</param>
     /// <returns>A HTTP status result.</returns>
-    public static ActionResult MapResult<T>(
+    public static ActionResult OnSuccess<T>(
         this ServiceResult<T> result, 
         ActionResult successfulResult) where T : notnull
     {
         return result.Succeeded
             ? successfulResult
-            : ResultMapper.MapErrorToHttpCode(result.Error);
+            : result.Error.MapToHttpResult();
     }
 
     /// <summary>
@@ -26,12 +26,12 @@ public static class ServiceResultExtension
     /// <param name="result">Result to map.</param>
     /// <param name="successfulResult">Value to return if result is successful.</param>
     /// <returns>A HTTP status result.</returns>
-    public static ActionResult MapResult(
+    public static ActionResult OnSuccess(
         this ServiceResult result, 
         ActionResult successfulResult)
     {
         return result.Succeeded
             ? successfulResult
-            : ResultMapper.MapErrorToHttpCode(result.Error);
+            : result.Error.MapToHttpResult();
     }
 }

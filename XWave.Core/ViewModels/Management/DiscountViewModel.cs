@@ -2,7 +2,7 @@
 
 namespace XWave.Core.ViewModels.Management;
 
-public class DiscountViewModel
+public class DiscountViewModel : IValidatableObject
 {
     [Required]
     [Range(1, 100, ErrorMessage = "Discount percentage outside valid range")]

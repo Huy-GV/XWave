@@ -3,9 +3,9 @@ using XWave.Core.Services.Communication;
 
 namespace XWave.Web.Extensions;
 
-public static class ResultMapper
+public static class ResultErrorExtension
 {
-    public static ActionResult MapErrorToHttpCode(Error error)
+    public static ActionResult MapToHttpResult(this Error error)
     {
         return error.Code switch 
         {

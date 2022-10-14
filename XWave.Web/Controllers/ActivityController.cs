@@ -32,7 +32,7 @@ public class ActivityController : ControllerBase
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffActivityService.FindAllActivityLogsAsync(staffId);
-        return result.MapResult(Ok(result.Value));
+        return result.OnSuccess(Ok(result.Value));
     }
 
     [HttpGet("{id:int}")]
@@ -40,6 +40,6 @@ public class ActivityController : ControllerBase
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffActivityService.FindActivityLogAsync(id, staffId);
-        return result.MapResult(Ok(result.Value));
+        return result.OnSuccess(Ok(result.Value));
     }
 }

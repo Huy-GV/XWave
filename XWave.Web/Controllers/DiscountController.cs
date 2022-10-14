@@ -56,7 +56,7 @@ public class DiscountController : ControllerBase
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.CreateDiscountAsync(userId, newDiscount);
 
-        return result.MapResult(
+        return result.OnSuccess(
             this.Created($"{this.ApiUrl()}/discount/{result.Value}"));
     }
 
@@ -67,7 +67,7 @@ public class DiscountController : ControllerBase
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.UpdateDiscountAsync(managerId, id, updatedDiscount);
 
-        return result.MapResult(this.Updated($"{this.ApiUrl()}/discount/{id}"));
+        return result.OnSuccess(this.Updated($"{this.ApiUrl()}/discount/{id}"));
     }
 
     [HttpDelete("{id:int}")]
@@ -76,7 +76,7 @@ public class DiscountController : ControllerBase
     { 
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountAsync(managerId, id);
-        return result.MapResult(NoContent());
+        return result.OnSuccess(NoContent());
     }
 
     [HttpPost("{id:int}/apply")]
@@ -90,7 +90,7 @@ public class DiscountController : ControllerBase
         }
 
         var result = await _discountService.ApplyDiscountToProducts(userId, id, productIds);
-        return result.MapResult(Ok());
+        return result.OnSuccess(Ok());
     }
 
     [HttpPost("{id}/remove")]
@@ -99,6 +99,6 @@ public class DiscountController : ControllerBase
     {
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountFromProductsAsync(userId, id, productIds);
-        return result.MapResult(Ok());
+        return result.OnSuccess(Ok());
     }
 }

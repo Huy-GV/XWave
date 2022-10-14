@@ -46,7 +46,7 @@ public class CategoryController : ControllerBase
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _categoryService.AddCategoryAsync(managerId, newCategory);
 
-        return result.MapResult(this.Created($"{this.ApiUrl()}/category/admin/{result.Value}")); 
+        return result.OnSuccess(this.Created($"{this.ApiUrl()}/category/admin/{result.Value}")); 
     }
 
     [HttpPut("{id:int}")]
@@ -56,7 +56,7 @@ public class CategoryController : ControllerBase
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
 
-        return result.MapResult(this.Updated($"{this.ApiUrl()}/category/admin/{id}")); 
+        return result.OnSuccess(this.Updated($"{this.ApiUrl()}/category/admin/{id}")); 
     }
 
     [HttpDelete("{id:int}")]
@@ -71,6 +71,6 @@ public class CategoryController : ControllerBase
 
         var result = await _categoryService.DeleteCategoryAsync(managerId, id);
 
-        return result.MapResult(NoContent()); 
+        return result.OnSuccess(NoContent()); 
     }
 }

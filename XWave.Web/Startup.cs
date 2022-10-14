@@ -59,7 +59,9 @@ public class Startup
                         // accommodate clients without cookies
                         if (string.IsNullOrEmpty(context.Token) &&
                             context.Request.Cookies.ContainsKey(cookieName))
+                        {
                             context.Token = context.Request.Cookies[cookieName];
+                        }
 
                         return Task.CompletedTask;
                     }
@@ -113,7 +115,6 @@ public class Startup
         app.UseRouting();
 
         app.UseAuthentication();
-        //app.UseIdentityServer();
         app.UseMiddleware<RoleAuthorizationMiddleware>();
         app.UseAuthorization();
         app.UseEndpoints(endpoints =>

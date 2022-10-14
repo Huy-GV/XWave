@@ -33,7 +33,7 @@ public class StaffAccountController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffAccountService.GetAllStaffAccounts(managerId);
-        return result.MapResult(Ok(result.Value));
+        return result.OnSuccess(Ok(result.Value));
     }
 
     [HttpGet("{id}")]
@@ -41,7 +41,7 @@ public class StaffAccountController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffAccountService.GetStaffAccountById(id, managerId);
-        return result.MapResult(Ok(result.Value));
+        return result.OnSuccess(Ok(result.Value));
     }
 
     [HttpPost("{id}")]
@@ -55,7 +55,7 @@ public class StaffAccountController : ControllerBase
             managerId, 
             staffAccountViewModel);
 
-        return result.MapResult(
+        return result.OnSuccess(
             this.Updated($"{this.ApiUrl()}/staff-account/{staffAccountId}")); 
     }
 
@@ -64,7 +64,7 @@ public class StaffAccountController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffAccountService.DeactivateStaffAccount(staffAccountId, managerId);
-        return result.MapResult(
+        return result.OnSuccess(
             this.Updated($"{this.ApiUrl()}/staff-account/{staffAccountId}")); 
     }
 }
