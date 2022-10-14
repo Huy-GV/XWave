@@ -118,7 +118,7 @@ internal class ProductService : ServiceBase, IProductService
         catch (Exception exception)
         {
             _logger.LogError($"Failed to delete product: {exception.Message}.");
-            return ServiceResult.DefaultFailure();
+            return ServiceResult.UnknownFailure();
         }
     }
 
@@ -254,7 +254,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             _logger.LogError($"Failed to update product with ID {productId}");
             _logger.LogDebug(exception, exception.Message);
-            return ServiceResult.DefaultFailure();
+            return ServiceResult.UnknownFailure();
         }
     }
 
@@ -293,7 +293,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             _logger.LogCritical($"Failed to update stock of product with ID {product.Id}.");
             _logger.LogDebug(exception, exception.Message);
-            return ServiceResult.DefaultFailure();
+            return ServiceResult.UnknownFailure();
         }
     }
 
@@ -331,7 +331,7 @@ internal class ProductService : ServiceBase, IProductService
         {
             _logger.LogError($"Failed to update general information of product with ID {productId}.");
             _logger.LogDebug(exception, exception.Message);
-            return ServiceResult.DefaultFailure();
+            return ServiceResult.UnknownFailure();
         }
     }
 

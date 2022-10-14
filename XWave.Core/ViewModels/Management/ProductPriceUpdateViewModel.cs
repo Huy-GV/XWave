@@ -2,7 +2,7 @@
 
 namespace XWave.Core.ViewModels.Management;
 
-public class ProductPriceAdjustmentViewModel
+public class ProductPriceUpdateViewModel
 {
     [Required] 
     public uint UpdatedPrice { get; set; }

@@ -108,8 +108,6 @@ internal class OrderService : ServiceBase, IOrderService
 
         var purchasedProducts = new List<Product>();
         var orderDetails = new List<OrderDetails>();
-
-        // todo: return error on the first encounter
         var errorMessages = new List<string>();
 
         foreach (var productInCart in purchaseViewModel.ProductCart)

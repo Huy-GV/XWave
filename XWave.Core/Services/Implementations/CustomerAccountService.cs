@@ -29,10 +29,15 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         try
         {
             var customerAccount = new CustomerAccount();
-            var entry = DbContext.CustomerAccount.Add(customerAccount);
-            entry.CurrentValues.SetValues(viewModel.CustomerAccountViewModel);
+            DbContext.CustomerAccount
+                .Add(customerAccount)
+                .CurrentValues
+                .SetValues(viewModel.CustomerAccountViewModel);
+            
             await DbContext.SaveChangesAsync();
-            var authenticationResult = await _authenticationService.RegisterUserAsync(viewModel.UserViewModel);
+            var authenticationResult = await _authenticationService
+                .RegisterUserAsync(viewModel.UserViewModel);
+
             if (authenticationResult.Succeeded)
             {
                 await transaction.CommitAsync();
@@ -43,10 +48,12 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
             _logger.LogInformation("Failed to register user account.");
             _logger.LogDebug(ex, ex.Message);
             return ServiceResult<string>.UnknownFailure();
+        }
+        finally {
+            await transaction.RollbackAsync();
         }
     }
 
@@ -62,20 +69,11 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
             });
         }
 
-        try
-        {
-            DbContext.CustomerAccount.Update(customerAccount);
-            customerAccount.IsSubscribedToPromotions = isSubscribed;
-            await DbContext.SaveChangesAsync();
+        DbContext.CustomerAccount.Update(customerAccount);
+        customerAccount.IsSubscribedToPromotions = isSubscribed;
+        await DbContext.SaveChangesAsync();
 
-            return ServiceResult.Success();
-        }
-        catch (Exception exception)
-        {
-            _logger.LogCritical($"Failed to update subscription status of customer ID {id}");
-            _logger.LogError($"Exception message: {exception.Message}");
-            return ServiceResult.DefaultFailure();
-        }
+        return ServiceResult.Success();
     }
 
     public async Task<ServiceResult> UpdateCustomerAccountAsync(
@@ -92,21 +90,12 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
             });
         }
 
-        try
-        {
-            DbContext.CustomerAccount
-                .Update(customerAccount)
-                .CurrentValues.SetValues(viewModel);
-            await DbContext.SaveChangesAsync();
+        DbContext.CustomerAccount
+            .Update(customerAccount)
+            .CurrentValues.SetValues(viewModel);
+        await DbContext.SaveChangesAsync();
 
-            return ServiceResult.Success();
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError($"Failed to update customer account of user ID {id}");
-            _logger.LogError($"Exception message: {exception.Message}");
-            return ServiceResult.DefaultFailure();
-        }
+        return ServiceResult.Success();
     }
 
     public async Task<bool> CustomerAccountExists(string id)

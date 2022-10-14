@@ -85,28 +85,17 @@ internal class DiscountService : ServiceBase, IDiscountService
         }
 
         var percentage = discount.Percentage;
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        try
-        {
-            // start tracking items to avoid FK constraint errors because Delete.ClientSetNull actually does NOT work
-            await DbContext.Product.Where(d => d.DiscountId == discountId).LoadAsync();
-            DbContext.Discount.Remove(discount);
-            await DbContext.SaveChangesAsync();
-            await _activityService.LogActivityAsync<Discount>(
-                managerId,
-                OperationType.Delete,
-                $"removed a {percentage} discount with ID {discountId}.");
 
-            await transaction.CommitAsync();
-            return ServiceResult.Success();
-        }
-        catch (Exception exception)
-        {
-            await transaction.RollbackAsync();
-            _logger.LogError($"Failed to remove discount with ID {discountId}");
-            _logger.LogError(exception.Message);
-            return ServiceResult.DefaultFailure();
-        }
+        // start tracking items to avoid FK constraint errors because Delete.ClientSetNull actually does NOT work
+        await DbContext.Product.Where(d => d.DiscountId == discountId).LoadAsync();
+        DbContext.Discount.Remove(discount);
+        await DbContext.SaveChangesAsync();
+        await _activityService.LogActivityAsync<Discount>(
+            managerId,
+            OperationType.Delete,
+            $"removed a {percentage} discount with ID {discountId}.");
+
+        return ServiceResult.Success();
     }
 
     public Task<IReadOnlyCollection<DetailedDiscountDto>> FindAllDiscountsAsync()

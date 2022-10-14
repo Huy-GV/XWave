@@ -81,7 +81,7 @@ internal class CategoryService : ServiceBase, ICategoryService
         }
         catch
         {
-            return ServiceResult.DefaultFailure();
+            return ServiceResult.UnknownFailure();
         }
     }
 
@@ -132,7 +132,7 @@ internal class CategoryService : ServiceBase, ICategoryService
         }
         catch
         {
-            return ServiceResult.DefaultFailure();
+            return ServiceResult.UnknownFailure();
         }
     }
 }

@@ -19,7 +19,7 @@ public record ServiceResult
     ///     Helper method that returns an internal failure result with hard-coded message.
     /// </summary>
     /// <returns></returns>
-    public static ServiceResult DefaultFailure()
+    public static ServiceResult UnknownFailure()
     {
         return Failure(Error.UndefinedError());
     }

@@ -89,7 +89,7 @@ public class ProductController : ControllerBase
 
     [HttpPut("{id:int}/price")]
     [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
-    public async Task<ActionResult> UpdatePriceAsync(int id, [FromBody] ProductPriceAdjustmentViewModel viewModel)
+    public async Task<ActionResult> UpdatePriceAsync(int id, [FromBody] ProductPriceUpdateViewModel viewModel)
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = viewModel.Schedule is null
