@@ -7,7 +7,6 @@ using XWave.Core.DTOs.Customers;
 using XWave.Core.Models;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.ViewModels.Customers;
-using XWave.Web.Data;
 using XWave.Web.Utils;
 
 namespace XWave.Web.Controllers;
@@ -34,7 +33,7 @@ public class OrderController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _orderService.FindAllOrdersAsync(customerId);
 
-        return result.MapResult(Ok(result.Value));
+        return result.OnSuccess(Ok(result.Value));
     }
 
     [HttpGet("{id:int}")]
@@ -44,7 +43,7 @@ public class OrderController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _orderService.FindOrderByIdAsync(customerId, id);
         
-        return result.MapResult(Ok(result.Value));
+        return result.OnSuccess(Ok(result.Value));
     }
 
     [HttpPost]
@@ -58,6 +57,6 @@ public class OrderController : ControllerBase
         }
 
         var result = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
-        return result.MapResult(this.Created($"{this.ApiUrl()}/order/{result.Value}"));
+        return result.OnSuccess(this.Created($"{this.ApiUrl()}/order/{result.Value}"));
     }
 }
