@@ -45,6 +45,14 @@ public class StaffAccountController : ControllerBase
     }
 
     [HttpPost("{id}")]
+    public async Task<ActionResult<StaffAccountDto>> RegisterStaffAccount(string staffId, StaffAccountViewModel viewModel)
+    {
+        var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _staffAccountService.RegisterStaffAccount(staffId, managerId, viewModel);
+        return result.OnSuccess(Ok(result.Value));
+    }
+
+    [HttpPut("{id}")]
     public async Task<ActionResult<ServiceResult>> UpdateStaffAccount(
         string staffAccountId,
         StaffAccountViewModel staffAccountViewModel)

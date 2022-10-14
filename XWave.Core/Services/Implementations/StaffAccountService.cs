@@ -30,7 +30,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
     }
 
     public async Task<ServiceResult<string>> RegisterStaffAccount(
-        string id,
+        string staffId,
         string managerId,
         StaffAccountViewModel registerStaffViewModel)
     {
@@ -39,23 +39,26 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
             return ServiceResult<string>.Failure(_unauthorizedOperationError);
         }
 
-        try
+        var user = await _userManager.FindByIdAsync(staffId);
+        if (user is null) 
         {
-            DbContext.StaffAccount.Add(new StaffAccount
+            return ServiceResult<string>.Failure(new Error
             {
-                StaffId = id,
-                ImmediateManagerId = registerStaffViewModel.ImmediateManagerId,
-                ContractEndDate = registerStaffViewModel.ContractEndDate,
-                HourlyWage = registerStaffViewModel.HourlyWage
+                Message = $"User ID {staffId} not found",
+                Code = ErrorCode.EntityNotFound,
             });
+        }
 
-            await DbContext.SaveChangesAsync();
-            return ServiceResult<string>.Success(id);
-        }
-        catch (Exception)
+        DbContext.StaffAccount.Add(new StaffAccount
         {
-            return ServiceResult<string>.UnknownFailure();
-        }
+            StaffId = user.Id,
+            ImmediateManagerId = registerStaffViewModel.ImmediateManagerId,
+            ContractEndDate = registerStaffViewModel.ContractEndDate,
+            HourlyWage = registerStaffViewModel.HourlyWage
+        });
+
+        await DbContext.SaveChangesAsync();
+        return ServiceResult<string>.Success(user.Id);
     }
 
     public async Task<ServiceResult<StaffAccountDto>> GetStaffAccountById(string id, string managerId)
@@ -119,20 +122,13 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
             });
         }
 
-        try
-        {
-            DbContext.StaffAccount
-                .Update(staffAccount)
-                .CurrentValues
-                .SetValues(updateStaffAccountViewModel);
-            await DbContext.SaveChangesAsync();
+        DbContext.StaffAccount
+            .Update(staffAccount)
+            .CurrentValues
+            .SetValues(updateStaffAccountViewModel);
+        await DbContext.SaveChangesAsync();
 
-            return ServiceResult.Success();
-        }
-        catch
-        {
-            return ServiceResult.DefaultFailure();
-        }
+        return ServiceResult.Success();
     }
 
     public async Task<ServiceResult> DeactivateStaffAccount(string staffId, string managerId)
@@ -163,7 +159,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
 
         if (!lockoutResult.Succeeded || !lockoutEndDateResult.Succeeded || !resetPasswordResult.Succeeded)
         {
-            return ServiceResult.DefaultFailure();
+            return ServiceResult.UnknownFailure();
         }
 
         staffAccount.SoftDelete();

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.Models;
@@ -13,14 +14,17 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
 {
     private readonly IAuthenticationService _authenticationService;
     private readonly ILogger<CustomerAccountService> _logger;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public CustomerAccountService(
         XWaveDbContext dbContext,
         IAuthenticationService authenticationService,
-        ILogger<CustomerAccountService> logger) : base(dbContext)
+        ILogger<CustomerAccountService> logger,
+        UserManager<ApplicationUser> userManager) : base(dbContext)
     {
         _logger = logger;
         _authenticationService = authenticationService;
+        _userManager = userManager;
     }
 
     public async Task<ServiceResult<string>> RegisterCustomerAsync(RegisterCustomerViewModel viewModel)
@@ -100,7 +104,10 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
 
     public async Task<bool> CustomerAccountExists(string id)
     {
-        return await _authenticationService.UserExists(id) &&
-            await DbContext.CustomerAccount.AnyAsync(x => x.CustomerId == id);
+        var userExists = await _userManager.Users
+            .Select(x => x.Id)
+            .AnyAsync(x => x == id);
+
+        return userExists && await DbContext.CustomerAccount.AnyAsync(x => x.CustomerId == id);
     }
 }

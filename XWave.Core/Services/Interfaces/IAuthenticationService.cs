@@ -25,6 +25,4 @@ public interface IAuthenticationService
     /// <param name="registerUserViewModel">Viewmodel containing register credentials.</param>
     /// <returns>Service result containing the user name if registration is successful</returns>
     public Task<ServiceResult<string>> RegisterUserAsync(RegisterUserViewModel registerUserViewModel);
-
-    public Task<bool> UserExists(string userId);
 }

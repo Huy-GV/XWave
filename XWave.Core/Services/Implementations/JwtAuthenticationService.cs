@@ -84,12 +84,6 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
             Message = string.Join(", ", result.Errors)
         }); ;
     }
-
-    public async Task<bool> UserExists(string userId)
-    {
-        return await _userManager.FindByIdAsync(userId) is not null;
-    }
-
     private JwtSecurityToken CreateJwtToken(ApplicationUser user)
     {
         var claims = new[]
