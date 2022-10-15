@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using XWave.Core.Data;
+using XWave.Core.Data.Constants;
 using XWave.Core.Extension;
 using XWave.Core.Models;
 using XWave.Core.Services.Communication;
@@ -29,7 +30,7 @@ internal class CategoryService : ServiceBase, ICategoryService
 
     public async Task<ServiceResult<int>> AddCategoryAsync(string managerId, Category category)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedOperationError);
         }
@@ -53,7 +54,7 @@ internal class CategoryService : ServiceBase, ICategoryService
 
     public async Task<ServiceResult> DeleteCategoryAsync(string managerId, int id)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -102,7 +103,7 @@ internal class CategoryService : ServiceBase, ICategoryService
         int id, 
         Category updatedCategory)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }

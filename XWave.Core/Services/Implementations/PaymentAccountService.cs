@@ -109,7 +109,9 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 
     public async Task<ServiceResult<IReadOnlyCollection<PaymentAccount>>> FindAllTransactionDetailsForStaffAsync(string staffId)
     {
-        if (!await _authorizationService.IsUserInRole(staffId, Roles.Staff)) 
+        if (!await _authorizationService.IsUserInRoles(
+            staffId, 
+            new [] { Roles.Staff, Roles.Customer })) 
         {
             return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Failure(new Error 
             {

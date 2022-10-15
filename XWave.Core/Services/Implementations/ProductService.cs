@@ -529,7 +529,10 @@ internal class ProductService : ServiceBase, IProductService
     public async Task UpdateProductSaleStatusByScheduleAsync(int[] productIds, bool isDiscontinued,
         DateTime updateSchedule)
     {
-        var productsToUpdate = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
+        var productsToUpdate = await DbContext.Product
+            .Where(x => productIds.Contains(x.Id))
+            .ToListAsync();
+            
         DbContext.Product.UpdateRange(productsToUpdate.Select(x =>
         {
             x.IsDiscontinued = isDiscontinued;
@@ -542,7 +545,6 @@ internal class ProductService : ServiceBase, IProductService
 
     private async Task<bool> IsStaffIdValid(string userId)
     {
-        var roles = await _authorizationService.GetRolesByUserId(userId);
-        return roles.Intersect(staffRoles).Any();
+        return await _authorizationService.IsUserInRoles(userId, Roles.InternalPersonnelRoles);
     }
 }

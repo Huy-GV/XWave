@@ -39,4 +39,11 @@ internal class AuthorizationService : IAuthorizationService
     {
         return (await GetRolesByUserId(userId)).Contains(role);
     }
+
+    public async Task<bool> IsUserInRoles(string userId, IEnumerable<string> roles)
+    {
+        return (await GetRolesByUserId(userId))
+            .Intersect(roles)
+            .Any();
+    }
 }

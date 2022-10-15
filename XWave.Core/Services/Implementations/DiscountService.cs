@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
+using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Management;
 using XWave.Core.Extension;
 using XWave.Core.Models;
@@ -41,7 +42,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         string managerId,
         DiscountViewModel discountViewModel)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedOperationError);
         }
@@ -69,7 +70,7 @@ internal class DiscountService : ServiceBase, IDiscountService
 
     public async Task<ServiceResult> RemoveDiscountAsync(string managerId, int discountId)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -121,7 +122,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         int discountId,
         DiscountViewModel updatedDiscountViewModel)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -152,7 +153,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         int discountId,
         IEnumerable<int> productIds)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -202,7 +203,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         int discountId,
         IEnumerable<int> productIds)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Data.Constants.Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }

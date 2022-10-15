@@ -7,4 +7,6 @@ public interface IAuthorizationService
     Task<string[]> GetRolesByUserId(string userId);
 
     Task<bool> IsUserInRole(string userId, string role);
+
+    Task<bool> IsUserInRoles(string userId, IEnumerable<string> roles);
 }

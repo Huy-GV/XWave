@@ -194,7 +194,7 @@ internal class OrderService : ServiceBase, IOrderService
                 Id = o.Id,
                 OrderDate = o.Date,
                 AccountNo = o.Payment.AccountNumber,
-                Provider = o.Payment.AccountNumber,
+                Provider = o.Payment.Provider,
                 ProductPurchaseDetails = o
                     .OrderDetails
                     .Select(od => new ProductPurchaseDetailsDto
