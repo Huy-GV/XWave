@@ -2,9 +2,9 @@
 
 public record OrderDto
 {
-    public IEnumerable<ProductPurchaseDetailsDto> ProductPurchaseDetails { get; set; } = Enumerable.Empty<ProductPurchaseDetailsDto>();
-    public DateTime OrderDate { get; set; }
-    public string AccountNo { get; set; } = string.Empty;
-    public string Provider { get; set; } = string.Empty;
-    public int Id { get; set; }
+    public IEnumerable<ProductPurchaseDetailsDto> ProductPurchaseDetails { get; init; } = Enumerable.Empty<ProductPurchaseDetailsDto>();
+    public DateTime OrderDate { get; init; }
+    public string AccountNo { get; init; } = string.Empty;
+    public string Provider { get; init; } = string.Empty;
+    public int Id { get; init; }
 }

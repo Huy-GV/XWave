@@ -2,7 +2,7 @@
 
 public record ActivityLogDto
 {
-    public int Id { get; set; }
-    public string InfoText { get; set; } = string.Empty;
-    public DateTime Timestamp { get; set; }
+    public int Id { get; init; }
+    public string InfoText { get; init; } = string.Empty;
+    public DateTime Timestamp { get; init; }
 }

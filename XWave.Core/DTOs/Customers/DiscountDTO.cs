@@ -2,6 +2,6 @@
 
 public record DiscountDto
 {
-    public uint Percentage { get; set; }
-    public DateTime EndDate { get; set; }
+    public uint Percentage { get; init; }
+    public DateTime EndDate { get; init; }
 }

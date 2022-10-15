@@ -8,7 +8,7 @@ public record DetailedProductDto
     public bool IsDiscontinued { get; init; } = false;
     public decimal Price { get; init; }
     public uint Quantity { get; init; }
-    public DateTime? LatestRestock { get; set; }
+    public DateTime? LatestRestock { get; init; }
     public int CategoryId { get; init; }
     public DetailedDiscountDto? Discount { get; init; }
 }

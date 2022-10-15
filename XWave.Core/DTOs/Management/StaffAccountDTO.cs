@@ -2,10 +2,10 @@
 
 public record StaffAccountDto
 {
-    public string StaffId { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public DateTime ContractStartDate { get; set; }
-    public DateTime ContractEndDate { get; set; }
+    public string StaffId { get; init; } = string.Empty;
+    public string FullName { get; init; } = string.Empty;
+    public DateTime ContractStartDate { get; init; }
+    public DateTime ContractEndDate { get; init; }
 
     public int RemainingDaysInContract
     {
@@ -17,6 +17,6 @@ public record StaffAccountDto
         }
     }
 
-    public uint HourlyWage { get; set; }
-    public string ImmediateManagerFullName { get; set; } = string.Empty;
+    public uint HourlyWage { get; init; }
+    public string ImmediateManagerFullName { get; init; } = string.Empty;
 }
