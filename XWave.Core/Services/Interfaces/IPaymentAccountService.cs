@@ -15,12 +15,9 @@ public interface IPaymentAccountService
 
     Task<ServiceResult<IReadOnlyCollection<PaymentAccount>>> FindAllTransactionDetailsForStaffAsync(string staffId);
 
-    /// <summary>
-    /// Find the summarized usage history of a payment account.
-    /// </summary>
-    /// <param name="customerId">ID of the payment account owner.</param>
-    /// <returns>An enumerable of <see cref="PaymentAccountUsageDto"/> which contains account usage information.</returns>
-    Task<ServiceResult<IReadOnlyCollection<PaymentAccountUsageDto>>> FindPaymentAccountSummary(string customerId);
+    Task<ServiceResult<IReadOnlyCollection<PaymentAccountUsageDto>>> FindAllPaymentAccountsAsync(string customerId);
+
+    Task<ServiceResult<PaymentAccountUsageDto>> FindPaymentAccountAsync(int paymentAccountId, string customerId);
 
     Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentId);
 

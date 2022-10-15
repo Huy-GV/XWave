@@ -12,7 +12,7 @@ using XWave.Web.Utils;
 
 namespace XWave.Web.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/payment-account")]
 [ApiController]
 public class PaymentAccountController : ControllerBase
 {
@@ -27,7 +27,7 @@ public class PaymentAccountController : ControllerBase
         _authenticationHelper = authenticationHelper;
     }
 
-    [HttpGet]
+    [HttpGet("private")]
     [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
     public async Task<ActionResult> Get()
     {
@@ -37,12 +37,22 @@ public class PaymentAccountController : ControllerBase
         return result.OnSuccess(Ok(result.Value));
     }
 
-    [HttpGet("usage")]
+    [HttpGet()]
     [Authorize(Roles = nameof(Roles.Customer))]
-    public async Task<ActionResult<IEnumerable<PaymentAccountDetails>>> GetByCustomer()
+    public async Task<ActionResult<IEnumerable<PaymentAccountDetails>>> GetAllForCustomer()
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        var result = await _paymentService.FindPaymentAccountSummary(customerId);
+        var result = await _paymentService.FindAllPaymentAccountsAsync(customerId);
+
+        return result.OnSuccess(Ok(result.Value));
+    }
+
+    [HttpGet("id:int")]
+    [Authorize(Roles = nameof(Roles.Customer))]
+    public async Task<ActionResult<IEnumerable<PaymentAccountDetails>>> GetByIdForCustomer(int id)
+    {
+        var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _paymentService.FindPaymentAccountAsync(id, customerId);
 
         return result.OnSuccess(Ok(result.Value));
     }

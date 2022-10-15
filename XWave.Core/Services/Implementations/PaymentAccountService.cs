@@ -33,7 +33,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         string customerId,
         PaymentAccountViewModel inputPayment)
     {
-        if (! await _authorizationService.IsUserInRole(customerId, Roles.Customer)) 
+        if (!await _authorizationService.IsUserInRole(customerId, Roles.Customer)) 
         {
             return ServiceResult<int>.Failure(new Error 
             {
@@ -78,7 +78,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 
     public async Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentAccountId)
     {
-        if (! await _authorizationService.IsUserInRole(customerId, Roles.Customer)) 
+        if (!await _authorizationService.IsUserInRole(customerId, Roles.Customer)) 
         {
             return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error 
             {
@@ -90,21 +90,13 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
             .Include(x => x.PaymentAccountDetails)
             .FirstOrDefaultAsync(x => x.PaymentAccountDetails.PaymentAccountId == paymentAccountId);
 
-        if (paymentAccountToRemove is null)
+        if (paymentAccountToRemove is null || 
+            paymentAccountToRemove.PaymentAccountDetails.CustomerId != customerId)
         {
             return ServiceResult.Failure(new Error
             {
                 Code = ErrorCode.EntityNotFound,
                 Message = $"Payment account for customer ID {customerId} not found.",
-            });
-        }
-
-        if (paymentAccountToRemove.PaymentAccountDetails.CustomerId != customerId)
-        { 
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.AuthenticationError,
-                Message = $"Payment account ID {paymentAccountId} does not belong to customer ID {customerId}.",
             });
         }
 
@@ -117,7 +109,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 
     public async Task<ServiceResult<IReadOnlyCollection<PaymentAccount>>> FindAllTransactionDetailsForStaffAsync(string staffId)
     {
-        if (! await _authorizationService.IsUserInRole(staffId, Roles.Staff)) 
+        if (!await _authorizationService.IsUserInRole(staffId, Roles.Staff)) 
         {
             return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Failure(new Error 
             {
@@ -142,7 +134,9 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         var paymentAccount = await DbContext.PaymentAccount
             .Include(x => x.PaymentAccountDetails)
             .FirstOrDefaultAsync(x => x.PaymentAccountDetails.PaymentAccountId == paymentAccountId);
-        if (paymentAccount is null)
+
+        if (paymentAccount is null ||
+            paymentAccount.PaymentAccountDetails.CustomerId != customerId)
         {
             return ServiceResult.Failure(new Error
             {
@@ -151,16 +145,10 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
             });
         }
 
-        if (paymentAccount.PaymentAccountDetails.CustomerId != customerId)
-        { 
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.AuthenticationError,
-                Message = $"Payment account ID {paymentAccountId} does not belong to customer ID {customerId}.",
-            });
-        }
-
-        DbContext.Update(paymentAccount).CurrentValues.SetValues(updatedPayment);
+        DbContext.PaymentAccount
+            .Update(paymentAccount)
+            .CurrentValues
+            .SetValues(updatedPayment);
         await DbContext.SaveChangesAsync();
 
         return ServiceResult.Success();
@@ -179,9 +167,9 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
                 (x.Payment.ExpiryDate > DateTime.Now || includeExpiredAccounts));
     }
 
-    public async Task<ServiceResult<IReadOnlyCollection<PaymentAccountUsageDto>>> FindPaymentAccountSummary(string customerId)
+    public async Task<ServiceResult<IReadOnlyCollection<PaymentAccountUsageDto>>> FindAllPaymentAccountsAsync(string customerId)
     {
-        if (! await _customerAccountService.CustomerAccountExists(customerId))
+        if (!await _customerAccountService.CustomerAccountExists(customerId))
         {
             return ServiceResult<IReadOnlyCollection<PaymentAccountUsageDto>>.Failure(new Error
             {
@@ -228,12 +216,51 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
                     ? totalSpendingByPaymentAccount[p.Id].TotalSpending
                     : 0,
                 PurchaseCount = purchasesByPaymentAccount.ContainsKey(p.Id)
-                    ? (ushort)purchasesByPaymentAccount[p.Id].PurchaseCount
-                    : (ushort)0
+                    ? purchasesByPaymentAccount[p.Id].PurchaseCount
+                    : 0
                 
             })
             .ToListAsync();
 
+        // TODO: FIX find function returning 0 TotalSpending even when there are purchases
         return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Success(paymentAccounts.AsIReadonlyCollection());
+    }
+
+    public async Task<ServiceResult<PaymentAccountUsageDto>> FindPaymentAccountAsync(int paymentAccountId, string customerId)
+    {
+        var paymentAccount = await DbContext.PaymentAccount
+            .Include(x => x.PaymentAccountDetails)
+            .FirstOrDefaultAsync(x => x.PaymentAccountDetails.PaymentAccountId == paymentAccountId);
+
+        if (paymentAccount is null ||
+            paymentAccount.PaymentAccountDetails.CustomerId != customerId)
+        {
+            return ServiceResult<PaymentAccountUsageDto>.Failure(new Error
+            {
+                Code = ErrorCode.EntityNotFound,
+                Message = $"Payment account ID {paymentAccountId} not found.",
+            });
+        }
+
+        var purchasesByCustomer = await DbContext.Order
+            .Include(o => o.OrderDetails)
+            .Where(o => o.CustomerId == customerId &&
+                    o .PaymentAccountId == paymentAccount.Id)
+            .OrderByDescending(o => o.Date)
+            .ToArrayAsync();
+
+        var totalSpendingOfPaymentAccount = purchasesByCustomer
+            .Sum(x => x.OrderDetails.Sum(od => od.Quantity * od.PriceAtOrder));
+
+        var paymentAccountDto = new PaymentAccountUsageDto()
+        {
+            Provider = paymentAccount.Provider,
+            AccountNumber = paymentAccount.AccountNumber,
+            LatestPurchase = purchasesByCustomer.FirstOrDefault()?.Date,
+            TotalSpending = totalSpendingOfPaymentAccount,
+            PurchaseCount = purchasesByCustomer.Length,
+        };
+
+        return ServiceResult<PaymentAccountUsageDto>.Success(paymentAccountDto);
     }
 }
