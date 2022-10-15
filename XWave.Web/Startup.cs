@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Hangfire;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using XWave.Core.Configuration;
 using XWave.Core.Data.Constants;
@@ -90,6 +92,16 @@ public class Startup
 
         services.AddScoped<RoleAuthorizationMiddleware>();
         services.AddDatabaseDeveloperPageExceptionFilter();
+        services.AddSwaggerGen(config =>
+        {
+            config.SwaggerDoc(
+                "v1", 
+                new OpenApiInfo 
+                { 
+                    Title = "XWave API", 
+                    Version = "v1",
+                });
+        });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -100,6 +112,12 @@ public class Startup
             app.UseDeveloperExceptionPage();
             app.UseMigrationsEndPoint();
             app.UseHangfireDashboard();
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "XWAVE.v1");
+                options.RoutePrefix = "";
+            });
         }
         else
         {

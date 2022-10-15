@@ -47,7 +47,7 @@ public class PaymentAccountController : ControllerBase
         return result.OnSuccess(Ok(result.Value));
     }
 
-    [HttpGet("id:int")]
+    [HttpGet("{id:int}")]
     [Authorize(Roles = nameof(Roles.Customer))]
     public async Task<ActionResult<IEnumerable<PaymentAccountDetails>>> GetByIdForCustomer(int id)
     {
