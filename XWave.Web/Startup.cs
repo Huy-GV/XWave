@@ -87,7 +87,7 @@ public class Startup
         services.AddAuthorization(options =>
         {
             options.AddPolicy(Policies.InternalPersonnelOnly,
-                policy => policy.RequireRole(Roles.Staff, Roles.Manager));
+                policy => policy.RequireRole(RoleNames.Staff, RoleNames.Manager));
         });
 
         services.AddScoped<RoleAuthorizationMiddleware>();

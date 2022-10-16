@@ -33,7 +33,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         string customerId,
         PaymentAccountViewModel inputPayment)
     {
-        if (!await _authorizationService.IsUserInRole(customerId, Roles.Customer)) 
+        if (!await _authorizationService.IsUserInRole(customerId, RoleNames.Customer)) 
         {
             return ServiceResult<int>.Failure(new Error 
             {
@@ -78,7 +78,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 
     public async Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentAccountId)
     {
-        if (!await _authorizationService.IsUserInRole(customerId, Roles.Customer)) 
+        if (!await _authorizationService.IsUserInRole(customerId, RoleNames.Customer)) 
         {
             return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error 
             {
@@ -111,7 +111,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
     {
         if (!await _authorizationService.IsUserInRoles(
             staffId, 
-            new [] { Roles.Staff, Roles.Customer })) 
+            new [] { RoleNames.Staff, RoleNames.Customer })) 
         {
             return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Failure(new Error 
             {

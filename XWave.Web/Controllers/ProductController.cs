@@ -104,7 +104,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> DeleteAsync(int id)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -113,7 +113,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpPut("discontinue/{updateSchedule}")]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> DiscontinueProductAsync([FromBody] int[] ids, DateTime updateSchedule)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -122,7 +122,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpPut("{id:int}/restart-sale/{updateSchedule:datetime}")]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> RestartProductSaleAsync(int id, DateTime updateSchedule)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -131,7 +131,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpDelete("{id}/cancel")]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> CancelBackgroundTaskAsync(string id)
     {
         var result = await _backgroundJobService.CancelJobAsync(id);

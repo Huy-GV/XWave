@@ -27,7 +27,7 @@ public class OrderController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = nameof(Roles.Customer))]
+    [Authorize(Roles = nameof(RoleNames.Customer))]
     public async Task<ActionResult<OrderDetails>> GetOrdersAsync()
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -37,7 +37,7 @@ public class OrderController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    [Authorize(Roles = nameof(Roles.Customer))]
+    [Authorize(Roles = nameof(RoleNames.Customer))]
     public async Task<ActionResult<OrderDto>> GetOrderById(int id)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -47,7 +47,7 @@ public class OrderController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = nameof(Roles.Customer))]
+    [Authorize(Roles = nameof(RoleNames.Customer))]
     public async Task<IActionResult> CreateOrder([FromBody] PurchaseViewModel purchaseViewModel)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);

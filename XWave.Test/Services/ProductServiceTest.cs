@@ -250,10 +250,10 @@ public class ProductServiceTest : BaseTest
             100,
             Gen.OneOf(new[]
             {
-                Gen.Constant(Roles.Customer),
+                Gen.Constant(RoleNames.Customer),
                 Arb.Default.String().Generator,
             }))
-            .Where(x => !x.Intersect(new[] { Roles.Staff, Roles.Manager })
+            .Where(x => !x.Intersect(new[] { RoleNames.Staff, RoleNames.Manager })
             .Any())
         .ToArbitrary();
     }
@@ -264,11 +264,11 @@ public class ProductServiceTest : BaseTest
             100,
             Gen.OneOf(new[]
             {
-                Gen.Constant(Roles.Staff),
-                Gen.Constant(Roles.Customer),
+                Gen.Constant(RoleNames.Staff),
+                Gen.Constant(RoleNames.Customer),
                 Arb.Default.String().Generator,
             }))
-            .Where(x => !x.Contains(Roles.Manager))
+            .Where(x => !x.Contains(RoleNames.Manager))
         .ToArbitrary();
     }
 }

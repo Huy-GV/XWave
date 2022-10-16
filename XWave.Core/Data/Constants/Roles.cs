@@ -1,9 +1,9 @@
 namespace XWave.Core.Data.Constants;
 
-public static class Roles
+public static class RoleNames
 {
-    public const string Manager = "Manager";
-    public const string Staff = "Staff";
-    public const string Customer = "Customer";
+    public const string Manager = nameof(Manager);
+    public const string Staff = nameof(Staff);
+    public const string Customer = nameof(Customer);
     public static readonly string[] InternalPersonnelRoles = new [] { Staff, Manager };
 }

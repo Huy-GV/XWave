@@ -40,7 +40,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> CreateAsync([FromBody] Category newCategory)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -50,7 +50,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> UpdateAsync(int id, [FromBody] Category updatedCategory)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -60,7 +60,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> Delete(int id)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);

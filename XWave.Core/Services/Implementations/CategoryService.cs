@@ -30,7 +30,7 @@ internal class CategoryService : ServiceBase, ICategoryService
 
     public async Task<ServiceResult<int>> AddCategoryAsync(string managerId, Category category)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedOperationError);
         }
@@ -54,7 +54,7 @@ internal class CategoryService : ServiceBase, ICategoryService
 
     public async Task<ServiceResult> DeleteCategoryAsync(string managerId, int id)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -103,7 +103,7 @@ internal class CategoryService : ServiceBase, ICategoryService
         int id, 
         Category updatedCategory)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }

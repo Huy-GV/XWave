@@ -42,7 +42,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         string managerId,
         DiscountViewModel discountViewModel)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedOperationError);
         }
@@ -70,7 +70,7 @@ internal class DiscountService : ServiceBase, IDiscountService
 
     public async Task<ServiceResult> RemoveDiscountAsync(string managerId, int discountId)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -122,7 +122,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         int discountId,
         DiscountViewModel updatedDiscountViewModel)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -153,7 +153,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         int discountId,
         IEnumerable<int> productIds)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -168,7 +168,10 @@ internal class DiscountService : ServiceBase, IDiscountService
             });
         }
 
-        var appliedProducts = await DbContext.Product.Where(x => productIds.Contains(x.Id)).ToListAsync();
+        var appliedProducts = await DbContext.Product
+            .Where(x => productIds.Contains(x.Id))
+            .ToListAsync();
+            
         var missingProductIds = productIds.Except(appliedProducts.Select(x => x.Id));
 
         if (missingProductIds.Any())
@@ -203,7 +206,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         int discountId,
         IEnumerable<int> productIds)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }

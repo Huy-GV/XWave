@@ -113,7 +113,7 @@ internal class ActivityService : ServiceBase, IActivityService
     private async Task<bool> IsStaffIdValid(string userId)
     {
         var roles = await _authorizationService.GetRolesByUserId(userId);
-        return roles.Intersect(new [] { Roles.Manager, Roles.Staff }).Any();
+        return roles.Intersect(new [] { RoleNames.Manager, RoleNames.Staff }).Any();
     }
 
     private static string CreateInfoText(ApplicationUser? user, string infoText)

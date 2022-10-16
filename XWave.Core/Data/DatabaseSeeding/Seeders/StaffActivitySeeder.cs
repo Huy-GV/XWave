@@ -23,12 +23,7 @@ internal class StaffActivitySeeder
         catch (Exception ex)
         {
             var logger = serviceProvider.GetRequiredService<ILogger<StaffActivitySeeder>>();
-            logger.LogError(ex, "An error occurred while seeding staff activities");
-            logger.LogError(ex.Message);
-        }
-        finally
-        {
-            context.Database.CloseConnection();
+            logger.LogError("An error occurred while seeding staff activities");
         }
     }
 
@@ -36,8 +31,8 @@ internal class StaffActivitySeeder
         XWaveDbContext dbContext,
         UserManager<ApplicationUser> userManager)
     {
-        var staff = await userManager.GetUsersInRoleAsync(Roles.Staff);
-        var managers = await userManager.GetUsersInRoleAsync(Roles.Staff);
+        var staff = await userManager.GetUsersInRoleAsync(RoleNames.Staff);
+        var managers = await userManager.GetUsersInRoleAsync(RoleNames.Staff);
 
         if (staff.Count < 2 || managers.Count < 1) throw new Exception("Insufficient staff or manager");
 

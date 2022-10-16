@@ -21,7 +21,7 @@ internal class ProductService : ServiceBase, IProductService
     private readonly ProductDtoMapper _productDtoMapper;
     private readonly IAuthorizationService _authorizationService;
 
-    private readonly string[] staffRoles = new[] { Roles.Staff, Roles.Manager };
+    private readonly string[] staffRoles = new[] { RoleNames.Staff, RoleNames.Manager };
 
     private readonly Error _unauthorizedError = new()
     {
@@ -88,7 +88,7 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> DeleteProductAsync(int productId, string managerId)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -390,7 +390,7 @@ internal class ProductService : ServiceBase, IProductService
         int[] productIds,
         DateTime updateSchedule)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -452,7 +452,7 @@ internal class ProductService : ServiceBase, IProductService
 
     public async Task<ServiceResult> RestartProductSaleAsync(string managerId, int productId, DateTime updateSchedule)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, Roles.Manager))
+        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -545,6 +545,6 @@ internal class ProductService : ServiceBase, IProductService
 
     private async Task<bool> IsStaffIdValid(string userId)
     {
-        return await _authorizationService.IsUserInRoles(userId, Roles.InternalPersonnelRoles);
+        return await _authorizationService.IsUserInRoles(userId, RoleNames.InternalPersonnelRoles);
     }
 }

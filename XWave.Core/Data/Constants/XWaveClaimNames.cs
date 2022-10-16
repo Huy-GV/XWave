@@ -2,5 +2,5 @@
 
 public static class XWaveClaimNames
 {
-    public const string UserId = "UserId";
+    public const string UserId = nameof(UserId);
 }

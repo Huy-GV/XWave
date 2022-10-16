@@ -45,10 +45,6 @@ internal class PurchaseRelatedDataSeeder
             var logger = serviceProvider.GetRequiredService<ILogger<PurchaseRelatedDataSeeder>>();
             logger.LogError(ex, "An error occurred while seeding purchase data");
         }
-        finally
-        {
-            context.Database.CloseConnection();
-        }
     }
 
     private static List<PaymentAccount> CreatePaymentAccounts(XWaveDbContext dbContext)

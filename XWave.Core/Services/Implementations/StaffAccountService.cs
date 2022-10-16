@@ -89,7 +89,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
                 .Failure(_unauthorizedOperationError);
         }
 
-        var staffUsers = await _userManager.GetUsersInRoleAsync(Roles.Staff);
+        var staffUsers = await _userManager.GetUsersInRoleAsync(RoleNames.Staff);
         var staffAccountDtos = await Task.WhenAll(staffUsers
             .Select(async x => await MapStaffAccountDtoOrDefault(x)));
             
@@ -170,8 +170,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
 
     private async Task<bool> IsManagerIdValid(string userId)
     {
-        var roles = await _authorizationService.GetRolesByUserId(userId);
-        return roles.FirstOrDefault() == Roles.Manager;
+        return await _authorizationService.IsUserInRole(userId, RoleNames.Manager);
     }
 
     private async Task<StaffAccountDto?> MapStaffAccountDtoOrDefault(ApplicationUser? staffUser)

@@ -28,14 +28,13 @@ internal class UserSeeder
         catch (Exception ex)
         {
             var logger = serviceProvider.GetRequiredService<ILogger<UserSeeder>>();
-            logger.LogError(ex, "An error occurred while seeding roles and users");
-            logger.LogError(ex.Message);
+            logger.LogError("An error occurred while seeding roles and users");
         }
     }
 
     private static async Task CreateRolesAsync(RoleManager<IdentityRole> roleManager)
     {
-        var roles = new[] { Roles.Customer, Roles.Manager, Roles.Staff };
+        var roles = new[] { RoleNames.Customer, RoleNames.Manager, RoleNames.Staff };
         foreach (var role in roles)
             if (!await roleManager.RoleExistsAsync(role))
                 await roleManager.CreateAsync(new IdentityRole(role));
@@ -74,7 +73,7 @@ internal class UserSeeder
         var result = await userManager.CreateAsync(user, "Password123@@");
         if (result.Succeeded)
         {
-            await userManager.AddToRoleAsync(user, Roles.Customer);
+            await userManager.AddToRoleAsync(user, RoleNames.Customer);
             dbContext.CustomerAccount.Add(new CustomerAccount
             {
                 CustomerId = user.Id,
@@ -111,7 +110,7 @@ internal class UserSeeder
         ApplicationUser staff)
     {
         await userManager.CreateAsync(staff, "Password123@@");
-        await userManager.AddToRoleAsync(staff, Roles.Staff);
+        await userManager.AddToRoleAsync(staff, RoleNames.Staff);
     }
 
     private static async Task CreateManagersAsync(
@@ -144,6 +143,6 @@ internal class UserSeeder
         UserManager<ApplicationUser> userManager)
     {
         await userManager.CreateAsync(manager, "Password123@@");
-        await userManager.AddToRoleAsync(manager, Roles.Manager);
+        await userManager.AddToRoleAsync(manager, RoleNames.Manager);
     }
 }

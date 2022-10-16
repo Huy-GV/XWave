@@ -14,7 +14,7 @@ namespace XWave.Web.Controllers;
 
 [Route("api/staff-account")]
 [ApiController]
-[Authorize(Roles = nameof(Roles.Manager))]
+[Authorize(Roles = nameof(RoleNames.Manager))]
 public class StaffAccountController : ControllerBase
 {
     private readonly IStaffAccountService _staffAccountService;

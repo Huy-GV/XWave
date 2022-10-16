@@ -50,7 +50,7 @@ public class DiscountController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> CreateAsync([FromBody] DiscountViewModel newDiscount)
     {
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -61,7 +61,7 @@ public class DiscountController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> UpdateAsync(int id, [FromBody] DiscountViewModel updatedDiscount)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -71,7 +71,7 @@ public class DiscountController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> Delete(int id)
     { 
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -80,7 +80,7 @@ public class DiscountController : ControllerBase
     }
 
     [HttpPost("{id:int}/apply")]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> ApplyDiscountToProduct(int id, [FromBody] int[] productIds)
     {
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -94,7 +94,7 @@ public class DiscountController : ControllerBase
     }
 
     [HttpPost("{id}/remove")]
-    [Authorize(Roles = nameof(Roles.Manager))]
+    [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> RemoveDiscountFromProducts(int id, [FromBody] int[] productIds)
     {
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);

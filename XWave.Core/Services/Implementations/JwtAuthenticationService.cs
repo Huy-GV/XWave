@@ -78,11 +78,14 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
             return ServiceResult<string>.Success(registerUserViewModel.UserName);
         }
 
+        var errorMessage = string.Join(
+            "\n", 
+            result.Errors.Select(x => $"[{x.Code}] {x.Description}"));
         return ServiceResult<string>.Failure(new Error
         {
             Code = ErrorCode.Undefined,
-            Message = string.Join(", ", result.Errors)
-        }); ;
+            Message = errorMessage,
+        });
     }
     private JwtSecurityToken CreateJwtToken(ApplicationUser user)
     {

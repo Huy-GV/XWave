@@ -9,8 +9,6 @@ namespace XWave.Core.Data.DatabaseSeeding.Seeders;
 
 internal class ProductRelatedDataSeeder
 {
-    private static string SetIdentityInsertQuery(bool status, string tableName) => $"SET IDENTITY_INSERT dbo.{tableName} {(status ? "ON" : "OFF")}";
-
     public static void SeedData(IServiceProvider serviceProvider)
     {
         using var context = new XWaveDbContext(
@@ -29,11 +27,6 @@ internal class ProductRelatedDataSeeder
         {
             var logger = serviceProvider.GetRequiredService<ILogger<ProductRelatedDataSeeder>>();
             logger.LogError("An error occurred while seeding product related data");
-            logger.LogDebug(ex.Message, ex);
-        }
-        finally
-        {
-            context.Database.CloseConnection();
         }
     }
 

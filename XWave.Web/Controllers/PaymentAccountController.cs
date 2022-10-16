@@ -38,7 +38,7 @@ public class PaymentAccountController : ControllerBase
     }
 
     [HttpGet()]
-    [Authorize(Roles = nameof(Roles.Customer))]
+    [Authorize(Roles = nameof(RoleNames.Customer))]
     public async Task<ActionResult<IEnumerable<PaymentAccountDetails>>> GetAllForCustomer()
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -48,7 +48,7 @@ public class PaymentAccountController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    [Authorize(Roles = nameof(Roles.Customer))]
+    [Authorize(Roles = nameof(RoleNames.Customer))]
     public async Task<ActionResult<IEnumerable<PaymentAccountDetails>>> GetByIdForCustomer(int id)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -58,7 +58,7 @@ public class PaymentAccountController : ControllerBase
     }
 
     [HttpPost("delete/{paymentId:int}")]
-    [Authorize(Roles = nameof(Roles.Customer))]
+    [Authorize(Roles = nameof(RoleNames.Customer))]
     public async Task<ActionResult> Delete(int paymentId)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -68,7 +68,7 @@ public class PaymentAccountController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Roles = nameof(Roles.Customer))]
+    [Authorize(Roles = nameof(RoleNames.Customer))]
     public async Task<ActionResult> UpdatePaymentAccountAsync(int id, [FromBody] PaymentAccountViewModel viewModel)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
@@ -79,7 +79,7 @@ public class PaymentAccountController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = nameof(Roles.Customer))]
+    [Authorize(Roles = nameof(RoleNames.Customer))]
     public async Task<ActionResult> CreatePaymentAsync([FromBody] PaymentAccountViewModel inputPayment)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);

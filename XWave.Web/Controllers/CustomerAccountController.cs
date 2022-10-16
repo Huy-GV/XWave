@@ -30,7 +30,7 @@ public class CustomerAccountController : ControllerBase
     }
 
     [HttpPost("register/customer")]
-    [Authorize(Roles = nameof(Roles.Customer))]
+    [Authorize(Roles = nameof(RoleNames.Customer))]
     public async Task<ActionResult<ServiceResult<string>>> RegisterCustomerAsync(
         [FromBody] RegisterCustomerViewModel viewModel)
     {
@@ -52,7 +52,7 @@ public class CustomerAccountController : ControllerBase
     }
 
     [HttpPost("subscribe")]
-    [Authorize(Roles = nameof(Roles.Customer))]
+    [Authorize(Roles = nameof(RoleNames.Customer))]
     public async Task<ActionResult<ServiceResult>> UpdatePromotionSubscriptionAsync([FromBody] bool isSubscribed = true)
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
