@@ -209,6 +209,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
             .Where(p => p.PaymentAccountDetails.CustomerId == customerId)
             .Select(p => new PaymentAccountUsageDto
             {
+                Id = p.Id,
                 Provider = p.Provider,
                 AccountNumber = p.AccountNumber,
                 LatestPurchase = purchasesByPaymentAccount.ContainsKey(p.Id)
@@ -256,6 +257,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 
         var paymentAccountDto = new PaymentAccountUsageDto()
         {
+            Id = paymentAccountId,
             Provider = paymentAccount.Provider,
             AccountNumber = paymentAccount.AccountNumber,
             LatestPurchase = purchasesByCustomer.FirstOrDefault()?.Date,

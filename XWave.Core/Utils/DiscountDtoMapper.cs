@@ -19,6 +19,7 @@ public static class DiscountDtoMapper
     {
         return new()
         {
+            Id = discount.Id,
             StartDate = discount.StartDate,
             EndDate = discount.EndDate,
             Percentage = discount.Percentage

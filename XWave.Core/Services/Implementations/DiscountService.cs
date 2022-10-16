@@ -102,8 +102,8 @@ internal class DiscountService : ServiceBase, IDiscountService
     public Task<IReadOnlyCollection<DetailedDiscountDto>> FindAllDiscountsAsync()
     {
         var discounts = DbContext.Discount
-            .AsEnumerable()
             .Select(d => DiscountDtoMapper.MapDetailedDiscountDto(d))
+            .AsEnumerable()
             .OrderBy(d => d.IsActive)
             .ToList()
             .AsIReadonlyCollection();
@@ -137,8 +137,10 @@ internal class DiscountService : ServiceBase, IDiscountService
             });
         }
 
-        var entry = DbContext.Discount.Update(discount);
-        entry.CurrentValues.SetValues(updatedDiscountViewModel);
+        DbContext.Discount
+            .Update(discount)
+            .CurrentValues
+            .SetValues(updatedDiscountViewModel);
         await DbContext.SaveChangesAsync();
         await _activityService.LogActivityAsync<Discount>(
             managerId,
