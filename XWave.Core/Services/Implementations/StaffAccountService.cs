@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Management;
@@ -63,15 +64,18 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
 
     public async Task<ServiceResult<StaffAccountDto>> GetStaffAccountById(string id, string managerId)
     {
-        if (! await IsManagerIdValid(managerId)) 
+        if (!await IsManagerIdValid(managerId)) 
         {
             return ServiceResult<StaffAccountDto>.Failure(_unauthorizedOperationError);
         }
         
         var staffUser = await _userManager.FindByIdAsync(id);
-        var staffAccountDto = await MapStaffAccountDtoOrDefault(staffUser);
-        if (staffAccountDto is not null)
+        var staffAccount = await DbContext.StaffAccount.FindAsync(id);
+        if (staffAccount is not null && 
+            staffUser is not null &&
+            await _authorizationService.IsUserInRole(id, RoleNames.Staff))
         {
+            var staffAccountDto = await MapStaffAccountDto(staffUser, staffAccount);
             return ServiceResult<StaffAccountDto>.Success(staffAccountDto);
         };
 
@@ -85,21 +89,23 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
     {
         if (! await IsManagerIdValid(managerId)) 
         {
+            Console.WriteLine("CHECK ROLE");
             return ServiceResult<IReadOnlyCollection<StaffAccountDto>>
                 .Failure(_unauthorizedOperationError);
         }
 
         var staffUsers = await _userManager.GetUsersInRoleAsync(RoleNames.Staff);
-        var staffAccountDtos = await Task.WhenAll(staffUsers
-            .Select(async x => await MapStaffAccountDtoOrDefault(x)));
+        var staffUserIds = staffUsers.Select(x => x.Id).ToArray();
+        var staffAccounts = await DbContext.StaffAccount
+            .Where(x => staffUserIds.Contains(x.StaffId))
+            .ToArrayAsync();
             
-        // filter null elements
-        var readonlyCollection = staffAccountDtos
-            .OfType<StaffAccountDto>()
-            .ToList()
-            .AsIReadonlyCollection();
+        var staffAccountDtos = await Task.WhenAll(staffUsers
+            .Zip(staffAccounts)
+            .Select((tuple, _) => (User: tuple.First,Account: tuple.Second))
+            .Select(async (tuple, _) => await MapStaffAccountDto(tuple.User, tuple.Account)));
 
-        return ServiceResult<IReadOnlyCollection<StaffAccountDto>>.Success(readonlyCollection);
+        return ServiceResult<IReadOnlyCollection<StaffAccountDto>>.Success(staffAccountDtos.AsIReadonlyCollection());
     }
 
     public async Task<ServiceResult> UpdateStaffAccount(
@@ -173,19 +179,8 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         return await _authorizationService.IsUserInRole(userId, RoleNames.Manager);
     }
 
-    private async Task<StaffAccountDto?> MapStaffAccountDtoOrDefault(ApplicationUser? staffUser)
+    private async Task<StaffAccountDto> MapStaffAccountDto(ApplicationUser staffUser, StaffAccount staffAccount)
     {
-        if (staffUser is null)
-        {
-            return null;
-        }
-
-        var staffAccount = await DbContext.StaffAccount.FindAsync(staffUser.Id);
-        if (staffAccount is null)
-        {
-            return null;
-        }
-
         var manager = await _userManager.FindByIdAsync(staffAccount.ImmediateManagerId);
         var managerFullName = manager is null
             ? string.Empty

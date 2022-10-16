@@ -22,8 +22,8 @@ internal class UserSeeder
         {
             CreateRolesAsync(roleManager).Wait();
             CreateCustomersAsync(userManager, dbContext).Wait();
-            CreateStaffAsync(userManager).Wait();
             CreateManagersAsync(userManager).Wait();
+            CreateStaffAsync(userManager, dbContext).Wait();
         }
         catch (Exception ex)
         {
@@ -83,8 +83,12 @@ internal class UserSeeder
         }
     }
 
-    private static async Task CreateStaffAsync(UserManager<ApplicationUser> userManager)
+    private static async Task CreateStaffAsync(
+        UserManager<ApplicationUser> userManager,
+        XWaveDbContext dbContext)
     {
+        var managers = await userManager.GetUsersInRoleAsync(RoleNames.Manager);
+
         var staff1 = new ApplicationUser
         {
             UserName = "paul_staff",
@@ -93,16 +97,38 @@ internal class UserSeeder
             RegistrationDate = DateTime.Now,
             PhoneNumber = "98765432"
         };
+        
         var staff2 = new ApplicationUser
         {
             UserName = "liz_staff",
             FirstName = "Elizabeth",
             LastName = "Applebee",
             RegistrationDate = DateTime.Now,
-            PhoneNumber = "98765432"
+            PhoneNumber = "2345678"
         };
+
         await CreateSingleStaffAsync(userManager, staff1);
         await CreateSingleStaffAsync(userManager, staff2);
+
+        var staffAccount1 = new StaffAccount()
+        {
+            ContractStartDate = DateTime.Now,
+            ImmediateManagerId = managers[0].Id,
+            StaffId = staff1.Id,
+            Address = "2 Humes, Bright"
+        };
+
+        var staffAccount2 = new StaffAccount()
+        {
+            ContractStartDate = DateTime.Now,
+            ImmediateManagerId = managers[1].Id,
+            StaffId = staff2.Id,
+            Address = "3 Second, Healesville"
+        };
+
+        dbContext.StaffAccount.Add(staffAccount1);
+        dbContext.StaffAccount.Add(staffAccount2);
+        await dbContext.SaveChangesAsync();
     }
 
     private static async Task CreateSingleStaffAsync(
