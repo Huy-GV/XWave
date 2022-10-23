@@ -55,7 +55,7 @@ internal class ActivityService : ServiceBase, IActivityService
 
     public async Task<ServiceResult<IReadOnlyCollection<ActivityLogDto>>> FindAllActivityLogsAsync(string staffId)
     {
-        if (! await IsStaffIdValid(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<IReadOnlyCollection<ActivityLogDto>>.Failure(new Error
             {
@@ -74,12 +74,12 @@ internal class ActivityService : ServiceBase, IActivityService
             })
             .ToListAsync();
 
-        return  ServiceResult<IReadOnlyCollection<ActivityLogDto>>.Success(activityLogDtos.AsIReadonlyCollection());
+        return ServiceResult<IReadOnlyCollection<ActivityLogDto>>.Success(activityLogDtos.AsIReadonlyCollection());
     }
 
     public async Task<ServiceResult<ActivityLogDto>> FindActivityLogAsync(int id, string staffId)
     {
-        if (! await IsStaffIdValid(staffId))
+        if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<ActivityLogDto>.Failure(new Error
             {
@@ -90,7 +90,7 @@ internal class ActivityService : ServiceBase, IActivityService
         var activityLog = await DbContext.Activity
             .Include(x => x.AppUser)
             .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == id);
 
         if (activityLog is null)
         {
@@ -112,8 +112,7 @@ internal class ActivityService : ServiceBase, IActivityService
 
     private async Task<bool> IsStaffIdValid(string userId)
     {
-        var roles = await _authorizationService.GetRolesByUserId(userId);
-        return roles.Intersect(new [] { RoleNames.Manager, RoleNames.Staff }).Any();
+        return await _authorizationService.IsUserInRoles(userId, RoleNames.InternalPersonnelRoles);
     }
 
     private static string CreateInfoText(ApplicationUser? user, string infoText)
