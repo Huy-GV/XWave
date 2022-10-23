@@ -29,6 +29,9 @@ public class Program
 
         return Host.CreateDefaultBuilder(args)
             .UseSerilog((_, services, configuration) => configuration
+#if !DEBUG
+                .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
+#endif
                 .ReadFrom.Services(services)
                 .WriteTo.File(
                     logFilePath,

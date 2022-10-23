@@ -40,9 +40,14 @@ public class Startup
         services.AddTransient<AuthenticationHelper>();
         services.AddControllers();
         services.AddDefaultXWaveServices();
-        services.AddDatabase(Configuration);
 
-        services.AddHangFireBackgroundServices(Configuration.GetConnectionString("DefaultConnection"));
+        var dockerEnv = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER");
+        var dbConnectionString = string.IsNullOrEmpty(dockerEnv)
+            ? Configuration.GetConnectionString("DefaultConnection")
+            : Configuration.GetConnectionString("ContainerConnection");
+
+        services.AddDatabase(dbConnectionString);
+        services.AddHangFireBackgroundServices(dbConnectionString);
 
         services
             .AddAuthentication(options =>

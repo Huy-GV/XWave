@@ -30,7 +30,7 @@ public static class XWaveServiceExtension
         services.AddTransient<ProductDtoMapper>();
     }
 
-    public static void AddDatabase(this IServiceCollection services, IConfiguration configuration)
+    public static void AddDatabase(this IServiceCollection services, string dbConnectionString)
     {
         services
             .AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -41,7 +41,7 @@ public static class XWaveServiceExtension
 
         services.AddDbContext<XWaveDbContext>(options =>
         {
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+            options.UseSqlServer(dbConnectionString);
         });
     }
 
