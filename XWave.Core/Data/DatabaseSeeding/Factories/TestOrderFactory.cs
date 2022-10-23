@@ -13,28 +13,28 @@ public static class TestOrderFactory
         {
             new()
             {
-                Date = DateTime.Parse("15/11/2021"),
+                Date = DateTime.ParseExact("15/11/2021", "d/M/yyyy", null),
                 CustomerId = userIds[randomIndex.Next(userIds.Count)],
                 PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
                 DeliveryAddress = "2 Collins St, Melbourne"
             },
             new()
             {
-                Date = DateTime.Parse("21/10/2021"),
+                Date = DateTime.ParseExact("21/10/2021", "d/M/yyyy", null),
                 CustomerId = userIds[randomIndex.Next(userIds.Count)],
                 PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
                 DeliveryAddress = "3 Collins St, Melbourne"
             },
             new()
             {
-                Date = DateTime.Parse("16/9/2021"),
+                Date = DateTime.ParseExact("16/9/2021", "d/M/yyyy", null),
                 CustomerId = userIds[randomIndex.Next(userIds.Count)],
                 PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
                 DeliveryAddress = "4 Collins St, Melbourne"
             },
             new()
             {
-                Date = DateTime.Parse("21/11/2021"),
+                Date = DateTime.ParseExact("21/11/2021", "d/M/yyyy", null),
                 CustomerId = userIds[randomIndex.Next(userIds.Count)],
                 PaymentAccountId = paymentAccountIds[randomIndex.Next(paymentAccountIds.Count)],
                 DeliveryAddress = "3 Collins St, Melbourne"

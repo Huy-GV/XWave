@@ -18,7 +18,7 @@ public class TestProductFactory
                 Description = "Monitor suitable for daily tasks",
                 Price = 200,
                 Quantity = 150,
-                LatestRestock = DateTime.Parse("2/2/2020"),
+                LatestRestock = DateTime.ParseExact("2/2/2020", "d/M/yyyy", null),
                 CategoryId = randomIndex.Next(minCategoryPK, categories.Count),
             },
             new ()
@@ -27,7 +27,7 @@ public class TestProductFactory
                 Description = "Monitor suitable for daily tasks",
                 Price = 80,
                 Quantity = 70,
-                LatestRestock = DateTime.Parse("14/9/2021"),
+                LatestRestock = DateTime.ParseExact("14/9/2021", "d/M/yyyy", null),
                 CategoryId = randomIndex.Next(minCategoryPK, categories.Count),
             },
 
@@ -37,7 +37,7 @@ public class TestProductFactory
                 Description = "Monitor suitable for daily tasks",
                 Price = 160,
                 Quantity = 200,
-                LatestRestock = DateTime.Parse("3/12/2021"),
+                LatestRestock = DateTime.ParseExact("3/12/2021", "d/M/yyyy", null),
                 CategoryId = randomIndex.Next(minCategoryPK, categories.Count),
                 DiscountId = randomIndex.Next(minDiscountPK, discounts.Count),
             },
@@ -48,7 +48,7 @@ public class TestProductFactory
                 Description = "Monitor suitable for daily tasks",
                 Price = 1800,
                 Quantity = 10,
-                LatestRestock = DateTime.Parse("11/10/2021"),
+                LatestRestock = DateTime.ParseExact("11/10/2021", "d/M/yyyy", null),
                 CategoryId = randomIndex.Next(minCategoryPK, categories.Count),
                 DiscountId = randomIndex.Next(minDiscountPK, discounts.Count),
             }

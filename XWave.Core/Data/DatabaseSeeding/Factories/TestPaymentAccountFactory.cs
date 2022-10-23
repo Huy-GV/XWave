@@ -12,19 +12,19 @@ public static class TestPaymentAccountFactory
             {
                 Provider = "mastercard",
                 AccountNumber = "12345678",
-                ExpiryDate = DateTime.Parse("2/5/2023")
+                ExpiryDate = DateTime.ParseExact("2/5/2023", "d/M/yyyy", null)
             },
             new()
             {
                 Provider = "visa",
                 AccountNumber = "24681357",
-                ExpiryDate = DateTime.Parse("1/2/2023")
+                ExpiryDate = DateTime.ParseExact("1/2/2023", "d/M/yyyy", null)
             },
             new()
             {
                 Provider = "visa",
                 AccountNumber = "01010101",
-                ExpiryDate = DateTime.Parse("1/8/2023")
+                ExpiryDate = DateTime.ParseExact("1/8/2023", "d/M/yyyy", null)
             }
         };
 

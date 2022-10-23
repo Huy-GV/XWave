@@ -40,10 +40,11 @@ internal class PurchaseRelatedDataSeeder
             CreateOrderDetail(context, orders, products);
             CreatePaymentDetail(context, users, paymentAccounts);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             var logger = serviceProvider.GetRequiredService<ILogger<PurchaseRelatedDataSeeder>>();
-            logger.LogError(ex, "An error occurred while seeding purchase data");
+            logger.LogError("An error occurred while seeding purchase data");
+            throw;
         }
     }
 

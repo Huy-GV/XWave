@@ -18,19 +18,19 @@ internal class ProductRelatedDataSeeder
 
         try
         {
-            context.Database.OpenConnection();
             var categories = CreateCategories(context);
             var discounts = CreateDiscounts(context);
             CreateProducts(context, categories, discounts);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             var logger = serviceProvider.GetRequiredService<ILogger<ProductRelatedDataSeeder>>();
             logger.LogError("An error occurred while seeding product related data");
+            throw;
         }
     }
 
-    public static List<Category> CreateCategories(XWaveDbContext dbContext)
+    private static List<Category> CreateCategories(XWaveDbContext dbContext)
     {
         var categories = TestCategoryFactory.Categories();
         dbContext.Category.AddRange(categories);
@@ -38,7 +38,7 @@ internal class ProductRelatedDataSeeder
         return categories;
     }
 
-    public static List<Product> CreateProducts(
+    private static List<Product> CreateProducts(
         XWaveDbContext dbContext,
         List<Category> categories,
         List<Discount> discounts)
@@ -49,7 +49,7 @@ internal class ProductRelatedDataSeeder
         return products;
     }
 
-    public static List<Discount> CreateDiscounts(XWaveDbContext dbContext)
+    private static List<Discount> CreateDiscounts(XWaveDbContext dbContext)
     {
         var discounts = TestDiscountFactory.Discounts();
         dbContext.Discount.AddRange(discounts);

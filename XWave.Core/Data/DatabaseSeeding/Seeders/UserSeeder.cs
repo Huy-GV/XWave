@@ -25,10 +25,11 @@ internal class UserSeeder
             CreateManagersAsync(userManager).Wait();
             CreateStaffAsync(userManager, dbContext).Wait();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             var logger = serviceProvider.GetRequiredService<ILogger<UserSeeder>>();
             logger.LogError("An error occurred while seeding roles and users");
+            throw;
         }
     }
 

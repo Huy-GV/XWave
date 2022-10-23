@@ -25,9 +25,12 @@ public class ProductDtoMapper
 
     public ProductDto MapCustomerProductDto(Product product, decimal? discountedPrice = null)
     {
-        DiscountDto? discountDto = null;
-        if (product.Discount is not null && DateTime.Now.IsBetween(product.Discount.StartDate, product.Discount.EndDate))
-            discountDto = DiscountDtoMapper.MapCustomerDiscountDto(product.Discount);
+        var activeDiscountExists = 
+            product.Discount is not null && 
+            DateTime.Now.IsBetween(product.Discount.StartDate, product.Discount.EndDate);
+        var discountDto = activeDiscountExists 
+            ? DiscountDtoMapper.MapCustomerDiscountDto(product.Discount!)
+            : null;
 
         return new ProductDto
         {

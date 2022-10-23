@@ -20,10 +20,11 @@ internal class StaffActivitySeeder
         {
             CreateStaffActivityLogsAsync(context, userManager).Wait();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             var logger = serviceProvider.GetRequiredService<ILogger<StaffActivitySeeder>>();
             logger.LogError("An error occurred while seeding staff activities");
+            throw;
         }
     }
 
