@@ -13,28 +13,25 @@ using XWave.Core.ViewModels.Management;
 
 namespace XWave.Core.Services.Implementations;
 
-internal class ProductService : ServiceBase, IProductService
+internal class ProductManagementService : ServiceBase, IProductManagementService
 {
     private readonly IActivityService _activityService;
     private readonly IBackgroundJobService _backgroundJobService;
-    private readonly ILogger<ProductService> _logger;
+    private readonly ILogger<ProductManagementService> _logger;
     private readonly ProductDtoMapper _productDtoMapper;
     private readonly IAuthorizationService _authorizationService;
-
-    private readonly string[] staffRoles = new[] { RoleNames.Staff, RoleNames.Manager };
-
     private readonly Error _unauthorizedError = new()
     {
         Code = ErrorCode.AuthorizationError,
         Message = "Only staff are authorized to modify products"
     };
 
-    public ProductService(
+    public ProductManagementService(
         XWaveDbContext dbContext,
         IActivityService activityService,
         IBackgroundJobService backgroundJobService,
         ProductDtoMapper productHelper,
-        ILogger<ProductService> logger,
+        ILogger<ProductManagementService> logger,
         IAuthorizationService authorizationService) : base(dbContext)
     {
         _productDtoMapper = productHelper;
@@ -45,7 +42,7 @@ internal class ProductService : ServiceBase, IProductService
     }
 
     public async Task<ServiceResult<int>> AddProductAsync(string staffId,
-        ProductViewModel productViewModel)
+        CreateProductViewModel productViewModel)
     {
         if (!await IsStaffIdValid(staffId))
         {
@@ -122,22 +119,6 @@ internal class ProductService : ServiceBase, IProductService
         }
     }
 
-    public Task<IReadOnlyCollection<ProductDto>> FindAllProductsForCustomers()
-    {
-        var productDtos = DbContext.Product
-            .AsNoTracking()
-            .Include(p => p.Discount)
-            .Include(p => p.Category)
-            .Where(p => !p.IsDiscontinued)
-            .AsEnumerable()
-            .Select(p => p.Discount is null
-                ? _productDtoMapper.MapCustomerProductDto(p)
-                : _productDtoMapper.MapCustomerProductDto(p, CalculatePriceAfterDiscount(p)))
-            .ToList();
-
-        return Task.FromResult(productDtos.AsIReadonlyCollection());
-    }
-
     public async Task<ServiceResult<IReadOnlyCollection<DetailedProductDto>>> FindAllProductsForStaff(
         bool includeDiscontinuedProducts,
         string staffId)
@@ -159,21 +140,6 @@ internal class ProductService : ServiceBase, IProductService
             .ToList();
         
         return ServiceResult<IReadOnlyCollection<DetailedProductDto>>.Success(productDtos.AsIReadonlyCollection());
-    }
-
-    public async Task<ProductDto?> FindProductByIdForCustomers(int id)
-    {
-        var product = await DbContext.Product
-            .AsNoTracking()
-            .Include(p => p.Discount)
-            .Include(p => p.Category)
-            .FirstOrDefaultAsync(p => p.Id == id);
-
-        if (product is null) return null;
-
-        return product.Discount is null
-            ? _productDtoMapper.MapCustomerProductDto(product)
-            : _productDtoMapper.MapCustomerProductDto(product, CalculatePriceAfterDiscount(product));
     }
 
     public async Task<ServiceResult<DetailedProductDto>> FindProductByIdForStaff(int id, string staffId)
@@ -209,7 +175,7 @@ internal class ProductService : ServiceBase, IProductService
     public async Task<ServiceResult> UpdateProductAsync(
         string staffId,
         int productId,
-        ProductViewModel updatedProductViewModel)
+        UpdateProductViewModel updatedProductViewModel)
     {
         if (!await IsStaffIdValid(staffId))
         {
@@ -227,12 +193,13 @@ internal class ProductService : ServiceBase, IProductService
             });
         }
 
+        // todo: split
         if (product.IsDiscontinued || product.IsDeleted)
         {
             return ServiceResult<int>.Failure(new Error
             {
                 Code = ErrorCode.ConflictingState,
-                Message = "Product removed or discontinued.",
+                Message = "Product removed or discontinued",
             });
         }
 

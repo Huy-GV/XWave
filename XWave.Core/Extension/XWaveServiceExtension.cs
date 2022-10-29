@@ -20,7 +20,8 @@ public static class XWaveServiceExtension
         services.AddScoped<IActivityService, ActivityService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IPaymentAccountService, PaymentAccountService>();
-        services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IProductManagementService, ProductManagementService>();
+        services.AddScoped<ICustomerProductService, CustomerProductService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IDiscountService, DiscountService>();
         services.AddScoped<IStaffAccountService, StaffAccountService>();

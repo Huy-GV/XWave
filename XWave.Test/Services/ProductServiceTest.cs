@@ -20,9 +20,9 @@ namespace XWave.Test.Services;
 [TestClass]
 public class ProductServiceTest : BaseTest
 {
-    private readonly IProductService _productService;
+    private readonly IProductManagementService _productService;
     private readonly Mock<IBackgroundJobService> _mockBackgroundJobService = new();
-    private readonly Mock<ILogger<ProductService>> _mockLog = new();
+    private readonly Mock<ILogger<ProductManagementService>> _mockLog = new();
     private readonly Mock<IActivityService> _mockActivityService = new();
     private readonly Mock<IAuthorizationService> _mockAuthorizationService = new();
     private readonly ProductDtoMapper _productMapper = new();
@@ -46,7 +46,7 @@ public class ProductServiceTest : BaseTest
         dbContext.Product.AddRange(_testProducts);
         dbContext.SaveChanges();
 
-        _productService = new ProductService(
+        _productService = new ProductManagementService(
             dbContext,
             _mockActivityService.Object,
             _mockBackgroundJobService.Object,
@@ -154,7 +154,7 @@ public class ProductServiceTest : BaseTest
                 .Setup(x => x.GetRolesByUserId(userId).Result)
                 .Returns(invalidRoles);
 
-            _productService.UpdateProductAsync(userId, It.IsAny<int>(), It.IsAny<ProductViewModel>())
+            _productService.UpdateProductAsync(userId, It.IsAny<int>(), It.IsAny<UpdateProductViewModel>())
                 .Result.Error
                 .Should()
                 .BeEquivalentTo(new Error()

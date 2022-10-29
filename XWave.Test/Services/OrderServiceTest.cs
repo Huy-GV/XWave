@@ -21,7 +21,7 @@ public class OrderServiceTest : BaseTest
     private readonly IOrderService _orderService;
     private readonly Mock<IAuthenticationService> _mockAuthService = new();
     private readonly Mock<ICustomerAccountService> _mockCustomerAccountService = new();
-    private readonly Mock<IProductService> _mockProductService = new();
+    private readonly Mock<IProductManagementService> _mockProductService = new();
     private readonly Mock<IPaymentAccountService> _mockPaymentService = new();
     private readonly Mock<ILogger<OrderService>> _mockLog = new();
 

@@ -6,7 +6,7 @@ using XWave.Core.ViewModels.Management;
 
 namespace XWave.Core.Services.Interfaces;
 
-public interface IProductService
+public interface IProductManagementService
 {
     /// <summary>
     ///     Calculate the discounted price of a product. Throws InvalidOperationException if product does not have any discount
@@ -15,18 +15,15 @@ public interface IProductService
     /// <returns>Discounted price</returns>
     decimal CalculatePriceAfterDiscount(Product product);
 
-    Task<IReadOnlyCollection<ProductDto>> FindAllProductsForCustomers();
-
+    /// <summary>
+    ///     Find all products with full details for staff.
+    /// </summary>
+    /// <param name="includeDiscontinuedProducts">Specify whether discontinued products are returned.</param>
+    /// <param name="staffId">Staff ID.</param>
+    /// <returns>A DTO containing details of the product.</returns>
     Task<ServiceResult<IReadOnlyCollection<DetailedProductDto>>> FindAllProductsForStaff(
         bool includeDiscontinuedProducts,
         string staffId);
-
-    /// <summary>
-    ///     Find a product by its ID with limited details for customers.
-    /// </summary>
-    /// <param name="id">Product ID.</param>
-    /// <returns>A DTO containing limited details of the product.</returns>
-    Task<ProductDto?> FindProductByIdForCustomers(int id);
 
     /// <summary>
     ///     Find a product by its ID with full details for staff.
@@ -36,7 +33,7 @@ public interface IProductService
     /// <returns>A DTO containing details of the product.</returns>
     Task<ServiceResult<DetailedProductDto>> FindProductByIdForStaff(int id, string staffId);
 
-    Task<ServiceResult<int>> AddProductAsync(string staffId, ProductViewModel productViewModel);
+    Task<ServiceResult<int>> AddProductAsync(string staffId, CreateProductViewModel productViewModel);
 
     /// <summary>
     ///     Update general information (Name, Description, and Price) of a product.
@@ -45,7 +42,7 @@ public interface IProductService
     /// <param name="id">ID of updated product.</param>
     /// <param name="productViewModel">ViewModel containing details of the updated product.</param>
     /// <returns></returns>
-    Task<ServiceResult> UpdateProductAsync(string staffId, int id, ProductViewModel productViewModel);
+    Task<ServiceResult> UpdateProductAsync(string staffId, int id, UpdateProductViewModel productViewModel);
 
     /// <summary>
     ///     Update existing stock due to restocking or erroneous input.
@@ -55,6 +52,7 @@ public interface IProductService
     /// <returns></returns>
     Task<ServiceResult> UpdateStockAsync(string staffId, int productId, uint updatedStockQuantity);
 
+    // todo: replace with optional parameter
     Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice,
         DateTime updateSchedule);
 

@@ -21,22 +21,25 @@ public class ProductController : ControllerBase
 {
     private readonly AuthenticationHelper _authenticationHelper;
     private readonly IBackgroundJobService _backgroundJobService;
-    private readonly IProductService _productService;
+    private readonly IProductManagementService _productService;
+    private readonly ICustomerProductService _customerProductService;
 
     public ProductController(
-        IProductService productService,
+        IProductManagementService productService,
         AuthenticationHelper authenticationHelper,
-        IBackgroundJobService backgroundJobService)
+        IBackgroundJobService backgroundJobService,
+        ICustomerProductService customerProductService)
     {
         _backgroundJobService = backgroundJobService;
         _authenticationHelper = authenticationHelper;
         _productService = productService;
+        _customerProductService = customerProductService;
     }
 
     [HttpGet("")]
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllForCustomersAsync()
     {
-        return Ok(await _productService.FindAllProductsForCustomers());
+        return Ok(await _customerProductService.FindAllProducts());
     }
 
     [HttpGet("private")]
@@ -54,7 +57,7 @@ public class ProductController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ProductDto>> GetById(int id)
     {
-        var productDto = await _productService.FindProductByIdForCustomers(id);
+        var productDto = await _customerProductService.FindProduct(id);
         return productDto is not null ? Ok(productDto) : NotFound();
     }
 
@@ -69,7 +72,7 @@ public class ProductController : ControllerBase
 
     [HttpPost]
     [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
-    public async Task<ActionResult> CreateAsync([FromBody] ProductViewModel productViewModel)
+    public async Task<ActionResult> CreateAsync([FromBody] CreateProductViewModel productViewModel)
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.AddProductAsync(staffId, productViewModel);
@@ -79,7 +82,7 @@ public class ProductController : ControllerBase
 
     [HttpPut("{id:int}")]
     [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
-    public async Task<ActionResult> UpdateAsync(int id, [FromBody] ProductViewModel updatedProduct)
+    public async Task<ActionResult> UpdateAsync(int id, [FromBody] UpdateProductViewModel updatedProduct)
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.UpdateProductAsync(staffId, id, updatedProduct);
@@ -89,7 +92,7 @@ public class ProductController : ControllerBase
 
     [HttpPut("{id:int}/price")]
     [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
-    public async Task<ActionResult> UpdatePriceAsync(int id, [FromBody] ProductPriceUpdateViewModel viewModel)
+    public async Task<ActionResult> UpdatePriceAsync(int id, [FromBody] UpdateProductPriceViewModel viewModel)
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = viewModel.Schedule is null
