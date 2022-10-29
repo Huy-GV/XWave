@@ -15,12 +15,12 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IAuthorizationService _authorizationService;
-
     private readonly Error _unauthorizedOperationError = new()
     {
         Code = ErrorCode.AuthorizationError,
         Message = "Only managers are authorized to manage staff accounts",
     };
+    
     public StaffAccountService(
         XWaveDbContext dbContext,
         UserManager<ApplicationUser> userManager,

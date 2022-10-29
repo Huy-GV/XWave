@@ -9,13 +9,6 @@ namespace XWave.Core.Services.Interfaces;
 public interface ICustomerProductService
 {
     /// <summary>
-    ///     Calculate the discounted price of a product. Throws InvalidOperationException if product does not have any discount
-    /// </summary>
-    /// <param name="product">Product with a discount</param>
-    /// <returns>Discounted price</returns>
-    decimal CalculatePriceAfterDiscount(Product product);
-
-    /// <summary>
     ///     Find all products with limited details for customers.
     /// </summary>
     /// <param name="id">Product ID.</param>

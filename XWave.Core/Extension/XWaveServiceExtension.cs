@@ -28,6 +28,7 @@ public static class XWaveServiceExtension
         services.AddScoped<ICustomerAccountService, CustomerAccountService>();
         services.AddScoped<IAuthenticationService, JwtAuthenticationService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
+        services.AddTransient<IDiscountedProductPriceCalculator, DiscountedProductPriceCalculator>();
         services.AddTransient<ProductDtoMapper>();
     }
 

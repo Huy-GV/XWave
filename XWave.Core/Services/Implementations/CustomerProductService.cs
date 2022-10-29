@@ -3,13 +3,10 @@ using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Customers;
-using XWave.Core.DTOs.Management;
 using XWave.Core.Extension;
-using XWave.Core.Models;
 using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Utils;
-using XWave.Core.ViewModels.Management;
 
 namespace XWave.Core.Services.Implementations;
 
@@ -20,14 +17,7 @@ internal class CustomerProductService : ServiceBase, ICustomerProductService
     private readonly ILogger<ProductManagementService> _logger;
     private readonly ProductDtoMapper _productDtoMapper;
     private readonly IAuthorizationService _authorizationService;
-
-    private readonly string[] staffRoles = new[] { RoleNames.Staff, RoleNames.Manager };
-
-    private readonly Error _unauthorizedError = new()
-    {
-        Code = ErrorCode.AuthorizationError,
-        Message = "Only staff are authorized to modify products"
-    };
+    private readonly IDiscountedProductPriceCalculator _discountedPriceCalculator;
 
     public CustomerProductService(
         XWaveDbContext dbContext,
@@ -35,12 +25,14 @@ internal class CustomerProductService : ServiceBase, ICustomerProductService
         IBackgroundJobService backgroundJobService,
         ProductDtoMapper productHelper,
         ILogger<ProductManagementService> logger,
-        IAuthorizationService authorizationService) : base(dbContext)
+        IAuthorizationService authorizationService,
+        IDiscountedProductPriceCalculator discountedPriceCalculator) : base(dbContext)
     {
         _productDtoMapper = productHelper;
         _activityService = activityService;
         _authorizationService = authorizationService;
         _backgroundJobService = backgroundJobService;
+        _discountedPriceCalculator = discountedPriceCalculator;
         _logger = logger;
     }
 
@@ -54,7 +46,7 @@ internal class CustomerProductService : ServiceBase, ICustomerProductService
             .AsEnumerable()
             .Select(p => p.Discount is null
                 ? _productDtoMapper.MapCustomerProductDto(p)
-                : _productDtoMapper.MapCustomerProductDto(p, CalculatePriceAfterDiscount(p)))
+                : _productDtoMapper.MapCustomerProductDto(p, _discountedPriceCalculator.CalculatePriceAfterDiscount(p)))
             .ToList();
 
         return Task.FromResult(productDtos.AsIReadonlyCollection());
@@ -72,16 +64,6 @@ internal class CustomerProductService : ServiceBase, ICustomerProductService
 
         return product.Discount is null
             ? _productDtoMapper.MapCustomerProductDto(product)
-            : _productDtoMapper.MapCustomerProductDto(product, CalculatePriceAfterDiscount(product));
-    }
-
-    public decimal CalculatePriceAfterDiscount(Product product)
-    {
-        if (product.Discount is null) 
-        {
-            throw new InvalidOperationException($"Product ID {product.Id} does not have any discount");
-        }
-        
-        return product.Price - product.Price * product.Discount.Percentage / 100;
+            : _productDtoMapper.MapCustomerProductDto(product, _discountedPriceCalculator.CalculatePriceAfterDiscount(product));
     }
 }

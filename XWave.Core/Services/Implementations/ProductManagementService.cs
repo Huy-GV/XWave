@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
-using XWave.Core.DTOs.Customers;
 using XWave.Core.DTOs.Management;
 using XWave.Core.Extension;
 using XWave.Core.Models;
@@ -100,23 +99,15 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
             });
         }
 
-        try
-        {
-            DbContext.Product.Update(product);
-            product.SoftDelete();
-            await DbContext.SaveChangesAsync();
-            await _activityService.LogActivityAsync<Product>(
-                managerId,
-                OperationType.Modify,
-                $"deleted product named {product.Name}, ID = {product.Id} at {product.DeleteDate}.");
+        DbContext.Product.Update(product);
+        product.SoftDelete();
+        await DbContext.SaveChangesAsync();
+        await _activityService.LogActivityAsync<Product>(
+            managerId,
+            OperationType.Modify,
+            $"deleted product named {product.Name}, ID = {product.Id} at {product.DeleteDate}.");
 
-            return ServiceResult.Success();
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError($"Failed to delete product: {exception.Message}.");
-            return ServiceResult.UnknownFailure();
-        }
+        return ServiceResult.Success();
     }
 
     public async Task<ServiceResult<IReadOnlyCollection<DetailedProductDto>>> FindAllProductsForStaff(
@@ -189,40 +180,30 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
             return ServiceResult<int>.Failure(new Error
             {
                 Code = ErrorCode.EntityNotFound,
-                Message = "Product not found.",
+                Message = $"Product with ID {productId} not found.",
             });
         }
 
-        // todo: split
-        if (product.IsDiscontinued || product.IsDeleted)
+        if (product.IsDiscontinued)
         {
             return ServiceResult<int>.Failure(new Error
             {
                 Code = ErrorCode.ConflictingState,
-                Message = "Product removed or discontinued",
+                Message = $"Product with ID {productId} is discontinued",
             });
         }
 
-        try
-        {
-            DbContext.Product
-                .Update(product)
-                .CurrentValues
-                .SetValues(updatedProductViewModel);
-            await DbContext.SaveChangesAsync();
-            await _activityService.LogActivityAsync<Product>(
-                staffId,
-                OperationType.Modify,
-                $"updated general information of product named {product.Name}.");
+        DbContext.Product
+            .Update(product)
+            .CurrentValues
+            .SetValues(updatedProductViewModel);
+        await DbContext.SaveChangesAsync();
+        await _activityService.LogActivityAsync<Product>(
+            staffId,
+            OperationType.Modify,
+            $"updated general information of product named {product.Name}.");
 
-            return ServiceResult.Success();
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError($"Failed to update product with ID {productId}");
-            _logger.LogDebug(exception, exception.Message);
-            return ServiceResult.UnknownFailure();
-        }
+        return ServiceResult.Success();
     }
 
     public async Task<ServiceResult> UpdateStockAsync(string staffId, int productId, uint updatedStock)
@@ -242,36 +223,30 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
             });
         }
 
-        try
-        {
-            var quantityBeforeRestock = product.Quantity;
-            DbContext.Product.Update(product);
-            product.Quantity = updatedStock;
-            product.LatestRestock = DateTime.Now;
-            await DbContext.SaveChangesAsync();
-            await _activityService.LogActivityAsync<Product>(
-                staffId,
-                OperationType.Modify,
-                $"updated stock of product named {product.Name} (from {quantityBeforeRestock} to {updatedStock}.");
+        var quantityBeforeRestock = product.Quantity;
+        DbContext.Product.Update(product);
+        product.Quantity = updatedStock;
+        product.LatestRestock = DateTime.Now;
+        await DbContext.SaveChangesAsync();
+        await _activityService.LogActivityAsync<Product>(
+            staffId,
+            OperationType.Modify,
+            $"updated stock of product named {product.Name} (from {quantityBeforeRestock} to {updatedStock}.");
 
-            return ServiceResult.Success();
-        }
-        catch (Exception exception)
-        {
-            _logger.LogCritical($"Failed to update stock of product with ID {product.Id}.");
-            _logger.LogDebug(exception, exception.Message);
-            return ServiceResult.UnknownFailure();
-        }
+        return ServiceResult.Success();
     }
 
-    public async Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice)
+    public async Task<ServiceResult> UpdateProductPriceAsync(
+        string staffId,
+        int productId,
+        UpdateProductPriceViewModel viewModel)
     {
         if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
 
-        var product = await DbContext.Product.FindAsync(productId);
+        var product = await DbContext.Product.FirstOrDefaultAsync(x => x.Id == productId);
         if (product is null)
         {
             return ServiceResult<int>.Failure(new Error
@@ -281,77 +256,23 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
             });
         }
 
-        try
+        if (viewModel.Schedule is null) 
         {
             var formerPrice = product.Price;
             DbContext.Product.Update(product);
-            product.Price = updatedPrice;
+            product.Price = viewModel.UpdatedPrice;
             await DbContext.SaveChangesAsync();
             await _activityService.LogActivityAsync<Product>(
                 staffId,
                 OperationType.Modify,
-                $"updated price of product named {product.Name} (from {formerPrice} to {updatedPrice}.");
-
+                $"updated price of product named {product.Name} (from {formerPrice} to {viewModel.UpdatedPrice}.");
+            
             return ServiceResult.Success();
         }
-        catch (Exception exception)
-        {
-            _logger.LogError($"Failed to update general information of product with ID {productId}.");
-            _logger.LogDebug(exception, exception.Message);
-            return ServiceResult.UnknownFailure();
-        }
+
+        return await ScheduleProductPriceUpdate(staffId, productId, viewModel);
     }
 
-    public async Task<ServiceResult> UpdateProductPriceAsync(
-        string staffId,
-        int productId,
-        uint updatedPrice,
-        DateTime updateSchedule)
-    {
-        if (!await IsStaffIdValid(staffId))
-        {
-            return ServiceResult<int>.Failure(_unauthorizedError);
-        }
-
-        if (!await DbContext.Product.AnyAsync(p => p.Id == productId))
-        {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = "Product not found.",
-            });
-        }
-
-        var now = DateTime.Now;
-        if (updateSchedule < now || updateSchedule < now.AddDays(7))
-        {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.InvalidArgument,
-                Message = "Scheduled price change date must be at least 1 week in the future."
-            });
-        }
-
-        _backgroundJobService
-            .AddBackgroundJobAsync(
-                () => ScheduledUpdateProductPrice(staffId, productId, updatedPrice),
-                new DateTimeOffset(updateSchedule))
-            .Wait();
-
-        await _activityService.LogActivityAsync<Product>(
-            staffId,
-            OperationType.Modify,
-            $"scheduled a price update (to ${updatedPrice}) for product ID {productId} at {updateSchedule}.");
-
-        return ServiceResult.Success();
-    }
-
-    /// <inheritdoc />
-    /// <remarks>
-    ///     This method will return a failed result if one of the passed product IDs belongs to no product or if one of the
-    ///     products is already discontinued. However, it does not check for products that are already scheduled for
-    ///     discontinuation.
-    /// </remarks>
     public async Task<ServiceResult> DiscontinueProductAsync(
         string managerId,
         int[] productIds,
@@ -393,8 +314,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
             });
         }
 
-        var now = DateTime.Now;
-        if (updateSchedule < now || updateSchedule < now.AddDays(7))
+        if (updateSchedule.IsBetween(DateTime.Now, DateTime.Now.AddDays(7)))
         {
             return ServiceResult.Failure(new Error
             {
@@ -433,8 +353,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
             });
         }
 
-        var now = DateTime.Now;
-        if (updateSchedule < now || updateSchedule < now.AddDays(7))
+        if (updateSchedule.IsBetween(DateTime.Now, DateTime.Now.AddDays(7)))
         {
             return ServiceResult.Failure(new Error
             {
@@ -457,21 +376,12 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
         return ServiceResult.Success();
     }
 
-    public decimal CalculatePriceAfterDiscount(Product product)
-    {
-        if (product.Discount is null) 
-        {
-            throw new InvalidOperationException($"Product ID {product.Id} does not have any discount");
-        }
-        
-        return product.Price - product.Price * product.Discount.Percentage / 100;
-    }
-
-    public async Task ScheduledUpdateProductPrice(string staffId, int productId, uint updatedPrice)
+    public async Task UpdateProductPriceByScheduleAsync(string staffId, int productId, uint updatedPrice)
     {
         var product = await DbContext.Product.FindAsync(productId);
         if (product is not null)
         {
+            DbContext.Product.Update(product);
             product.Price = updatedPrice;
             await DbContext.SaveChangesAsync();
             await _activityService.LogActivityAsync<Product>(
@@ -508,6 +418,34 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
         }));
 
         await DbContext.SaveChangesAsync();
+    }
+
+    private async Task<ServiceResult> ScheduleProductPriceUpdate(
+        string staffId, 
+        int productId, 
+        UpdateProductPriceViewModel viewModel)
+    {
+        if (viewModel.Schedule!.Value.IsBetween(DateTime.Now, DateTime.Now.AddDays(7)))
+        {
+            return ServiceResult.Failure(new Error
+            {
+                Code = ErrorCode.InvalidArgument,
+                Message = "Scheduled price change date must be at least 1 week in the future."
+            });
+        }
+
+        _backgroundJobService
+            .AddBackgroundJobAsync(
+                () => UpdateProductPriceByScheduleAsync(staffId, productId, viewModel.UpdatedPrice),
+                new DateTimeOffset(viewModel.Schedule!.Value))
+            .Wait();
+
+        await _activityService.LogActivityAsync<Product>(
+            staffId,
+            OperationType.Modify,
+            $"scheduled a price update (to ${viewModel.UpdatedPrice}) for product ID {productId} at {viewModel.Schedule}.");
+
+        return ServiceResult.Success();
     }
 
     private async Task<bool> IsStaffIdValid(string userId)

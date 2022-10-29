@@ -177,7 +177,7 @@ public class ProductServiceTest : BaseTest
             _mockAuthorizationService
                 .Setup(x => x.GetRolesByUserId(userId).Result)
                 .Returns(invalidRoles);
-            _productService.UpdateProductPriceAsync(userId, It.IsAny<int>(), It.IsAny<uint>())
+            _productService.UpdateProductPriceAsync(userId, It.IsAny<int>(), It.IsAny<UpdateProductPriceViewModel>())
                 .Result.Error
                 .Should()
                 .BeEquivalentTo(new Error()

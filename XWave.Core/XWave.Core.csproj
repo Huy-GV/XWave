@@ -8,6 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="..\XWave.Test\XWave.Test.csproj" />
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Hangfire.AspNetCore" Version="1.7.30" />
         <PackageReference Include="Hangfire.Core" Version="1.7.30" />
         <PackageReference Include="Hangfire.SqlServer" Version="1.7.30" />

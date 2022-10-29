@@ -10,6 +10,7 @@ namespace XWave.Core.Services.Implementations;
 internal class AuthorizationService : ServiceBase, IAuthorizationService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    
     public AuthorizationService(
         UserManager<ApplicationUser> userManager,
         XWaveDbContext dbContext) : base(dbContext)

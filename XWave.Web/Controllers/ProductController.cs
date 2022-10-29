@@ -95,13 +95,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult> UpdatePriceAsync(int id, [FromBody] UpdateProductPriceViewModel viewModel)
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        var result = viewModel.Schedule is null
-            ? await _productService.UpdateProductPriceAsync(staffId, id, viewModel.UpdatedPrice)
-            : await _productService.UpdateProductPriceAsync(
-                staffId,
-                id,
-                viewModel.UpdatedPrice,
-                viewModel.Schedule.Value);
+        var result = await _productService.UpdateProductPriceAsync(staffId, id, viewModel);
 
         return result.OnSuccess(this.Created($"{this.ApiUrl()}/product/{id}/private"));
     }

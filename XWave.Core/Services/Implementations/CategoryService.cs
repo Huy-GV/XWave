@@ -12,7 +12,6 @@ internal class CategoryService : ServiceBase, ICategoryService
 {
     private readonly IActivityService _activityService;
     private readonly IAuthorizationService _authorizationService;
-
     private readonly Error _unauthorizedOperationError = new()
     {
         Code = ErrorCode.AuthorizationError,

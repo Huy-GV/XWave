@@ -18,6 +18,7 @@ internal class OrderService : ServiceBase, IOrderService
     private readonly IProductManagementService _productService;
     private readonly ICustomerAccountService _customerAccountService;
     private readonly IPaymentAccountService _paymentService;
+    private readonly IDiscountedProductPriceCalculator _discountedPriceCalculator;
 
     public OrderService(
         XWaveDbContext dbContext,
@@ -25,13 +26,15 @@ internal class OrderService : ServiceBase, IOrderService
         IAuthenticationService authenticationService,
         IProductManagementService productService,
         ICustomerAccountService customerAccountService,
-        IPaymentAccountService paymentService) : base(dbContext)
+        IPaymentAccountService paymentService,
+        IDiscountedProductPriceCalculator discountedPriceCalculator) : base(dbContext)
     {
         _logger = logger;
         _authenticationService = authenticationService;
         _productService = productService;
         _customerAccountService = customerAccountService;
         _paymentService = paymentService;
+        _discountedPriceCalculator = discountedPriceCalculator;
     }
 
     public async Task<ServiceResult<OrderDto>> FindOrderByIdAsync(string customerId, int orderId)
@@ -134,7 +137,7 @@ internal class OrderService : ServiceBase, IOrderService
 
             var purchasePrice = product.Discount is null
                 ? product.Price
-                : _productService.CalculatePriceAfterDiscount(product);
+                : _discountedPriceCalculator.CalculatePriceAfterDiscount(product);
 
             product.Quantity -= productInCart.Quantity;
             purchasedProducts.Add(product);

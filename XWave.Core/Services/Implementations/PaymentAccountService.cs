@@ -15,7 +15,6 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 {
     private readonly ILogger<PaymentAccountService> _logger;
     private readonly IAuthorizationService _authorizationService;
-
     private readonly ICustomerAccountService _customerAccountService;
 
     public PaymentAccountService(

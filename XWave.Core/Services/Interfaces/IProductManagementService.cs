@@ -9,13 +9,6 @@ namespace XWave.Core.Services.Interfaces;
 public interface IProductManagementService
 {
     /// <summary>
-    ///     Calculate the discounted price of a product. Throws InvalidOperationException if product does not have any discount
-    /// </summary>
-    /// <param name="product">Product with a discount</param>
-    /// <returns>Discounted price</returns>
-    decimal CalculatePriceAfterDiscount(Product product);
-
-    /// <summary>
     ///     Find all products with full details for staff.
     /// </summary>
     /// <param name="includeDiscontinuedProducts">Specify whether discontinued products are returned.</param>
@@ -52,11 +45,7 @@ public interface IProductManagementService
     /// <returns></returns>
     Task<ServiceResult> UpdateStockAsync(string staffId, int productId, uint updatedStockQuantity);
 
-    // todo: replace with optional parameter
-    Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice,
-        DateTime updateSchedule);
-
-    Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, uint updatedPrice);
+    Task<ServiceResult> UpdateProductPriceAsync(string staffId, int productId, UpdateProductPriceViewModel viewModel);
 
     /// <summary>
     ///     Soft-delete a product.

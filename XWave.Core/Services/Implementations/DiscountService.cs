@@ -18,7 +18,6 @@ internal class DiscountService : ServiceBase, IDiscountService
     private readonly IBackgroundJobService _backgroundJobService;
     private readonly ILogger<DiscountService> _logger;
     private readonly IAuthorizationService _authorizationService;
-
     private readonly Error _unauthorizedOperationError = new()
     {
         Code = ErrorCode.AuthorizationError,
