@@ -23,8 +23,11 @@ public class Program
     public static IHostBuilder CreateHostBuilder(string[] args)
     {
         var logFileName = "XWave.log";
-        var logDirectory = Environment.GetEnvironmentVariable("dev_log", EnvironmentVariableTarget.User)
-            ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        var dockerEnv = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER");
+        var logDirectory = string.IsNullOrEmpty(dockerEnv)
+            ?  Environment.GetEnvironmentVariable("dev_log", EnvironmentVariableTarget.User)
+                ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!
+            : "log";
         var logFilePath = Path.Combine(logDirectory, logFileName);
 
         return Host.CreateDefaultBuilder(args)
