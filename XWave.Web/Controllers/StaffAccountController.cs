@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +33,7 @@ public class StaffAccountController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffAccountService.GetAllStaffAccounts(managerId);
-        return result.OnSuccess(Ok(result.Value));
+        return result.OnSuccess(x => Ok(x));
     }
 
     [HttpGet("{id}")]
@@ -41,7 +41,7 @@ public class StaffAccountController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffAccountService.GetStaffAccountById(id, managerId);
-        return result.OnSuccess(Ok(result.Value));
+        return result.OnSuccess(x => Ok(x));
     }
 
     [HttpPost("{id}")]
@@ -49,7 +49,7 @@ public class StaffAccountController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffAccountService.RegisterStaffAccount(staffId, managerId, viewModel);
-        return result.OnSuccess(Ok(result.Value));
+        return result.OnSuccess(x => Ok(x));
     }
 
     [HttpPut("{id}")]
@@ -59,12 +59,12 @@ public class StaffAccountController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffAccountService.UpdateStaffAccount(
-            staffAccountId, 
-            managerId, 
+            staffAccountId,
+            managerId,
             staffAccountViewModel);
 
-        return result.OnSuccess(
-            this.Updated($"{this.ApiUrl()}/staff-account/{staffAccountId}")); 
+        return result.OnSuccess(() =>
+            this.Updated($"{this.ApiUrl()}/staff-account/{staffAccountId}"));
     }
 
     [HttpDelete("{id}")]
@@ -72,7 +72,7 @@ public class StaffAccountController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffAccountService.DeactivateStaffAccount(staffAccountId, managerId);
-        return result.OnSuccess(
-            this.Updated($"{this.ApiUrl()}/staff-account/{staffAccountId}")); 
+        return result.OnSuccess(() =>
+            this.Updated($"{this.ApiUrl()}/staff-account/{staffAccountId}"));
     }
 }

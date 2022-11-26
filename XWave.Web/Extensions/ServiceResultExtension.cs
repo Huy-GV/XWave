@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System;
 using XWave.Core.Services.Communication;
 
 namespace XWave.Web.Extensions;
@@ -9,14 +10,14 @@ public static class ServiceResultExtension
     /// Map service result to HTTP result with a value based on its error status.
     /// </summary>
     /// <param name="result">Result to map.</param>
-    /// <param name="successfulResult">Value to return if result is successful.</param>
+    /// <param name="convertToHttpResult">Function that returns the value of successful results.</param>
     /// <returns>A HTTP status result.</returns>
     public static ActionResult OnSuccess<T>(
-        this ServiceResult<T> result, 
-        ActionResult successfulResult) where T : notnull
+        this ServiceResult<T> result,
+        Func<T, ActionResult> convertToHttpResult) where T : notnull
     {
         return result.Succeeded
-            ? successfulResult
+            ? convertToHttpResult(result.Value)
             : result.Error.MapToHttpResult();
     }
 
@@ -27,11 +28,11 @@ public static class ServiceResultExtension
     /// <param name="successfulResult">Value to return if result is successful.</param>
     /// <returns>A HTTP status result.</returns>
     public static ActionResult OnSuccess(
-        this ServiceResult result, 
-        ActionResult successfulResult)
+        this ServiceResult result,
+        Func<ActionResult> convertToHttpResult)
     {
         return result.Succeeded
-            ? successfulResult
+            ? convertToHttpResult()
             : result.Error.MapToHttpResult();
     }
 }

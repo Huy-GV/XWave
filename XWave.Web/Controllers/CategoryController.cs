@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -45,8 +45,7 @@ public class CategoryController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _categoryService.AddCategoryAsync(managerId, newCategory);
-
-        return result.OnSuccess(this.Created($"{this.ApiUrl()}/category/admin/{result.Value}")); 
+        return result.OnSuccess(x => this.Created($"{this.ApiUrl()}/category/admin/{result.Value}"));
     }
 
     [HttpPut("{id:int}")]
@@ -56,7 +55,7 @@ public class CategoryController : ControllerBase
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _categoryService.UpdateCategoryAsync(managerId, id, updatedCategory);
 
-        return result.OnSuccess(this.Updated($"{this.ApiUrl()}/category/admin/{id}")); 
+        return result.OnSuccess(() => this.Updated($"{this.ApiUrl()}/category/admin/{id}"));
     }
 
     [HttpDelete("{id:int}")]
@@ -71,6 +70,6 @@ public class CategoryController : ControllerBase
 
         var result = await _categoryService.DeleteCategoryAsync(managerId, id);
 
-        return result.OnSuccess(NoContent()); 
+        return result.OnSuccess(() => NoContent());
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -48,10 +48,8 @@ public class ProductController : ControllerBase
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.FindAllProductsForStaff(false, staffId);
-    
-        return result.Succeeded 
-            ? Ok(result.Value)
-            : NotFound();
+
+        return result.OnSuccess(x => Ok(x));
     }
 
     [HttpGet("{id:int}")]
@@ -67,7 +65,7 @@ public class ProductController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.FindProductByIdForStaff(id, staffId);
 
-        return result.OnSuccess(Ok(result.Value));
+        return result.OnSuccess(x => Ok(x));
     }
 
     [HttpPost]
@@ -77,7 +75,7 @@ public class ProductController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.AddProductAsync(staffId, productViewModel);
 
-        return result.OnSuccess(this.Created($"{this.ApiUrl()}/product/{result.Value}/private"));
+        return result.OnSuccess(x => this.Created($"{this.ApiUrl()}/product/{x}/private"));
     }
 
     [HttpPut("{id:int}")]
@@ -87,7 +85,7 @@ public class ProductController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.UpdateProductAsync(staffId, id, updatedProduct);
 
-        return result.OnSuccess(this.Created($"{this.ApiUrl()}/product/{id}/private"));
+        return result.OnSuccess(() => this.Created($"{this.ApiUrl()}/product/{id}/private"));
     }
 
     [HttpPut("{id:int}/price")]
@@ -97,7 +95,7 @@ public class ProductController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.UpdateProductPriceAsync(staffId, id, viewModel);
 
-        return result.OnSuccess(this.Created($"{this.ApiUrl()}/product/{id}/private"));
+        return result.OnSuccess(() => this.Created($"{this.ApiUrl()}/product/{id}/private"));
     }
 
     [HttpDelete("{id:int}")]
@@ -106,7 +104,7 @@ public class ProductController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.DeleteProductAsync(id, managerId);
-        return result.OnSuccess(NoContent());
+        return result.OnSuccess(() => NoContent());
     }
 
     [HttpPut("discontinue/{updateSchedule}")]
@@ -115,7 +113,7 @@ public class ProductController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.DiscontinueProductAsync(managerId, ids, updateSchedule);
-        return result.OnSuccess(NoContent());
+        return result.OnSuccess(() => NoContent());
     }
 
     [HttpPut("{id:int}/restart-sale/{updateSchedule:datetime}")]
@@ -124,7 +122,7 @@ public class ProductController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productService.RestartProductSaleAsync(managerId, id, updateSchedule);
-        return result.OnSuccess(NoContent());
+        return result.OnSuccess(() => NoContent());
     }
 
     [HttpDelete("{id}/cancel")]
@@ -132,6 +130,6 @@ public class ProductController : ControllerBase
     public async Task<ActionResult> CancelBackgroundTaskAsync(string id)
     {
         var result = await _backgroundJobService.CancelJobAsync(id);
-        return result.OnSuccess(NoContent());
+        return result.OnSuccess(() => NoContent());
     }
 }

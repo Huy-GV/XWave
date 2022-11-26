@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using XWave.Web.Extensions;
@@ -33,7 +33,7 @@ public class OrderController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _orderService.FindAllOrdersAsync(customerId);
 
-        return result.OnSuccess(Ok(result.Value));
+        return result.OnSuccess(x => Ok(x));
     }
 
     [HttpGet("{id:int}")]
@@ -42,8 +42,8 @@ public class OrderController : ControllerBase
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _orderService.FindOrderByIdAsync(customerId, id);
-        
-        return result.OnSuccess(Ok(result.Value));
+
+        return result.OnSuccess(x => Ok(x));
     }
 
     [HttpPost]
@@ -57,6 +57,6 @@ public class OrderController : ControllerBase
         }
 
         var result = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
-        return result.OnSuccess(this.Created($"{this.ApiUrl()}/order/{result.Value}"));
+        return result.OnSuccess(x => this.Created($"{this.ApiUrl()}/order/{x}"));
     }
 }

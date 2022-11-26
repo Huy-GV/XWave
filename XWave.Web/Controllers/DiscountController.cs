@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -56,8 +56,7 @@ public class DiscountController : ControllerBase
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.CreateDiscountAsync(userId, newDiscount);
 
-        return result.OnSuccess(
-            this.Created($"{this.ApiUrl()}/discount/{result.Value}"));
+        return result.OnSuccess(x => this.Created($"{this.ApiUrl()}/discount/{x}"));
     }
 
     [HttpPut("{id:int}")]
@@ -67,16 +66,16 @@ public class DiscountController : ControllerBase
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.UpdateDiscountAsync(managerId, id, updatedDiscount);
 
-        return result.OnSuccess(this.Updated($"{this.ApiUrl()}/discount/{id}"));
+        return result.OnSuccess(() => this.Updated($"{this.ApiUrl()}/discount/{id}"));
     }
 
     [HttpDelete("{id:int}")]
     [Authorize(Roles = nameof(RoleNames.Manager))]
     public async Task<ActionResult> Delete(int id)
-    { 
+    {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountAsync(managerId, id);
-        return result.OnSuccess(NoContent());
+        return result.OnSuccess(() => NoContent());
     }
 
     [HttpPost("{id:int}/apply")]
@@ -90,7 +89,7 @@ public class DiscountController : ControllerBase
         }
 
         var result = await _discountService.ApplyDiscountToProducts(userId, id, productIds);
-        return result.OnSuccess(Ok());
+        return result.OnSuccess(() => Ok());
     }
 
     [HttpPost("{id}/remove")]
@@ -99,6 +98,6 @@ public class DiscountController : ControllerBase
     {
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountFromProductsAsync(userId, id, productIds);
-        return result.OnSuccess(Ok());
+        return result.OnSuccess(() => Ok());
     }
 }

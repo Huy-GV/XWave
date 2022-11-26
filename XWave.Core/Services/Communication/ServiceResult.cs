@@ -1,18 +1,28 @@
-﻿namespace XWave.Core.Services.Communication;
+using Newtonsoft.Json.Linq;
+
+namespace XWave.Core.Services.Communication;
 
 public record ServiceResult
 {
     public bool Succeeded { get; protected init; }
 
-    public Error Error { get; protected init; } = Error.UndefinedError();
+    public Error Error { get; protected init; } = Error.UnknownError();
+
+    protected ServiceResult()
+    {
+        Succeeded = true;
+        Error = Error.NoError();
+    }
+
+    protected ServiceResult(Error error)
+    {
+        Succeeded = false;
+        Error = error;
+    }
 
     public static ServiceResult Failure(Error error)
     {
-        return new ServiceResult()
-        {
-            Succeeded = false,
-            Error = error ,
-        };
+        return new ServiceResult(error);
     }
 
     /// <summary>
@@ -21,7 +31,7 @@ public record ServiceResult
     /// <returns></returns>
     public static ServiceResult UnknownFailure()
     {
-        return Failure(Error.UndefinedError());
+        return Failure(Error.UnknownError());
     }
 
     /// <summary>
@@ -30,10 +40,6 @@ public record ServiceResult
     /// <returns></returns>
     public static ServiceResult Success()
     {
-        return new() 
-        { 
-            Succeeded = true,
-            Error = Error.Empty(),
-        };
+        return new();
     }
 }

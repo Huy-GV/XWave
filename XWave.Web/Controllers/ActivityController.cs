@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +16,7 @@ namespace XWave.Web.Controllers;
 public class ActivityController : ControllerBase
 {
     private readonly IActivityService _staffActivityService;
-    
+
     private readonly AuthenticationHelper _authenticationHelper;
 
     public ActivityController(
@@ -32,7 +32,7 @@ public class ActivityController : ControllerBase
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffActivityService.FindAllActivityLogsAsync(staffId);
-        return result.OnSuccess(Ok(result.Value));
+        return result.OnSuccess(x => Ok(x));
     }
 
     [HttpGet("{id:int}")]
@@ -40,6 +40,6 @@ public class ActivityController : ControllerBase
     {
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffActivityService.FindActivityLogAsync(id, staffId);
-        return result.OnSuccess(Ok(result.Value));
+        return result.OnSuccess(x => Ok(x));
     }
 }

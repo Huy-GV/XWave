@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -8,6 +8,7 @@ using XWave.Core.Services.Interfaces;
 using XWave.Core.ViewModels.Authentication;
 using XWave.Web.Utils;
 using XWave.Core.Services.Communication;
+using XWave.Web.Extensions;
 
 namespace XWave.Web.Controllers;
 
@@ -35,7 +36,7 @@ public class CustomerAccountController : ControllerBase
         [FromBody] RegisterCustomerViewModel viewModel)
     {
         var result = await _customerAccountService.RegisterCustomerAsync(viewModel);
-        if (!result.Succeeded) 
+        if (!result.Succeeded)
         {
             return BadRequest(result.Error);
         }
@@ -57,12 +58,6 @@ public class CustomerAccountController : ControllerBase
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _customerAccountService.UpdateSubscriptionAsync(customerId, isSubscribed);
-
-        if (result.Succeeded)
-        {
-            return NoContent();
-        }
-
-        return UnprocessableEntity(result.Error);
+        return result.OnSuccess(() => NoContent());
     }
 }
