@@ -3,7 +3,7 @@ WORKDIR /app
 EXPOSE 5000
 EXPOSE 5001
 
-# Copy everything
+# Copy everything to the container
 COPY ./XWave.Core ./XWave.Core
 COPY ./XWave.Web ./XWave.Web
 
