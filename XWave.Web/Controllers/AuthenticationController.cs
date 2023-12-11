@@ -31,7 +31,10 @@ public class AuthenticationController : ControllerBase
     public async Task<ActionResult<ServiceResult<string>>> LogInAsync([FromBody] SignInViewModel model)
     {
         var result = await _authenticationService.SignInAsync(model);
-        if (!result.Succeeded) return Unauthorized(result.Error);
+        if (!result.Succeeded)
+        {
+            return Unauthorized(result.Error);
+        }
 
         Response.Cookies.Delete(_jwtCookieConfig.Name);
         var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);

@@ -5,14 +5,14 @@ VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave.Web", "XWave.Web\XWave.Web.csproj", "{87CD5A25-565A-4812-86FE-4943876C3B59}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave.Test", "XWave.Test\XWave.Test.csproj", "{92DD85AA-F057-48B1-B2B7-024A27024DAE}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F540061B-46B7-4ED7-81ED-A2CFD516FC4E}"
 	ProjectSection(SolutionItems) = preProject
 		TODO.txt = TODO.txt
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave.Core", "XWave.Core\XWave.Core.csproj", "{6AD6CFED-9AF7-465A-8E58-4BEB387CC299}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XWave.Test", "XWave.Test\XWave.Test.csproj", "{A5B70131-57DC-425A-9B87-5E08B76A15B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,18 +27,18 @@ Global
 		{87CD5A25-565A-4812-86FE-4943876C3B59}.Release|Any CPU.Build.0 = Release|Any CPU
 		{87CD5A25-565A-4812-86FE-4943876C3B59}.Test|Any CPU.ActiveCfg = Test|Any CPU
 		{87CD5A25-565A-4812-86FE-4943876C3B59}.Test|Any CPU.Build.0 = Test|Any CPU
-		{92DD85AA-F057-48B1-B2B7-024A27024DAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{92DD85AA-F057-48B1-B2B7-024A27024DAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{92DD85AA-F057-48B1-B2B7-024A27024DAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{92DD85AA-F057-48B1-B2B7-024A27024DAE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{92DD85AA-F057-48B1-B2B7-024A27024DAE}.Test|Any CPU.ActiveCfg = Test|Any CPU
-		{92DD85AA-F057-48B1-B2B7-024A27024DAE}.Test|Any CPU.Build.0 = Test|Any CPU
 		{6AD6CFED-9AF7-465A-8E58-4BEB387CC299}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6AD6CFED-9AF7-465A-8E58-4BEB387CC299}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6AD6CFED-9AF7-465A-8E58-4BEB387CC299}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6AD6CFED-9AF7-465A-8E58-4BEB387CC299}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6AD6CFED-9AF7-465A-8E58-4BEB387CC299}.Test|Any CPU.ActiveCfg = Test|Any CPU
 		{6AD6CFED-9AF7-465A-8E58-4BEB387CC299}.Test|Any CPU.Build.0 = Test|Any CPU
+		{A5B70131-57DC-425A-9B87-5E08B76A15B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5B70131-57DC-425A-9B87-5E08B76A15B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5B70131-57DC-425A-9B87-5E08B76A15B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5B70131-57DC-425A-9B87-5E08B76A15B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5B70131-57DC-425A-9B87-5E08B76A15B5}.Test|Any CPU.ActiveCfg = Test|Any CPU
+		{A5B70131-57DC-425A-9B87-5E08B76A15B5}.Test|Any CPU.Build.0 = Test|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

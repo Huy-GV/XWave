@@ -35,7 +35,10 @@ internal class StaffActivitySeeder
         var staff = await userManager.GetUsersInRoleAsync(RoleNames.Staff);
         var managers = await userManager.GetUsersInRoleAsync(RoleNames.Staff);
 
-        if (staff.Count < 2 || managers.Count < 1) throw new Exception("Insufficient staff or manager");
+        if (staff.Count < 2 || managers.Count < 1)
+        {
+            throw new Exception("Insufficient staff or manager");
+        }
 
         var logs = new List<Activity>
         {

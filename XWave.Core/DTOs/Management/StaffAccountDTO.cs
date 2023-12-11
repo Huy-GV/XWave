@@ -11,7 +11,10 @@ public record StaffAccountDto
     {
         get
         {
-            if (DateTime.Now > ContractEndDate) return 0;
+            if (DateTime.Now > ContractEndDate)
+            {
+                return 0;
+            }
 
             return (ContractEndDate - DateTime.Now).Days;
         }

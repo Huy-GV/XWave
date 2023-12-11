@@ -60,7 +60,10 @@ internal class CustomerProductService : ServiceBase, ICustomerProductService
             .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.Id == id);
 
-        if (product is null) return null;
+        if (product is null)
+        {
+            return null;
+        }
 
         return product.Discount is null
             ? _productDtoMapper.MapCustomerProductDto(product)

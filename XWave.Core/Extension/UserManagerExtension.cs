@@ -9,7 +9,10 @@ public static class UserManagerExtension
         TUser user,
         string password) where TUser : IdentityUser
     {
-        if (user.LockoutEnabled) return false;
+        if (user.LockoutEnabled)
+        {
+            return false;
+        }
 
         return await userManager.CheckPasswordAsync(user, password);
     }

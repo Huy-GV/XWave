@@ -133,7 +133,10 @@ internal class OrderService : ServiceBase, IOrderService
             }
 
             // move to validate remaining products without processing any of them.
-            if (errorMessages.Count > 0) continue;
+            if (errorMessages.Count > 0)
+            {
+                continue;
+            }
 
             var purchasePrice = product.Discount is null
                 ? product.Price
