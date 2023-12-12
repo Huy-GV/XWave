@@ -62,14 +62,15 @@ public class OrderServiceTest : BaseTest
         _mockCustomerAccountService
             .Setup(x => x.CustomerAccountExists(customerId).Result)
             .Returns(false);
-        _orderService.AddOrderAsync(It.IsAny<PurchaseViewModel>(), customerId)
-            .Result
-            .Should()
-            .BeEquivalentTo(ServiceResult<int>.Failure(new Error()
-            {
-                Code = ErrorCode.AuthorizationError,
-                Message = "Customer account not found"
-            }));
+
+        var result = _orderService.AddOrderAsync(It.IsAny<PurchaseViewModel>(), customerId).Result;
+        var expected = ServiceResult<int>.Failure(new Error()
+        {
+            Code = ErrorCode.AuthorizationError,
+            Message = "Customer account not found"
+        });
+
+        AssertEqualServiceResults(result, expected);
     }
 
     [TestMethod]
@@ -87,14 +88,16 @@ public class OrderServiceTest : BaseTest
             _mockPaymentService
                 .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
                 .Returns(false);
-            _orderService.AddOrderAsync(purchaseViewModel, customerId)
-                .Result
-                .Should()
-                .BeEquivalentTo(ServiceResult<int>.Failure(new Error
-                {
-                    Code = ErrorCode.InvalidState,
-                    Message = "Valid payment account not found"
-                }));
+
+            var result = _orderService.AddOrderAsync(purchaseViewModel, customerId).Result;
+            var expected = ServiceResult<int>.Failure(new Error
+            {
+                Code = ErrorCode.InvalidState,
+                Message = "Valid payment account not found"
+            });
+
+            AssertEqualServiceResults(result, expected);
+
         }).QuickCheckThrowOnFailure();
     }
 
@@ -134,14 +137,14 @@ public class OrderServiceTest : BaseTest
                 .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
                 .Returns(true);
 
-            _orderService.AddOrderAsync(purchaseViewModel, customerId)
-                .Result
-                .Should()
-                .BeEquivalentTo(ServiceResult<int>.Failure(new Error
-                {
-                    Code = ErrorCode.InvalidState,
-                    Message = $"The following products were not found: { string.Join(", ", randomMissingIds) }.",
-                }));
+            var result = _orderService.AddOrderAsync(purchaseViewModel, customerId).Result;
+            var expected = ServiceResult<int>.Failure(new Error
+            {
+                Code = ErrorCode.InvalidState,
+                Message = $"The following products were not found: {string.Join(", ", randomMissingIds)}.",
+            });
+
+            AssertEqualServiceResults(result, expected);
         }).QuickCheckThrowOnFailure();
     }
 }
