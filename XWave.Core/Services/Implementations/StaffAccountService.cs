@@ -14,20 +14,20 @@ namespace XWave.Core.Services.Implementations;
 internal class StaffAccountService : ServiceBase, IStaffAccountService
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IAuthorizationService _authorizationService;
+    private readonly IRoleAuthorizer _roleAuthorizer;
     private readonly Error _unauthorizedOperationError = new()
     {
         Code = ErrorCode.AuthorizationError,
         Message = "Only managers are authorized to manage staff accounts",
     };
-    
+
     public StaffAccountService(
         XWaveDbContext dbContext,
         UserManager<ApplicationUser> userManager,
-        IAuthorizationService authorizationService) : base(dbContext)
+        IRoleAuthorizer roleAuthorizer) : base(dbContext)
     {
         _userManager = userManager;
-        _authorizationService = authorizationService;
+        _roleAuthorizer = roleAuthorizer;
     }
 
     public async Task<ServiceResult<string>> RegisterStaffAccount(
@@ -35,13 +35,13 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         string managerId,
         StaffAccountViewModel registerStaffViewModel)
     {
-        if (! await IsManagerIdValid(managerId)) 
+        if (! await IsManagerIdValid(managerId))
         {
             return ServiceResult<string>.Failure(_unauthorizedOperationError);
         }
 
         var user = await _userManager.FindByIdAsync(staffId);
-        if (user is null) 
+        if (user is null)
         {
             return ServiceResult<string>.Failure(new Error
             {
@@ -64,22 +64,22 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
 
     public async Task<ServiceResult<StaffAccountDto>> GetStaffAccountById(string id, string managerId)
     {
-        if (!await IsManagerIdValid(managerId)) 
+        if (!await IsManagerIdValid(managerId))
         {
             return ServiceResult<StaffAccountDto>.Failure(_unauthorizedOperationError);
         }
-        
+
         var staffUser = await _userManager.FindByIdAsync(id);
         var staffAccount = await DbContext.StaffAccount.FindAsync(id);
-        if (staffAccount is not null && 
+        if (staffAccount is not null &&
             staffUser is not null &&
-            await _authorizationService.IsUserInRole(id, RoleNames.Staff))
+            await _roleAuthorizer.IsUserInRole(id, RoleNames.Staff))
         {
             var staffAccountDto = await MapStaffAccountDto(staffUser, staffAccount);
             return ServiceResult<StaffAccountDto>.Success(staffAccountDto);
         };
 
-        return ServiceResult<StaffAccountDto>.Failure(new Error 
+        return ServiceResult<StaffAccountDto>.Failure(new Error
         {
             Code = ErrorCode.EntityNotFound,
         });
@@ -87,7 +87,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
 
     public async Task<ServiceResult<IReadOnlyCollection<StaffAccountDto>>> GetAllStaffAccounts(string managerId)
     {
-        if (! await IsManagerIdValid(managerId)) 
+        if (! await IsManagerIdValid(managerId))
         {
             Console.WriteLine("CHECK ROLE");
             return ServiceResult<IReadOnlyCollection<StaffAccountDto>>
@@ -99,7 +99,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         var staffAccounts = await DbContext.StaffAccount
             .Where(x => staffUserIds.Contains(x.StaffId))
             .ToArrayAsync();
-            
+
         var staffAccountDtos = await Task.WhenAll(staffUsers
             .Zip(staffAccounts)
             .Select((tuple, _) => (User: tuple.First,Account: tuple.Second))
@@ -113,7 +113,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
         string managerId,
         StaffAccountViewModel updateStaffAccountViewModel)
     {
-        if (! await IsManagerIdValid(managerId)) 
+        if (! await IsManagerIdValid(managerId))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -139,7 +139,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
 
     public async Task<ServiceResult> DeactivateStaffAccount(string staffId, string managerId)
     {
-        if (! await IsManagerIdValid(managerId)) 
+        if (! await IsManagerIdValid(managerId))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -176,7 +176,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
 
     private async Task<bool> IsManagerIdValid(string userId)
     {
-        return await _authorizationService.IsUserInRole(userId, RoleNames.Manager);
+        return await _roleAuthorizer.IsUserInRole(userId, RoleNames.Manager);
     }
 
     private async Task<StaffAccountDto> MapStaffAccountDto(ApplicationUser staffUser, StaffAccount staffAccount)

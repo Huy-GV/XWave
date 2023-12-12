@@ -3,7 +3,7 @@ using XWave.Core.ViewModels.Authentication;
 
 namespace XWave.Core.Services.Interfaces;
 
-public interface IAuthenticationService
+public interface IAuthenticator
 {
     /// <summary>
     /// Sign the user in.

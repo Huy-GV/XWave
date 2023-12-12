@@ -14,23 +14,23 @@ namespace XWave.Web.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly AuthenticationHelper _authenticationHelper;
-    private readonly IAuthenticationService _authenticationService;
+    private readonly IAuthenticator _authenticator;
     private readonly JwtCookie _jwtCookieConfig;
 
     public AuthenticationController(
-        IAuthenticationService authenticationService,
+        IAuthenticator authenticator,
         AuthenticationHelper authenticationHelper,
         IOptions<JwtCookie> jwtCookieOptions)
     {
         _jwtCookieConfig = jwtCookieOptions.Value;
-        _authenticationService = authenticationService;
+        _authenticator = authenticator;
         _authenticationHelper = authenticationHelper;
     }
 
     [HttpPost("login")]
     public async Task<ActionResult<ServiceResult<string>>> LogInAsync([FromBody] SignInViewModel model)
     {
-        var result = await _authenticationService.SignInAsync(model);
+        var result = await _authenticator.SignInAsync(model);
         if (!result.Succeeded)
         {
             return Unauthorized(result.Error);

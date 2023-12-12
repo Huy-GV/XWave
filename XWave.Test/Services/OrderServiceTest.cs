@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using FsCheck;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,7 +19,7 @@ namespace XWave.Test.Services;
 public class OrderServiceTest : BaseTest
 {
     private readonly IOrderService _orderService;
-    private readonly Mock<IAuthenticationService> _mockAuthService = new();
+    private readonly Mock<IAuthenticator> _mockAuthService = new();
     private readonly Mock<ICustomerAccountService> _mockCustomerAccountService = new();
     private readonly Mock<IProductManagementService> _mockProductService = new();
     private readonly Mock<IPaymentAccountService> _mockPaymentService = new();

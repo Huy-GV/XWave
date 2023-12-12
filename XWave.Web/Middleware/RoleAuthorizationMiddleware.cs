@@ -11,13 +11,13 @@ namespace XWave.Web.Middleware;
 public class RoleAuthorizationMiddleware : IMiddleware
 {
     private readonly JwtCookie _jwtCookieOptions;
-    private readonly Core.Services.Interfaces.IAuthorizationService _authorizationService;
+    private readonly Core.Services.Interfaces.IRoleAuthorizer _roleAuthorizer;
 
     public RoleAuthorizationMiddleware(
-        Core.Services.Interfaces.IAuthorizationService authorizationService,
+        Core.Services.Interfaces.IRoleAuthorizer roleAuthorizer,
         IOptions<JwtCookie> jwtCookieOptions)
     {
-        _authorizationService = authorizationService;
+        _roleAuthorizer = roleAuthorizer;
         _jwtCookieOptions = jwtCookieOptions.Value;
     }
 
@@ -39,7 +39,7 @@ public class RoleAuthorizationMiddleware : IMiddleware
             return;
         }
 
-        var roles = await _authorizationService.GetRolesByUserName(userName);
+        var roles = await _roleAuthorizer.GetRolesByUserName(userName);
         if (roles.Length != 1)
         {
             await context.ForbidAsync();

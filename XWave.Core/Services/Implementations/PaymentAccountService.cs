@@ -14,17 +14,17 @@ namespace XWave.Core.Services.Implementations;
 internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 {
     private readonly ILogger<PaymentAccountService> _logger;
-    private readonly IAuthorizationService _authorizationService;
+    private readonly IRoleAuthorizer _roleAuthorizer;
     private readonly ICustomerAccountService _customerAccountService;
 
     public PaymentAccountService(
         XWaveDbContext dbContext,
         ILogger<PaymentAccountService> logger,
-        IAuthorizationService authorizationService,
+        IRoleAuthorizer roleAuthorizer,
         ICustomerAccountService customerAccountService) : base(dbContext)
     {
         _logger = logger;
-        _authorizationService = authorizationService;
+        _roleAuthorizer = roleAuthorizer;
         _customerAccountService = customerAccountService;
     }
 
@@ -32,9 +32,9 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         string customerId,
         PaymentAccountViewModel inputPayment)
     {
-        if (!await _authorizationService.IsUserInRole(customerId, RoleNames.Customer)) 
+        if (!await _roleAuthorizer.IsUserInRole(customerId, RoleNames.Customer))
         {
-            return ServiceResult<int>.Failure(new Error 
+            return ServiceResult<int>.Failure(new Error
             {
                 Code = ErrorCode.AuthorizationError,
             });
@@ -77,9 +77,9 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 
     public async Task<ServiceResult> RemovePaymentAccountAsync(string customerId, int paymentAccountId)
     {
-        if (!await _authorizationService.IsUserInRole(customerId, RoleNames.Customer)) 
+        if (!await _roleAuthorizer.IsUserInRole(customerId, RoleNames.Customer))
         {
-            return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error 
+            return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error
             {
                 Code = ErrorCode.AuthorizationError,
             });
@@ -89,7 +89,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
             .Include(x => x.PaymentAccountDetails)
             .FirstOrDefaultAsync(x => x.PaymentAccountDetails.PaymentAccountId == paymentAccountId);
 
-        if (paymentAccountToRemove is null || 
+        if (paymentAccountToRemove is null ||
             paymentAccountToRemove.PaymentAccountDetails.CustomerId != customerId)
         {
             return ServiceResult.Failure(new Error
@@ -108,11 +108,11 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 
     public async Task<ServiceResult<IReadOnlyCollection<PaymentAccount>>> FindAllTransactionDetailsForStaffAsync(string staffId)
     {
-        if (!await _authorizationService.IsUserInRoles(
-            staffId, 
-            new [] { RoleNames.Staff, RoleNames.Customer })) 
+        if (!await _roleAuthorizer.IsUserInRoles(
+            staffId,
+            new [] { RoleNames.Staff, RoleNames.Customer }))
         {
-            return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Failure(new Error 
+            return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Failure(new Error
             {
                 Code = ErrorCode.AuthorizationError,
             });
@@ -220,7 +220,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
                 PurchaseCount = purchasesByPaymentAccount.ContainsKey(p.Id)
                     ? purchasesByPaymentAccount[p.Id].PurchaseCount
                     : 0
-                
+
             })
             .ToListAsync();
 

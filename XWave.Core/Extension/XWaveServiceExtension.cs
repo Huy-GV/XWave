@@ -1,8 +1,7 @@
-﻿using Hangfire;
+using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using XWave.Core.Data;
 using XWave.Core.Data.DatabaseSeeding;
 using XWave.Core.Models;
@@ -17,17 +16,17 @@ public static class XWaveServiceExtension
 {
     public static void AddDefaultXWaveServices(this IServiceCollection services)
     {
-        services.AddScoped<IActivityService, ActivityService>();
+        services.AddScoped<IStaffActivityLogger, StaffActivityLogger>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IPaymentAccountService, PaymentAccountService>();
         services.AddScoped<IProductManagementService, ProductManagementService>();
-        services.AddScoped<ICustomerProductService, CustomerProductService>();
+        services.AddScoped<ICustomerProductBrowser, CustomerProductBrowser>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IDiscountService, DiscountService>();
         services.AddScoped<IStaffAccountService, StaffAccountService>();
         services.AddScoped<ICustomerAccountService, CustomerAccountService>();
-        services.AddScoped<IAuthenticationService, JwtAuthenticationService>();
-        services.AddScoped<IAuthorizationService, AuthorizationService>();
+        services.AddScoped<IAuthenticator, JwtAuthenticator>();
+        services.AddScoped<IRoleAuthorizer, RoleAuthorizer>();
         services.AddTransient<IDiscountedProductPriceCalculator, DiscountedProductPriceCalculator>();
         services.AddTransient<ProductDtoMapper>();
     }

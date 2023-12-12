@@ -1,56 +1,43 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
-using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Customers;
 using XWave.Core.Extension;
-using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Utils;
 
 namespace XWave.Core.Services.Implementations;
 
-internal class CustomerProductService : ServiceBase, ICustomerProductService
+internal class CustomerProductBrowser : ServiceBase, ICustomerProductBrowser
 {
-    private readonly IActivityService _activityService;
-    private readonly IBackgroundJobService _backgroundJobService;
-    private readonly ILogger<ProductManagementService> _logger;
     private readonly ProductDtoMapper _productDtoMapper;
-    private readonly IAuthorizationService _authorizationService;
     private readonly IDiscountedProductPriceCalculator _discountedPriceCalculator;
 
-    public CustomerProductService(
+    public CustomerProductBrowser(
         XWaveDbContext dbContext,
-        IActivityService activityService,
-        IBackgroundJobService backgroundJobService,
-        ProductDtoMapper productHelper,
-        ILogger<ProductManagementService> logger,
-        IAuthorizationService authorizationService,
+        ProductDtoMapper productDtoMapper,
         IDiscountedProductPriceCalculator discountedPriceCalculator) : base(dbContext)
     {
-        _productDtoMapper = productHelper;
-        _activityService = activityService;
-        _authorizationService = authorizationService;
-        _backgroundJobService = backgroundJobService;
+        _productDtoMapper = productDtoMapper;
         _discountedPriceCalculator = discountedPriceCalculator;
-        _logger = logger;
     }
 
-    public Task<IReadOnlyCollection<ProductDto>> FindAllProducts()
+    public async Task<IReadOnlyCollection<ProductDto>> FindAllProducts()
     {
-        var productDtos = DbContext.Product
+        var productDtos = await DbContext.Product
             .AsNoTracking()
             .Include(p => p.Discount)
             .Include(p => p.Category)
             .Where(p => !p.IsDiscontinued)
-            .AsEnumerable()
+            .ToListAsync();
+
+        return productDtos
             .Select(p => p.Discount is null
                 ? _productDtoMapper.MapCustomerProductDto(p)
                 : _productDtoMapper.MapCustomerProductDto(p, _discountedPriceCalculator.CalculatePriceAfterDiscount(p)))
-            .ToList();
-
-        return Task.FromResult(productDtos.AsIReadonlyCollection());
+            .ToList()
+            .AsIReadonlyCollection();
     }
+
 
     public async Task<ProductDto?> FindProduct(int id)
     {

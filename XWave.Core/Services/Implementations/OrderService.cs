@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
@@ -13,7 +13,7 @@ namespace XWave.Core.Services.Implementations;
 
 internal class OrderService : ServiceBase, IOrderService
 {
-    private readonly IAuthenticationService _authenticationService;
+    private readonly IAuthenticator _authenticator;
     private readonly ILogger<OrderService> _logger;
     private readonly IProductManagementService _productService;
     private readonly ICustomerAccountService _customerAccountService;
@@ -23,14 +23,14 @@ internal class OrderService : ServiceBase, IOrderService
     public OrderService(
         XWaveDbContext dbContext,
         ILogger<OrderService> logger,
-        IAuthenticationService authenticationService,
+        IAuthenticator authenticator,
         IProductManagementService productService,
         ICustomerAccountService customerAccountService,
         IPaymentAccountService paymentService,
         IDiscountedProductPriceCalculator discountedPriceCalculator) : base(dbContext)
     {
         _logger = logger;
-        _authenticationService = authenticationService;
+        _authenticator = authenticator;
         _productService = productService;
         _customerAccountService = customerAccountService;
         _paymentService = paymentService;
@@ -48,7 +48,7 @@ internal class OrderService : ServiceBase, IOrderService
         }
 
         var order = await GetOrderDtosQuery(customerId).FirstOrDefaultAsync(o => o.Id == orderId);
-        if (order is null) 
+        if (order is null)
         {
             return ServiceResult<OrderDto>.Failure(new Error
             {
@@ -73,7 +73,7 @@ internal class OrderService : ServiceBase, IOrderService
         }
 
         if (!await _paymentService.CustomerHasPaymentAccount(
-            customerId, 
+            customerId,
             purchaseViewModel.PaymentAccountId))
         {
             return ServiceResult<int>.Failure(new Error
@@ -155,7 +155,7 @@ internal class OrderService : ServiceBase, IOrderService
 
         if (errorMessages.Count > 0)
         {
-            return ServiceResult<int>.Failure(new Error 
+            return ServiceResult<int>.Failure(new Error
             {
                 Code = ErrorCode.ConflictingState,
                 Message = string.Join("\n", errorMessages)
@@ -169,7 +169,7 @@ internal class OrderService : ServiceBase, IOrderService
         await DbContext.SaveChangesAsync();
 
         return ServiceResult<int>.Success(order.Id);
-        
+
     }
 
     public async Task<ServiceResult<IReadOnlyCollection<OrderDto>>> FindAllOrdersAsync(string customerId)

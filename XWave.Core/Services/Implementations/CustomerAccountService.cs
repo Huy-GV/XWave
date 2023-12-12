@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
@@ -12,18 +12,18 @@ namespace XWave.Core.Services.Implementations;
 
 internal class CustomerAccountService : ServiceBase, ICustomerAccountService
 {
-    private readonly IAuthenticationService _authenticationService;
+    private readonly IAuthenticator _authenticator;
     private readonly ILogger<CustomerAccountService> _logger;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public CustomerAccountService(
         XWaveDbContext dbContext,
-        IAuthenticationService authenticationService,
+        IAuthenticator authenticator,
         ILogger<CustomerAccountService> logger,
         UserManager<ApplicationUser> userManager) : base(dbContext)
     {
         _logger = logger;
-        _authenticationService = authenticationService;
+        _authenticator = authenticator;
         _userManager = userManager;
     }
 
@@ -37,9 +37,9 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
                 .Add(customerAccount)
                 .CurrentValues
                 .SetValues(viewModel.CustomerAccountViewModel);
-            
+
             await DbContext.SaveChangesAsync();
-            var authenticationResult = await _authenticationService
+            var authenticationResult = await _authenticator
                 .RegisterUserAsync(viewModel.UserViewModel);
 
             if (authenticationResult.Succeeded)
@@ -81,7 +81,7 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
     }
 
     public async Task<ServiceResult> UpdateCustomerAccountAsync(
-        string id, 
+        string id,
         CustomerAccountViewModel viewModel)
     {
         var customerAccount = await DbContext.CustomerAccount.FindAsync(id);

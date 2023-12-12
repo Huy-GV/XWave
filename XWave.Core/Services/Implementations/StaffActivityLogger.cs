@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
@@ -10,18 +10,18 @@ using XWave.Core.Services.Interfaces;
 
 namespace XWave.Core.Services.Implementations;
 
-internal class ActivityService : ServiceBase, IActivityService
+internal class StaffActivityLogger : ServiceBase, IStaffActivityLogger
 {
-    private readonly ILogger<ActivityService> _logger;
-    private readonly IAuthorizationService _authorizationService;
+    private readonly ILogger<StaffActivityLogger> _logger;
+    private readonly IRoleAuthorizer _roleAuthorizer;
 
-    public ActivityService(
+    public StaffActivityLogger(
         XWaveDbContext dbContext,
-        ILogger<ActivityService> logger,
-        IAuthorizationService authorizationService) : base(dbContext)
+        ILogger<StaffActivityLogger> logger,
+        IRoleAuthorizer roleAuthorizer) : base(dbContext)
     {
         _logger = logger;
-        _authorizationService = authorizationService;
+        _roleAuthorizer = roleAuthorizer;
     }
 
     public async Task<ServiceResult> LogActivityAsync<T>(
@@ -112,7 +112,7 @@ internal class ActivityService : ServiceBase, IActivityService
 
     private async Task<bool> IsStaffIdValid(string userId)
     {
-        return await _authorizationService.IsUserInRoles(userId, RoleNames.InternalPersonnelRoles);
+        return await _roleAuthorizer.IsUserInRoles(userId, RoleNames.InternalPersonnelRoles);
     }
 
     private static string CreateInfoText(ApplicationUser? user, string infoText)

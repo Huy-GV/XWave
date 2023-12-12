@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
@@ -14,10 +14,10 @@ namespace XWave.Core.Services.Implementations;
 
 internal class DiscountService : ServiceBase, IDiscountService
 {
-    private readonly IActivityService _activityService;
+    private readonly IStaffActivityLogger _activityService;
     private readonly IBackgroundJobService _backgroundJobService;
     private readonly ILogger<DiscountService> _logger;
-    private readonly IAuthorizationService _authorizationService;
+    private readonly IRoleAuthorizer _roleAuthorizer;
     private readonly Error _unauthorizedOperationError = new()
     {
         Code = ErrorCode.AuthorizationError,
@@ -26,14 +26,14 @@ internal class DiscountService : ServiceBase, IDiscountService
 
     public DiscountService(
         XWaveDbContext dbContext,
-        IActivityService activityService,
-        IAuthorizationService authorizationService,
+        IStaffActivityLogger activityService,
+        IRoleAuthorizer roleAuthorizer,
         ILogger<DiscountService> logger,
         IBackgroundJobService backgroundJobService) : base(dbContext)
     {
         _logger = logger;
         _activityService = activityService;
-        _authorizationService = authorizationService;
+        _roleAuthorizer = roleAuthorizer;
         _backgroundJobService = backgroundJobService;
     }
 
@@ -41,7 +41,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         string managerId,
         DiscountViewModel discountViewModel)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
+        if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedOperationError);
         }
@@ -69,7 +69,7 @@ internal class DiscountService : ServiceBase, IDiscountService
 
     public async Task<ServiceResult> RemoveDiscountAsync(string managerId, int discountId)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
+        if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -117,11 +117,11 @@ internal class DiscountService : ServiceBase, IDiscountService
     }
 
     public async Task<ServiceResult> UpdateDiscountAsync(
-        string managerId, 
+        string managerId,
         int discountId,
         DiscountViewModel updatedDiscountViewModel)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
+        if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -150,11 +150,11 @@ internal class DiscountService : ServiceBase, IDiscountService
     }
 
     public async Task<ServiceResult> ApplyDiscountToProducts(
-        string managerId, 
+        string managerId,
         int discountId,
         IEnumerable<int> productIds)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
+        if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -172,7 +172,7 @@ internal class DiscountService : ServiceBase, IDiscountService
         var appliedProducts = await DbContext.Product
             .Where(x => productIds.Contains(x.Id))
             .ToListAsync();
-            
+
         var missingProductIds = productIds.Except(appliedProducts.Select(x => x.Id));
 
         if (missingProductIds.Any())
@@ -203,11 +203,11 @@ internal class DiscountService : ServiceBase, IDiscountService
     }
 
     public async Task<ServiceResult> RemoveDiscountFromProductsAsync(
-        string managerId, 
+        string managerId,
         int discountId,
         IEnumerable<int> productIds)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
+        if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }

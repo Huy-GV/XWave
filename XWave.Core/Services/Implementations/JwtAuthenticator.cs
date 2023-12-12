@@ -16,12 +16,12 @@ using XWave.Core.ViewModels.Authentication;
 
 namespace XWave.Core.Services.Implementations;
 
-internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
+internal class JwtAuthenticator : ServiceBase, IAuthenticator
 {
     private readonly Jwt _jwt;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public JwtAuthenticationService(
+    public JwtAuthenticator(
         UserManager<ApplicationUser> userManager,
         IOptions<Jwt> jwt,
         XWaveDbContext dbContext) : base(dbContext)
@@ -79,7 +79,7 @@ internal class JwtAuthenticationService : ServiceBase, IAuthenticationService
         }
 
         var errorMessage = string.Join(
-            "\n", 
+            "\n",
             result.Errors.Select(x => $"[{x.Code}] {x.Description}"));
         return ServiceResult<string>.Failure(new Error
         {

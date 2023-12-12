@@ -4,7 +4,7 @@ using XWave.Core.Services.Communication;
 
 namespace XWave.Core.Services.Interfaces;
 
-public interface IActivityService
+public interface IStaffActivityLogger
 {
     /// <summary>
     ///     Log changes made by staff members. Is exception-safe.

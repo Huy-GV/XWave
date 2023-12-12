@@ -1,6 +1,6 @@
 ﻿namespace XWave.Core.Services.Interfaces;
 
-public interface IAuthorizationService
+public interface IRoleAuthorizer
 {
     Task<string[]> GetRolesByUserName(string userName);
 

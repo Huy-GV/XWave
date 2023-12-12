@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,8 +14,9 @@ public class Program
     {
         var host = CreateHostBuilder(args).Build();
         using var scope = host.Services.CreateScope();
+#if DEBUG
         scope.ServiceProvider.SeedDatabase();
-
+#endif
         host.Run();
     }
 
@@ -27,6 +27,7 @@ public class Program
             ?  Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "XWave")
             : "log";
         var logFilePath = Path.Combine(logDirectory, "XWave.log");
+        Console.WriteLine($"Log file path: {logFilePath}");
 
         return Host.CreateDefaultBuilder(args)
             .UseSerilog((_, services, configuration) => configuration

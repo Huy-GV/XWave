@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using FsCheck;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,8 +23,8 @@ public class ProductServiceTest : BaseTest
     private readonly IProductManagementService _productService;
     private readonly Mock<IBackgroundJobService> _mockBackgroundJobService = new();
     private readonly Mock<ILogger<ProductManagementService>> _mockLog = new();
-    private readonly Mock<IActivityService> _mockActivityService = new();
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService = new();
+    private readonly Mock<IStaffActivityLogger> _mockActivityService = new();
+    private readonly Mock<IRoleAuthorizer> _mockAuthorizationService = new();
     private readonly ProductDtoMapper _productMapper = new();
 
     private readonly List<Discount> _testDiscounts = TestDiscountFactory.Discounts();

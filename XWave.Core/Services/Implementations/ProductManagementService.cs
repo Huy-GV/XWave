@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
@@ -14,11 +14,11 @@ namespace XWave.Core.Services.Implementations;
 
 internal class ProductManagementService : ServiceBase, IProductManagementService
 {
-    private readonly IActivityService _activityService;
+    private readonly IStaffActivityLogger _activityService;
     private readonly IBackgroundJobService _backgroundJobService;
     private readonly ILogger<ProductManagementService> _logger;
     private readonly ProductDtoMapper _productDtoMapper;
-    private readonly IAuthorizationService _authorizationService;
+    private readonly IRoleAuthorizer _roleAuthorizer;
     private readonly Error _unauthorizedError = new()
     {
         Code = ErrorCode.AuthorizationError,
@@ -27,15 +27,15 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
 
     public ProductManagementService(
         XWaveDbContext dbContext,
-        IActivityService activityService,
+        IStaffActivityLogger activityService,
         IBackgroundJobService backgroundJobService,
         ProductDtoMapper productHelper,
         ILogger<ProductManagementService> logger,
-        IAuthorizationService authorizationService) : base(dbContext)
+        IRoleAuthorizer roleAuthorizer) : base(dbContext)
     {
         _productDtoMapper = productHelper;
         _activityService = activityService;
-        _authorizationService = authorizationService;
+        _roleAuthorizer = roleAuthorizer;
         _backgroundJobService = backgroundJobService;
         _logger = logger;
     }
@@ -84,7 +84,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
 
     public async Task<ServiceResult> DeleteProductAsync(int productId, string managerId)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
+        if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -129,12 +129,12 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
         var productDtos = products
             .Select(_productDtoMapper.MapDetailedProductDto)
             .ToList();
-        
+
         return ServiceResult<IReadOnlyCollection<DetailedProductDto>>.Success(productDtos.AsIReadonlyCollection());
     }
 
     public async Task<ServiceResult<DetailedProductDto>> FindProductByIdForStaff(int id, string staffId)
-    {       
+    {
         if (!await IsStaffIdValid(staffId))
         {
             return ServiceResult<DetailedProductDto>.Failure(new Error
@@ -256,7 +256,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
             });
         }
 
-        if (viewModel.Schedule is null) 
+        if (viewModel.Schedule is null)
         {
             var formerPrice = product.Price;
             DbContext.Product.Update(product);
@@ -266,7 +266,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
                 staffId,
                 OperationType.Modify,
                 $"updated price of product named {product.Name} (from {formerPrice} to {viewModel.UpdatedPrice}.");
-            
+
             return ServiceResult.Success();
         }
 
@@ -278,7 +278,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
         int[] productIds,
         DateTime updateSchedule)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
+        if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -339,7 +339,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
 
     public async Task<ServiceResult> RestartProductSaleAsync(string managerId, int productId, DateTime updateSchedule)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
+        if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedError);
         }
@@ -409,7 +409,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
         var productsToUpdate = await DbContext.Product
             .Where(x => productIds.Contains(x.Id))
             .ToListAsync();
-            
+
         DbContext.Product.UpdateRange(productsToUpdate.Select(x =>
         {
             x.IsDiscontinued = isDiscontinued;
@@ -421,8 +421,8 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     }
 
     private async Task<ServiceResult> ScheduleProductPriceUpdate(
-        string staffId, 
-        int productId, 
+        string staffId,
+        int productId,
         UpdateProductPriceViewModel viewModel)
     {
         if (viewModel.Schedule!.Value.IsBetween(DateTime.Now, DateTime.Now.AddDays(7)))
@@ -450,6 +450,6 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
 
     private async Task<bool> IsStaffIdValid(string userId)
     {
-        return await _authorizationService.IsUserInRoles(userId, RoleNames.InternalPersonnelRoles);
+        return await _roleAuthorizer.IsUserInRoles(userId, RoleNames.InternalPersonnelRoles);
     }
 }

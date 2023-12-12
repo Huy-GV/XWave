@@ -1,5 +1,5 @@
 using System;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Hangfire;
@@ -41,11 +41,7 @@ public class Startup
         services.AddControllers();
         services.AddDefaultXWaveServices();
 
-        var dockerEnv = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER");
-        var dbConnectionString = string.IsNullOrEmpty(dockerEnv)
-            ? Configuration.GetConnectionString("DefaultConnection")
-            : Configuration.GetConnectionString("ContainerConnection");
-
+        var dbConnectionString = GetDbConnectionString();   
         services.AddDatabase(dbConnectionString);
         services.AddHangFireBackgroundServices(dbConnectionString);
 
@@ -107,6 +103,27 @@ public class Startup
                     Version = "v1",
                 });
         });
+
+        string GetDbConnectionString()
+        {
+            var dockerEnv = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER");
+            var (connectionKey, locationKey) = string.IsNullOrEmpty(dockerEnv)
+                ? ("DefaultConnection", "DefaultDbLocation")
+                : ("ContainerConnection", "ContainerDbLocation");
+
+            var connection = Configuration.GetConnectionString(connectionKey);
+            var dbLocation = Configuration.GetConnectionString(locationKey);
+
+            if (string.IsNullOrEmpty(dbLocation))
+            {
+                return connection;
+            }
+
+            var dbDirectory = Path.GetDirectoryName(dbLocation) 
+                ?? throw new InvalidOperationException("Invalid database directory path");
+            Directory.CreateDirectory(dbDirectory);
+            return $"{connection}AttachDbFileName={dbLocation};";
+        }
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

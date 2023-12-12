@@ -15,12 +15,12 @@ namespace XWave.Web.Controllers;
 [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
 public class ActivityController : ControllerBase
 {
-    private readonly IActivityService _staffActivityService;
+    private readonly IStaffActivityLogger _staffActivityService;
 
     private readonly AuthenticationHelper _authenticationHelper;
 
     public ActivityController(
-        IActivityService staffActivityService,
+        IStaffActivityLogger staffActivityService,
         AuthenticationHelper authenticationHelper)
     {
         _staffActivityService = staffActivityService;

@@ -6,7 +6,6 @@ using XWave.Web.Extensions;
 using XWave.Core.Data.Constants;
 using XWave.Core.Models;
 using XWave.Core.Services.Interfaces;
-using XWave.Web.Data;
 using XWave.Web.Utils;
 
 namespace XWave.Web.Controllers;

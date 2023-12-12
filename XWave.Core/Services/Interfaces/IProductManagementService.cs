@@ -1,6 +1,4 @@
-﻿using XWave.Core.DTOs.Customers;
-using XWave.Core.DTOs.Management;
-using XWave.Core.Models;
+﻿using XWave.Core.DTOs.Management;
 using XWave.Core.Services.Communication;
 using XWave.Core.ViewModels.Management;
 

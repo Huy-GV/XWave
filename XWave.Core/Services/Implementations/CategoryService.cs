@@ -10,8 +10,8 @@ namespace XWave.Core.Services.Implementations;
 
 internal class CategoryService : ServiceBase, ICategoryService
 {
-    private readonly IActivityService _activityService;
-    private readonly IAuthorizationService _authorizationService;
+    private readonly IStaffActivityLogger _activityService;
+    private readonly IRoleAuthorizer _roleAuthorizer;
     private readonly Error _unauthorizedOperationError = new()
     {
         Code = ErrorCode.AuthorizationError,
@@ -20,16 +20,16 @@ internal class CategoryService : ServiceBase, ICategoryService
 
     public CategoryService(
         XWaveDbContext dbContext,
-        IActivityService activityService,
-        IAuthorizationService authorizationService) : base(dbContext)
+        IStaffActivityLogger activityService,
+        IRoleAuthorizer roleAuthorizer) : base(dbContext)
     {
         _activityService = activityService;
-        _authorizationService = authorizationService;
+        _roleAuthorizer = roleAuthorizer;
     }
 
     public async Task<ServiceResult<int>> AddCategoryAsync(string managerId, Category category)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
+        if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult<int>.Failure(_unauthorizedOperationError);
         }
@@ -53,7 +53,7 @@ internal class CategoryService : ServiceBase, ICategoryService
 
     public async Task<ServiceResult> DeleteCategoryAsync(string managerId, int id)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
+        if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }
@@ -98,11 +98,11 @@ internal class CategoryService : ServiceBase, ICategoryService
     }
 
     public async Task<ServiceResult> UpdateCategoryAsync(
-        string managerId, 
-        int id, 
+        string managerId,
+        int id,
         Category updatedCategory)
     {
-        if (!await _authorizationService.IsUserInRole(managerId, RoleNames.Manager))
+        if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
             return ServiceResult.Failure(_unauthorizedOperationError);
         }

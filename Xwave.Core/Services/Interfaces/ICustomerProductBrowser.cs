@@ -1,12 +1,8 @@
 using XWave.Core.DTOs.Customers;
-using XWave.Core.DTOs.Management;
-using XWave.Core.Models;
-using XWave.Core.Services.Communication;
-using XWave.Core.ViewModels.Management;
 
 namespace XWave.Core.Services.Interfaces;
 
-public interface ICustomerProductService
+public interface ICustomerProductBrowser
 {
     /// <summary>
     ///     Find all products with limited details for customers.
