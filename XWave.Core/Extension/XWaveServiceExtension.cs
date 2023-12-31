@@ -9,6 +9,7 @@ using XWave.Core.Services.Implementations;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Utils;
 using XWave.Core.Data.DatabaseSeeding.Seeders;
+using System;
 
 namespace XWave.Core.Extension;
 
@@ -46,16 +47,28 @@ public static class XWaveServiceExtension
         });
     }
 
-    public static void SeedDatabase(this IServiceProvider services)
+    public static async Task SeedDevelopmentDatabaseAsync(this IServiceProvider serviceProvider)
     {
+        using var scope = serviceProvider.CreateScope();
+        var services = scope.ServiceProvider;
         var context = services.GetRequiredService<XWaveDbContext>();
-        context.Database.EnsureDeleted();
-        context.Database.Migrate();
+        await context.Database.EnsureCreatedAsync();
+        await context.Database.MigrateAsync();
 
         UserSeeder.SeedData(services);
         ProductRelatedDataSeeder.SeedData(services);
         PurchaseRelatedDataSeeder.SeedData(services);
         StaffActivitySeeder.SeedData(services);
+    }
+
+    public static async Task SeedProductionDatabaseAsync(this IServiceProvider serviceProvider)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var services = scope.ServiceProvider;
+        var context = services.GetRequiredService<XWaveDbContext>();
+        await context.Database.MigrateAsync();
+
+        UserSeeder.SeedData(services);
     }
 
     public static void AddHangFireBackgroundServices(this IServiceCollection services, string dbConnectionString)
@@ -65,6 +78,7 @@ public static class XWaveServiceExtension
         {
             config.UseSqlServerStorage(dbConnectionString);
         });
+
         services.AddHangfireServer(options =>
         {
             options.SchedulePollingInterval = TimeSpan.FromMinutes(1);
