@@ -2,14 +2,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
 using XWave.Core.Data.Constants;
+using XWave.Core.Data.DatabaseSeeding.Factories;
 using XWave.Core.Models;
 
 namespace XWave.Core.Data.DatabaseSeeding;
 
 internal class UserSeeder
 {
-    public static void SeedData(IServiceProvider serviceProvider)
+    public static async Task SeedDevelopmentDataAsync(IServiceProvider serviceProvider)
     {
         using var context = new XWaveDbContext(
             serviceProvider
@@ -20,14 +22,36 @@ internal class UserSeeder
 
         try
         {
-            CreateRolesAsync(roleManager).Wait();
-            CreateCustomersAsync(userManager, dbContext).Wait();
-            CreateManagersAsync(userManager).Wait();
-            CreateStaffAsync(userManager, dbContext).Wait();
+            await CreateRolesAsync(roleManager);
+            await CreateCustomersAsync(userManager, dbContext);
+            await CreateTestManagersAsync(userManager);
+            await CreateStaffAsync(userManager, dbContext);
         }
         catch (Exception)
         {
             var logger = serviceProvider.GetRequiredService<ILogger<UserSeeder>>();
+            logger.LogError("An error occurred while seeding roles and users");
+            throw;
+        }
+    }
+
+    public static async Task SeedProductionDataAsync(IServiceProvider serviceProvider)
+    {
+        using var context = new XWaveDbContext(
+            serviceProvider
+                .GetRequiredService<DbContextOptions<XWaveDbContext>>());
+        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var dbContext = serviceProvider.GetRequiredService<XWaveDbContext>();
+
+        var logger = serviceProvider.GetRequiredService<ILogger<UserSeeder>>();
+        try
+        {
+            await CreateRolesAsync(roleManager);
+            await CreateProductionManagersAsync(userManager, logger);
+        }
+        catch (Exception)
+        {
             logger.LogError("An error occurred while seeding roles and users");
             throw;
         }
@@ -57,6 +81,7 @@ internal class UserSeeder
             RegistrationDate = DateTime.Now,
             PhoneNumber = "98765432"
         };
+
         var customer2 = new ApplicationUser
         {
             UserName = "jake_customer",
@@ -94,45 +119,18 @@ internal class UserSeeder
     {
         var managers = await userManager.GetUsersInRoleAsync(RoleNames.Manager);
 
-        var staff1 = new ApplicationUser
+        var staffUsers = TestUserFactory.StaffUsers();
+        foreach (var staffUser in staffUsers)
         {
-            UserName = "paul_staff",
-            FirstName = "Paul",
-            LastName = "Applebee",
-            RegistrationDate = DateTime.Now,
-            PhoneNumber = "98765432"
-        };
-        
-        var staff2 = new ApplicationUser
+            await CreateSingleStaffAsync(userManager, staffUser);
+        }
+
+        var staffAccounts = TestUserFactory.StaffAccounts(managers, staffUsers);
+        foreach (var staffAccount in staffAccounts)
         {
-            UserName = "liz_staff",
-            FirstName = "Elizabeth",
-            LastName = "Applebee",
-            RegistrationDate = DateTime.Now,
-            PhoneNumber = "2345678"
-        };
+            dbContext.StaffAccount.Add(staffAccount);
+        }
 
-        await CreateSingleStaffAsync(userManager, staff1);
-        await CreateSingleStaffAsync(userManager, staff2);
-
-        var staffAccount1 = new StaffAccount()
-        {
-            ContractStartDate = DateTime.Now,
-            ImmediateManagerId = managers[0].Id,
-            StaffId = staff1.Id,
-            Address = "2 Humes, Bright"
-        };
-
-        var staffAccount2 = new StaffAccount()
-        {
-            ContractStartDate = DateTime.Now,
-            ImmediateManagerId = managers[1].Id,
-            StaffId = staff2.Id,
-            Address = "3 Second, Healesville"
-        };
-
-        dbContext.StaffAccount.Add(staffAccount1);
-        dbContext.StaffAccount.Add(staffAccount2);
         await dbContext.SaveChangesAsync();
     }
 
@@ -144,29 +142,37 @@ internal class UserSeeder
         await userManager.AddToRoleAsync(staff, RoleNames.Staff);
     }
 
-    private static async Task CreateManagersAsync(
-        UserManager<ApplicationUser> userManager)
+    private static async Task CreateTestManagersAsync(UserManager<ApplicationUser> userManager)
     {
-        var manager1 = new ApplicationUser
+        var managers = TestUserFactory.Managers();
+        foreach (var manager in managers)
         {
-            UserName = "gia_manager",
-            FirstName = "Gia",
-            LastName = "Applebee",
+            await CreateManagerAsync(manager, userManager);
+        }
+    }
+
+    private static async Task CreateProductionManagersAsync(
+        UserManager<ApplicationUser> userManager,
+        ILogger<UserSeeder> logger)
+    {
+        var manager = new ApplicationUser
+        {
+            UserName = "admin",
+            FirstName = "Admin",
+            LastName = "Administrator",
             RegistrationDate = DateTime.Now,
-            PhoneNumber = "98765432"
+            PhoneNumber = "00000000"
         };
 
-        var manager2 = new ApplicationUser
+        if (!await userManager.Users.AnyAsync(x => x.UserName == manager.UserName))
         {
-            UserName = "huy_manager",
-            FirstName = "Huy",
-            LastName = "Applebee",
-            RegistrationDate = DateTime.Now,
-            PhoneNumber = "98765432"
-        };
-
-        await CreateManagerAsync(manager1, userManager);
-        await CreateManagerAsync(manager2, userManager);
+            logger.LogInformation("Seeding manager user in production");
+            await CreateManagerAsync(manager, userManager);
+        }
+        else
+        {
+            logger.LogWarning("Manager user already seeded in production");
+        }
     }
 
     private static async Task CreateManagerAsync(

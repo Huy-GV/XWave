@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,7 +9,7 @@ namespace XWave.Core.Data.DatabaseSeeding.Seeders;
 
 internal class PurchaseRelatedDataSeeder
 {
-    public static void SeedData(IServiceProvider serviceProvider)
+    public static async Task SeedData(IServiceProvider serviceProvider)
     {
         using var context = new XWaveDbContext(
             serviceProvider
@@ -19,8 +19,8 @@ internal class PurchaseRelatedDataSeeder
 
         try
         {
-            var user1 = userManager.FindByNameAsync("john_customer").Result;
-            var user2 = userManager.FindByNameAsync("jake_customer").Result;
+            var user1 = await userManager.FindByNameAsync("john_customer");
+            var user2 = await userManager.FindByNameAsync("jake_customer");
 
             if (user1 is null || user2 is null)
             {
@@ -35,10 +35,10 @@ internal class PurchaseRelatedDataSeeder
             }
 
             var users = new List<ApplicationUser> { user1, user2 };
-            var paymentAccounts = CreatePaymentAccounts(context);
-            var orders = CreateOrders(context, paymentAccounts, users);
-            CreateOrderDetail(context, orders, products);
-            CreatePaymentDetail(context, users, paymentAccounts);
+            var paymentAccounts = await CreatePaymentAccountsAsync(context);
+            var orders = await CreateOrdersAsync(context, paymentAccounts, users);
+            await CreateOrderDetailAsync(context, orders, products);
+            await CreatePaymentDetailAsync(context, users, paymentAccounts);
         }
         catch (Exception)
         {
@@ -48,38 +48,38 @@ internal class PurchaseRelatedDataSeeder
         }
     }
 
-    private static List<PaymentAccount> CreatePaymentAccounts(XWaveDbContext dbContext)
+    private static async Task<List<PaymentAccount>> CreatePaymentAccountsAsync(XWaveDbContext dbContext)
     {
         var paymentAccounts = TestPaymentAccountFactory.PaymentAccounts();
         dbContext.PaymentAccount.AddRange(paymentAccounts);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
         return paymentAccounts;
     }
 
-    private static List<Order> CreateOrders(
+    private static async Task<List<Order>> CreateOrdersAsync(
         XWaveDbContext dbContext,
         List<PaymentAccount> paymentAccounts,
         List<ApplicationUser> users)
     {
         var orders = TestOrderFactory.Orders(users, paymentAccounts);
         dbContext.Order.AddRange(orders);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
         return orders;
     }
 
-    private static void CreateOrderDetail(XWaveDbContext dbContext, List<Order> orders, List<Product> products)
+    private static async Task CreateOrderDetailAsync(XWaveDbContext dbContext, List<Order> orders, List<Product> products)
     {
         dbContext.OrderDetails.AddRange(TestOrderFactory.OrderDetails(products, orders));
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
     }
 
-    private static void CreatePaymentDetail(
+    private static async Task CreatePaymentDetailAsync(
         XWaveDbContext dbContext,
         List<ApplicationUser> users,
         List<PaymentAccount> paymentAccounts)
     {
         var paymentAccountDetails = TestPaymentAccountFactory.PaymentAccountDetails(paymentAccounts, users);
         dbContext.PaymentAccountDetails.AddRange(paymentAccountDetails);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
     }
 }

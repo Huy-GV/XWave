@@ -9,7 +9,7 @@ namespace XWave.Core.Data.DatabaseSeeding.Seeders;
 
 internal class ProductRelatedDataSeeder
 {
-    public static void SeedData(IServiceProvider serviceProvider)
+    public static async Task SeedData(IServiceProvider serviceProvider)
     {
         using var context = new XWaveDbContext(
             serviceProvider.GetRequiredService<DbContextOptions<XWaveDbContext>>());
@@ -18,9 +18,9 @@ internal class ProductRelatedDataSeeder
 
         try
         {
-            var categories = CreateCategories(context);
-            var discounts = CreateDiscounts(context);
-            CreateProducts(context, categories, discounts);
+            var categories = await CreateCategoriesAsync(context);
+            var discounts = await CreateDiscountsAsync(context);
+            await CreateProductsAsync(context, categories, discounts);
         }
         catch (Exception)
         {
@@ -30,30 +30,30 @@ internal class ProductRelatedDataSeeder
         }
     }
 
-    private static List<Category> CreateCategories(XWaveDbContext dbContext)
+    private static async Task<List<Category>> CreateCategoriesAsync(XWaveDbContext dbContext)
     {
         var categories = TestCategoryFactory.Categories();
         dbContext.Category.AddRange(categories);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
         return categories;
     }
 
-    private static List<Product> CreateProducts(
+    private static async Task<List<Product>> CreateProductsAsync(
         XWaveDbContext dbContext,
         List<Category> categories,
         List<Discount> discounts)
     {
         var products = TestProductFactory.Products(categories, discounts);
         dbContext.Product.AddRange(products);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
         return products;
     }
 
-    private static List<Discount> CreateDiscounts(XWaveDbContext dbContext)
+    private static async Task<List<Discount>> CreateDiscountsAsync(XWaveDbContext dbContext)
     {
         var discounts = TestDiscountFactory.Discounts();
         dbContext.Discount.AddRange(discounts);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync(); 
         return discounts;
     }
 }

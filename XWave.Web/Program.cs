@@ -28,7 +28,6 @@ public class Program
         var builder = CreateHostBuilder(args);
         var app = builder.Build();
 
-
         if (app.Environment.IsDevelopment())
         {
             await app.Services.SeedDevelopmentDatabaseAsync();

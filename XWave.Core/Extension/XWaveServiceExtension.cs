@@ -52,13 +52,13 @@ public static class XWaveServiceExtension
         using var scope = serviceProvider.CreateScope();
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<XWaveDbContext>();
-        await context.Database.EnsureCreatedAsync();
+        await context.Database.EnsureDeletedAsync();
         await context.Database.MigrateAsync();
 
-        UserSeeder.SeedData(services);
-        ProductRelatedDataSeeder.SeedData(services);
-        PurchaseRelatedDataSeeder.SeedData(services);
-        StaffActivitySeeder.SeedData(services);
+        await UserSeeder.SeedDevelopmentDataAsync(services);
+        await ProductRelatedDataSeeder.SeedData(services);
+        await PurchaseRelatedDataSeeder.SeedData(services);
+        await StaffActivitySeeder.SeedData(services);
     }
 
     public static async Task SeedProductionDatabaseAsync(this IServiceProvider serviceProvider)
@@ -68,7 +68,7 @@ public static class XWaveServiceExtension
         var context = services.GetRequiredService<XWaveDbContext>();
         await context.Database.MigrateAsync();
 
-        UserSeeder.SeedData(services);
+        await UserSeeder.SeedProductionDataAsync(services);
     }
 
     public static void AddHangFireBackgroundServices(this IServiceCollection services, string dbConnectionString)

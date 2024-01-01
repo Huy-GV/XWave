@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,7 +9,7 @@ namespace XWave.Core.Data.DatabaseSeeding;
 
 internal class StaffActivitySeeder
 {
-    public static void SeedData(IServiceProvider serviceProvider)
+    public static async Task SeedData(IServiceProvider serviceProvider)
     {
         using var context = new XWaveDbContext(
             serviceProvider
@@ -18,7 +18,7 @@ internal class StaffActivitySeeder
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         try
         {
-            CreateStaffActivityLogsAsync(context, userManager).Wait();
+            await CreateStaffActivityLogsAsync(context, userManager);
         }
         catch (Exception)
         {
