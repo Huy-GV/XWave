@@ -23,9 +23,12 @@ namespace XWave.Web;
 
 public class Program
 {
+    // well known environment variable set when the application is run in a container
+    private const string DotnetRunningInContainerEnvVariable = "DOTNET_RUNNING_IN_CONTAINER";
+
     public static async Task Main(string[] args)
     {
-        var builder = CreateHostBuilder(args);
+        var builder = CreateApplicationBuilder(args);
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
@@ -68,7 +71,7 @@ public class Program
         await app.RunAsync();
     }
 
-    private static WebApplicationBuilder CreateHostBuilder(string[] args)
+    private static WebApplicationBuilder CreateApplicationBuilder(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.Configure<Jwt>(builder.Configuration.GetSection("Jwt"));
@@ -79,7 +82,6 @@ public class Program
         builder.Services.AddDefaultXWaveServices();
 
         var dbConnectionString = GetDbConnectionString();
-        Console.WriteLine($"\n{dbConnectionString}\n");
         builder.Services.AddDatabase(dbConnectionString);
         builder.Services.AddHangFireBackgroundServices(dbConnectionString);
 
@@ -97,7 +99,8 @@ public class Program
                     OnMessageReceived = context =>
                     {
                         var cookieName = builder.Configuration["JwtCookie:Name"];
-                        // accommodate clients without cookies
+
+                        // set token to accommodate clients that do not support cookies
                         if (string.IsNullOrEmpty(context.Token) &&
                             context.Request.Cookies.ContainsKey(cookieName))
                         {
@@ -161,7 +164,7 @@ public class Program
 
         string GetLogFileLocation()
         {
-            var dockerEnv = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER");
+            var dockerEnv = Environment.GetEnvironmentVariable(DotnetRunningInContainerEnvVariable);
             var logDirectory = string.IsNullOrEmpty(dockerEnv)
                 ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "XWave")
                 : "log";
@@ -172,7 +175,7 @@ public class Program
 
         string GetDbConnectionString()
         {
-            var dockerEnv = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER");
+            var dockerEnv = Environment.GetEnvironmentVariable(DotnetRunningInContainerEnvVariable);
             var (connectionKey, locationKey) = string.IsNullOrEmpty(dockerEnv)
                 ? ("DefaultConnection", "DefaultDbLocation")
                 : ("ContainerConnection", "ContainerDbLocation");
@@ -187,6 +190,8 @@ public class Program
 
             var dbDirectory = Path.GetDirectoryName(dbLocation)
                 ?? throw new InvalidOperationException("Invalid database directory path");
+
+            Console.WriteLine($"Creating database directory {dbDirectory}");
             Directory.CreateDirectory(dbDirectory);
             return $"{connection}AttachDbFileName={dbLocation};";
         }

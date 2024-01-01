@@ -22,9 +22,7 @@
     - Unit testing: Moq, FsCheck, FluentAssertions
 
 ## Build and Run
-
 ### Run locally:
-
 - Install required Nuget packages:
     ```bash
     dotnet restore
@@ -36,17 +34,15 @@
     ```
 
 ### Run via Docker:
-
 - Start the Docker engine and ensure it is targeting Linux
 - Generate a certificate and store it in `~/.aspnet/https` on the host machine, modify `docker-compose.yaml` to use the correct certificate name, password and host directory.
-- Run the command:
+- Run the below command in admin mode:
     ```bash
-    cd /directory/containing/docker-compose.yaml
+    cd /directory/containing/docker-compose.yaml/
     docker compose up
     ```
 
 ### Usage
-
 - Sending request to retrieve available products: open `https://localhost:5000/api/product`
 - To view full Swagger API documentation:
     - Start the server in `Debug` mode:
