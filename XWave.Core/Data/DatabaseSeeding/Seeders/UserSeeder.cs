@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -16,6 +17,8 @@ internal class UserSeeder
         using var context = new XWaveDbContext(
             serviceProvider
                 .GetRequiredService<DbContextOptions<XWaveDbContext>>());
+
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var dbContext = serviceProvider.GetRequiredService<XWaveDbContext>();
@@ -24,7 +27,7 @@ internal class UserSeeder
         {
             await CreateRolesAsync(roleManager);
             await CreateCustomersAsync(userManager, dbContext);
-            await CreateTestManagersAsync(userManager);
+            await CreateTestManagersAsync(userManager, configuration);
             await CreateStaffAsync(userManager, dbContext);
         }
         catch (Exception)
@@ -40,6 +43,8 @@ internal class UserSeeder
         using var context = new XWaveDbContext(
             serviceProvider
                 .GetRequiredService<DbContextOptions<XWaveDbContext>>());
+
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var dbContext = serviceProvider.GetRequiredService<XWaveDbContext>();
@@ -48,7 +53,7 @@ internal class UserSeeder
         try
         {
             await CreateRolesAsync(roleManager);
-            await CreateProductionManagersAsync(userManager, logger);
+            await CreateProductionManagersAsync(userManager, logger, configuration);
         }
         catch (Exception)
         {
@@ -142,18 +147,21 @@ internal class UserSeeder
         await userManager.AddToRoleAsync(staff, RoleNames.Staff);
     }
 
-    private static async Task CreateTestManagersAsync(UserManager<ApplicationUser> userManager)
+    private static async Task CreateTestManagersAsync(
+        UserManager<ApplicationUser> userManager,
+        IConfiguration configuration)
     {
         var managers = TestUserFactory.Managers();
         foreach (var manager in managers)
         {
-            await CreateManagerAsync(manager, userManager);
+            await CreateManagerAsync(manager, userManager, configuration);
         }
     }
 
     private static async Task CreateProductionManagersAsync(
         UserManager<ApplicationUser> userManager,
-        ILogger<UserSeeder> logger)
+        ILogger<UserSeeder> logger,
+        IConfiguration configuration)
     {
         var manager = new ApplicationUser
         {
@@ -167,7 +175,7 @@ internal class UserSeeder
         if (!await userManager.Users.AnyAsync(x => x.UserName == manager.UserName))
         {
             logger.LogInformation("Seeding manager user in production");
-            await CreateManagerAsync(manager, userManager);
+            await CreateManagerAsync(manager, userManager, configuration);
         }
         else
         {
@@ -177,9 +185,12 @@ internal class UserSeeder
 
     private static async Task CreateManagerAsync(
         ApplicationUser manager,
-        UserManager<ApplicationUser> userManager)
+        UserManager<ApplicationUser> userManager,
+        IConfiguration configuration)
     {
-        await userManager.CreateAsync(manager, "Password123@@");
+        var password = configuration.GetValue<string>("SeedData:Password");
+
+        await userManager.CreateAsync(manager, password);
         await userManager.AddToRoleAsync(manager, RoleNames.Manager);
     }
 }

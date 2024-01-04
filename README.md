@@ -4,10 +4,10 @@
 
 - Online store web server
 - Features:
-    - View and Purchase Products
-    - View transaction history and manage payment accounts
-    - Manage products as staff users
-    - Manage staff activity as admin users
+    - View and purchase products as customer users
+    - View transaction history and manage payment accounts as customer users
+    - Manage products as staff and manager users
+    - Manage staff activity as manager users
 
 ## Build and Run
 ### Pre-requisites
@@ -26,12 +26,17 @@
     ```bash
     dotnet user-secrets init
     ```
+- Set up passwords for seeded user account:
+    ```bash
+    cd /directory/containing/XWave.Web.csproj/
+    dotnet user-secrets set "SeedData:Password" "YourTestPassword"
+    ```
 - Set up configurations for JWT authentication:
     ``` bash
     cd /directory/containing/XWave.Web.csproj/
 
     dotnet user-secrets set "Jwt:Issuer" "YourIssuerName"
-    dotnet user-secrets set "Jwt:Key" "VeryLongAlphanumericKey"
+    dotnet user-secrets set "Jwt:Key" "AlphanumericKeyAtLeast16CharactersInLength"
     dotnet user-secrets set "Jwt:Audience" "YourAudienceName"
     ```
 - Set up database connection
