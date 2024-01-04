@@ -181,7 +181,7 @@ public class Program
 
         string GetDbConnectionString()
         {
-            var (connectionKey, locationKey) = ("ContainerConnection", "ContainerDbLocation");
+            var (connectionKey, locationKey) = ("DefaultConnection", "DefaultDbLocation");
             var connection = builder.Configuration.GetConnectionString(connectionKey);
             var dbLocation = builder.Configuration.GetConnectionString(locationKey);
 
