@@ -9,27 +9,48 @@
     - Manage products as staff users
     - Manage staff activity as admin users
 
-## Pre-requisites
-
+## Build and Run
+### Pre-requisites
 - Required installations:
     - [.NET 6.0 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
     - [Docker Community](https://www.docker.com/get-started/)
     - [Microsoft SQL Server](https://www.microsoft.com/en-au/sql-server/sql-server-downloads)
-    - Microsoft Visual Studio 2022 or VS Code
-- Packages:
-    - ASP.NET Core
-    - Entity Framework Core
-    - Unit testing: Moq, FsCheck, FluentAssertions
-
-## Build and Run
-### Run locally:
 - Install required Nuget packages:
-    ```bash
+    ``` bash
+    cd /directory/containing/XWave.sln/
     dotnet restore
     ```
+
+### Set Up Development Environment
+- Initialize user secret storage:
+    ```bash
+    dotnet user-secrets init
+    ```
+- Set up configurations for JWT authentication:
+    ``` bash
+    cd /directory/containing/XWave.Web.csproj/
+
+    dotnet user-secrets set "Jwt:Issuer" "YourIssuerName"
+    dotnet user-secrets set "Jwt:Key" "VeryLongAlphanumericKey"
+    dotnet user-secrets set "Jwt:Audience" "YourAudienceName"
+    ```
+- Set up database connection
+    ``` bash
+    cd /directory/containing/XWave.Web.csproj/
+
+    # Optionally set custom database location
+    # If this directory does not exist, it will automatically be created
+    dotnet user-secrets set "ConnectionStrings:DefaultDbLocation" "\\Path\\To\\Database\\Directory\\DatabaseName.mdf"
+
+    # Set up MS SQL server connection string
+    # Example using a local server: "Server=(localdb)\\mssqllocaldb;Database=XWave;Trusted_Connection=True;MultipleActiveResultSets=false;
+    dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Your;Database;Connection;String;"
+    ```
+
+### Run locally:
 - Start the web server in `Release` mode:
     ```bash
-    cd /directory/containing/XWave.Web.csproj
+    cd /directory/containing/XWave.Web.csproj/
     dotnet run --configuration Release
     ```
 
