@@ -74,6 +74,12 @@ public class Program
     private static WebApplicationBuilder CreateApplicationBuilder(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(DotnetRunningInContainerEnvVariable)))
+        {
+            // some configurations such as JWT and database connection are configured via environment variables when deployed in Docker
+            builder.Configuration.AddEnvironmentVariables();
+        }
+
         builder.Services.Configure<Jwt>(builder.Configuration.GetSection("Jwt"));
         builder.Services.Configure<JwtCookie>(builder.Configuration.GetSection("JwtCookie"));
 
@@ -175,11 +181,7 @@ public class Program
 
         string GetDbConnectionString()
         {
-            var dockerEnv = Environment.GetEnvironmentVariable(DotnetRunningInContainerEnvVariable);
-            var (connectionKey, locationKey) = string.IsNullOrEmpty(dockerEnv)
-                ? ("DefaultConnection", "DefaultDbLocation")
-                : ("ContainerConnection", "ContainerDbLocation");
-
+            var (connectionKey, locationKey) = ("ContainerConnection", "ContainerDbLocation");
             var connection = builder.Configuration.GetConnectionString(connectionKey);
             var dbLocation = builder.Configuration.GetConnectionString(locationKey);
 
