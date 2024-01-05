@@ -47,7 +47,7 @@
     dotnet user-secrets set "ConnectionStrings:DefaultDbLocation" "\\Path\\To\\Database\\Directory\\DatabaseName.mdf"
 
     # Set up MS SQL server connection string
-    # Example using a local server: "Server=(localdb)\\mssqllocaldb;Database=XWave;Trusted_Connection=True;MultipleActiveResultSets=false;
+    # Example using a local server: "Server=(localdb)\\mssqllocaldb;Database=XWave;Trusted_Connection=True;MultipleActiveResultSets=false;"
     dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Your;Database;Connection;String;"
     ```
 - Start the web server in `Release` mode:
@@ -60,14 +60,14 @@
 - Start the Docker engine and ensure it is targeting *Linux*
 - Generate a certificate and store it in `~/.aspnet/https` on the host machine
 - Create an environment file named `docker.env` and specify the following fields:
-    - SeedData__Password: equivalent to SeedData:Password
-    - Jwt__Key: equivalent to Jwt:Key
-    - Jwt__Issuer: equivalent to Jwt:Issuer
-    - Jwt__Audience: equivalent to Jwt:Audience
-    - ConnectionStrings__DefaultConnection: equivalent to ConnectionStrings:DefaultConnection
-    - SqlServer__Password: password of MS SQL Server database
-    - ASPNETCORE_Kestrel__Certificates__Default__Password: password of HTTPS certificate
-    - ASPNETCORE_Kestrel__Certificates__Default__Path: path to certificate file
+    - `SeedData__Password`: equivalent to `SeedData:Password`
+    - `Jwt__Key`: equivalent to `Jwt:Key`
+    - `Jwt__Issuer`: equivalent to `Jwt:Issuer`
+    - `Jwt__Audience`: equivalent to `Jwt:Audience`
+    - `ConnectionStrings__DefaultConnection`: equivalent to `ConnectionStrings:DefaultConnection`
+    - `SqlServer__Password`: password of MS SQL Server database
+    - `ASPNETCORE_Kestrel__Certificates__Default__Password`: password of HTTPS certificate
+    - `ASPNETCORE_Kestrel__Certificates__Default__Path`: path to certificate file
     - Example:
         ```env
         # docker.env
