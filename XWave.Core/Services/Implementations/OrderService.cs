@@ -13,25 +13,16 @@ namespace XWave.Core.Services.Implementations;
 
 internal class OrderService : ServiceBase, IOrderService
 {
-    private readonly IAuthenticator _authenticator;
-    private readonly ILogger<OrderService> _logger;
-    private readonly IProductManagementService _productService;
     private readonly ICustomerAccountService _customerAccountService;
     private readonly IPaymentAccountService _paymentService;
     private readonly IDiscountedProductPriceCalculator _discountedPriceCalculator;
 
     public OrderService(
         XWaveDbContext dbContext,
-        ILogger<OrderService> logger,
-        IAuthenticator authenticator,
-        IProductManagementService productService,
         ICustomerAccountService customerAccountService,
         IPaymentAccountService paymentService,
         IDiscountedProductPriceCalculator discountedPriceCalculator) : base(dbContext)
     {
-        _logger = logger;
-        _authenticator = authenticator;
-        _productService = productService;
         _customerAccountService = customerAccountService;
         _paymentService = paymentService;
         _discountedPriceCalculator = discountedPriceCalculator;

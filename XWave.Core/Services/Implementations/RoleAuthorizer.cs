@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using XWave.Core.Data;
 using XWave.Core.Services.Interfaces;
 
@@ -46,7 +46,7 @@ internal class RoleAuthorizer : ServiceBase, IRoleAuthorizer
                 (role, userRole) => new
                 {
                     RoleName = role.Name,
-                    UserId = userRole.UserId
+                    userRole.UserId
                 })
             .Where(x => x.UserId == userId)
             .Select(x => x.RoleName);

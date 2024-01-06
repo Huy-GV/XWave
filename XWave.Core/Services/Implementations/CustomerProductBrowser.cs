@@ -27,7 +27,7 @@ internal class CustomerProductBrowser : ServiceBase, ICustomerProductBrowser
             .AsNoTracking()
             .Include(p => p.Discount)
             .Include(p => p.Category)
-            .Where(p => !p.IsDiscontinued)
+            .Where(p => !p.IsDiscontinued && !p.IsDeleted)
             .ToListAsync();
 
         return productDtos
@@ -45,6 +45,7 @@ internal class CustomerProductBrowser : ServiceBase, ICustomerProductBrowser
             .AsNoTracking()
             .Include(p => p.Discount)
             .Include(p => p.Category)
+            .Where(p => !p.IsDiscontinued && !p.IsDeleted)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (product is null)

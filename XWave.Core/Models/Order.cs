@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace XWave.Core.Models;
@@ -11,10 +11,15 @@ public class Order : IEntity
     [Column(TypeName = "datetime")]
     public DateTime Date { get; set; } = DateTime.Now;
 
-    public string CustomerId { get; set; }
-    public string DeliveryAddress { get; set; }
+    public string DeliveryAddress { get; set; } = null!;
+
+    public string CustomerId { get; set; } = null!;
+
     public int PaymentAccountId { get; set; }
-    public CustomerAccount Customer { get; set; }
-    public PaymentAccount Payment { get; set; }
-    public ICollection<OrderDetails> OrderDetails { get; set; }
+
+    public CustomerAccount Customer { get; set; } = null!;
+
+    public PaymentAccount Payment { get; set; } = null!;
+
+    public ICollection<OrderDetails> OrderDetails { get; set; } = new List<OrderDetails>();
 }

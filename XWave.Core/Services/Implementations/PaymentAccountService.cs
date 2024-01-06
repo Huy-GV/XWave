@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
@@ -13,17 +13,14 @@ namespace XWave.Core.Services.Implementations;
 
 internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 {
-    private readonly ILogger<PaymentAccountService> _logger;
     private readonly IRoleAuthorizer _roleAuthorizer;
     private readonly ICustomerAccountService _customerAccountService;
 
     public PaymentAccountService(
         XWaveDbContext dbContext,
-        ILogger<PaymentAccountService> logger,
         IRoleAuthorizer roleAuthorizer,
         ICustomerAccountService customerAccountService) : base(dbContext)
     {
-        _logger = logger;
         _roleAuthorizer = roleAuthorizer;
         _customerAccountService = customerAccountService;
     }
@@ -134,6 +131,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
     {
         var paymentAccount = await DbContext.PaymentAccount
             .Include(x => x.PaymentAccountDetails)
+            .Where(x => !x.IsDeleted)
             .FirstOrDefaultAsync(x => x.PaymentAccountDetails.PaymentAccountId == paymentAccountId);
 
         if (paymentAccount is null ||
@@ -162,6 +160,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
     {
         return await DbContext.PaymentAccountDetails
             .Include(x => x.Payment)
+            .Where(x => !x.Payment.IsDeleted)
             .AnyAsync(
                 x => x.CustomerId == customerId &&
                 x.PaymentAccountId == paymentId &&
@@ -205,7 +204,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
 
         var paymentAccounts = await DbContext.PaymentAccount
             .Include(p => p.PaymentAccountDetails)
-            .Where(p => p.PaymentAccountDetails.CustomerId == customerId)
+            .Where(p => p.PaymentAccountDetails.CustomerId == customerId && !p.IsDeleted)
             .Select(p => new PaymentAccountUsageDto
             {
                 Id = p.Id,
@@ -232,6 +231,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
     {
         var paymentAccount = await DbContext.PaymentAccount
             .Include(x => x.PaymentAccountDetails)
+            .Where(x => !x.IsDeleted)
             .FirstOrDefaultAsync(x => x.PaymentAccountDetails.PaymentAccountId == paymentAccountId);
 
         if (paymentAccount is null ||

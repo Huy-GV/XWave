@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Management;
@@ -16,7 +15,6 @@ internal class DiscountService : ServiceBase, IDiscountService
 {
     private readonly IStaffActivityLogger _activityService;
     private readonly IBackgroundJobService _backgroundJobService;
-    private readonly ILogger<DiscountService> _logger;
     private readonly IRoleAuthorizer _roleAuthorizer;
     private readonly Error _unauthorizedOperationError = new()
     {
@@ -28,10 +26,8 @@ internal class DiscountService : ServiceBase, IDiscountService
         XWaveDbContext dbContext,
         IStaffActivityLogger activityService,
         IRoleAuthorizer roleAuthorizer,
-        ILogger<DiscountService> logger,
         IBackgroundJobService backgroundJobService) : base(dbContext)
     {
-        _logger = logger;
         _activityService = activityService;
         _roleAuthorizer = roleAuthorizer;
         _backgroundJobService = backgroundJobService;

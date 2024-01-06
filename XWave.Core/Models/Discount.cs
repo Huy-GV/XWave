@@ -11,9 +11,11 @@ public class Discount : IEntity
     [Range(1, 100, ErrorMessage = "Discount percentage outside valid range")]
     public uint Percentage { get; set; }
 
-    [Required] [Column(TypeName = "date")] public DateTime StartDate { get; set; }
+    [Required] [Column(TypeName = "date")] 
+    public DateTime StartDate { get; set; }
 
-    [Required] [Column(TypeName = "date")] public DateTime EndDate { get; set; }
+    [Required] [Column(TypeName = "date")] 
+    public DateTime EndDate { get; set; }
 
-    public ICollection<Product> Products { get; set; }
+    public ICollection<Product> Products { get; set; } = new List<Product>();
 }

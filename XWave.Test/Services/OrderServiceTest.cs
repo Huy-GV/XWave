@@ -19,12 +19,9 @@ namespace XWave.Test.Services;
 public class OrderServiceTest : BaseTest
 {
     private readonly IOrderService _orderService;
-    private readonly Mock<IAuthenticator> _mockAuthService = new();
     private readonly Mock<ICustomerAccountService> _mockCustomerAccountService = new();
-    private readonly Mock<IProductManagementService> _mockProductService = new();
     private readonly Mock<IPaymentAccountService> _mockPaymentService = new();
     private readonly Mock<IDiscountedProductPriceCalculator> _mockDiscountCalculator = new();
-    private readonly Mock<ILogger<OrderService>> _mockLog = new();
 
     private readonly List<Product> _testProducts;
 
@@ -47,9 +44,6 @@ public class OrderServiceTest : BaseTest
 
         _orderService = new OrderService(
             dbContext,
-            _mockLog.Object,
-            _mockAuthService.Object,
-            _mockProductService.Object,
             _mockCustomerAccountService.Object,
             _mockPaymentService.Object,
             _mockDiscountCalculator.Object);

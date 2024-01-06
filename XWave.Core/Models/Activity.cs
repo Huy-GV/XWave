@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
@@ -21,16 +21,16 @@ public class Activity : IEntity
 
     [Required]
     [StringLength(50, MinimumLength = 5)]
-    public string EntityType { get; set; }
+    public string EntityType { get; set; } = string.Empty;
 
     [Required]
     [StringLength(200, MinimumLength = 5)]
-    public string Info { get; set; }
+    public string Info { get; set; } = string.Empty;
 
-    public string UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public OperationType OperationType { get; set; }
 
-    [JsonIgnore] public ApplicationUser AppUser { get; set; }
+    public ApplicationUser AppUser { get; set; } = null!;
 }
