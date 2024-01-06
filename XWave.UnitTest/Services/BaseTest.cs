@@ -53,4 +53,13 @@ public class BaseTest : IDisposable
         }
 
     }
+
+    protected void AssertEqualServiceResults(ServiceResult result1, ServiceResult result2)
+    {
+        result1.Succeeded.Should().Be(result2.Succeeded);
+        if (!result1.Succeeded)
+        { 
+            result1.Error.Should().BeEquivalentTo(result2.Error);
+        }
+    }
 }

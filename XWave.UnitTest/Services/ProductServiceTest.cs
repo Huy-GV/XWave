@@ -69,13 +69,13 @@ public class ProductServiceTest : BaseTest
             testProductIds.ToArray(),
             DateTime.MaxValue);
 
-        result
-            .Should()
-            .BeEquivalentTo(ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Products with the following IDs not found: {string.Join(", ", new[] { nonExistentProductId })}.",
-            }));
+        var expected = ServiceResult.Failure(new Error
+        {
+            Code = ErrorCode.EntityNotFound,
+            Message = $"Products with the following IDs not found: {string.Join(", ", new[] { nonExistentProductId })}.",
+        });
+
+        AssertEqualServiceResults(expected, result);
     }
 
     [Fact]
@@ -90,13 +90,13 @@ public class ProductServiceTest : BaseTest
             _testProducts.Select(x => x.Id).ToArray(),
             DateTime.MaxValue);
 
-        result
-            .Should()
-            .BeEquivalentTo(ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.InvalidState,
-                Message = $"Products with the following IDs already discontinued: {string.Join(", ", new[] { discontinuedProductId })}."
-            }));
+        var expected = ServiceResult.Failure(new Error
+        {
+            Code = ErrorCode.InvalidState,
+            Message = $"Products with the following IDs already discontinued: {string.Join(", ", new[] { discontinuedProductId })}."
+        });
+
+        AssertEqualServiceResults(result, expected);
     }
 
     [Fact]
@@ -113,13 +113,13 @@ public class ProductServiceTest : BaseTest
             testProductIds,
             schedule);
 
-        result
-            .Should()
-            .BeEquivalentTo(ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.InvalidArgument,
-                Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
-            }));
+        var expected = ServiceResult.Failure(new Error
+        {
+            Code = ErrorCode.InvalidArgument,
+            Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
+        });
+
+        AssertEqualServiceResults(result, expected);
     }
 
     [Fact]
@@ -138,13 +138,14 @@ public class ProductServiceTest : BaseTest
             testProductIds,
             schedule);
 
-        result
-            .Should()
-            .BeEquivalentTo(ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.InvalidArgument,
-                Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
-            }));
+
+        var expected = ServiceResult.Failure(new Error
+        {
+            Code = ErrorCode.InvalidArgument,
+            Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
+        });
+
+        AssertEqualServiceResults(result, expected);
     }
 
     [Fact]
@@ -162,13 +163,13 @@ public class ProductServiceTest : BaseTest
 
             var result = await _productService.UpdateProductAsync(userId, It.IsAny<int>(), It.IsAny<UpdateProductViewModel>());
 
-            result.Error
-                .Should()
-                .BeEquivalentTo(new Error()
-                {
-                    Code = ErrorCode.AuthorizationError,
-                    Message = "Only staff are authorized to modify products"
-                });
+            var expected = ServiceResult.Failure(new Error()
+            {
+                Code = ErrorCode.AuthorizationError,
+                Message = "Only staff are authorized to modify products"
+            });
+
+            AssertEqualServiceResults(result, expected);
         });
     }
 
@@ -186,13 +187,13 @@ public class ProductServiceTest : BaseTest
                 .Returns(invalidRoles);
             var result = await _productService.UpdateProductPriceAsync(userId, It.IsAny<int>(), It.IsAny<UpdateProductPriceViewModel>());
             
-            result.Error
-                .Should()
-                .BeEquivalentTo(new Error()
-                {
-                    Code = ErrorCode.AuthorizationError,
-                    Message = "Only staff are authorized to modify products"
-                });
+            var expected = ServiceResult.Failure(new Error()
+            {
+                Code = ErrorCode.AuthorizationError,
+                Message = "Only staff are authorized to modify products"
+            });
+
+            AssertEqualServiceResults(result, expected);
         });
     }
 
@@ -210,13 +211,13 @@ public class ProductServiceTest : BaseTest
                                 .Returns(invalidRoles);
                 var result = await _productService.UpdateStockAsync(userId, It.IsAny<int>(), It.IsAny<uint>());
                 
-                result.Error
-                    .Should()
-                    .BeEquivalentTo(new Error()
-                    {
-                        Code = ErrorCode.AuthorizationError,
-                        Message = "Only staff are authorized to modify products"
-                    });
+                var expected = ServiceResult.Failure(new Error()
+                {
+                    Code = ErrorCode.AuthorizationError,
+                    Message = "Only staff are authorized to modify products"
+                });
+
+                AssertEqualServiceResults(result, expected);
             });
     }
 
@@ -234,13 +235,13 @@ public class ProductServiceTest : BaseTest
                     .Returns(invalidRoles);
                 var result = await _productService.RestartProductSaleAsync(userId, It.IsAny<int>(), It.IsAny<DateTime>());
 
-                result.Error
-                    .Should()
-                    .BeEquivalentTo(new Error()
-                    {
-                        Code = ErrorCode.AuthorizationError,
-                        Message = "Only staff are authorized to modify products"
-                    });
+                var expected = ServiceResult.Failure(new Error()
+                {
+                    Code = ErrorCode.AuthorizationError,
+                    Message = "Only staff are authorized to modify products"
+                });
+
+                AssertEqualServiceResults(result, expected);
             });
     }
 
