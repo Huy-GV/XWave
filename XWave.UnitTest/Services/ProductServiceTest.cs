@@ -16,7 +16,7 @@ using XWave.Core.Utils;
 using XWave.Core.ViewModels.Management;
 using System.Threading.Tasks;
 
-namespace XWave.Test.Services;
+namespace XWave.UnitTest.Services;
 
 public class ProductServiceTest : BaseTest
 {

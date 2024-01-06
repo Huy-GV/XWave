@@ -7,7 +7,7 @@ using System.Data.Common;
 using XWave.Core.Data;
 using XWave.Core.Services.Communication;
 
-namespace XWave.Test.Services;
+namespace XWave.UnitTest.Services;
 
 /// <summary>
 /// Sets up and manages a connection to the in-memory SQLite database.

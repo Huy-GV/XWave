@@ -13,7 +13,7 @@ using XWave.Core.Services.Interfaces;
 using XWave.Core.ViewModels.Customers;
 using System.Threading.Tasks;
 
-namespace XWave.Test.Services;
+namespace XWave.UnitTest.Services;
 
 public class OrderServiceTest : BaseTest
 {

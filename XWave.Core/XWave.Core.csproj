@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="..\XWave.Test\XWave.Test.csproj" />
+        <InternalsVisibleTo Include="..\XWave.UnitTest\XWave.UnitTest.csproj" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
     </ItemGroup>
 
