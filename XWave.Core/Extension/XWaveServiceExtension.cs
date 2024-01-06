@@ -73,7 +73,6 @@ public static class XWaveServiceExtension
 
     public static void AddHangFireBackgroundServices(this IServiceCollection services, string dbConnectionString)
     {
-        services.AddTransient<IBackgroundJobService, HangFireBackgroundJobService>();
         services.AddHangfire(config =>
         {
             config.UseSqlServerStorage(dbConnectionString);

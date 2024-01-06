@@ -1,3 +1,4 @@
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
@@ -15,7 +16,7 @@ namespace XWave.Core.Services.Implementations;
 internal class ProductManagementService : ServiceBase, IProductManagementService
 {
     private readonly IStaffActivityLogger _activityService;
-    private readonly IBackgroundJobService _backgroundJobService;
+    private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly ILogger<ProductManagementService> _logger;
     private readonly ProductDtoMapper _productDtoMapper;
     private readonly IRoleAuthorizer _roleAuthorizer;
@@ -28,7 +29,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     public ProductManagementService(
         XWaveDbContext dbContext,
         IStaffActivityLogger activityService,
-        IBackgroundJobService backgroundJobService,
+        IBackgroundJobClient backgroundJobService,
         ProductDtoMapper productHelper,
         ILogger<ProductManagementService> logger,
         IRoleAuthorizer roleAuthorizer) : base(dbContext)
@@ -36,7 +37,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
         _productDtoMapper = productHelper;
         _activityService = activityService;
         _roleAuthorizer = roleAuthorizer;
-        _backgroundJobService = backgroundJobService;
+        _backgroundJobClient = backgroundJobService;
         _logger = logger;
     }
 
@@ -323,11 +324,9 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
             });
         }
 
-        _backgroundJobService
-            .AddBackgroundJobAsync(
-                () => UpdateProductSaleStatusByScheduleAsync(productIds, false, updateSchedule),
-                new DateTimeOffset(updateSchedule))
-            .Wait();
+        _backgroundJobClient.Schedule(
+            () => UpdateProductSaleStatusByScheduleAsync(productIds, false, updateSchedule),
+            new DateTimeOffset(updateSchedule));
 
         await _activityService.LogActivityAsync<Product>(
             managerId,
@@ -362,11 +361,9 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
             });
         }
 
-        _backgroundJobService
-            .AddBackgroundJobAsync(
-                () => UpdateProductSaleStatusByScheduleAsync(productId, false, updateSchedule),
-                new DateTimeOffset(updateSchedule))
-            .Wait();
+        _backgroundJobClient.Schedule(
+            () => UpdateProductSaleStatusByScheduleAsync(productId, false, updateSchedule),
+            new DateTimeOffset(updateSchedule));
 
         await _activityService.LogActivityAsync<Product>(
             managerId,
@@ -434,11 +431,9 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
             });
         }
 
-        _backgroundJobService
-            .AddBackgroundJobAsync(
-                () => UpdateProductPriceByScheduleAsync(staffId, productId, viewModel.UpdatedPrice),
-                new DateTimeOffset(viewModel.Schedule!.Value))
-            .Wait();
+        _backgroundJobClient.Schedule(
+            () => UpdateProductPriceByScheduleAsync(staffId, productId, viewModel.UpdatedPrice),
+            new DateTimeOffset(viewModel.Schedule!.Value));
 
         await _activityService.LogActivityAsync<Product>(
             staffId,

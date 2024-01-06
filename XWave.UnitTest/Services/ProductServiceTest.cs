@@ -15,13 +15,14 @@ using XWave.Core.Services.Interfaces;
 using XWave.Core.Utils;
 using XWave.Core.ViewModels.Management;
 using System.Threading.Tasks;
+using Hangfire;
 
 namespace XWave.UnitTest.Services;
 
 public class ProductServiceTest : BaseTest
 {
     private readonly IProductManagementService _productService;
-    private readonly Mock<IBackgroundJobService> _mockBackgroundJobService = new();
+    private readonly Mock<IBackgroundJobClient> _mockBackgroundJobClient = new();
     private readonly Mock<ILogger<ProductManagementService>> _mockLog = new();
     private readonly Mock<IStaffActivityLogger> _mockStaffActivityLogger = new();
     private readonly Mock<IRoleAuthorizer> _mockRoleAuthorizer = new();
@@ -49,7 +50,7 @@ public class ProductServiceTest : BaseTest
         _productService = new ProductManagementService(
             dbContext,
             _mockStaffActivityLogger.Object,
-            _mockBackgroundJobService.Object,
+            _mockBackgroundJobClient.Object,
             _productMapper,
             _mockLog.Object,
             _mockRoleAuthorizer.Object);
@@ -105,12 +106,12 @@ public class ProductServiceTest : BaseTest
             .Where(x => !x.IsDiscontinued)
             .Select(x => x.Id).ToArray();
         var userId = Guid.NewGuid().ToString();
-        var schedule = new System.Random().NextDouble() % (DateTime.Now - DateTime.MinValue).Days;
+        var schedule = DateTime.Now.AddDays(new System.Random().NextDouble() % (DateTime.Now - DateTime.MinValue).Days);
         SetUpManagerRoleCheckBypass(userId);
         var result = await _productService.DiscontinueProductAsync(
             userId,
             testProductIds,
-            DateTime.Now.AddDays(schedule));
+            schedule);
 
         result
             .Should()
@@ -129,12 +130,13 @@ public class ProductServiceTest : BaseTest
             .Where(x => !x.IsDiscontinued)
             .Select(x => x.Id).ToArray();
         var userId = Guid.NewGuid().ToString();
+        var schedule = DateTime.Now.AddDays(randomDay);
 
         SetUpManagerRoleCheckBypass(userId);
         var result = await _productService.DiscontinueProductAsync(
             userId,
             testProductIds,
-            DateTime.Now.AddDays(randomDay));
+            schedule);
 
         result
             .Should()
@@ -242,7 +244,7 @@ public class ProductServiceTest : BaseTest
             });
     }
 
-    [Xunit.Fact]
+    [Fact]
     public void UpdateProductSaleStatus_ShouldFail_IfUserIsNotStaff()
     {
     }

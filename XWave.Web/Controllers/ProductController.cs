@@ -1,3 +1,4 @@
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Customers;
 using XWave.Core.DTOs.Management;
+using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.ViewModels.Management;
 using XWave.Web.Data;
@@ -19,17 +21,17 @@ namespace XWave.Web.Controllers;
 public class ProductController : ControllerBase
 {
     private readonly AuthenticationHelper _authenticationHelper;
-    private readonly IBackgroundJobService _backgroundJobService;
+    private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IProductManagementService _productManagementService;
     private readonly ICustomerProductBrowser _customerProductBrowser;
 
     public ProductController(
         IProductManagementService productService,
         AuthenticationHelper authenticationHelper,
-        IBackgroundJobService backgroundJobService,
+        IBackgroundJobClient backgroundJobService,
         ICustomerProductBrowser customerProductBrowser)
     {
-        _backgroundJobService = backgroundJobService;
+        _backgroundJobClient = backgroundJobService;
         _authenticationHelper = authenticationHelper;
         _productManagementService = productService;
         _customerProductBrowser = customerProductBrowser;
@@ -126,9 +128,16 @@ public class ProductController : ControllerBase
 
     [HttpDelete("{id}/cancel")]
     [Authorize(Roles = nameof(RoleNames.Manager))]
-    public async Task<ActionResult> CancelBackgroundTaskAsync(string id)
+    public ActionResult CancelBackgroundTask(string id)
     {
-        var result = await _backgroundJobService.CancelJobAsync(id);
+        var result = _backgroundJobClient.Delete(id)
+                ? ServiceResult.Success()
+                : ServiceResult.Failure(new Error
+                {
+                    Code = ErrorCode.EntityNotFound,
+                    Message = $"Failed to remove background job ID {id}."
+                });
+
         return result.OnSuccess(() => NoContent());
     }
 }

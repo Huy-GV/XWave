@@ -1,3 +1,4 @@
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
@@ -14,7 +15,7 @@ namespace XWave.Core.Services.Implementations;
 internal class DiscountService : ServiceBase, IDiscountService
 {
     private readonly IStaffActivityLogger _activityService;
-    private readonly IBackgroundJobService _backgroundJobService;
+    private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IRoleAuthorizer _roleAuthorizer;
     private readonly Error _unauthorizedOperationError = new()
     {
@@ -26,11 +27,11 @@ internal class DiscountService : ServiceBase, IDiscountService
         XWaveDbContext dbContext,
         IStaffActivityLogger activityService,
         IRoleAuthorizer roleAuthorizer,
-        IBackgroundJobService backgroundJobService) : base(dbContext)
+        IBackgroundJobClient backgroundJobClient) : base(dbContext)
     {
         _activityService = activityService;
         _roleAuthorizer = roleAuthorizer;
-        _backgroundJobService = backgroundJobService;
+        _backgroundJobClient = backgroundJobClient;
     }
 
     public async Task<ServiceResult<int>> CreateDiscountAsync(
@@ -187,9 +188,11 @@ internal class DiscountService : ServiceBase, IDiscountService
         }));
 
         await DbContext.SaveChangesAsync();
-        await _backgroundJobService.AddBackgroundJobAsync(
+
+        _backgroundJobClient.Schedule(
             () => RemoveDiscountFromProducts(appliedProducts.Select(x => x.Id)),
             new DateTimeOffset(discount.EndDate));
+
         await _activityService.LogActivityAsync<Discount>(
             managerId,
             OperationType.Modify,
