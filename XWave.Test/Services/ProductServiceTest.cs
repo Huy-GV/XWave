@@ -1,7 +1,7 @@
 using FluentAssertions;
 using FsCheck;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -14,17 +14,17 @@ using XWave.Core.Services.Implementations;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Utils;
 using XWave.Core.ViewModels.Management;
+using System.Threading.Tasks;
 
 namespace XWave.Test.Services;
 
-[TestClass]
 public class ProductServiceTest : BaseTest
 {
     private readonly IProductManagementService _productService;
     private readonly Mock<IBackgroundJobService> _mockBackgroundJobService = new();
     private readonly Mock<ILogger<ProductManagementService>> _mockLog = new();
-    private readonly Mock<IStaffActivityLogger> _mockActivityService = new();
-    private readonly Mock<IRoleAuthorizer> _mockAuthorizationService = new();
+    private readonly Mock<IStaffActivityLogger> _mockStaffActivityLogger = new();
+    private readonly Mock<IRoleAuthorizer> _mockRoleAuthorizer = new();
     private readonly ProductDtoMapper _productMapper = new();
 
     private readonly List<Discount> _testDiscounts = TestDiscountFactory.Discounts();
@@ -48,26 +48,27 @@ public class ProductServiceTest : BaseTest
 
         _productService = new ProductManagementService(
             dbContext,
-            _mockActivityService.Object,
+            _mockStaffActivityLogger.Object,
             _mockBackgroundJobService.Object,
             _productMapper,
             _mockLog.Object,
-            _mockAuthorizationService.Object);
+            _mockRoleAuthorizer.Object);
     }
 
-    [TestMethod]
-    public void DiscontinueProduct_ShouldFail_IfOneProductIsMissing()
+    [Fact]
+    public async Task DiscontinueProduct_ShouldFail_IfOneProductIsMissing()
     {
         var nonExistentProductId = _testProducts.Sum(x => x.Id);
         var testProductIds = new List<int>(_testProducts.Select(x => x.Id)) { nonExistentProductId };
         var userId = Guid.NewGuid().ToString();
 
         SetUpManagerRoleCheckBypass(userId);
-        _productService.DiscontinueProductAsync(
+        var result = await _productService.DiscontinueProductAsync(
             userId,
             testProductIds.ToArray(),
-            DateTime.MaxValue)
-            .Result
+            DateTime.MaxValue);
+
+        result
             .Should()
             .BeEquivalentTo(ServiceResult.Failure(new Error
             {
@@ -76,18 +77,19 @@ public class ProductServiceTest : BaseTest
             }));
     }
 
-    [TestMethod]
-    public void DiscontinueProduct_ShouldFail_IfProductIsAlreadyDiscontinued()
+    [Fact]
+    public async Task DiscontinueProduct_ShouldFail_IfProductIsAlreadyDiscontinued()
     {
         var discontinuedProductId = _testProducts.First(x => x.IsDiscontinued).Id;
         var userId = Guid.NewGuid().ToString();
 
         SetUpManagerRoleCheckBypass(userId);
-        _productService.DiscontinueProductAsync(
+        var result = await _productService.DiscontinueProductAsync(
             userId,
             _testProducts.Select(x => x.Id).ToArray(),
-            DateTime.MaxValue)
-            .Result
+            DateTime.MaxValue);
+
+        result
             .Should()
             .BeEquivalentTo(ServiceResult.Failure(new Error
             {
@@ -96,8 +98,8 @@ public class ProductServiceTest : BaseTest
             }));
     }
 
-    [TestMethod]
-    public void DiscontinueProduct_ShouldFail_IfScheduleIsNotFuture()
+    [Fact]
+    public async Task DiscontinueProduct_ShouldFail_IfScheduleIsNotFuture()
     {
         var testProductIds = _testProducts
             .Where(x => !x.IsDiscontinued)
@@ -105,11 +107,12 @@ public class ProductServiceTest : BaseTest
         var userId = Guid.NewGuid().ToString();
         var schedule = new System.Random().NextDouble() % (DateTime.Now - DateTime.MinValue).Days;
         SetUpManagerRoleCheckBypass(userId);
-        _productService.DiscontinueProductAsync(
+        var result = await _productService.DiscontinueProductAsync(
             userId,
             testProductIds,
-            DateTime.Now.AddDays(schedule))
-            .Result
+            DateTime.Now.AddDays(schedule));
+
+        result
             .Should()
             .BeEquivalentTo(ServiceResult.Failure(new Error
             {
@@ -118,8 +121,8 @@ public class ProductServiceTest : BaseTest
             }));
     }
 
-    [TestMethod]
-    public void DiscontinueProduct_ShouldFail_IfScheduleIsUnderOneWeek()
+    [Fact]
+    public async Task DiscontinueProduct_ShouldFail_IfScheduleIsUnderOneWeek()
     {
         var randomDay = Math.Abs(new System.Random().NextInt64()) % 6;
         var testProductIds = _testProducts
@@ -128,11 +131,12 @@ public class ProductServiceTest : BaseTest
         var userId = Guid.NewGuid().ToString();
 
         SetUpManagerRoleCheckBypass(userId);
-        _productService.DiscontinueProductAsync(
+        var result = await _productService.DiscontinueProductAsync(
             userId,
             testProductIds,
-            DateTime.Now.AddDays(randomDay))
-            .Result
+            DateTime.Now.AddDays(randomDay));
+
+        result
             .Should()
             .BeEquivalentTo(ServiceResult.Failure(new Error
             {
@@ -141,21 +145,22 @@ public class ProductServiceTest : BaseTest
             }));
     }
 
-    [TestMethod]
+    [Fact]
     public void UpdateProduct_ShouldFail_IfUserIsNotStaff()
     {
         Prop.ForAll(
             NonStaffRoles(),
             Arb.Default.Guid(),
-            (invalidRoles, guid) =>
+            async (invalidRoles, guid) =>
         {
             var userId = guid.ToString();
-            _mockAuthorizationService
+            _mockRoleAuthorizer
                 .Setup(x => x.GetRolesByUserId(userId).Result)
                 .Returns(invalidRoles);
 
-            _productService.UpdateProductAsync(userId, It.IsAny<int>(), It.IsAny<UpdateProductViewModel>())
-                .Result.Error
+            var result = await _productService.UpdateProductAsync(userId, It.IsAny<int>(), It.IsAny<UpdateProductViewModel>());
+
+            result.Error
                 .Should()
                 .BeEquivalentTo(new Error()
                 {
@@ -165,20 +170,21 @@ public class ProductServiceTest : BaseTest
         });
     }
 
-    [TestMethod]
+    [Fact]
     public void UpdateProductPrice_ShouldFail_IfUserIsNotStaff()
     {
         Prop.ForAll(
             NonStaffRoles(),
             Arb.Default.Guid(),
-            (invalidRoles, guid) =>
+            async (invalidRoles, guid) =>
         {
             var userId = guid.ToString();
-            _mockAuthorizationService
+            _mockRoleAuthorizer
                 .Setup(x => x.GetRolesByUserId(userId).Result)
                 .Returns(invalidRoles);
-            _productService.UpdateProductPriceAsync(userId, It.IsAny<int>(), It.IsAny<UpdateProductPriceViewModel>())
-                .Result.Error
+            var result = await _productService.UpdateProductPriceAsync(userId, It.IsAny<int>(), It.IsAny<UpdateProductPriceViewModel>());
+            
+            result.Error
                 .Should()
                 .BeEquivalentTo(new Error()
                 {
@@ -188,20 +194,21 @@ public class ProductServiceTest : BaseTest
         });
     }
 
-    [TestMethod]
+    [Fact]
     public void UpdateProductStock_ShouldFail_IfUserIsNotStaff()
     {
         Prop.ForAll(
             NonStaffRoles(),
             Arb.Default.Guid(),
-            (invalidRoles, guid) =>
+            async (invalidRoles, guid) =>
             {
                 var userId = guid.ToString();
-                _mockAuthorizationService
+                _mockRoleAuthorizer
                                 .Setup(x => x.GetRolesByUserId(userId).Result)
                                 .Returns(invalidRoles);
-                _productService.UpdateStockAsync(userId, It.IsAny<int>(), It.IsAny<uint>())
-                    .Result.Error
+                var result = await _productService.UpdateStockAsync(userId, It.IsAny<int>(), It.IsAny<uint>());
+                
+                result.Error
                     .Should()
                     .BeEquivalentTo(new Error()
                     {
@@ -211,20 +218,21 @@ public class ProductServiceTest : BaseTest
             });
     }
 
-    [TestMethod]
+    [Fact]
     public void RestartProductSale_ShouldFail_IfUserIsNotManager()
     {
         Prop.ForAll(
             NonManagerRoles(),
             Arb.Default.Guid(),
-            (invalidRoles, guid) =>
+            async (invalidRoles, guid) =>
             {
                 var userId = guid.ToString();
-                _mockAuthorizationService
+                _mockRoleAuthorizer
                     .Setup(x => x.GetRolesByUserId(userId).Result)
                     .Returns(invalidRoles);
-                _productService.RestartProductSaleAsync(userId, It.IsAny<int>(), It.IsAny<DateTime>())
-                    .Result.Error
+                var result = await _productService.RestartProductSaleAsync(userId, It.IsAny<int>(), It.IsAny<DateTime>());
+
+                result.Error
                     .Should()
                     .BeEquivalentTo(new Error()
                     {
@@ -234,13 +242,14 @@ public class ProductServiceTest : BaseTest
             });
     }
 
+    [Xunit.Fact]
     public void UpdateProductSaleStatus_ShouldFail_IfUserIsNotStaff()
     {
     }
 
     private void SetUpManagerRoleCheckBypass(string userId)
     {
-        _mockAuthorizationService.Setup(x => x.IsUserInRole(userId, "Manager").Result)
+        _mockRoleAuthorizer.Setup(x => x.IsUserInRole(userId, "Manager").Result)
             .Returns(true);
     }
 

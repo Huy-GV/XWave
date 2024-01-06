@@ -1,7 +1,6 @@
 using FluentAssertions;
 using FsCheck;
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -12,10 +11,10 @@ using XWave.Core.Services.Communication;
 using XWave.Core.Services.Implementations;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.ViewModels.Customers;
+using System.Threading.Tasks;
 
 namespace XWave.Test.Services;
 
-[TestClass]
 public class OrderServiceTest : BaseTest
 {
     private readonly IOrderService _orderService;
@@ -49,15 +48,15 @@ public class OrderServiceTest : BaseTest
             _mockDiscountCalculator.Object);
     }
 
-    [TestMethod]
-    public void AddOrder_ShouldFail_IfCustomerAccountDoesNotExist()
+    [Fact]
+    public async Task AddOrder_ShouldFail_IfCustomerAccountDoesNotExist()
     {
         var customerId = Guid.NewGuid().ToString();
         _mockCustomerAccountService
             .Setup(x => x.CustomerAccountExists(customerId).Result)
             .Returns(false);
 
-        var result = _orderService.AddOrderAsync(It.IsAny<PurchaseViewModel>(), customerId).Result;
+        var result = await _orderService.AddOrderAsync(It.IsAny<PurchaseViewModel>(), customerId);
         var expected = ServiceResult<int>.Failure(new Error()
         {
             Code = ErrorCode.AuthorizationError,
@@ -67,12 +66,12 @@ public class OrderServiceTest : BaseTest
         AssertEqualServiceResults(result, expected);
     }
 
-    [TestMethod]
+    [Fact]
     public void AddOrder_ShouldFail_IfPaymentAccountIsInvalid()
     {
         Prop.ForAll(
             Arb.Default.Int32(),
-            (paymentAccountId) =>
+            async (paymentAccountId) =>
         {
             var purchaseViewModel = new PurchaseViewModel() { PaymentAccountId = paymentAccountId };
             var customerId = Guid.NewGuid().ToString();
@@ -83,7 +82,7 @@ public class OrderServiceTest : BaseTest
                 .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
                 .Returns(false);
 
-            var result = _orderService.AddOrderAsync(purchaseViewModel, customerId).Result;
+            var result = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
             var expected = ServiceResult<int>.Failure(new Error
             {
                 Code = ErrorCode.InvalidState,
@@ -95,7 +94,7 @@ public class OrderServiceTest : BaseTest
         }).QuickCheckThrowOnFailure();
     }
 
-    [TestMethod]
+    [Fact]
     public void AddOrder_ShouldFail_IfPurchasedProductsNotFound()
     {
         var existingProductIds = _testProducts.Select(x => x.Id).ToList();
@@ -108,7 +107,7 @@ public class OrderServiceTest : BaseTest
         Prop.ForAll(
             randomNonExistentProductIdGen,
             Arb.Default.Int32(),
-            (randomMissingIds, paymentAccountId) =>
+            async (randomMissingIds, paymentAccountId) =>
         {
             var itemsToPurchase = randomMissingIds
                 .Select(x => new PurchaseViewModel.PurchasedItems
@@ -131,7 +130,7 @@ public class OrderServiceTest : BaseTest
                 .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
                 .Returns(true);
 
-            var result = _orderService.AddOrderAsync(purchaseViewModel, customerId).Result;
+            var result = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
             var expected = ServiceResult<int>.Failure(new Error
             {
                 Code = ErrorCode.InvalidState,
