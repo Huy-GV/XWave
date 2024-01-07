@@ -170,6 +170,7 @@ internal class OrderService : ServiceBase, IOrderService
             return ServiceResult<IReadOnlyCollection<OrderDto>>.Failure(new Error
             {
                 Code = ErrorCode.AuthorizationError,
+                Message = "Customer account not found"
             });
         }
 

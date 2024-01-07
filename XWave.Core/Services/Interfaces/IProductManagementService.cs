@@ -1,4 +1,4 @@
-﻿using XWave.Core.DTOs.Management;
+using XWave.Core.DTOs.Management;
 using XWave.Core.Services.Communication;
 using XWave.Core.ViewModels.Management;
 
@@ -70,5 +70,5 @@ public interface IProductManagementService
     /// <param name="id"></param>
     /// <param name="updateSchedule">The scheduled date for discontinuing an active product.</param>
     /// <returns></returns>
-    Task<ServiceResult> DiscontinueProductAsync(string userId, int[] ids, DateTime updateSchedule);
+    Task<ServiceResult> DiscontinueProductAsync(string userId, IEnumerable<int> ids, DateTime updateSchedule);
 }

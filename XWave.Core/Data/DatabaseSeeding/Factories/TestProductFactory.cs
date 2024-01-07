@@ -1,4 +1,5 @@
-﻿using XWave.Core.Models;
+using System;
+using XWave.Core.Models;
 
 namespace XWave.Core.Data.DatabaseSeeding.Factories;
 
@@ -20,6 +21,8 @@ public class TestProductFactory
                 Quantity = 150,
                 LatestRestock = DateTime.ParseExact("2/2/2020", "d/M/yyyy", null),
                 CategoryId = randomIndex.Next(minCategoryPK, categories.Count),
+                IsDiscontinued = true,
+                DiscontinuationDate = GenerateRandomPastDate(randomIndex)
             },
             new ()
             {
@@ -40,6 +43,8 @@ public class TestProductFactory
                 LatestRestock = DateTime.ParseExact("3/12/2021", "d/M/yyyy", null),
                 CategoryId = randomIndex.Next(minCategoryPK, categories.Count),
                 DiscountId = randomIndex.Next(minDiscountPK, discounts.Count),
+                IsDiscontinued = true,
+                DiscontinuationDate = GenerateRandomPastDate(randomIndex)
             },
 
             new()
@@ -55,5 +60,10 @@ public class TestProductFactory
         };
 
         return products;
+    }
+    private static DateTime GenerateRandomPastDate(Random random)
+    {
+        int daysInPast = random.Next(1, 366);
+        return DateTime.Now.AddDays(-daysInPast);
     }
 }

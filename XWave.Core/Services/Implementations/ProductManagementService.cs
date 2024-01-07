@@ -276,7 +276,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
 
     public async Task<ServiceResult> DiscontinueProductAsync(
         string managerId,
-        int[] productIds,
+        IEnumerable<int> productIds,
         DateTime updateSchedule)
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
@@ -400,7 +400,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
         }
     }
 
-    public async Task UpdateProductSaleStatusByScheduleAsync(int[] productIds, bool isDiscontinued,
+    public async Task UpdateProductSaleStatusByScheduleAsync(IEnumerable<int> productIds, bool isDiscontinued,
         DateTime updateSchedule)
     {
         var productsToUpdate = await DbContext.Product

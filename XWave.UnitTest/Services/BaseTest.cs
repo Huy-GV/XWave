@@ -22,15 +22,34 @@ public class BaseTest : IDisposable
         InMemoryDbConnection.Open();
     }
 
-    internal XWaveDbContext CreateDbContext()
+    internal XWaveDbContext CreateDbContext(bool isClean)
     {
         var dbContext = new XWaveDbContext(
             new DbContextOptionsBuilder<XWaveDbContext>()
             .UseSqlite(InMemoryDbConnection)
             .Options);
 
-        dbContext.Database.EnsureDeleted();
+        if (isClean)
+        {
+            dbContext.Database.EnsureDeleted();
+            dbContext.Database.EnsureCreated();
+        }
+
+        return dbContext;
+    }
+
+    internal XWaveDbContext CreateDbContext()
+    {
+        var newConnection = new SqliteConnection("DataSource=:memory:;");
+        newConnection.Open();
+
+        var dbContext = new XWaveDbContext(
+            new DbContextOptionsBuilder<XWaveDbContext>()
+            .UseSqlite(newConnection)
+            .Options);
+
         dbContext.Database.EnsureCreated();
+
         return dbContext;
     }
 
@@ -40,7 +59,7 @@ public class BaseTest : IDisposable
         InMemoryDbConnection.Dispose();
     }
 
-    protected void AssertEqualServiceResults<T>(ServiceResult<T> result1, ServiceResult<T> result2) where T : notnull
+    protected static void AssertEqualServiceResults<T>(ServiceResult<T> result1, ServiceResult<T> result2) where T : notnull
     {
         result1.Succeeded.Should().Be(result2.Succeeded);
         if (result1.Succeeded)
@@ -54,7 +73,7 @@ public class BaseTest : IDisposable
 
     }
 
-    protected void AssertEqualServiceResults(ServiceResult result1, ServiceResult result2)
+    protected static void AssertEqualServiceResults(ServiceResult result1, ServiceResult result2)
     {
         result1.Succeeded.Should().Be(result2.Succeeded);
         if (!result1.Succeeded)
