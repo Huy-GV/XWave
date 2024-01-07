@@ -29,11 +29,7 @@ public class ProductServiceTest : BaseTest
     private readonly Mock<IRoleAuthorizer> _mockRoleAuthorizer = new();
     private readonly ProductDtoMapper _productMapper = new();
 
-    public ProductServiceTest() : base()
-    {
-    }
-
-    private async Task SeedTestDataAsync(
+    private static async Task SeedTestDataAsync(
         XWaveDbContext dbContext,
         List<Product>? testProducts = null)
     {

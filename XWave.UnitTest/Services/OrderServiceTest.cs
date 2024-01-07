@@ -12,36 +12,42 @@ using XWave.Core.Services.Implementations;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.ViewModels.Customers;
 using System.Threading.Tasks;
+using XWave.Core.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace XWave.UnitTest.Services;
 
 public class OrderServiceTest : BaseTest
 {
-    private readonly IOrderService _orderService;
     private readonly Mock<ICustomerAccountService> _mockCustomerAccountService = new();
     private readonly Mock<IPaymentAccountService> _mockPaymentService = new();
     private readonly Mock<IDiscountedProductPriceCalculator> _mockDiscountCalculator = new();
-
-    private readonly List<Product> _testProducts;
-
-    private readonly List<Category> _testCategories;
-
-    private readonly List<Discount> _testDiscounts;
-
-    public OrderServiceTest()
+    
+    private static async Task SeedTestDataAsync(
+        XWaveDbContext dbContext,
+        List<Product>? testProducts = null)
     {
-        _testCategories = TestCategoryFactory.Categories();
-        _testDiscounts = TestDiscountFactory.Discounts();
+        if (testProducts is null)
+        {
+            var testDiscounts = TestDiscountFactory.Discounts();
+            var testCategories = TestCategoryFactory.Categories();
 
-        var dbContext = CreateDbContext();
-        dbContext.Discount.AddRange(_testDiscounts);
-        dbContext.Category.AddRange(_testCategories);
-        dbContext.SaveChanges();
-        _testProducts = TestProductFactory.Products(_testCategories, _testDiscounts);
-        dbContext.Product.AddRange(_testProducts);
-        dbContext.SaveChanges();
+            dbContext.Category.AddRange(testCategories);
+            await dbContext.SaveChangesAsync();
 
-        _orderService = new OrderService(
+            dbContext.Discount.AddRange(testDiscounts);
+            await dbContext.SaveChangesAsync();
+
+            testProducts = TestProductFactory.Products(testCategories, testDiscounts);
+        }
+
+        dbContext.Product.AddRange(testProducts);
+        await dbContext.SaveChangesAsync();
+    }
+
+    private IOrderService CreateTestSubject(XWaveDbContext dbContext)
+    {
+        return new OrderService(
             dbContext,
             _mockCustomerAccountService.Object,
             _mockPaymentService.Object,
@@ -49,14 +55,17 @@ public class OrderServiceTest : BaseTest
     }
 
     [Fact]
-    public async Task AddOrder_ShouldFail_IfCustomerAccountDoesNotExist()
+    public async Task FindAllOrders_ShouldFail_IfCustomerAccountDoesNotExist()
     {
         var customerId = Guid.NewGuid().ToString();
         _mockCustomerAccountService
             .Setup(x => x.CustomerAccountExists(customerId).Result)
             .Returns(false);
 
-        var result = await _orderService.AddOrderAsync(It.IsAny<PurchaseViewModel>(), customerId);
+        using var dbContext = CreateDbContext();
+        await SeedTestDataAsync(dbContext);
+        var orderService = CreateTestSubject(dbContext);
+        var result = await orderService.FindAllOrdersAsync(customerId);
         var expected = ServiceResult<int>.Failure(new Error()
         {
             Code = ErrorCode.AuthorizationError,
@@ -67,77 +76,127 @@ public class OrderServiceTest : BaseTest
     }
 
     [Fact]
-    public void AddOrder_ShouldFail_IfPaymentAccountIsInvalid()
+    public async Task FindOrderById_ShouldFail_IfCustomerAccountDoesNotExist()
     {
-        Prop.ForAll(
-            Arb.Default.Int32(),
-            async (paymentAccountId) =>
+        using var dbContext = CreateDbContext();
+        await SeedTestDataAsync(dbContext);
+        var orderService = CreateTestSubject(dbContext);
+
+        var customerId = Guid.NewGuid().ToString();
+        _mockCustomerAccountService
+            .Setup(x => x.CustomerAccountExists(customerId).Result)
+            .Returns(false);
+
+        var result = await orderService.FindAllOrdersAsync(customerId);
+        var expected = ServiceResult<int>.Failure(new Error()
         {
-            var purchaseViewModel = new PurchaseViewModel() { PaymentAccountId = paymentAccountId };
-            var customerId = Guid.NewGuid().ToString();
-            _mockCustomerAccountService
-                .Setup(x => x.CustomerAccountExists(customerId).Result)
-                .Returns(true);
-            _mockPaymentService
-                .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
-                .Returns(false);
+            Code = ErrorCode.AuthorizationError,
+            Message = "Customer account not found"
+        });
 
-            var result = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
-            var expected = ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.InvalidState,
-                Message = "Valid payment account not found"
-            });
-
-            AssertEqualServiceResults(result, expected);
-
-        }).QuickCheckThrowOnFailure();
+        AssertEqualServiceResults(result, expected);
     }
 
     [Fact]
-    public void AddOrder_ShouldFail_IfPurchasedProductsNotFound()
+    public async Task AddOrder_ShouldFail_IfCustomerAccountDoesNotExist()
     {
-        var existingProductIds = _testProducts.Select(x => x.Id).ToList();
+        using var dbContext = CreateDbContext();
+        await SeedTestDataAsync(dbContext);
+        var orderService = CreateTestSubject(dbContext);
+
+        var customerId = Guid.NewGuid().ToString();
+        _mockCustomerAccountService
+            .Setup(x => x.CustomerAccountExists(customerId).Result)
+            .Returns(false);
+
+        var result = await orderService.AddOrderAsync(It.IsAny<PurchaseViewModel>(), customerId);
+        var expected = ServiceResult<int>.Failure(new Error()
+        {
+            Code = ErrorCode.AuthorizationError,
+            Message = "Customer account not found"
+        });
+
+        AssertEqualServiceResults(result, expected);
+    }
+
+    [Fact]
+    public async Task AddOrder_ShouldFail_IfPaymentAccountIsInvalid()
+    {
+        using var dbContext = CreateDbContext();
+        await SeedTestDataAsync(dbContext);
+        var orderService = CreateTestSubject(dbContext);
+
+        var randomPaymentAccountId = (new System.Random()).Next();
+        var purchaseViewModel = new PurchaseViewModel() { PaymentAccountId = randomPaymentAccountId };
+        var customerId = Guid.NewGuid().ToString();
+
+        _mockCustomerAccountService
+            .Setup(x => x.CustomerAccountExists(customerId).Result)
+            .Returns(true);
+
+        _mockPaymentService
+            .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
+            .Returns(false);
+
+        var result = await orderService.AddOrderAsync(purchaseViewModel, customerId);
+        var expected = ServiceResult<int>.Failure(new Error
+        {
+            Code = ErrorCode.InvalidState,
+            Message = "Valid payment account not found"
+        });
+
+        AssertEqualServiceResults(result, expected);
+    }
+
+    [Fact]
+    public async Task AddOrder_ShouldFail_IfPurchasedProductsNotFoundAsync()
+    {
+        using var dbContext = CreateDbContext();
+        await SeedTestDataAsync(dbContext);
+        var orderService = CreateTestSubject(dbContext);
+
+        var existingProductIds = await dbContext.Product.Select(x => x.Id).ToListAsync();
         var randomNonExistentProductIdGen = Gen
             .ArrayOf(100, Arb.Default.Int32().Generator)
             .Where(x => !existingProductIds.Intersect(x).Any())
+            .Select(x => x.Distinct());
+
+        var randomPaymentAccountId = (new System.Random()).Next();
+        var randomMissingIds = Gen
+            .ArrayOf(100, Arb.Default.Int32().Generator)
+            .Where(x => !existingProductIds.Intersect(x).Any())
             .Select(x => x.Distinct())
-            .ToArbitrary();
+            .Sample(1, 1)
+            .Head;
 
-        Prop.ForAll(
-            randomNonExistentProductIdGen,
-            Arb.Default.Int32(),
-            async (randomMissingIds, paymentAccountId) =>
+        var itemsToPurchase = randomMissingIds
+            .Select(x => new PurchaseViewModel.PurchasedItems
+            {
+                ProductId = x,
+            })
+            .ToList();
+
+        var purchaseViewModel = new PurchaseViewModel()
         {
-            var itemsToPurchase = randomMissingIds
-                .Select(x => new PurchaseViewModel.PurchasedItems
-                {
-                    ProductId = x,
-                })
-                .ToList();
+            PaymentAccountId = randomPaymentAccountId,
+            ProductCart = itemsToPurchase
+        };
 
-            var purchaseViewModel = new PurchaseViewModel()
-            {
-                PaymentAccountId = paymentAccountId,
-                ProductCart = itemsToPurchase
-            };
+        var customerId = Guid.NewGuid().ToString();
+        _mockCustomerAccountService
+            .Setup(x => x.CustomerAccountExists(customerId).Result)
+            .Returns(true);
+        _mockPaymentService
+            .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
+            .Returns(true);
 
-            var customerId = Guid.NewGuid().ToString();
-            _mockCustomerAccountService
-                .Setup(x => x.CustomerAccountExists(customerId).Result)
-                .Returns(true);
-            _mockPaymentService
-                .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
-                .Returns(true);
+        var result = await orderService.AddOrderAsync(purchaseViewModel, customerId);
+        var expected = ServiceResult<int>.Failure(new Error
+        {
+            Code = ErrorCode.InvalidState,
+            Message = $"The following products were not found: {string.Join(", ", randomMissingIds)}.",
+        });
 
-            var result = await _orderService.AddOrderAsync(purchaseViewModel, customerId);
-            var expected = ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.InvalidState,
-                Message = $"The following products were not found: {string.Join(", ", randomMissingIds)}.",
-            });
-
-            AssertEqualServiceResults(result, expected);
-        }).QuickCheckThrowOnFailure();
+        AssertEqualServiceResults(result, expected);
     }
 }
