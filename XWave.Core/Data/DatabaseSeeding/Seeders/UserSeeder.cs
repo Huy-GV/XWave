@@ -21,9 +21,9 @@ internal class UserSeeder
         try
         {
             await CreateRolesAsync(roleManager);
-            await CreateCustomersAsync(userManager, context);
+            await CreateCustomersAsync(userManager, context, configuration);
             await CreateTestManagersAsync(userManager, configuration);
-            await CreateStaffAsync(userManager, context);
+            await CreateStaffAsync(userManager, context, configuration);
         }
         catch (Exception)
         {
@@ -42,9 +42,7 @@ internal class UserSeeder
         try
         {
             await CreateRolesAsync(roleManager);
-            await CreateCustomersAsync(userManager, context);
-            await CreateTestManagersAsync(userManager, configuration);
-            await CreateStaffAsync(userManager, context);
+            await CreateProductionManagersAsync(userManager, logger, configuration);
         }
         catch (Exception)
         {
@@ -67,7 +65,8 @@ internal class UserSeeder
 
     private static async Task CreateCustomersAsync(
         UserManager<ApplicationUser> userManager,
-        XWaveDbContext dbContext)
+        XWaveDbContext dbContext,
+        IConfiguration configuration)
     {
         var customer1 = new ApplicationUser
         {
@@ -87,16 +86,18 @@ internal class UserSeeder
             PhoneNumber = "98765432"
         };
 
-        await CreateCustomerAsync(customer1, userManager, dbContext);
-        await CreateCustomerAsync(customer2, userManager, dbContext);
+        await CreateCustomerAsync(customer1, userManager, dbContext, configuration);
+        await CreateCustomerAsync(customer2, userManager, dbContext, configuration);
     }
 
     private static async Task CreateCustomerAsync(
         ApplicationUser user,
         UserManager<ApplicationUser> userManager,
-        XWaveDbContext dbContext)
+        XWaveDbContext dbContext,
+        IConfiguration configuration)
     {
-        var result = await userManager.CreateAsync(user, "Password123@@");
+        var password = configuration.GetValue<string>("SeedData:Password");
+        var result = await userManager.CreateAsync(user, password);
         if (result.Succeeded)
         {
             await userManager.AddToRoleAsync(user, RoleNames.Customer);
@@ -111,14 +112,15 @@ internal class UserSeeder
 
     private static async Task CreateStaffAsync(
         UserManager<ApplicationUser> userManager,
-        XWaveDbContext dbContext)
+        XWaveDbContext dbContext,
+        IConfiguration configuration)
     {
         var managers = await userManager.GetUsersInRoleAsync(RoleNames.Manager);
 
         var staffUsers = TestUserFactory.StaffUsers();
         foreach (var staffUser in staffUsers)
         {
-            await CreateSingleStaffAsync(userManager, staffUser);
+            await CreateSingleStaffAsync(userManager, staffUser, configuration);
         }
 
         var staffAccounts = TestUserFactory.StaffAccounts(managers, staffUsers);
@@ -132,9 +134,11 @@ internal class UserSeeder
 
     private static async Task CreateSingleStaffAsync(
         UserManager<ApplicationUser> userManager,
-        ApplicationUser staff)
+        ApplicationUser staff,
+        IConfiguration configuration)
     {
-        await userManager.CreateAsync(staff, "Password123@@");
+        var password = configuration.GetValue<string>("SeedData:Password");
+        await userManager.CreateAsync(staff, password);
         await userManager.AddToRoleAsync(staff, RoleNames.Staff);
     }
 
@@ -149,10 +153,10 @@ internal class UserSeeder
         }
     }
 
-    private static async Task CreateProductionManagersAsync(
+    private static async Task CreateProductionManagersAsync<TSeeder>(
         UserManager<ApplicationUser> userManager,
-        ILogger<UserSeeder> logger,
-        IConfiguration configuration)
+        ILogger<TSeeder> logger,
+        IConfiguration configuration) where TSeeder : IDataSeeder
     {
         var manager = new ApplicationUser
         {

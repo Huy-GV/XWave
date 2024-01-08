@@ -9,7 +9,7 @@ namespace XWave.UnitTest.Services;
 /// <summary>
 /// Sets up and manages a connection to the in-memory SQLite database.
 /// </summary>
-public class BaseTest
+public abstract class BaseTest
 {
     internal static XWaveDbContext CreateDbContext()
     {

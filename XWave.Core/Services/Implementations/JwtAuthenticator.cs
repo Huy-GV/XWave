@@ -38,7 +38,7 @@ internal class JwtAuthenticator : ServiceBase, IAuthenticator
             return ServiceResult<string>.Failure(new Error
             {
                 Code = ErrorCode.AuthenticationError,
-                Message = $"User with {viewModel.Username} not found",
+                Message = $"User {viewModel.Username} not found",
             });
         }
 
@@ -47,7 +47,7 @@ internal class JwtAuthenticator : ServiceBase, IAuthenticator
             return ServiceResult<string>.Failure(new Error
             {
                 Code = ErrorCode.AuthorizationError,
-                Message = $"User with {viewModel.Username} locked out",
+                Message = $"Unable to sign in",
             });
         }
 

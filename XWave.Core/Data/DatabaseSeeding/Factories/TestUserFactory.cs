@@ -7,8 +7,8 @@ public static class TestUserFactory
     {
         var manager1 = new ApplicationUser
         {
-            UserName = "gia_manager",
-            FirstName = "Gia",
+            UserName = "matt_manager",
+            FirstName = "Matt",
             LastName = "Applebee",
             RegistrationDate = DateTime.Now,
             PhoneNumber = "98765432"
@@ -16,8 +16,8 @@ public static class TestUserFactory
 
         var manager2 = new ApplicationUser
         {
-            UserName = "huy_manager",
-            FirstName = "Huy",
+            UserName = "tom_manager",
+            FirstName = "Tom",
             LastName = "Applebee",
             RegistrationDate = DateTime.Now,
             PhoneNumber = "98765432"
