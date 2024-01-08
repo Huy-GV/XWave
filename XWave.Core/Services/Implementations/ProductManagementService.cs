@@ -315,7 +315,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
             });
         }
 
-        if (updateSchedule.IsBetween(DateTime.Now, DateTime.Now.AddDays(7)))
+        if (updateSchedule < DateTime.Now.AddDays(7))
         {
             return ServiceResult.Failure(new Error
             {

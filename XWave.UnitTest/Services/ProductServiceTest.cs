@@ -1,12 +1,10 @@
 using FluentAssertions;
-using FsCheck;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using XWave.Core.Data.Constants;
 using XWave.Core.Data.DatabaseSeeding.Factories;
 using XWave.Core.Models;
 using XWave.Core.Services.Communication;
@@ -18,6 +16,7 @@ using System.Threading.Tasks;
 using Hangfire;
 using XWave.Core.Data;
 using Microsoft.EntityFrameworkCore;
+using Bogus;
 
 namespace XWave.UnitTest.Services;
 
@@ -70,10 +69,10 @@ public class ProductServiceTest : BaseTest
 
         var productManagementService = CreateTestSubject(dbContext);
 
-        var testProductIds = dbContext.Product.Select(x => x.Id).ToList();
+        var testProductIds = await dbContext.Product.Select(x => x.Id).ToListAsync();
         var nonExistentProductId = new System.Random().Next(testProductIds.Max(), int.MaxValue);
 
-        var userId = Guid.NewGuid().ToString();
+        var userId = new Faker().Random.Guid().ToString();
 
         SetUpManagerRoleCheckBypass(userId);
         var result = await productManagementService.DiscontinueProductAsync(
@@ -99,7 +98,7 @@ public class ProductServiceTest : BaseTest
         var productManagementService = CreateTestSubject(dbContext);
         var testProducts = await dbContext.Product.Where(x => !x.IsDiscontinued).ToListAsync();
         var discontinuedProductId = (await dbContext.Product.FirstAsync(x => x.IsDiscontinued)).Id;
-        var userId = Guid.NewGuid().ToString();
+        var userId = new Faker().Random.Guid().ToString();
 
         SetUpManagerRoleCheckBypass(userId);
         var result = await productManagementService.DiscontinueProductAsync(
@@ -117,36 +116,6 @@ public class ProductServiceTest : BaseTest
     }
 
     [Fact]
-    public async Task DiscontinueProduct_ShouldFail_IfScheduleIsNotFuture()
-    {
-        using var dbContext = CreateDbContext();
-        await SeedTestDataAsync(dbContext);
-
-        var productManagementService = CreateTestSubject(dbContext);
-        var testProducts = await dbContext.Product.ToListAsync();
-
-        var testProductIds = testProducts
-            .Where(x => !x.IsDiscontinued)
-            .Select(x => x.Id).ToArray();
-
-        var userId = Guid.NewGuid().ToString();
-        var schedule = DateTime.Now.AddDays(new System.Random().NextDouble() % (DateTime.Now - DateTime.MinValue).Days);
-        SetUpManagerRoleCheckBypass(userId);
-        var result = await productManagementService.DiscontinueProductAsync(
-            userId,
-            testProductIds,
-            schedule);
-
-        var expected = ServiceResult.Failure(new Error
-        {
-            Code = ErrorCode.InvalidArgument,
-            Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
-        });
-
-        AssertEqualServiceResults(result, expected);
-    }
-
-    [Fact]
     public async Task DiscontinueProduct_ShouldFail_IfScheduleIsUnderOneWeek()
     {
         using var dbContext = CreateDbContext();
@@ -155,13 +124,16 @@ public class ProductServiceTest : BaseTest
         var productManagementService = CreateTestSubject(dbContext);
         var testProducts = await dbContext.Product.ToListAsync();
 
-        var randomDay = Math.Abs(new System.Random().NextInt64()) % 6;
+        var faker = new Faker();
+
+        // either in the past or less than 1 week in the future
+        var randomDayOffset = faker.Random.Number(-1000, 6);
         var testProductIds = testProducts
             .Where(x => !x.IsDiscontinued)
             .Select(x => x.Id).ToArray();
 
-        var userId = Guid.NewGuid().ToString();
-        var schedule = DateTime.Now.AddDays(randomDay);
+        var userId = new Faker().Random.Guid().ToString();
+        var schedule = DateTime.Now.AddDays(randomDayOffset);
 
         SetUpManagerRoleCheckBypass(userId);
         var result = await productManagementService.DiscontinueProductAsync(
@@ -184,10 +156,10 @@ public class ProductServiceTest : BaseTest
         using var dbContext = CreateDbContext();
         await SeedTestDataAsync(dbContext);
 
-        var productManagementService = CreateTestSubject(dbContext); 
-        var invalidRoles = NonStaffRoles().Sample(1, 10).Head;
-        var guid = Guid.NewGuid();
-        var userId = guid.ToString();
+        var productManagementService = CreateTestSubject(dbContext);
+        var invalidRoles = NonStaffRoles();
+        var userId = new Faker().Random.Guid().ToString();
+
         _mockRoleAuthorizer
             .Setup(x => x.GetRolesByUserId(userId))
             .ReturnsAsync(invalidRoles);
@@ -211,9 +183,8 @@ public class ProductServiceTest : BaseTest
         await SeedTestDataAsync(dbContext);
 
         var productManagementService = CreateTestSubject(dbContext);
-        var invalidRoles = NonStaffRoles().Sample(1, 10).Head;
-        var guid = Guid.NewGuid();
-        var userId = guid.ToString();
+        var invalidRoles = NonStaffRoles();
+        var userId = new Faker().Random.Guid().ToString();
         _mockRoleAuthorizer
             .Setup(x => x.GetRolesByUserId(userId))
             .ReturnsAsync(invalidRoles);
@@ -239,9 +210,8 @@ public class ProductServiceTest : BaseTest
         await SeedTestDataAsync(dbContext);
 
         var productManagementService = CreateTestSubject(dbContext);
-        var invalidRoles = NonStaffRoles().Sample(1, 10).Head;
-        var guid = Guid.NewGuid();
-        var userId = guid.ToString();
+        var invalidRoles = NonStaffRoles();
+        var userId = new Faker().Random.Guid().ToString();
 
         _mockRoleAuthorizer
             .Setup(x => x.GetRolesByUserId(userId))
@@ -266,9 +236,8 @@ public class ProductServiceTest : BaseTest
         await SeedTestDataAsync(dbContext);
 
         var productManagementService = CreateTestSubject(dbContext);
-        var invalidRoles = NonStaffRoles().Sample(1, 10).Head;
-        var guid = Guid.NewGuid();
-        var userId = guid.ToString();
+        var invalidRoles = NonStaffRoles();
+        var userId = new Faker().Random.Guid().ToString();
         _mockRoleAuthorizer
             .Setup(x => x.GetRolesByUserId(userId))
             .ReturnsAsync(invalidRoles);
@@ -299,16 +268,14 @@ public class ProductServiceTest : BaseTest
             .ReturnsAsync(true);
     }
 
-    private static Gen<string[]> NonStaffRoles()
+    private static Faker<string[]> NonStaffRoles()
     {
-        return Gen.ArrayOf(
-            100,
-            Gen.OneOf(new[]
-            {
-                Gen.Constant(RoleNames.Customer),
-                Arb.Default.String().Generator,
-            }))
-            .Where(x => !x.Intersect(new[] { RoleNames.Staff, RoleNames.Manager })
-            .Any());
+        var faker = new Faker<string[]>()
+            .CustomInstantiator(f => f.Random
+                    .ArrayElements(new[]  { "Customer", f.Random.Word() })
+                    .Where(role => role is not "Staff" and not "Manager")
+                    .ToArray());
+
+        return faker;
     }
 }

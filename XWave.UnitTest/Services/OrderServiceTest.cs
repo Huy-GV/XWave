@@ -1,8 +1,6 @@
 using FluentAssertions;
-using FsCheck;
 using Xunit;
 using Moq;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using XWave.Core.Data.DatabaseSeeding.Factories;
@@ -14,6 +12,7 @@ using XWave.Core.ViewModels.Customers;
 using System.Threading.Tasks;
 using XWave.Core.Data;
 using Microsoft.EntityFrameworkCore;
+using Bogus;
 
 namespace XWave.UnitTest.Services;
 
@@ -57,7 +56,7 @@ public class OrderServiceTest : BaseTest
     [Fact]
     public async Task FindAllOrders_ShouldFail_IfCustomerAccountDoesNotExist()
     {
-        var customerId = Guid.NewGuid().ToString();
+        var customerId = new Faker().Random.Guid().ToString();
         _mockCustomerAccountService
             .Setup(x => x.CustomerAccountExists(customerId))
             .ReturnsAsync(false);
@@ -82,7 +81,7 @@ public class OrderServiceTest : BaseTest
         await SeedTestDataAsync(dbContext);
         var orderService = CreateTestSubject(dbContext);
 
-        var customerId = Guid.NewGuid().ToString();
+        var customerId = new Faker().Random.Guid().ToString();
         _mockCustomerAccountService
             .Setup(x => x.CustomerAccountExists(customerId))
             .ReturnsAsync(false);
@@ -104,7 +103,7 @@ public class OrderServiceTest : BaseTest
         await SeedTestDataAsync(dbContext);
         var orderService = CreateTestSubject(dbContext);
         
-        var customerId = Guid.NewGuid().ToString();
+        var customerId = new Faker().Random.Guid().ToString();
         _mockCustomerAccountService
             .Setup(x => x.CustomerAccountExists(customerId))
             .ReturnsAsync(false);
@@ -122,13 +121,14 @@ public class OrderServiceTest : BaseTest
     [Fact]
     public async Task AddOrder_ShouldFail_IfPaymentAccountIsInvalid()
     {
+        var faker = new Faker();
         using var dbContext = CreateDbContext();
         await SeedTestDataAsync(dbContext);
         var orderService = CreateTestSubject(dbContext);
 
-        var randomPaymentAccountId = (new System.Random()).Next();
+        var randomPaymentAccountId = faker.Random.Number();
         var purchaseViewModel = new PurchaseViewModel() { PaymentAccountId = randomPaymentAccountId };
-        var customerId = Guid.NewGuid().ToString();
+        var customerId = faker.Random.Guid().ToString();
 
         _mockCustomerAccountService
             .Setup(x => x.CustomerAccountExists(customerId))
@@ -151,25 +151,23 @@ public class OrderServiceTest : BaseTest
     [Fact]
     public async Task AddOrder_ShouldFail_IfPurchasedProductsNotFoundAsync()
     {
+        var faker = new Faker();
         using var dbContext = CreateDbContext();
         await SeedTestDataAsync(dbContext);
         var orderService = CreateTestSubject(dbContext);
 
         var existingProductIds = await dbContext.Product.Select(x => x.Id).ToListAsync();
-        var randomNonExistentProductIdGen = Gen
-            .ArrayOf(100, Arb.Default.Int32().Generator)
-            .Where(x => !existingProductIds.Intersect(x).Any())
-            .Select(x => x.Distinct());
 
-        var randomPaymentAccountId = (new System.Random()).Next();
-        var randomMissingIds = Gen
-            .ArrayOf(100, Arb.Default.Int32().Generator)
-            .Where(x => !existingProductIds.Intersect(x).Any())
-            .Select(x => x.Distinct())
-            .Sample(1, 1)
-            .Head;
+        var randomNonExistentProductIds = Enumerable.Range(0, 100)
+            .Select(_ => faker.Random.Number(int.MinValue, int.MaxValue))
+            .Distinct()
+            .Where(x => !existingProductIds.Contains(x))
+            .Take(100)
+            .ToArray();
 
-        var itemsToPurchase = randomMissingIds
+        var randomPaymentAccountId = faker.Random.Int();
+
+        var itemsToPurchase = randomNonExistentProductIds
             .Select(x => new PurchaseViewModel.PurchasedItems
             {
                 ProductId = x,
@@ -183,7 +181,7 @@ public class OrderServiceTest : BaseTest
         };
 
         var includeExpiredAccounts = false;
-        var customerId = Guid.NewGuid().ToString();
+        var customerId = faker.Random.Guid().ToString();
         _mockCustomerAccountService
             .Setup(x => x.CustomerAccountExists(customerId))
             .ReturnsAsync(true);
@@ -199,7 +197,7 @@ public class OrderServiceTest : BaseTest
         var expected = ServiceResult<int>.Failure(new Error
         {
             Code = ErrorCode.InvalidState,
-            Message = $"The following products were not found: {string.Join(", ", randomMissingIds)}.",
+            Message = $"The following products were not found: {string.Join(", ", randomNonExistentProductIds)}.",
         });
 
         AssertEqualServiceResults(result, expected);
