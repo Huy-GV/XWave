@@ -59,8 +59,8 @@ public class OrderServiceTest : BaseTest
     {
         var customerId = Guid.NewGuid().ToString();
         _mockCustomerAccountService
-            .Setup(x => x.CustomerAccountExists(customerId).Result)
-            .Returns(false);
+            .Setup(x => x.CustomerAccountExists(customerId))
+            .ReturnsAsync(false);
 
         using var dbContext = CreateDbContext();
         await SeedTestDataAsync(dbContext);
@@ -84,8 +84,8 @@ public class OrderServiceTest : BaseTest
 
         var customerId = Guid.NewGuid().ToString();
         _mockCustomerAccountService
-            .Setup(x => x.CustomerAccountExists(customerId).Result)
-            .Returns(false);
+            .Setup(x => x.CustomerAccountExists(customerId))
+            .ReturnsAsync(false);
 
         var result = await orderService.FindAllOrdersAsync(customerId);
         var expected = ServiceResult<int>.Failure(new Error()
@@ -103,11 +103,11 @@ public class OrderServiceTest : BaseTest
         using var dbContext = CreateDbContext();
         await SeedTestDataAsync(dbContext);
         var orderService = CreateTestSubject(dbContext);
-
+        
         var customerId = Guid.NewGuid().ToString();
         _mockCustomerAccountService
-            .Setup(x => x.CustomerAccountExists(customerId).Result)
-            .Returns(false);
+            .Setup(x => x.CustomerAccountExists(customerId))
+            .ReturnsAsync(false);
 
         var result = await orderService.AddOrderAsync(It.IsAny<PurchaseViewModel>(), customerId);
         var expected = ServiceResult<int>.Failure(new Error()
@@ -131,12 +131,12 @@ public class OrderServiceTest : BaseTest
         var customerId = Guid.NewGuid().ToString();
 
         _mockCustomerAccountService
-            .Setup(x => x.CustomerAccountExists(customerId).Result)
-            .Returns(true);
+            .Setup(x => x.CustomerAccountExists(customerId))
+            .ReturnsAsync(true);
 
         _mockPaymentService
-            .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
-            .Returns(false);
+            .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false))
+            .ReturnsAsync(false);
 
         var result = await orderService.AddOrderAsync(purchaseViewModel, customerId);
         var expected = ServiceResult<int>.Failure(new Error
@@ -182,13 +182,18 @@ public class OrderServiceTest : BaseTest
             ProductCart = itemsToPurchase
         };
 
+        var includeExpiredAccounts = false;
         var customerId = Guid.NewGuid().ToString();
         _mockCustomerAccountService
-            .Setup(x => x.CustomerAccountExists(customerId).Result)
-            .Returns(true);
+            .Setup(x => x.CustomerAccountExists(customerId))
+            .ReturnsAsync(true);
+
         _mockPaymentService
-            .Setup(x => x.CustomerHasPaymentAccount(customerId, purchaseViewModel.PaymentAccountId, false).Result)
-            .Returns(true);
+            .Setup(x => x.CustomerHasPaymentAccount(
+                customerId, 
+                purchaseViewModel.PaymentAccountId,
+                includeExpiredAccounts))
+            .ReturnsAsync(true);
 
         var result = await orderService.AddOrderAsync(purchaseViewModel, customerId);
         var expected = ServiceResult<int>.Failure(new Error

@@ -189,8 +189,8 @@ public class ProductServiceTest : BaseTest
         var guid = Guid.NewGuid();
         var userId = guid.ToString();
         _mockRoleAuthorizer
-            .Setup(x => x.GetRolesByUserId(userId).Result)
-            .Returns(invalidRoles);
+            .Setup(x => x.GetRolesByUserId(userId))
+            .ReturnsAsync(invalidRoles);
 
         var result = await productManagementService.UpdateProductAsync(
             userId,
@@ -215,8 +215,8 @@ public class ProductServiceTest : BaseTest
         var guid = Guid.NewGuid();
         var userId = guid.ToString();
         _mockRoleAuthorizer
-            .Setup(x => x.GetRolesByUserId(userId).Result)
-            .Returns(invalidRoles);
+            .Setup(x => x.GetRolesByUserId(userId))
+            .ReturnsAsync(invalidRoles);
 
         var result = await productManagementService.UpdateProductPriceAsync(
             userId,
@@ -244,8 +244,8 @@ public class ProductServiceTest : BaseTest
         var userId = guid.ToString();
 
         _mockRoleAuthorizer
-            .Setup(x => x.GetRolesByUserId(userId).Result)
-            .Returns(invalidRoles);
+            .Setup(x => x.GetRolesByUserId(userId))
+            .ReturnsAsync(invalidRoles);
 
         var result = await productManagementService.UpdateStockAsync(
             userId,
@@ -270,8 +270,8 @@ public class ProductServiceTest : BaseTest
         var guid = Guid.NewGuid();
         var userId = guid.ToString();
         _mockRoleAuthorizer
-            .Setup(x => x.GetRolesByUserId(userId).Result)
-            .Returns(invalidRoles);
+            .Setup(x => x.GetRolesByUserId(userId))
+            .ReturnsAsync(invalidRoles);
 
         var result = await productManagementService.RestartProductSaleAsync(
             userId,
@@ -294,8 +294,9 @@ public class ProductServiceTest : BaseTest
 
     private void SetUpManagerRoleCheckBypass(string userId)
     {
-        _mockRoleAuthorizer.Setup(x => x.IsUserInRole(userId, "Manager").Result)
-            .Returns(true);
+        _mockRoleAuthorizer
+            .Setup(x => x.IsUserInRole(userId, "Manager"))
+            .ReturnsAsync(true);
     }
 
     private static Gen<string[]> NonStaffRoles()
