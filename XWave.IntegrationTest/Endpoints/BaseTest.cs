@@ -1,9 +1,5 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 using XWave.Core.Data;
 using XWave.IntegrationTest.Factories;
@@ -18,8 +14,15 @@ public abstract class BaseTest : IClassFixture<XWaveApiWebApplicationFactory>
 
     protected XWaveApiWebApplicationFactory XWaveApplicationFactory { get; }
 
-    internal XWaveDbContext CreateDbContext()
+    internal IServiceScope CreateScope()
     {
-        return XWaveApplicationFactory.Services.GetRequiredService<XWaveDbContext>();
+        return XWaveApplicationFactory.Services.CreateScope();
+    }
+
+    internal static XWaveDbContext CreateDbContext(IServiceScope scope)
+    {
+        var options = scope.ServiceProvider.GetRequiredService<DbContextOptions<XWaveDbContext>>();
+
+        return new XWaveDbContext(options);
     }
 }

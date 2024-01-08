@@ -6,6 +6,7 @@ using XWave.Core.DTOs.Shared;
 using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.ViewModels.Authentication;
+using XWave.Web.Extensions;
 using XWave.Web.Utils;
 
 namespace XWave.Web.Controllers;
@@ -34,7 +35,7 @@ public class AuthenticationController : ControllerBase
         var result = await _authenticator.SignInAsync(model);
         if (!result.Succeeded)
         {
-            return Unauthorized(result.Error);
+            return result.Error.MapToHttpResult();
         }
 
         Response.Cookies.Delete(_jwtCookieConfig.Name);

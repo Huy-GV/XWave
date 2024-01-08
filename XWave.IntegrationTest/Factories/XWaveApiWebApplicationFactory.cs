@@ -8,7 +8,6 @@ using XWave.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Microsoft.Extensions.Configuration;
-using System.Runtime.CompilerServices;
 
 namespace XWave.IntegrationTest.Factories;
 
