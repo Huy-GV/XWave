@@ -1,4 +1,3 @@
-using System;
 using XWave.Core.Models;
 
 namespace XWave.Core.Data.DatabaseSeeding.Factories;

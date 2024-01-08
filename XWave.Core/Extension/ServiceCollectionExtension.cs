@@ -3,17 +3,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using XWave.Core.Data;
-using XWave.Core.Data.DatabaseSeeding;
 using XWave.Core.Models;
 using XWave.Core.Services.Implementations;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.Utils;
 using XWave.Core.Data.DatabaseSeeding.Seeders;
-using System;
+using Microsoft.Extensions.Hosting;
 
 namespace XWave.Core.Extension;
 
-public static class XWaveServiceExtension
+public static class ServiceCollectionExtension
 {
     public static void AddDefaultXWaveServices(this IServiceCollection services)
     {
@@ -47,28 +46,16 @@ public static class XWaveServiceExtension
         });
     }
 
-    public static async Task SeedDevelopmentDatabaseAsync(this IServiceProvider serviceProvider)
+    public static void AddDataSeeder(this IServiceCollection services, string environmentName)
     {
-        using var scope = serviceProvider.CreateScope();
-        var services = scope.ServiceProvider;
-        var context = services.GetRequiredService<XWaveDbContext>();
-        await context.Database.EnsureDeletedAsync();
-        await context.Database.MigrateAsync();
-
-        await UserSeeder.SeedDevelopmentDataAsync(services);
-        await ProductRelatedDataSeeder.SeedData(services);
-        await PurchaseRelatedDataSeeder.SeedData(services);
-        await StaffActivitySeeder.SeedData(services);
-    }
-
-    public static async Task SeedProductionDatabaseAsync(this IServiceProvider serviceProvider)
-    {
-        using var scope = serviceProvider.CreateScope();
-        var services = scope.ServiceProvider;
-        var context = services.GetRequiredService<XWaveDbContext>();
-        await context.Database.MigrateAsync();
-
-        await UserSeeder.SeedProductionDataAsync(services);
+        if (environmentName == Environments.Development)
+        {
+            services.AddTransient<IDataSeeder, DevelopmentDataSeeder>();
+        }
+        else
+        {
+            services.AddTransient<IDataSeeder, ProductionDataSeeder>();
+        }
     }
 
     public static void AddHangFireBackgroundServices(this IServiceCollection services, string dbConnectionString)

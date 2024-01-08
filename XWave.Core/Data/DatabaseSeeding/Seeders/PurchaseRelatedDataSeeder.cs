@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data.DatabaseSeeding.Factories;
 using XWave.Core.Models;
@@ -9,14 +7,11 @@ namespace XWave.Core.Data.DatabaseSeeding.Seeders;
 
 internal class PurchaseRelatedDataSeeder
 {
-    public static async Task SeedData(IServiceProvider serviceProvider)
+    public static async Task SeedData<TSeeder>(
+        XWaveDbContext context,
+        UserManager<ApplicationUser> userManager,
+        ILogger<TSeeder> logger) where TSeeder : IDataSeeder
     {
-        using var context = new XWaveDbContext(
-            serviceProvider
-                .GetRequiredService<DbContextOptions<XWaveDbContext>>());
-        var userManager = serviceProvider
-            .GetRequiredService<UserManager<ApplicationUser>>();
-
         try
         {
             var user1 = await userManager.FindByNameAsync("john_customer");
@@ -42,7 +37,6 @@ internal class PurchaseRelatedDataSeeder
         }
         catch (Exception)
         {
-            var logger = serviceProvider.GetRequiredService<ILogger<PurchaseRelatedDataSeeder>>();
             logger.LogError("An error occurred while seeding purchase data");
             throw;
         }

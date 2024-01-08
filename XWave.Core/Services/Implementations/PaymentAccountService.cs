@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
 using XWave.Core.DTOs.Customers;

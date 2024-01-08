@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using XWave.Core.Data;
 using XWave.Core.DTOs.Customers;
 using XWave.Core.Extension;

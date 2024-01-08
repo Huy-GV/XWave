@@ -16,6 +16,7 @@ using XWave.Core.Configuration;
 using XWave.Core.Data.Constants;
 using XWave.Core.Extension;
 using XWave.Web.Data;
+using XWave.Web.Extensions;
 using XWave.Web.Middleware;
 using XWave.Web.Utils;
 
@@ -31,9 +32,10 @@ public class Program
         var builder = CreateApplicationBuilder(args);
         var app = builder.Build();
 
+        await app.SeedDataAsync();
+
         if (app.Environment.IsDevelopment())
         {
-            await app.Services.SeedDevelopmentDatabaseAsync();
             app.UseDeveloperExceptionPage();
             app.UseMigrationsEndPoint();
             app.UseHangfireDashboard();
@@ -46,7 +48,6 @@ public class Program
         }
         else
         {
-            await app.Services.SeedProductionDatabaseAsync();
             app.UseExceptionHandler("/Error");
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
@@ -80,13 +81,18 @@ public class Program
             builder.Configuration.AddEnvironmentVariables();
         }
 
+        builder.Services.AddDataSeeder(builder.Environment.EnvironmentName);
+
+        // configure JWT
         builder.Services.Configure<Jwt>(builder.Configuration.GetSection("Jwt"));
         builder.Services.Configure<JwtCookie>(builder.Configuration.GetSection("JwtCookie"));
 
+        // configure core services and controllers
         builder.Services.AddTransient<AuthenticationHelper>();
         builder.Services.AddControllers();
         builder.Services.AddDefaultXWaveServices();
 
+        // configure databases
         var dbConnectionString = GetDbConnectionString();
         builder.Services.AddDatabase(dbConnectionString);
         builder.Services.AddHangFireBackgroundServices(dbConnectionString);

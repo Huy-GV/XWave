@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data.DatabaseSeeding.Factories;
 using XWave.Core.Models;
@@ -9,13 +7,11 @@ namespace XWave.Core.Data.DatabaseSeeding.Seeders;
 
 internal class ProductRelatedDataSeeder
 {
-    public static async Task SeedData(IServiceProvider serviceProvider)
+    public static async Task SeedData<TSeeder>(
+        XWaveDbContext context, 
+        UserManager<ApplicationUser> userManager, 
+        ILogger<TSeeder> logger) where TSeeder : IDataSeeder
     {
-        using var context = new XWaveDbContext(
-            serviceProvider.GetRequiredService<DbContextOptions<XWaveDbContext>>());
-
-        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
         try
         {
             var categories = await CreateCategoriesAsync(context);
@@ -24,8 +20,7 @@ internal class ProductRelatedDataSeeder
         }
         catch (Exception)
         {
-            var logger = serviceProvider.GetRequiredService<ILogger<ProductRelatedDataSeeder>>();
-            logger.LogError("An error occurred while seeding product related data");
+            logger.LogError("An error occurred while seeding product-related data");
             throw;
         }
     }

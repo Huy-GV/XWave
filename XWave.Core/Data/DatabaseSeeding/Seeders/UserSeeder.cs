@@ -1,59 +1,50 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
 using XWave.Core.Data.Constants;
 using XWave.Core.Data.DatabaseSeeding.Factories;
+using XWave.Core.Data.DatabaseSeeding.Seeders;
 using XWave.Core.Models;
 
 namespace XWave.Core.Data.DatabaseSeeding;
 
 internal class UserSeeder
 {
-    public static async Task SeedDevelopmentDataAsync(IServiceProvider serviceProvider)
+    public static async Task SeedDevelopmentDataAsync<TSeeder>(
+        XWaveDbContext context, 
+        IConfiguration configuration, 
+        RoleManager<IdentityRole> roleManager, 
+        UserManager<ApplicationUser> userManager, 
+        ILogger<TSeeder> logger) where TSeeder : IDataSeeder
     {
-        using var context = new XWaveDbContext(
-            serviceProvider
-                .GetRequiredService<DbContextOptions<XWaveDbContext>>());
-
-        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var dbContext = serviceProvider.GetRequiredService<XWaveDbContext>();
-
         try
         {
             await CreateRolesAsync(roleManager);
-            await CreateCustomersAsync(userManager, dbContext);
+            await CreateCustomersAsync(userManager, context);
             await CreateTestManagersAsync(userManager, configuration);
-            await CreateStaffAsync(userManager, dbContext);
+            await CreateStaffAsync(userManager, context);
         }
         catch (Exception)
         {
-            var logger = serviceProvider.GetRequiredService<ILogger<UserSeeder>>();
             logger.LogError("An error occurred while seeding roles and users");
             throw;
         }
     }
 
-    public static async Task SeedProductionDataAsync(IServiceProvider serviceProvider)
+    public static async Task SeedProductionDataAsync<TSeeder>(
+        XWaveDbContext context,
+        IConfiguration configuration,
+        RoleManager<IdentityRole> roleManager,
+        UserManager<ApplicationUser> userManager,
+        ILogger<TSeeder> logger) where TSeeder : IDataSeeder
     {
-        using var context = new XWaveDbContext(
-            serviceProvider
-                .GetRequiredService<DbContextOptions<XWaveDbContext>>());
-
-        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var dbContext = serviceProvider.GetRequiredService<XWaveDbContext>();
-
-        var logger = serviceProvider.GetRequiredService<ILogger<UserSeeder>>();
         try
         {
             await CreateRolesAsync(roleManager);
-            await CreateProductionManagersAsync(userManager, logger, configuration);
+            await CreateCustomersAsync(userManager, context);
+            await CreateTestManagersAsync(userManager, configuration);
+            await CreateStaffAsync(userManager, context);
         }
         catch (Exception)
         {

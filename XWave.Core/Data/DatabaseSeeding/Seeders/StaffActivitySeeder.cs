@@ -1,28 +1,24 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data.Constants;
+using XWave.Core.Data.DatabaseSeeding.Seeders;
 using XWave.Core.Models;
 
 namespace XWave.Core.Data.DatabaseSeeding;
 
 internal class StaffActivitySeeder
 {
-    public static async Task SeedData(IServiceProvider serviceProvider)
+    public static async Task SeedData<TSeeder>(
+        XWaveDbContext context, 
+        UserManager<ApplicationUser> userManager, 
+        ILogger<TSeeder> logger) where TSeeder : IDataSeeder
     {
-        using var context = new XWaveDbContext(
-            serviceProvider
-                .GetRequiredService<DbContextOptions<XWaveDbContext>>());
-
-        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         try
         {
             await CreateStaffActivityLogsAsync(context, userManager);
         }
         catch (Exception)
         {
-            var logger = serviceProvider.GetRequiredService<ILogger<StaffActivitySeeder>>();
             logger.LogError("An error occurred while seeding staff activities");
             throw;
         }
