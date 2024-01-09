@@ -33,7 +33,6 @@ internal class UserSeeder
     }
 
     public static async Task SeedProductionDataAsync<TSeeder>(
-        XWaveDbContext context,
         IConfiguration configuration,
         RoleManager<IdentityRole> roleManager,
         UserManager<ApplicationUser> userManager,

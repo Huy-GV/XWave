@@ -31,19 +31,17 @@ internal class OrderService : ServiceBase, IOrderService
     {
         if (!await _customerAccountService.CustomerAccountExists(customerId))
         {
-            return ServiceResult<OrderDto>.Failure(new Error
-            {
-                Code = ErrorCode.AuthorizationError,
-            });
+            return ServiceResult<OrderDto>.Failure(
+                Error.With(
+                    ErrorCode.AuthorizationError));
         }
 
         var order = await GetOrderDtosQuery(customerId).FirstOrDefaultAsync(o => o.Id == orderId);
         if (order is null)
         {
-            return ServiceResult<OrderDto>.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-            });
+            return ServiceResult<OrderDto>.Failure(
+                Error.With(
+                    ErrorCode.EntityNotFound));
         }
 
         return ServiceResult<OrderDto>.Success(order);
@@ -55,22 +53,20 @@ internal class OrderService : ServiceBase, IOrderService
     {
         if (!await _customerAccountService.CustomerAccountExists(customerId))
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.AuthorizationError,
-                Message = "Customer account not found"
-            });
+            return ServiceResult<int>.Failure(
+                Error.With(
+                    ErrorCode.AuthorizationError,
+                    "Customer account not found"));
         }
 
         if (!await _paymentService.CustomerHasPaymentAccount(
             customerId,
             purchaseViewModel.PaymentAccountId))
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.InvalidState,
-                Message = "Valid payment account not found"
-            });
+            return ServiceResult<int>.Failure(
+                Error.With(
+                    ErrorCode.InvalidState,
+                    "Valid payment account not found"));
         }
 
         var order = new Order
@@ -92,11 +88,10 @@ internal class OrderService : ServiceBase, IOrderService
 
         if (missingProductIds.Any())
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.InvalidState,
-                Message = $"The following products were not found: { string.Join(", ", missingProductIds) }.",
-            });
+            return ServiceResult<int>.Failure(
+                Error.With(
+                    ErrorCode.InvalidState,
+                    $"The following products were not found: {string.Join(", ", missingProductIds)}."));
         }
 
         var purchasedProducts = new List<Product>();
@@ -145,11 +140,10 @@ internal class OrderService : ServiceBase, IOrderService
 
         if (errorMessages.Count > 0)
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.ConflictingState,
-                Message = string.Join("\n", errorMessages)
-            });
+            return ServiceResult<int>.Failure(
+                Error.With(
+                    ErrorCode.ConflictingState,
+                    string.Join("\n", errorMessages)));
         }
 
         DbContext.Order.Add(order);
@@ -166,11 +160,8 @@ internal class OrderService : ServiceBase, IOrderService
     {
         if (!await _customerAccountService.CustomerAccountExists(customerId))
         {
-            return ServiceResult<IReadOnlyCollection<OrderDto>>.Failure(new Error
-            {
-                Code = ErrorCode.AuthorizationError,
-                Message = "Customer account not found"
-            });
+            return ServiceResult<IReadOnlyCollection<OrderDto>>.Failure(
+                Error.With(ErrorCode.AuthorizationError));
         }
 
         var orderDtos = await GetOrderDtosQuery(customerId).ToListAsync();

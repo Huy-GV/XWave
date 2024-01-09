@@ -1,6 +1,6 @@
-﻿namespace XWave.Web.Data;
+namespace XWave.Web.Data;
 
 public static class Policies
 {
-    public static string InternalPersonnelOnly => "InternalPersonnelOnly";
+    public const string InternalPersonnelOnly = nameof(InternalPersonnelOnly);
 }

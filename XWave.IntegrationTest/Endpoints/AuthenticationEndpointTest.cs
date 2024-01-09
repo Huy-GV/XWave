@@ -23,8 +23,8 @@ public class AuthenticationEndpointTest : BaseTest
     [Fact]
     public async Task LogIn_ShouldSucceed_WhenPasswordIsCorrect()
     {
-        using var scope = CreateScope();
-        using var dbContext = CreateDbContext(scope);
+        await using var scope = CreateScope();
+        await using var dbContext = CreateDbContext(scope);
         var password = XWaveApplicationFactory.Services
             .GetRequiredService<IConfiguration>()
             .GetValue<string>("SeedData:Password");
@@ -33,13 +33,12 @@ public class AuthenticationEndpointTest : BaseTest
 
         var userNames = await dbContext.Users.Select(x => x.UserName).ToListAsync();
         var requests = userNames
-            .Select(x => new
-            {
-                username = x,
-                password
-            })
-            .Select(x => new StringContent(
-                JsonSerializer.Serialize(x),
+            .Select(username => new StringContent(
+                JsonSerializer.Serialize(new
+                {
+                    username,
+                    password
+                }),
                 Encoding.UTF8,
                 "application/json"));
 
@@ -58,8 +57,8 @@ public class AuthenticationEndpointTest : BaseTest
     [Fact]
     public async Task LogIn_ShouldFail_WhenPasswordIsIncorrect()
     {
-        using var scope = CreateScope();
-        using var dbContext = CreateDbContext(scope);
+        await using var scope = CreateScope();
+        await using var dbContext = CreateDbContext(scope);
         var password = XWaveApplicationFactory.Services
             .GetRequiredService<IConfiguration>()
             .GetValue<string>("SeedData:Password");

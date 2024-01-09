@@ -30,10 +30,8 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
     {
         if (!await _roleAuthorizer.IsUserInRole(customerId, RoleNames.Customer))
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.AuthorizationError,
-            });
+            return ServiceResult<int>.Failure(
+                Error.With(ErrorCode.AuthorizationError));
         }
 
         var existingPaymentAccount = await DbContext.PaymentAccount
@@ -75,10 +73,8 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
     {
         if (!await _roleAuthorizer.IsUserInRole(customerId, RoleNames.Customer))
         {
-            return ServiceResult<IEnumerable<PaymentAccount>>.Failure(new Error
-            {
-                Code = ErrorCode.AuthorizationError,
-            });
+            return ServiceResult<IEnumerable<PaymentAccount>>.Failure(
+                Error.With(ErrorCode.AuthorizationError));
         }
 
         var paymentAccountToRemove = await DbContext.PaymentAccount
@@ -88,11 +84,10 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         if (paymentAccountToRemove is null ||
             paymentAccountToRemove.PaymentAccountDetails.CustomerId != customerId)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Payment account for customer ID {customerId} not found.",
-            });
+            return ServiceResult.Failure(
+                Error.With(
+                    ErrorCode.EntityNotFound,
+                    $"Payment account for customer ID {customerId} not found."));
         }
 
         DbContext.Update(paymentAccountToRemove);
@@ -108,10 +103,8 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
             staffId,
             new [] { RoleNames.Staff, RoleNames.Customer }))
         {
-            return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Failure(new Error
-            {
-                Code = ErrorCode.AuthorizationError,
-            });
+            return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Failure(
+                Error.With(ErrorCode.AuthorizationError));
         }
 
         var transactions = await DbContext.PaymentAccount
@@ -136,11 +129,10 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         if (paymentAccount is null ||
             paymentAccount.PaymentAccountDetails.CustomerId != customerId)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Payment account ID {paymentAccountId} not found.",
-            });
+            return ServiceResult.Failure(
+                Error.With(
+                    ErrorCode.EntityNotFound,
+                    $"Payment account ID {paymentAccountId} not found."));
         }
 
         DbContext.PaymentAccount
@@ -170,10 +162,8 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
     {
         if (!await _customerAccountService.CustomerAccountExists(customerId))
         {
-            return ServiceResult<IReadOnlyCollection<PaymentAccountUsageDto>>.Failure(new Error
-            {
-                Code = ErrorCode.AuthorizationError,
-            });
+            return ServiceResult<IReadOnlyCollection<PaymentAccountUsageDto>>.Failure(
+                Error.With(ErrorCode.AuthorizationError));
         }
 
         var purchasesByCustomer = await DbContext.Order
@@ -236,11 +226,10 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
         if (paymentAccount is null ||
             paymentAccount.PaymentAccountDetails.CustomerId != customerId)
         {
-            return ServiceResult<PaymentAccountUsageDto>.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Payment account ID {paymentAccountId} not found.",
-            });
+            return ServiceResult<PaymentAccountUsageDto>.Failure(
+                Error.With(
+                    ErrorCode.EntityNotFound,
+                    $"Payment account ID {paymentAccountId} not found."));
         }
 
         var purchasesByCustomer = await DbContext.Order

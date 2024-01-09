@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using XWave.Core.Data;
 using XWave.Core.Services.Communication;
 
@@ -11,17 +12,17 @@ namespace XWave.UnitTest.Services;
 /// </summary>
 public abstract class BaseTest
 {
-    internal static XWaveDbContext CreateDbContext()
+    internal static async Task<XWaveDbContext> CreateDbContext()
     {
         var newConnection = new SqliteConnection("DataSource=:memory:;");
-        newConnection.Open();
+        await newConnection.OpenAsync();
 
         var dbContext = new XWaveDbContext(
             new DbContextOptionsBuilder<XWaveDbContext>()
-            .UseSqlite(newConnection)
-            .Options);
+                .UseSqlite(newConnection)
+                .Options);
 
-        dbContext.Database.EnsureCreated();
+        await dbContext.Database.EnsureCreatedAsync();
 
         return dbContext;
     }

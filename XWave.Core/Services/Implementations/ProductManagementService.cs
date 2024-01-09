@@ -20,11 +20,10 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     private readonly ILogger<ProductManagementService> _logger;
     private readonly ProductDtoMapper _productDtoMapper;
     private readonly IRoleAuthorizer _roleAuthorizer;
-    private readonly Error _unauthorizedError = new()
-    {
-        Code = ErrorCode.AuthorizationError,
-        Message = "Only staff are authorized to modify products"
-    };
+
+    private static readonly Error NonStaffUserError = Error.With(
+        ErrorCode.AuthorizationError,
+        "Only staff are authorized to modify products");
 
     public ProductManagementService(
         XWaveDbContext dbContext,
@@ -41,12 +40,13 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
         _logger = logger;
     }
 
-    public async Task<ServiceResult<int>> AddProductAsync(string staffId,
+    public async Task<ServiceResult<int>> AddProductAsync(
+        string staffId,
         CreateProductViewModel productViewModel)
     {
         if (!await IsStaffIdValid(staffId))
         {
-            return ServiceResult<int>.Failure(_unauthorizedError);
+            return ServiceResult<int>.Failure(NonStaffUserError);
         }
 
         try
@@ -56,11 +56,10 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
 
             if (!await DbContext.Category.AnyAsync(c => c.Id == productViewModel.CategoryId))
             {
-                return ServiceResult<int>.Failure(new Error
-                {
-                    Code = ErrorCode.InvalidState,
-                    Message = "Category not found",
-                });
+                return ServiceResult<int>.Failure(
+                    Error.With(
+                        ErrorCode.InvalidState,
+                        $"Category ID {productViewModel.CategoryId} not found"));
             }
 
             var newProduct = new Product();
@@ -87,17 +86,16 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
-            return ServiceResult<int>.Failure(_unauthorizedError);
+            return ServiceResult<int>.Failure(NonStaffUserError);
         }
 
         var product = await DbContext.Product.FindAsync(productId);
         if (product is null)
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = "Product not found",
-            });
+            return ServiceResult<int>.Failure(Error.With(
+                ErrorCode.EntityNotFound,
+                $"Product with ID {productId} not found"
+            ));
         }
 
         DbContext.Product.Update(product);
@@ -117,7 +115,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     {
         if (!await IsStaffIdValid(staffId))
         {
-            return ServiceResult<IReadOnlyCollection<DetailedProductDto>>.Failure(_unauthorizedError);
+            return ServiceResult<IReadOnlyCollection<DetailedProductDto>>.Failure(NonStaffUserError);
         }
 
         var products = await DbContext.Product
@@ -138,10 +136,8 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     {
         if (!await IsStaffIdValid(staffId))
         {
-            return ServiceResult<DetailedProductDto>.Failure(new Error
-            {
-                Code = ErrorCode.AuthorizationError
-            });
+            return ServiceResult<DetailedProductDto>.Failure(
+                Error.With(ErrorCode.AuthorizationError));
         }
 
         var product = await DbContext.Product
@@ -152,11 +148,9 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
 
         if (product is null)
         {
-            return ServiceResult<DetailedProductDto>.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Product with ID {id} not found.",
-            });
+            return ServiceResult<DetailedProductDto>.Failure(
+                Error.With(ErrorCode.EntityNotFound,
+                $"Product with ID {id} not found."));
         }
 
         var productDto = _productDtoMapper.MapDetailedProductDto(product);
@@ -171,27 +165,23 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     {
         if (!await IsStaffIdValid(staffId))
         {
-            return ServiceResult<int>.Failure(_unauthorizedError);
+            return ServiceResult<int>.Failure(NonStaffUserError);
         }
 
         _logger.LogInformation($"User with ID {staffId} is attempting to update product ID {productId}");
         var product = await DbContext.Product.FindAsync(productId);
         if (product is null)
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Product with ID {productId} not found.",
-            });
+            return ServiceResult<DetailedProductDto>.Failure(
+                Error.With(ErrorCode.EntityNotFound,
+                $"Product with ID {productId} not found."));
         }
 
         if (product.IsDiscontinued)
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.ConflictingState,
-                Message = $"Product with ID {productId} is discontinued",
-            });
+            return ServiceResult<DetailedProductDto>.Failure(
+                Error.With(ErrorCode.ConflictingState,
+                $"Product with ID {productId} is discontinued."));
         }
 
         DbContext.Product
@@ -211,17 +201,15 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     {
         if (!await IsStaffIdValid(staffId))
         {
-            return ServiceResult<int>.Failure(_unauthorizedError);
+            return ServiceResult<int>.Failure(NonStaffUserError);
         }
 
         var product = await DbContext.Product.FindAsync(productId);
         if (product is null)
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = "Product not found.",
-            });
+            return ServiceResult<DetailedProductDto>.Failure(
+                Error.With(ErrorCode.EntityNotFound,
+                $"Product with ID {productId} not found."));
         }
 
         var quantityBeforeRestock = product.Quantity;
@@ -244,17 +232,15 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     {
         if (!await IsStaffIdValid(staffId))
         {
-            return ServiceResult<int>.Failure(_unauthorizedError);
+            return ServiceResult<int>.Failure(NonStaffUserError);
         }
 
         var product = await DbContext.Product.FirstOrDefaultAsync(x => x.Id == productId);
         if (product is null)
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = "Product not found.",
-            });
+            return ServiceResult<DetailedProductDto>.Failure(
+                Error.With(ErrorCode.EntityNotFound,
+                $"Product with ID {productId} not found."));
         }
 
         if (viewModel.Schedule is null)
@@ -281,7 +267,7 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
-            return ServiceResult<int>.Failure(_unauthorizedError);
+            return ServiceResult<int>.Failure(NonStaffUserError);
         }
 
         var productsToDiscontinue = await DbContext.Product
@@ -294,11 +280,9 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
 
         if (missingProducts.Any())
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Products with the following IDs not found: {string.Join(", ", missingProducts)}.",
-            });
+            return ServiceResult<int>.Failure(
+                Error.With(ErrorCode.EntityNotFound,
+                $"Products with the following IDs not found: {string.Join(", ", missingProducts)}."));
         }
 
         var discontinuedProducts = productsToDiscontinue
@@ -308,21 +292,18 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
 
         if (discontinuedProducts.Any())
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.InvalidState,
-                Message = $"Products with the following IDs already discontinued: {string.Join(", ", discontinuedProducts)}.",
-            });
+            return ServiceResult<int>.Failure(
+                Error.With(ErrorCode.InvalidState,
+                $"Products with the following IDs already discontinued: {string.Join(", ", discontinuedProducts)}."));
         }
 
         if (updateSchedule < DateTime.Now.AddDays(7))
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.InvalidArgument,
-                Message = "Scheduled sale discontinuation date must be at least 1 week in the future."
-            });
+            return ServiceResult.Failure(
+                Error.With(ErrorCode.InvalidArgument,
+                "Scheduled sale discontinuation date must be at least 1 week in the future."));
         }
+
 
         _backgroundJobClient.Schedule(
             () => UpdateProductSaleStatusByScheduleAsync(productIds, false, updateSchedule),
@@ -340,25 +321,23 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
-            return ServiceResult<int>.Failure(_unauthorizedError);
+            return ServiceResult<int>.Failure(NonStaffUserError);
         }
 
         if (!await DbContext.Product.AnyAsync(p => p.Id == productId))
         {
-            return ServiceResult<int>.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = "Product not found.",
-            });
+            return ServiceResult<int>.Failure(
+                Error.With(
+                    ErrorCode.EntityNotFound,
+                    "Product not found."));
         }
 
         if (updateSchedule.IsBetween(DateTime.Now, DateTime.Now.AddDays(7)))
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.InvalidArgument,
-                Message = "Scheduled sale restart date must be at least 1 week in the future."
-            });
+            return ServiceResult.Failure(
+                Error.With(
+                    ErrorCode.InvalidArgument,
+                    "Scheduled sale restart date must be at least 1 week in the future."));
         }
 
         _backgroundJobClient.Schedule(
@@ -424,11 +403,10 @@ internal class ProductManagementService : ServiceBase, IProductManagementService
     {
         if (viewModel.Schedule!.Value.IsBetween(DateTime.Now, DateTime.Now.AddDays(7)))
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.InvalidArgument,
-                Message = "Scheduled price change date must be at least 1 week in the future."
-            });
+            return ServiceResult.Failure(
+                Error.With(
+                    ErrorCode.InvalidArgument,
+                    "Scheduled price change date must be at least 1 week in the future."));
         }
 
         _backgroundJobClient.Schedule(

@@ -14,9 +14,9 @@ public abstract class BaseTest : IClassFixture<XWaveApiWebApplicationFactory>
 
     protected XWaveApiWebApplicationFactory XWaveApplicationFactory { get; }
 
-    internal IServiceScope CreateScope()
+    internal AsyncServiceScope CreateScope()
     {
-        return XWaveApplicationFactory.Services.CreateScope();
+        return XWaveApplicationFactory.Services.CreateAsyncScope();
     }
 
     internal static XWaveDbContext CreateDbContext(IServiceScope scope)

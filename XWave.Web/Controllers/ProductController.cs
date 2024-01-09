@@ -132,11 +132,10 @@ public class ProductController : ControllerBase
     {
         var result = _backgroundJobClient.Delete(id)
                 ? ServiceResult.Success()
-                : ServiceResult.Failure(new Error
-                {
-                    Code = ErrorCode.EntityNotFound,
-                    Message = $"Failed to remove background job ID {id}."
-                });
+                : ServiceResult.Failure(
+                    Error.With(
+                        ErrorCode.EntityNotFound,
+                        $"Failed to remove background job ID {id}."));
 
         return result.OnSuccess(() => NoContent());
     }

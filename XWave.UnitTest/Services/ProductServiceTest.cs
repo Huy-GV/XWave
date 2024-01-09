@@ -64,27 +64,30 @@ public class ProductServiceTest : BaseTest
     [Fact]
     public async Task DiscontinueProduct_ShouldFail_IfOneProductIsMissing()
     {
-        using var dbContext = CreateDbContext();
+        await using var dbContext = await CreateDbContext();
         await SeedTestDataAsync(dbContext);
 
         var productManagementService = CreateTestSubject(dbContext);
-
+        var faker = new Faker();
         var testProductIds = await dbContext.Product.Select(x => x.Id).ToListAsync();
-        var nonExistentProductId = new System.Random().Next(testProductIds.Max(), int.MaxValue);
+        var nonExistentProductIds = Enumerable
+            .Range(0, 100)
+            .Select(_ => faker.Random.Number(int.MinValue, int.MaxValue))
+            .Distinct()
+            .Where(x => !testProductIds.Contains(x))
+            .ToList();
 
-        var userId = new Faker().Random.Guid().ToString();
+        var userId = faker.Random.Guid().ToString();
 
         SetUpManagerRoleCheckBypass(userId);
         var result = await productManagementService.DiscontinueProductAsync(
             userId,
-            testProductIds.ToArray().Append(nonExistentProductId),
+            testProductIds.Concat(nonExistentProductIds),
             DateTime.MaxValue);
 
-        var expected = ServiceResult.Failure(new Error
-        {
-            Code = ErrorCode.EntityNotFound,
-            Message = $"Products with the following IDs not found: {string.Join(", ", new[] { nonExistentProductId })}.",
-        });
+        var expected = ServiceResult<int>.Failure(
+                Error.With(ErrorCode.EntityNotFound, 
+                $"Products with the following IDs not found: {string.Join(", ", nonExistentProductIds)}."));
 
         AssertEqualServiceResults(expected, result);
     }
@@ -92,25 +95,27 @@ public class ProductServiceTest : BaseTest
     [Fact]
     public async Task DiscontinueProduct_ShouldFail_IfProductIsAlreadyDiscontinued()
     {
-        using var dbContext = CreateDbContext();
+        await using var dbContext = await CreateDbContext();
         await SeedTestDataAsync(dbContext);
 
         var productManagementService = CreateTestSubject(dbContext);
         var testProducts = await dbContext.Product.Where(x => !x.IsDiscontinued).ToListAsync();
-        var discontinuedProductId = (await dbContext.Product.FirstAsync(x => x.IsDiscontinued)).Id;
+        var discontinuedProductIds = await dbContext.Product
+            .Where(x => x.IsDiscontinued)
+            .Select(x => x.Id)
+            .ToListAsync();
+
         var userId = new Faker().Random.Guid().ToString();
 
         SetUpManagerRoleCheckBypass(userId);
         var result = await productManagementService.DiscontinueProductAsync(
             userId,
-            testProducts.Select(x => x.Id).Append(discontinuedProductId),
+            testProducts.Select(x => x.Id).Concat(discontinuedProductIds),
             DateTime.MaxValue);
 
-        var expected = ServiceResult.Failure(new Error
-        {
-            Code = ErrorCode.InvalidState,
-            Message = $"Products with the following IDs already discontinued: {string.Join(", ", new[] { discontinuedProductId })}."
-        });
+        var expected = ServiceResult<int>.Failure(
+                Error.With(ErrorCode.InvalidState,
+                $"Products with the following IDs already discontinued: {string.Join(", ", discontinuedProductIds)}."));
 
         AssertEqualServiceResults(result, expected);
     }
@@ -118,7 +123,7 @@ public class ProductServiceTest : BaseTest
     [Fact]
     public async Task DiscontinueProduct_ShouldFail_IfScheduleIsUnderOneWeek()
     {
-        using var dbContext = CreateDbContext();
+        await using var dbContext = await CreateDbContext();
         await SeedTestDataAsync(dbContext);
 
         var productManagementService = CreateTestSubject(dbContext);
@@ -141,11 +146,9 @@ public class ProductServiceTest : BaseTest
             testProductIds,
             schedule);
 
-        var expected = ServiceResult.Failure(new Error
-        {
-            Code = ErrorCode.InvalidArgument,
-            Message = "Scheduled sale discontinuation date must be at least 1 week in the future.",
-        });
+        var expected = ServiceResult.Failure(
+                Error.With(ErrorCode.InvalidArgument,
+                "Scheduled sale discontinuation date must be at least 1 week in the future."));
 
         AssertEqualServiceResults(result, expected);
     }
@@ -153,7 +156,7 @@ public class ProductServiceTest : BaseTest
     [Fact]
     public async Task UpdateProduct_ShouldFail_IfUserIsNotStaffAsync()
     {
-        using var dbContext = CreateDbContext();
+        await using var dbContext = await CreateDbContext();
         await SeedTestDataAsync(dbContext);
 
         var productManagementService = CreateTestSubject(dbContext);
@@ -169,17 +172,17 @@ public class ProductServiceTest : BaseTest
             It.IsAny<int>(),
             It.IsAny<UpdateProductViewModel>());
 
-        var expected = ServiceResult.Failure(new Error()
-        {
-            Code = ErrorCode.AuthorizationError,
-            Message = "Only staff are authorized to modify products"
-        });
+        var expected = ServiceResult.Failure(Error.With(
+            ErrorCode.AuthorizationError,
+            "Only staff are authorized to modify products"));
+
+        AssertEqualServiceResults(result, expected);
     }
 
     [Fact]
     public async Task UpdateProductPrice_ShouldFail_IfUserIsNotStaffAsync()
     {
-        using var dbContext = CreateDbContext();
+        await using var dbContext = await CreateDbContext();
         await SeedTestDataAsync(dbContext);
 
         var productManagementService = CreateTestSubject(dbContext);
@@ -194,11 +197,9 @@ public class ProductServiceTest : BaseTest
             It.IsAny<int>(),
             It.IsAny<UpdateProductPriceViewModel>());
 
-        var expected = ServiceResult.Failure(new Error()
-        {
-            Code = ErrorCode.AuthorizationError,
-            Message = "Only staff are authorized to modify products"
-        });
+        var expected = ServiceResult.Failure(Error.With(
+            ErrorCode.AuthorizationError,
+            "Only staff are authorized to modify products"));
 
         AssertEqualServiceResults(result, expected);
     }
@@ -206,7 +207,7 @@ public class ProductServiceTest : BaseTest
     [Fact]
     public async Task UpdateProductStock_ShouldFail_IfUserIsNotStaffAsync()
     {
-        using var dbContext = CreateDbContext();
+        await using var dbContext = await CreateDbContext();
         await SeedTestDataAsync(dbContext);
 
         var productManagementService = CreateTestSubject(dbContext);
@@ -222,17 +223,17 @@ public class ProductServiceTest : BaseTest
             It.IsAny<int>(),
             It.IsAny<uint>());
 
-        var expected = ServiceResult.Failure(new Error()
-        {
-            Code = ErrorCode.AuthorizationError,
-            Message = "Only staff are authorized to modify products"
-        });
+        var expected = ServiceResult.Failure(Error.With(
+            ErrorCode.AuthorizationError,
+            "Only staff are authorized to modify products"));
+
+        AssertEqualServiceResults(result, expected);
     }
 
     [Fact]
     public async Task RestartProductSale_ShouldFail_IfUserIsNotManagerAsync()
     {
-        using var dbContext = CreateDbContext();
+        await using var dbContext = await CreateDbContext();
         await SeedTestDataAsync(dbContext);
 
         var productManagementService = CreateTestSubject(dbContext);
@@ -247,11 +248,9 @@ public class ProductServiceTest : BaseTest
             It.IsAny<int>(),
             It.IsAny<DateTime>());
 
-        var expected = ServiceResult.Failure(new Error()
-        {
-            Code = ErrorCode.AuthorizationError,
-            Message = "Only staff are authorized to modify products"
-        });
+        var expected = ServiceResult.Failure(Error.With(
+            ErrorCode.AuthorizationError,
+            "Only staff are authorized to modify products"));
 
         AssertEqualServiceResults(result, expected);
     }

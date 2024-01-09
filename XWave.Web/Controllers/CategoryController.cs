@@ -7,10 +7,12 @@ using XWave.Core.Data.Constants;
 using XWave.Core.Models;
 using XWave.Core.Services.Interfaces;
 using XWave.Web.Utils;
+using XWave.Web.Data;
 
 namespace XWave.Web.Controllers;
 
 [Route("api/[controller]")]
+[Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
 [ApiController]
 public class CategoryController : ControllerBase
 {
@@ -28,14 +30,19 @@ public class CategoryController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Category>>> Get()
     {
-        return Ok(await _categoryService.FindAllCategoriesAsync());
+        var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _categoryService.FindAllCategoriesAsync(userId);
+
+        return result.OnSuccess(() => Ok(result.Value));
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Category>> Get(int id)
     {
-        var category = await _categoryService.FindCategoryByIdAsync(id);
-        return category is not null ? Ok(category) : NotFound();
+        var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
+        var result = await _categoryService.FindCategoryByIdAsync(id, userId);
+
+        return result.OnSuccess(() => Ok(result.Value));
     }
 
     [HttpPost]
@@ -44,6 +51,7 @@ public class CategoryController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _categoryService.AddCategoryAsync(managerId, newCategory);
+
         return result.OnSuccess(x => this.Created($"{this.ApiUrl()}/category/admin/{result.Value}"));
     }
 

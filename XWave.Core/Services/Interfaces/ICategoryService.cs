@@ -1,17 +1,17 @@
-﻿using XWave.Core.Models;
+using XWave.Core.Models;
 using XWave.Core.Services.Communication;
 
 namespace XWave.Core.Services.Interfaces;
 
 public interface ICategoryService
 {
-    Task<ServiceResult<int>> AddCategoryAsync(string managerUserName, Category category);
+    Task<ServiceResult<int>> AddCategoryAsync(string managerUserId, Category category);
 
-    Task<ServiceResult> UpdateCategoryAsync(string managerUserName, int id, Category category);
+    Task<ServiceResult> UpdateCategoryAsync(string managerUserId, int id, Category category);
 
-    Task<ServiceResult> DeleteCategoryAsync(string managerUserName, int id);
+    Task<ServiceResult> DeleteCategoryAsync(string managerUserId, int id);
 
-    Task<Category?> FindCategoryByIdAsync(int id);
+    Task<ServiceResult<Category>> FindCategoryByIdAsync(int id, string userId);
 
-    Task<IReadOnlyCollection<Category>> FindAllCategoriesAsync();
+    Task<ServiceResult<IReadOnlyCollection<Category>>> FindAllCategoriesAsync(string userId);
 }

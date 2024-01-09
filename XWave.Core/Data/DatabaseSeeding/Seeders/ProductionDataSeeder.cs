@@ -33,7 +33,7 @@ internal class ProductionDataSeeder : IDataSeeder
 
         try
         {
-            await UserSeeder.SeedProductionDataAsync(_dbContext, _configuration, _roleManager, _userManager, _logger);
+            await UserSeeder.SeedProductionDataAsync(_configuration, _roleManager, _userManager, _logger);
         }
         catch (Exception)
         {

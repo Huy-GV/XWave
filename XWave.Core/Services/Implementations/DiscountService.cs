@@ -17,11 +17,10 @@ internal class DiscountService : ServiceBase, IDiscountService
     private readonly IStaffActivityLogger _activityService;
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IRoleAuthorizer _roleAuthorizer;
-    private readonly Error _unauthorizedOperationError = new()
-    {
-        Code = ErrorCode.AuthorizationError,
-        Message = "Only managers are authorized to modify/ assign Discounts",
-    };
+    private static readonly Error NonManagerUserError = Error.With(
+        ErrorCode.AuthorizationError,
+        "Only managers are authorized to modify/assign Discounts");
+
 
     public DiscountService(
         XWaveDbContext dbContext,
@@ -40,7 +39,7 @@ internal class DiscountService : ServiceBase, IDiscountService
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
-            return ServiceResult<int>.Failure(_unauthorizedOperationError);
+            return ServiceResult<int>.Failure(NonManagerUserError);
         }
 
         var newDiscount = new Discount();
@@ -68,17 +67,15 @@ internal class DiscountService : ServiceBase, IDiscountService
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
-            return ServiceResult.Failure(_unauthorizedOperationError);
+            return ServiceResult.Failure(NonManagerUserError);
         }
 
         var discount = await DbContext.Discount.FindAsync(discountId);
         if (discount is null)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Discount with ID {discountId} was not found.",
-            });
+            return ServiceResult.Failure(Error.With(
+                ErrorCode.EntityNotFound,
+                $"Discount with ID {discountId} was not found."));
         }
 
         var percentage = discount.Percentage;
@@ -120,17 +117,15 @@ internal class DiscountService : ServiceBase, IDiscountService
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
-            return ServiceResult.Failure(_unauthorizedOperationError);
+            return ServiceResult.Failure(NonManagerUserError);
         }
 
         var discount = await DbContext.Discount.FindAsync(discountId);
         if (discount is null)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Discount with ID {discountId} was not found.",
-            });
+            return ServiceResult.Failure(Error.With(
+                ErrorCode.EntityNotFound,
+                $"Discount with ID {discountId} was not found."));
         }
 
         DbContext.Discount
@@ -153,17 +148,15 @@ internal class DiscountService : ServiceBase, IDiscountService
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
-            return ServiceResult.Failure(_unauthorizedOperationError);
+            return ServiceResult.Failure(NonManagerUserError);
         }
 
         var discount = await DbContext.Discount.FindAsync(discountId);
         if (discount is null)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Discount with ID {discountId} was not found.",
-            });
+            return ServiceResult.Failure(Error.With(
+                ErrorCode.EntityNotFound,
+                $"Discount with ID {discountId} was not found."));
         }
 
         var appliedProducts = await DbContext.Product
@@ -174,11 +167,9 @@ internal class DiscountService : ServiceBase, IDiscountService
 
         if (missingProductIds.Any())
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.InvalidState,
-                Message = $"Products with IDs {string.Join(", ", missingProductIds)} not found"
-            });
+            return ServiceResult.Failure(Error.With(
+                ErrorCode.InvalidState,
+                $"Products with IDs {string.Join(", ", missingProductIds)} not found"));
         }
 
         DbContext.Product.UpdateRange(appliedProducts.Select(x =>
@@ -208,7 +199,7 @@ internal class DiscountService : ServiceBase, IDiscountService
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
-            return ServiceResult.Failure(_unauthorizedOperationError);
+            return ServiceResult.Failure(NonManagerUserError);
         }
 
         var discount = await DbContext.Discount
@@ -216,11 +207,9 @@ internal class DiscountService : ServiceBase, IDiscountService
 
         if (discount is null)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Discount with ID {discountId} was not found.",
-            });
+            return ServiceResult.Failure(Error.With(
+                ErrorCode.EntityNotFound,
+                $"Discount with ID {discountId} was not found."));
         }
 
         var appliedProducts = await DbContext.Product
@@ -233,11 +222,10 @@ internal class DiscountService : ServiceBase, IDiscountService
 
         if (productsWithoutDiscount.Any())
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.InvalidState,
-                Message = $"Discount with ID {discountId} is not applied to the following products: {string.Join(", ", productsWithoutDiscount.Select(p => p.Name))}.",
-            });
+            return ServiceResult.Failure(
+                Error.With(
+                    ErrorCode.InvalidState,
+                    $"Discount with ID {discountId} is not applied to the following products: {string.Join(", ", productsWithoutDiscount.Select(p => p.Name))}."));
         }
 
         DbContext.Product.UpdateRange(appliedProducts.Select(p =>

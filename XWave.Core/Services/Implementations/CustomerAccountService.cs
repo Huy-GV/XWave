@@ -66,11 +66,9 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
         if (customerAccount is null)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Customer account with ID {id} not found.",
-            });
+            return ServiceResult.Failure(
+                Error.With(ErrorCode.EntityNotFound,
+                $"Customer account with ID {id} not found."));
         }
 
         DbContext.CustomerAccount.Update(customerAccount);
@@ -87,11 +85,9 @@ internal class CustomerAccountService : ServiceBase, ICustomerAccountService
         var customerAccount = await DbContext.CustomerAccount.FindAsync(id);
         if (customerAccount is null)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Customer account with ID {id} not found.",
-            });
+            return ServiceResult.Failure(
+                Error.With(ErrorCode.EntityNotFound,
+                $"Customer account with ID {id} not found."));
         }
 
         DbContext.CustomerAccount

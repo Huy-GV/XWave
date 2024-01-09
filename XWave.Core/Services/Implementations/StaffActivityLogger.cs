@@ -57,10 +57,8 @@ internal class StaffActivityLogger : ServiceBase, IStaffActivityLogger
     {
         if (!await IsStaffIdValid(staffId))
         {
-            return ServiceResult<IReadOnlyCollection<ActivityLogDto>>.Failure(new Error
-            {
-                Code = ErrorCode.AuthenticationError
-            });
+            return ServiceResult<IReadOnlyCollection<ActivityLogDto>>.Failure(
+                Error.With(ErrorCode.AuthorizationError));
         }
 
         var activityLogDtos = await DbContext.Activity
@@ -81,10 +79,8 @@ internal class StaffActivityLogger : ServiceBase, IStaffActivityLogger
     {
         if (!await IsStaffIdValid(staffId))
         {
-            return ServiceResult<ActivityLogDto>.Failure(new Error
-            {
-                Code = ErrorCode.AuthenticationError,
-            });
+            return ServiceResult<ActivityLogDto>.Failure(
+                Error.With(ErrorCode.AuthorizationError));
         }
 
         var activityLog = await DbContext.Activity
@@ -94,10 +90,7 @@ internal class StaffActivityLogger : ServiceBase, IStaffActivityLogger
 
         if (activityLog is null)
         {
-            return ServiceResult<ActivityLogDto>.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-            });
+            return ServiceResult<ActivityLogDto>.Failure(Error.With(ErrorCode.EntityNotFound));
         }
 
         var activityLogDto = new ActivityLogDto

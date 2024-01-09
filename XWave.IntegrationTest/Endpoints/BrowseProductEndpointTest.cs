@@ -12,6 +12,7 @@ using XWave.IntegrationTest.Utils;
 using System.Text.Json;
 using XWave.Core.DTOs.Shared;
 using IdentityModel.Client;
+using XWave.Core.DTOs.Customers;
 
 namespace XWave.IntegrationTest.Endpoints;
 public class BrowseProductEndpointTests : BaseTest
@@ -23,13 +24,21 @@ public class BrowseProductEndpointTests : BaseTest
     [Fact]
     public async Task GetAllProducts_ShouldReturnProductList()
     {
+        await using var scope = CreateScope();
+        await using var dbContext = CreateDbContext(scope);
+
+        var storedProductIds = await dbContext.Product
+            .Where(x => !x.IsDeleted && !x.IsDiscontinued)
+            .Select(x => x.Id)
+            .ToListAsync();
+
         var httpClient = XWaveApplicationFactory.CreateClient();
         var response = await httpClient.GetAsync("/api/product/");
 
-        var responseBody = await response.Content.ReadFromJsonAsync<IEnumerable<DetailedProductDto>>();
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        responseBody.Should().NotBeEmpty();
+        var products = await response.Content.ReadFromJsonAsync<IEnumerable<ProductDto>>() 
+            ?? Enumerable.Empty<ProductDto>();
+        products.Select(x => x.Id).Should().BeEquivalentTo(storedProductIds);
     }
 
     [Fact]
@@ -47,41 +56,36 @@ public class BrowseProductEndpointTests : BaseTest
     [Fact]
     public async Task GetAllProductsForStaff_ShouldReturnUnauthorized_IfUserIsCustomer()
     {
-        using var scope = CreateScope();
-        using var dbContext = CreateDbContext(scope);
+        await using var scope = CreateScope();
+        await using var dbContext = CreateDbContext(scope);
         var httpClient = XWaveApplicationFactory.CreateClient();
 
         var password = XWaveApplicationFactory.Services
             .GetRequiredService<IConfiguration>()
             .GetValue<string>("SeedData:Password");
 
-        var query =
+        var getCustomerUserNamesQuery =
             from user in dbContext.Users
             join userRole in dbContext.UserRoles on user.Id equals userRole.UserId
             join role in dbContext.Roles on userRole.RoleId equals role.Id
             where role.Name == "Customer"
             select user.UserName;
 
-        var userNames = await query.ToListAsync();
+        var userNames = await getCustomerUserNamesQuery.ToListAsync();
 
         var requests = userNames
-            .Select(username => new
-            {
-                username,
-                password
-            })
-            .Select(x => new StringContent(
-                JsonSerializer.Serialize(x),
+            .Select(username => new StringContent(
+                JsonSerializer.Serialize(new
+                {
+                    username,
+                    password
+                }),
                 Encoding.UTF8,
                 "application/json"));
 
         foreach (var request in requests)
         {
-            var authResponse = await httpClient.PostAsync("/api/auth/login", request);
-            authResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-            var deserializedBody = await authResponse.Content.ReadFromJsonAsync<JwtTokenDto>(JsonUtil.CaseInsensitiveOptions);
-            var token = deserializedBody?.Token;
-            token.Should().NotBeNullOrEmpty();
+            var token = await GivenTokenFromSuccessfulAuthentication(httpClient, request);
 
             httpClient.SetBearerToken(token);
             var browseResponse = await httpClient.GetAsync("/api/product/private");
@@ -93,49 +97,68 @@ public class BrowseProductEndpointTests : BaseTest
     }
 
     [Fact]
-    public async Task GetAllProductsForStaff_ShouldReturnSuccess_IfUserIsStaff()
+    public async Task GetAllProductsForStaff_ShouldSucceed_IfUserIsStaff()
     {
-        using var scope = CreateScope();
-        using var dbContext = CreateDbContext(scope);
-        var httpClient = XWaveApplicationFactory.CreateClient();
+        await using var scope = CreateScope();
+        await using var dbContext = CreateDbContext(scope);
 
+        var storedProductIds = await dbContext.Product
+            .Where(x => !x.IsDeleted && !x.IsDiscontinued)
+            .Select(x => x.Id)
+            .ToListAsync();
+
+        var httpClient = XWaveApplicationFactory.CreateClient();
         var password = XWaveApplicationFactory.Services
             .GetRequiredService<IConfiguration>()
             .GetValue<string>("SeedData:Password");
 
-        var query =
+        var getStaffUserNamesQuery =
             from user in dbContext.Users
             join userRole in dbContext.UserRoles on user.Id equals userRole.UserId
             join role in dbContext.Roles on userRole.RoleId equals role.Id
             where role.Name == "Staff" || role.Name == "Manager"
             select user.UserName;
 
-        var userNames = await query.ToListAsync();
+        var userNames = await getStaffUserNamesQuery.ToListAsync();
 
         var requests = userNames
-            .Select(username => new
-            {
-                username,
-                password
-            })
-            .Select(x => new StringContent(
-                JsonSerializer.Serialize(x),
+            .Select(username => new StringContent(
+                JsonSerializer.Serialize(new
+                {
+                    username,
+                    password
+                }),
                 Encoding.UTF8,
                 "application/json"));
 
         foreach (var request in requests)
         {
-            var authResponse = await httpClient.PostAsync("/api/auth/login", request);
-            authResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-            var deserializedBody = await authResponse.Content.ReadFromJsonAsync<JwtTokenDto>(JsonUtil.CaseInsensitiveOptions);
-            var token = deserializedBody?.Token;
-            token.Should().NotBeNullOrEmpty();
+            var token = await GivenTokenFromSuccessfulAuthentication(httpClient, request);
 
             httpClient.SetBearerToken(token);
+
             var browseResponse = await httpClient.GetAsync("/api/product/private");
+
             browseResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             var browseResponseBody = await browseResponse.Content.ReadAsStringAsync();
-            browseResponseBody.Should().NotBeEmpty();
+            var products = await browseResponse.Content.ReadFromJsonAsync<IEnumerable<DetailedProductDto>>()
+                ?? Enumerable.Empty<DetailedProductDto>();
+
+            products.Select(x => x.Id).Should().BeEquivalentTo(storedProductIds);
+            products.Select(x => x.LatestRestock).Should().NotBeNull();
         }
+    }
+
+    private static async Task<string> GivenTokenFromSuccessfulAuthentication(
+        HttpClient httpClient,
+        HttpContent httpContent)
+    {
+        var authResponse = await httpClient.PostAsync("/api/auth/login", httpContent);
+        authResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var deserializedBody = await authResponse.Content.ReadFromJsonAsync<JwtTokenDto>(JsonUtil.CaseInsensitiveOptions);
+        var token = deserializedBody?.Token;
+        token.Should().NotBeNullOrEmpty();
+
+        return token!;
     }
 }

@@ -12,11 +12,14 @@ internal class CategoryService : ServiceBase, ICategoryService
 {
     private readonly IStaffActivityLogger _activityService;
     private readonly IRoleAuthorizer _roleAuthorizer;
-    private readonly Error _unauthorizedOperationError = new()
-    {
-        Code = ErrorCode.AuthorizationError,
-        Message = "Only managers are authorized to modify Categories",
-    };
+
+    private static readonly Error NonManagerUserError = Error.With(
+        ErrorCode.AuthorizationError,
+        "Only managers are authorized to modify Categories");
+
+    private static readonly Error NonStaffUserError = Error.With(
+        ErrorCode.AuthorizationError,
+        "Only staff users are authorized to view Categories");
 
     public CategoryService(
         XWaveDbContext dbContext,
@@ -31,7 +34,7 @@ internal class CategoryService : ServiceBase, ICategoryService
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
-            return ServiceResult<int>.Failure(_unauthorizedOperationError);
+            return ServiceResult<int>.Failure(NonManagerUserError);
         }
 
         try
@@ -55,17 +58,16 @@ internal class CategoryService : ServiceBase, ICategoryService
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
-            return ServiceResult.Failure(_unauthorizedOperationError);
+            return ServiceResult.Failure(NonManagerUserError);
         }
 
         var category = await DbContext.Category.FindAsync(id);
         if (category is null)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Category with ID {id} not found.",
-            });
+            return ServiceResult.Failure(
+                Error.With(
+                    ErrorCode.EntityNotFound,
+                    $"Category with ID {id} not found."));
         }
 
         try
@@ -85,16 +87,32 @@ internal class CategoryService : ServiceBase, ICategoryService
         }
     }
 
-    public async Task<IReadOnlyCollection<Category>> FindAllCategoriesAsync()
+    public async Task<ServiceResult<IReadOnlyCollection<Category>>> FindAllCategoriesAsync(string userId)
     {
+        if (!await _roleAuthorizer.IsUserInRoles(userId, new[] { RoleNames.Manager, RoleNames.Staff }))
+        {
+            return ServiceResult<IReadOnlyCollection<Category>>.Failure(NonStaffUserError);
+        }
+
         var categories = await DbContext.Category.AsNoTracking().ToListAsync();
 
-        return categories.AsIReadonlyCollection();
+        return ServiceResult<IReadOnlyCollection<Category>>.Success(categories.AsIReadonlyCollection());
     }
 
-    public async Task<Category?> FindCategoryByIdAsync(int id)
+    public async Task<ServiceResult<Category>> FindCategoryByIdAsync(int id, string userId)
     {
-        return await DbContext.Category.FindAsync(id);
+        if (!await _roleAuthorizer.IsUserInRoles(userId, new[] { RoleNames.Manager, RoleNames.Staff }))
+        {
+            return ServiceResult<Category>.Failure(NonStaffUserError);
+        }
+
+        var category = await DbContext.Category.FindAsync(id);
+        if (category is null)
+        {
+            return ServiceResult<Category>.Failure(Error.With(ErrorCode.EntityNotFound));
+        }
+
+        return ServiceResult<Category>.Success(category);
     }
 
     public async Task<ServiceResult> UpdateCategoryAsync(
@@ -104,17 +122,16 @@ internal class CategoryService : ServiceBase, ICategoryService
     {
         if (!await _roleAuthorizer.IsUserInRole(managerId, RoleNames.Manager))
         {
-            return ServiceResult.Failure(_unauthorizedOperationError);
+            return ServiceResult.Failure(NonManagerUserError);
         }
 
         var category = await DbContext.Category.FindAsync(id);
         if (category is null)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Category with ID {id} not found.",
-            });
+            return ServiceResult.Failure(
+                Error.With(
+                    ErrorCode.EntityNotFound,
+                    $"Category with ID {id} not found."));
         }
 
         try

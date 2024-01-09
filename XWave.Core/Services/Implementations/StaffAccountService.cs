@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
@@ -15,11 +15,10 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IRoleAuthorizer _roleAuthorizer;
-    private readonly Error _unauthorizedOperationError = new()
-    {
-        Code = ErrorCode.AuthorizationError,
-        Message = "Only managers are authorized to manage staff accounts",
-    };
+
+    private static readonly Error UnauthorizedOperationError = Error.With(
+        ErrorCode.AuthorizationError, 
+        "Only managers are authorized to manage staff accounts");
 
     public StaffAccountService(
         XWaveDbContext dbContext,
@@ -37,17 +36,16 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
     {
         if (! await IsManagerIdValid(managerId))
         {
-            return ServiceResult<string>.Failure(_unauthorizedOperationError);
+            return ServiceResult<string>.Failure(UnauthorizedOperationError);
         }
 
         var user = await _userManager.FindByIdAsync(staffId);
         if (user is null)
         {
-            return ServiceResult<string>.Failure(new Error
-            {
-                Message = $"User ID {staffId} not found",
-                Code = ErrorCode.EntityNotFound,
-            });
+            return ServiceResult<string>.Failure(
+                Error.With(
+                    ErrorCode.EntityNotFound,
+                    $"User ID {staffId} not found"));
         }
 
         DbContext.StaffAccount.Add(new StaffAccount
@@ -66,7 +64,7 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
     {
         if (!await IsManagerIdValid(managerId))
         {
-            return ServiceResult<StaffAccountDto>.Failure(_unauthorizedOperationError);
+            return ServiceResult<StaffAccountDto>.Failure(UnauthorizedOperationError);
         }
 
         var staffUser = await _userManager.FindByIdAsync(id);
@@ -79,19 +77,18 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
             return ServiceResult<StaffAccountDto>.Success(staffAccountDto);
         };
 
-        return ServiceResult<StaffAccountDto>.Failure(new Error
-        {
-            Code = ErrorCode.EntityNotFound,
-        });
+        return ServiceResult<StaffAccountDto>.Failure(
+            Error.With(
+                ErrorCode.EntityNotFound,
+                $"Staff account ID {id} not found"));
     }
 
     public async Task<ServiceResult<IReadOnlyCollection<StaffAccountDto>>> GetAllStaffAccounts(string managerId)
     {
         if (! await IsManagerIdValid(managerId))
         {
-            Console.WriteLine("CHECK ROLE");
             return ServiceResult<IReadOnlyCollection<StaffAccountDto>>
-                .Failure(_unauthorizedOperationError);
+                .Failure(UnauthorizedOperationError);
         }
 
         var staffUsers = await _userManager.GetUsersInRoleAsync(RoleNames.Staff);
@@ -115,23 +112,23 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
     {
         if (! await IsManagerIdValid(managerId))
         {
-            return ServiceResult.Failure(_unauthorizedOperationError);
+            return ServiceResult.Failure(UnauthorizedOperationError);
         }
 
         var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
         if (staffAccount is null)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Staff account with ID {staffId} not found."
-            });
+            return ServiceResult<StaffAccountDto>.Failure(
+                Error.With(
+                    ErrorCode.EntityNotFound,
+                    $"Staff account ID {staffId} not found"));
         }
 
         DbContext.StaffAccount
             .Update(staffAccount)
             .CurrentValues
             .SetValues(updateStaffAccountViewModel);
+
         await DbContext.SaveChangesAsync();
 
         return ServiceResult.Success();
@@ -141,18 +138,17 @@ internal class StaffAccountService : ServiceBase, IStaffAccountService
     {
         if (! await IsManagerIdValid(managerId))
         {
-            return ServiceResult.Failure(_unauthorizedOperationError);
+            return ServiceResult.Failure(UnauthorizedOperationError);
         }
 
         var staffUser = await _userManager.FindByIdAsync(staffId);
         var staffAccount = await DbContext.StaffAccount.FindAsync(staffId);
         if (staffUser is null || staffAccount is null)
         {
-            return ServiceResult.Failure(new Error
-            {
-                Code = ErrorCode.EntityNotFound,
-                Message = $"Staff account with ID {staffId} not found."
-            });
+            return ServiceResult<StaffAccountDto>.Failure(
+                Error.With(
+                    ErrorCode.EntityNotFound,
+                    $"Staff account ID {staffId} not found"));
         }
 
         var lockoutResult = await _userManager.SetLockoutEnabledAsync(staffUser, true);

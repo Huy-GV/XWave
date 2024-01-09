@@ -35,20 +35,16 @@ internal class JwtAuthenticator : ServiceBase, IAuthenticator
         var user = await _userManager.FindByNameAsync(viewModel.Username);
         if (user is null)
         {
-            return ServiceResult<string>.Failure(new Error
-            {
-                Code = ErrorCode.AuthenticationError,
-                Message = $"User {viewModel.Username} not found",
-            });
+            return ServiceResult<string>.Failure(
+                Error.With(ErrorCode.AuthenticationError,
+                $"User {viewModel.Username} not found"));
         }
 
         if (!await _userManager.CheckPasswordAndLockoutStatusAsync(user, viewModel.Password))
         {
-            return ServiceResult<string>.Failure(new Error
-            {
-                Code = ErrorCode.AuthorizationError,
-                Message = $"Unable to sign in",
-            });
+            return ServiceResult<string>.Failure(
+                Error.With(ErrorCode.AuthorizationError,
+                $"Unable to sign in"));
         }
 
         var token = CreateJwtToken(user);
@@ -81,11 +77,9 @@ internal class JwtAuthenticator : ServiceBase, IAuthenticator
         var errorMessage = string.Join(
             "\n",
             result.Errors.Select(x => $"[{x.Code}] {x.Description}"));
-        return ServiceResult<string>.Failure(new Error
-        {
-            Code = ErrorCode.Undefined,
-            Message = errorMessage,
-        });
+
+        return ServiceResult<string>.Failure(
+            Error.With(ErrorCode.Undefined, errorMessage));
     }
     private JwtSecurityToken CreateJwtToken(ApplicationUser user)
     {
