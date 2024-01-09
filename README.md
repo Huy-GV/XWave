@@ -1,12 +1,13 @@
 # README.md
 
 ## About
-- Online store web server
+- Online store web API
 - Features:
     - View and purchase products as customer users
     - View transaction history and manage payment accounts as customer users
     - Manage products as staff and manager users
     - Manage staff activity as manager users
+- Technologies used: C#, xUnit, .NET Testcontainer, Hangfire, ASP.NET Core, Docker, MS SQL Server
 
 ##  Run Locally
 ### Pre-requisites
@@ -89,6 +90,11 @@
     cd /directory/containing/docker-compose.yaml/
     docker compose --env-file docker.env up --build
     ```
+
+## Run Integration Tests
+- To run integration tests:
+    - Ensure the secret `SeedData:Password` is set as it is used as the password for the test databases
+    - Ensure Docker engine is running and targeting Linux
 
 ### Usage
 - Sending request to retrieve available products: open `https://localhost:5000/api/product`
