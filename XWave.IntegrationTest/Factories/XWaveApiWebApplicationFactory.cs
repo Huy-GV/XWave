@@ -30,7 +30,7 @@ public class XWaveApiWebApplicationFactory : WebApplicationFactory<Program>, IAs
         _databasePassword = configuration["SeedData:Password"];
 
         _mssqlContainer = new ContainerBuilder()
-            .WithName($"XWaveTestcontainer_{DateTime.Now.Ticks}")
+            .WithName($"XWaveTestcontainer_{Guid.NewGuid()}")
             .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
             .WithPortBinding(MsSqlPort, UseRandomHostPort)
             .WithEnvironment("ACCEPT_EULA", "Y")

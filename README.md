@@ -9,7 +9,7 @@
     - Manage staff activity as manager users
 - Technologies used: C#, xUnit, .NET Testcontainer, Hangfire, ASP.NET Core, Docker, MS SQL Server
 
-##  Run Locally
+## Run Locally
 ### Pre-requisites
 - Required installations:
     - [.NET 6.0 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
@@ -57,6 +57,16 @@
     dotnet run --configuration Release
     ```
 
+### Run Integration Tests
+- Pre-requisites:
+    - Ensure the secret `SeedData:Password` is set as it is used as the password for the test databases
+    - Ensure the Docker engine is running and targeting Linux
+- Run the tests from the terminal:
+    ```bash
+    cd /directory/containing/XWave.IntegrationTest.csproj/
+    dotnet test
+    ```
+
 ## Run Inside Docker Container:
 - Start the Docker engine and ensure it is targeting *Linux*
 - Generate a certificate and store it in `~/.aspnet/https` on the host machine
@@ -90,11 +100,6 @@
     cd /directory/containing/docker-compose.yaml/
     docker compose --env-file docker.env up --build
     ```
-
-## Run Integration Tests
-- To run integration tests:
-    - Ensure the secret `SeedData:Password` is set as it is used as the password for the test databases
-    - Ensure Docker engine is running and targeting Linux
 
 ### Usage
 - Sending request to retrieve available products: open `https://localhost:5000/api/product`
