@@ -131,10 +131,10 @@ public class Program
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero,
-                    ValidIssuer = builder.Configuration["JWT:Issuer"],
-                    ValidAudience = builder.Configuration["JWT:Audience"],
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+                        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
                 };
             });
 
