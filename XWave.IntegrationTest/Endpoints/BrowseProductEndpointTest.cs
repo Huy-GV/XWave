@@ -140,12 +140,12 @@ public class BrowseProductEndpointTests : BaseTest
             var browseResponse = await httpClient.GetAsync("/api/product/private");
 
             browseResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-            var browseResponseBody = await browseResponse.Content.ReadAsStringAsync();
             var products = await browseResponse.Content.ReadFromJsonAsync<IEnumerable<DetailedProductDto>>()
                 ?? Enumerable.Empty<DetailedProductDto>();
 
-            products.Select(x => x.Id).Should().BeEquivalentTo(storedProductIds);
-            products.Select(x => x.LatestRestock).Should().NotBeNull();
+            var detailedProductDtos = products.ToList();
+            detailedProductDtos.Select(x => x.Id).Should().BeEquivalentTo(storedProductIds);
+            detailedProductDtos.Select(x => x.LatestRestock).Should().NotBeNull();
         }
     }
 

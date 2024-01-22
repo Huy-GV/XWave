@@ -47,7 +47,7 @@ internal class JwtAuthenticator : ServiceBase, IAuthenticator
                 $"Unable to sign in"));
         }
 
-        var token = CreateJwtToken(user);
+        var token = CreateJwtToken(user.UserName!, user.Id);
         var serializedToken = new JwtSecurityTokenHandler().WriteToken(token);
 
         return ServiceResult<string>.Success(serializedToken);
@@ -81,14 +81,17 @@ internal class JwtAuthenticator : ServiceBase, IAuthenticator
         return ServiceResult<string>.Failure(
             Error.With(ErrorCode.Undefined, errorMessage));
     }
-    private JwtSecurityToken CreateJwtToken(ApplicationUser user)
+
+    private JwtSecurityToken CreateJwtToken(string userName, string userId)
     {
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Sub, userName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString(CultureInfo.InvariantCulture)),
-            new Claim(XWaveClaimNames.UserId, user.Id)
+            new Claim(JwtRegisteredClaimNames.Iat, new DateTimeOffset(DateTime.UtcNow)
+                .ToUnixTimeSeconds()
+                .ToString(CultureInfo.InvariantCulture)),
+            new Claim(XWaveClaimNames.UserId, userId)
         };
 
         var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));

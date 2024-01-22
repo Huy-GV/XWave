@@ -71,7 +71,7 @@ public class AuthenticationEndpointTest : BaseTest
             .Select(x => new
             {
                 username = faker.Random.Bool() ? x : faker.Random.Word(),
-                password = faker.Random.WordsArray(20).Where(x => x != password).First()
+                password = faker.Random.WordsArray(20).First(x => x != password)
             })
             .Select(x => new StringContent(
                 JsonSerializer.Serialize(x),

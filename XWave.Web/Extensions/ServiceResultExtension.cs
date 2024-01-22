@@ -10,7 +10,7 @@ public static class ServiceResultExtension
     /// Map service result to HTTP result with a value based on its error status.
     /// </summary>
     /// <param name="result">Result to map.</param>
-    /// <param name="convertToHttpResult">Function that returns the value of successful results.</param>
+    /// <param name="convertToHttpResult">Function that converts successful service result to HTTP code.</param>
     /// <returns>A HTTP status result.</returns>
     public static ActionResult OnSuccess<T>(
         this ServiceResult<T> result,
@@ -25,7 +25,7 @@ public static class ServiceResultExtension
     /// Map service result to HTTP result based on its error status.
     /// </summary>
     /// <param name="result">Result to map.</param>
-    /// <param name="successfulResult">Value to return if result is successful.</param>
+    /// <param name="convertToHttpResult">Function that converts successful service result to HTTP code.</param>
     /// <returns>A HTTP status result.</returns>
     public static ActionResult OnSuccess(
         this ServiceResult result,

@@ -58,6 +58,6 @@ public class CustomerAccountController : ControllerBase
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _customerAccountService.UpdateSubscriptionAsync(customerId, isSubscribed);
-        return result.OnSuccess(() => NoContent());
+        return result.OnSuccess(NoContent);
     }
 }

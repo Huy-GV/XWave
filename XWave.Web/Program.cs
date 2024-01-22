@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -62,13 +61,10 @@ public class Program
         app.UseAuthentication();
         app.UseMiddleware<RoleAuthorizationMiddleware>();
         app.UseAuthorization();
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllerRoute(
+        app.MapControllerRoute(
                 "default",
                 "{controller}/{action=Index}/{id?}");
-        });
-
+        
         await app.RunAsync();
     }
 
@@ -110,9 +106,9 @@ public class Program
                 {
                     OnMessageReceived = context =>
                     {
-                        var cookieName = builder.Configuration["JwtCookie:Name"];
+                        var cookieName = builder.Configuration["JwtCookie:Name"]!;
 
-                        // set token to accommodate clients that do not support cookies
+                        // try populating token using value from cookie
                         if (string.IsNullOrEmpty(context.Token) &&
                             context.Request.Cookies.ContainsKey(cookieName))
                         {
@@ -134,15 +130,15 @@ public class Program
                     ValidIssuer = builder.Configuration["Jwt:Issuer"],
                     ValidAudience = builder.Configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
                 };
             });
 
-        builder.Services.AddAuthorization(options =>
-        {
-            options.AddPolicy(Policies.InternalPersonnelOnly,
+        builder.Services
+            .AddAuthorizationBuilder()
+            .AddPolicy(
+                Policies.InternalPersonnelOnly, 
                 policy => policy.RequireRole(RoleNames.Staff, RoleNames.Manager));
-        });
 
         builder.Services.AddScoped<RoleAuthorizationMiddleware>();
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -188,8 +184,8 @@ public class Program
         string GetDbConnectionString()
         {
             var (connectionKey, locationKey) = ("DefaultConnection", "DefaultDbLocation");
-            var connection = builder.Configuration.GetConnectionString(connectionKey);
-            var dbLocation = builder.Configuration.GetConnectionString(locationKey);
+            var connection = builder.Configuration.GetConnectionString(connectionKey)!;
+            var dbLocation = builder.Configuration.GetConnectionString(locationKey)!;
 
             if (string.IsNullOrEmpty(dbLocation))
             {

@@ -95,7 +95,7 @@ internal class UserSeeder
         XWaveDbContext dbContext,
         IConfiguration configuration)
     {
-        var password = configuration.GetValue<string>("SeedData:Password");
+        var password = configuration["SeedData:Password"]!;
         var result = await userManager.CreateAsync(user, password);
         if (result.Succeeded)
         {
@@ -136,7 +136,7 @@ internal class UserSeeder
         ApplicationUser staff,
         IConfiguration configuration)
     {
-        var password = configuration.GetValue<string>("SeedData:Password");
+        var password = configuration["SeedData:Password"]!;
         await userManager.CreateAsync(staff, password);
         await userManager.AddToRoleAsync(staff, RoleNames.Staff);
     }
@@ -182,7 +182,7 @@ internal class UserSeeder
         UserManager<ApplicationUser> userManager,
         IConfiguration configuration)
     {
-        var password = configuration.GetValue<string>("SeedData:Password");
+        var password = configuration["SeedData:Password"]!;
 
         await userManager.CreateAsync(manager, password);
         await userManager.AddToRoleAsync(manager, RoleNames.Manager);

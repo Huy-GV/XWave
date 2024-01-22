@@ -33,7 +33,7 @@ public class OrderController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _orderService.FindAllOrdersAsync(customerId);
 
-        return result.OnSuccess(x => Ok(x));
+        return result.OnSuccess(Ok);
     }
 
     [HttpGet("{id:int}")]
@@ -43,7 +43,7 @@ public class OrderController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _orderService.FindOrderByIdAsync(customerId, id);
 
-        return result.OnSuccess(x => Ok(x));
+        return result.OnSuccess(Ok);
     }
 
     [HttpPost]

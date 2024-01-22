@@ -50,7 +50,7 @@ public class ProductController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productManagementService.FindAllProductsForStaff(false, staffId);
 
-        return result.OnSuccess(x => Ok(x));
+        return result.OnSuccess(Ok);
     }
 
     [HttpGet("{id:int}")]
@@ -66,7 +66,7 @@ public class ProductController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productManagementService.FindProductByIdForStaff(id, staffId);
 
-        return result.OnSuccess(x => Ok(x));
+        return result.OnSuccess(Ok);
     }
 
     [HttpPost]
@@ -105,7 +105,7 @@ public class ProductController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productManagementService.DeleteProductAsync(id, managerId);
-        return result.OnSuccess(() => NoContent());
+        return result.OnSuccess(NoContent);
     }
 
     [HttpPut("discontinue/{updateSchedule}")]
@@ -114,7 +114,7 @@ public class ProductController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productManagementService.DiscontinueProductAsync(managerId, ids, updateSchedule);
-        return result.OnSuccess(() => NoContent());
+        return result.OnSuccess(NoContent);
     }
 
     [HttpPut("{id:int}/restart-sale/{updateSchedule:datetime}")]
@@ -123,7 +123,7 @@ public class ProductController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _productManagementService.RestartProductSaleAsync(managerId, id, updateSchedule);
-        return result.OnSuccess(() => NoContent());
+        return result.OnSuccess(NoContent);
     }
 
     [HttpDelete("{id}/cancel")]
@@ -137,6 +137,6 @@ public class ProductController : ControllerBase
                         ErrorCode.EntityNotFound,
                         $"Failed to remove background job ID {id}."));
 
-        return result.OnSuccess(() => NoContent());
+        return result.OnSuccess(NoContent);
     }
 }

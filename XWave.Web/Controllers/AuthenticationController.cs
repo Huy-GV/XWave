@@ -40,7 +40,7 @@ public class AuthenticationController : ControllerBase
 
         Response.Cookies.Delete(_jwtCookieConfig.Name);
         var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
-        Response.Cookies.Append(_jwtCookieConfig.Name, result.Value!, cookieOptions);
+        Response.Cookies.Append(_jwtCookieConfig.Name, result.Value, cookieOptions);
 
         return Ok(new JwtTokenDto { Token = result.Value });
     }

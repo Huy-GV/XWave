@@ -1,6 +1,6 @@
-﻿namespace XWave.Core.Data.Constants;
+namespace XWave.Core.Data.Constants;
 
 public static class XWaveClaimNames
 {
-    public const string UserId = nameof(UserId);
+    public const string UserId = "userId";
 }

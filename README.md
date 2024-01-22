@@ -12,7 +12,7 @@
 ## Run Locally
 ### Pre-requisites
 - Required installations:
-    - [.NET 6.0 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+    - [.NET 8.0 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
     - [Docker Community](https://www.docker.com/get-started/)
     - [Microsoft SQL Server](https://www.microsoft.com/en-au/sql-server/sql-server-downloads)
 - Install required Nuget packages:
@@ -36,7 +36,7 @@
     cd /directory/containing/XWave.Web.csproj/
 
     dotnet user-secrets set "Jwt:Issuer" "YourIssuerName"
-    dotnet user-secrets set "Jwt:Key" "AlphanumericKeyAtLeast16CharactersInLength"
+    dotnet user-secrets set "Jwt:Key" "AlphanumericKeyAtLeast32CharactersInLength"
     dotnet user-secrets set "Jwt:Audience" "YourAudienceName"
     ```
 - Set up database connection
@@ -83,7 +83,7 @@
         ```env
         # docker.env
         SeedData__Password=TestPassword123@@
-        Jwt__Key=A1B2C3D4E5F6G7H8I9J0K1L2M3N4O
+        Jwt__Key=A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6
         Jwt__Issuer=YourIssuerName
         Jwt__Audience=YourAudienceName
         ConnectionStrings__DefaultConnection=Server=sqlserver;Database=XWave;User ID=SA;Password=YourDbPassword;MultipleActiveResultSets=false;

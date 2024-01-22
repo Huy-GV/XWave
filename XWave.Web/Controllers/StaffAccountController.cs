@@ -33,46 +33,46 @@ public class StaffAccountController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffAccountService.GetAllStaffAccounts(managerId);
-        return result.OnSuccess(x => Ok(x));
+        return result.OnSuccess(Ok);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<StaffAccountDto>> GetStaffAccountById(string id)
+    [HttpGet("{staffId}")]
+    public async Task<ActionResult<StaffAccountDto>> GetStaffAccountById(string staffId)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        var result = await _staffAccountService.GetStaffAccountById(id, managerId);
-        return result.OnSuccess(x => Ok(x));
+        var result = await _staffAccountService.GetStaffAccountById(staffId, managerId);
+        return result.OnSuccess(Ok);
     }
 
-    [HttpPost("{id}")]
+    [HttpPost("{staffId}")]
     public async Task<ActionResult<StaffAccountDto>> RegisterStaffAccount(string staffId, StaffAccountViewModel viewModel)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffAccountService.RegisterStaffAccount(staffId, managerId, viewModel);
-        return result.OnSuccess(x => Ok(x));
+        return result.OnSuccess(Ok);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{staffId}")]
     public async Task<ActionResult<ServiceResult>> UpdateStaffAccount(
-        string staffAccountId,
+        string staffId,
         StaffAccountViewModel staffAccountViewModel)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _staffAccountService.UpdateStaffAccount(
-            staffAccountId,
+            staffId,
             managerId,
             staffAccountViewModel);
 
         return result.OnSuccess(() =>
-            this.Updated($"{this.ApiUrl()}/staff-account/{staffAccountId}"));
+            this.Updated($"{this.ApiUrl()}/staff-account/{staffId}"));
     }
 
-    [HttpDelete("{id}")]
-    public async Task<ActionResult<ServiceResult>> DeactivateStaffAccount(string staffAccountId)
+    [HttpDelete("{staffId}")]
+    public async Task<ActionResult<ServiceResult>> DeactivateStaffAccount(string staffId)
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
-        var result = await _staffAccountService.DeactivateStaffAccount(staffAccountId, managerId);
+        var result = await _staffAccountService.DeactivateStaffAccount(staffId, managerId);
         return result.OnSuccess(() =>
-            this.Updated($"{this.ApiUrl()}/staff-account/{staffAccountId}"));
+            this.Updated($"{this.ApiUrl()}/staff-account/{staffId}"));
     }
 }

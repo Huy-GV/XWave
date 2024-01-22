@@ -101,7 +101,7 @@ internal class PaymentAccountService : ServiceBase, IPaymentAccountService
     {
         if (!await _roleAuthorizer.IsUserInRoles(
             staffId,
-            new [] { RoleNames.Staff, RoleNames.Customer }))
+            [RoleNames.Staff, RoleNames.Customer]))
         {
             return ServiceResult<IReadOnlyCollection<PaymentAccount>>.Failure(
                 Error.With(ErrorCode.AuthorizationError));

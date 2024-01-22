@@ -34,7 +34,7 @@ public class DiscountController : ControllerBase
         return Ok(await _discountService.FindAllDiscountsAsync());
     }
 
-    [HttpGet("{id}/product")]
+    [HttpGet("{id:int}/product")]
     [Authorize(Policy = nameof(Policies.InternalPersonnelOnly))]
     public async Task<IEnumerable<Product>> GetProductsWithDiscount(int id)
     {
@@ -75,7 +75,7 @@ public class DiscountController : ControllerBase
     {
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountAsync(managerId, id);
-        return result.OnSuccess(() => NoContent());
+        return result.OnSuccess(NoContent);
     }
 
     [HttpPost("{id:int}/apply")]
@@ -89,7 +89,7 @@ public class DiscountController : ControllerBase
         }
 
         var result = await _discountService.ApplyDiscountToProducts(userId, id, productIds);
-        return result.OnSuccess(() => Ok());
+        return result.OnSuccess(Ok);
     }
 
     [HttpPost("{id}/remove")]
@@ -98,6 +98,6 @@ public class DiscountController : ControllerBase
     {
         var userId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _discountService.RemoveDiscountFromProductsAsync(userId, id, productIds);
-        return result.OnSuccess(() => Ok());
+        return result.OnSuccess(Ok);
     }
 }

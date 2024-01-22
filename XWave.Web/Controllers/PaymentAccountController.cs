@@ -34,7 +34,7 @@ public class PaymentAccountController : ControllerBase
         var staffId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.FindAllTransactionDetailsForStaffAsync(staffId);
 
-        return result.OnSuccess(x => Ok(x));
+        return result.OnSuccess(Ok);
     }
 
     [HttpGet()]
@@ -44,7 +44,7 @@ public class PaymentAccountController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.FindAllPaymentAccountsAsync(customerId);
 
-        return result.OnSuccess(x => Ok(x));
+        return result.OnSuccess(Ok);
     }
 
     [HttpGet("{id:int}")]
@@ -54,7 +54,7 @@ public class PaymentAccountController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.FindPaymentAccountAsync(id, customerId);
 
-        return result.OnSuccess(x => Ok(x));
+        return result.OnSuccess(Ok);
     }
 
     [HttpPost("delete/{paymentId:int}")]
@@ -64,7 +64,7 @@ public class PaymentAccountController : ControllerBase
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.RemovePaymentAccountAsync(customerId, paymentId);
 
-        return result.OnSuccess(() => NoContent());
+        return result.OnSuccess(NoContent);
     }
 
     [HttpPut("{id:int}")]

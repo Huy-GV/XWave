@@ -52,7 +52,7 @@ public class CategoryController : ControllerBase
         var managerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _categoryService.AddCategoryAsync(managerId, newCategory);
 
-        return result.OnSuccess(x => this.Created($"{this.ApiUrl()}/category/admin/{result.Value}"));
+        return result.OnSuccess(() => this.Created($"{this.ApiUrl()}/category/admin/{result.Value}"));
     }
 
     [HttpPut("{id:int}")]
@@ -77,6 +77,6 @@ public class CategoryController : ControllerBase
 
         var result = await _categoryService.DeleteCategoryAsync(managerId, id);
 
-        return result.OnSuccess(() => NoContent());
+        return result.OnSuccess(NoContent);
     }
 }

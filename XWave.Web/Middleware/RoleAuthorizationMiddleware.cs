@@ -47,8 +47,9 @@ public class RoleAuthorizationMiddleware : IMiddleware
         }
 
         var claim = new Claim(ClaimTypes.Role, roles.Single());
-        var roleClaimIdentity = new ClaimsIdentity(new[] { claim });
+        var roleClaimIdentity = new ClaimsIdentity([claim]);
         context.User.AddIdentity(roleClaimIdentity);
+
         await next(context);
     }
 }
