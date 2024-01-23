@@ -73,8 +73,7 @@ public class PaymentAccountController : ControllerBase
     {
         var customerId = _authenticationHelper.GetUserId(HttpContext.User.Identity);
         var result = await _paymentService.UpdatePaymentAccountAsync(customerId, id, viewModel);
-
-        // todo: add URL that returns payment account by ID
+        
         return result.OnSuccess(() => this.Updated($"{this.ApiUrl()}/payment/details/{id}"));
     }
 

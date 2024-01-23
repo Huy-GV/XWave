@@ -68,13 +68,12 @@ public class AuthenticationEndpointTest : BaseTest
         var faker = new Faker();
         var userNames = await dbContext.Users.Select(x => x.UserName).ToListAsync();
         var requests = userNames
-            .Select(x => new
-            {
-                username = faker.Random.Bool() ? x : faker.Random.Word(),
-                password = faker.Random.WordsArray(20).First(x => x != password)
-            })
             .Select(x => new StringContent(
-                JsonSerializer.Serialize(x),
+                JsonSerializer.Serialize(new
+                {
+                    username = faker.Random.Bool() ? x : faker.Random.Word(),
+                    password = faker.Random.WordsArray(20).First(p => p != password)
+                }),
                 Encoding.UTF8,
                 "application/json"));
 

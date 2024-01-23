@@ -4,7 +4,9 @@ namespace XWave.Core.Data.DatabaseSeeding.Factories;
 
 public static class TestOrderFactory
 {
-    public static List<Order> Orders(List<ApplicationUser> users, List<PaymentAccount> paymentAccounts)
+    public static List<Order> Orders(
+        IEnumerable<ApplicationUser> users, 
+        IEnumerable<PaymentAccount> paymentAccounts)
     {
         var paymentAccountIds = paymentAccounts.Select(x => x.Id).ToList();
         var userIds = users.Select(x => x.Id).ToList();
@@ -111,6 +113,6 @@ public static class TestOrderFactory
             }
         };
 
-        return orderDetail.DistinctBy(x => new { x.OrderId, x.ProductId }).ToList(); ;
+        return orderDetail.DistinctBy(x => new { x.OrderId, x.ProductId }).ToList();
     }
 }

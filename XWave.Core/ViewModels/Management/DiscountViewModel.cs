@@ -8,9 +8,11 @@ public class DiscountViewModel : IValidatableObject
     [Range(1, 100, ErrorMessage = "Discount percentage outside valid range")]
     public uint Percentage { get; set; }
 
-    [Required] public DateTime StartDate { get; set; }
+    [Required] 
+    public DateTime StartDate { get; set; }
 
-    [Required] public DateTime EndDate { get; set; }
+    [Required] 
+    public DateTime EndDate { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext _)
     {

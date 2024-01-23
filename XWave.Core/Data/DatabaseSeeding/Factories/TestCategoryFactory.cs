@@ -2,27 +2,29 @@
 
 namespace XWave.Core.Data.DatabaseSeeding.Factories;
 
-public class TestCategoryFactory
+public static class TestCategoryFactory
 {
     public static List<Category> Categories()
     {
-        return new List<Category>
-        {
-            new()
+        return
+        [
+            new Category
             {
                 Name = "GPU Cards",
                 Description = "Graphics processing units"
             },
-            new()
+
+            new Category
             {
                 Name = "Storages",
                 Description = "Hard drives, used to store data"
             },
-            new()
+
+            new Category
             {
                 Name = "Monitors",
                 Description = "Used to display the user interface"
             }
-        };
+        ];
     }
 }

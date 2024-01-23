@@ -4,7 +4,8 @@ namespace XWave.Core.ViewModels.Management;
 
 public class StaffAccountViewModel : IValidatableObject
 {
-    [Range(20, 500)] public uint HourlyWage { get; set; }
+    [Range(20, 500)] 
+    public uint HourlyWage { get; set; }
     public DateTime ContractEndDate { get; set; }
 
     public string ImmediateManagerId { get; set; } = string.Empty;

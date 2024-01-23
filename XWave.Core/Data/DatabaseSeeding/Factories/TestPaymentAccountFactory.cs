@@ -31,7 +31,9 @@ public static class TestPaymentAccountFactory
         return accounts;
     }
 
-    public static List<PaymentAccountDetails> PaymentAccountDetails(List<PaymentAccount> paymentAccounts, List<ApplicationUser> users)
+    public static List<PaymentAccountDetails> PaymentAccountDetails(
+        IEnumerable<PaymentAccount> paymentAccounts, 
+        IEnumerable<ApplicationUser> users)
     {
         var random = new Random();
         var userIds = users.Select(x => x.Id).ToList();

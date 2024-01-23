@@ -8,7 +8,7 @@ public static class DiscountDtoMapper
 {
     public static DiscountDto MapCustomerDiscountDto(Discount discount)
     {
-        return new()
+        return new DiscountDto
         {
             Percentage = discount.Percentage,
             EndDate = discount.EndDate
@@ -17,7 +17,7 @@ public static class DiscountDtoMapper
 
     public static DetailedDiscountDto MapDetailedDiscountDto(Discount discount)
     {
-        return new()
+        return new DetailedDiscountDto
         {
             Id = discount.Id,
             StartDate = discount.StartDate,

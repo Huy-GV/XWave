@@ -47,7 +47,7 @@ public class CustomerAccountController : ControllerBase
         }
 
         var cookieOptions = _authenticationHelper.CreateCookieOptions();
-        Response.Cookies.Append(_jwtCookieOptionsOptions.Name, result.Value!, cookieOptions);
+        Response.Cookies.Append(_jwtCookieOptionsOptions.Name, result.Value, cookieOptions);
 
         return Ok(result.Value);
     }

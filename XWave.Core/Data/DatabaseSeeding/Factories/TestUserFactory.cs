@@ -23,7 +23,7 @@ public static class TestUserFactory
             PhoneNumber = "98765432"
         };
 
-        return new List<ApplicationUser>() { manager1, manager2 };
+        return [manager1, manager2];
     }
 
     public static List<ApplicationUser> StaffUsers()
@@ -46,7 +46,7 @@ public static class TestUserFactory
             PhoneNumber = "2345678"
         };
 
-        return new List<ApplicationUser>() { staff1, staff2 };
+        return [staff1, staff2];
     }
 
     public static List<ApplicationUser> CustomerUsers()
@@ -69,7 +69,7 @@ public static class TestUserFactory
             PhoneNumber = "98765432"
         };
 
-        return new List<ApplicationUser>() { customer1, customer2 };
+        return [customer1, customer2];
     }
 
     public static List<StaffAccount> StaffAccounts(IEnumerable<ApplicationUser> managers, IEnumerable<ApplicationUser> staffUsers)

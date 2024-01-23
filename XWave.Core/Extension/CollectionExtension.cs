@@ -6,6 +6,6 @@ public static class CollectionExtension
 {
     public static IReadOnlyCollection<T> AsIReadonlyCollection<T>(this IList<T> list)
     {
-        return (IReadOnlyCollection<T>)new ReadOnlyCollection<T>(list);
+        return new ReadOnlyCollection<T>(list);
     }
 }

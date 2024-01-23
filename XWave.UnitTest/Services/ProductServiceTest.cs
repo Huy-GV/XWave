@@ -270,7 +270,7 @@ public class ProductServiceTest : BaseTest
     {
         var faker = new Faker<string[]>()
             .CustomInstantiator(f => f.Random
-                    .ArrayElements(new[]  { "Customer", f.Random.Word() })
+                    .ArrayElements(["Customer", f.Random.Word()])
                     .Where(role => role is not "Staff" and not "Manager")
                     .ToArray());
 

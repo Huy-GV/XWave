@@ -25,12 +25,12 @@ public record ServiceResult<TResult> : ServiceResult where TResult : notnull
         return new ServiceResult<TResultValue>(value);
     }
 
-    public static new ServiceResult<TResult> Failure(Error error)
+    public new static ServiceResult<TResult> Failure(Error error)
     {
         return new ServiceResult<TResult>(error);
     }
 
-    public static new ServiceResult<TResult> UnknownFailure()
+    public new static ServiceResult<TResult> UnknownFailure()
     {
         return Failure(Error.UnknownError());
     }

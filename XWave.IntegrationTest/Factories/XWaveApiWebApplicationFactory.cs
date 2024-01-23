@@ -27,7 +27,7 @@ public class XWaveApiWebApplicationFactory : WebApplicationFactory<Program>, IAs
     {
         var configuration = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
 
-        _databasePassword = configuration["SeedData:Password"];
+        _databasePassword = configuration["SeedData:Password"]!;
 
         _mssqlContainer = new ContainerBuilder()
             .WithName($"XWaveTestcontainer_{Guid.NewGuid()}")

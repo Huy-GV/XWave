@@ -12,7 +12,7 @@ public record ServiceResult
         Error = Error.NoError();
     }
 
-    protected ServiceResult(Error error)
+    private ServiceResult(Error error)
     {
         Succeeded = false;
         Error = error;
@@ -38,6 +38,6 @@ public record ServiceResult
     /// <returns></returns>
     public static ServiceResult Success()
     {
-        return new();
+        return new ServiceResult();
     }
 }
