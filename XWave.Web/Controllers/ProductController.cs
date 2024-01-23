@@ -20,14 +20,14 @@ namespace XWave.Web.Controllers;
 [ApiController]
 public class ProductController : ControllerBase
 {
-    private readonly AuthenticationHelper _authenticationHelper;
+    private readonly IAuthenticationHelper _authenticationHelper;
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IProductManagementService _productManagementService;
     private readonly ICustomerProductBrowser _customerProductBrowser;
 
     public ProductController(
         IProductManagementService productService,
-        AuthenticationHelper authenticationHelper,
+        IAuthenticationHelper authenticationHelper,
         IBackgroundJobClient backgroundJobService,
         ICustomerProductBrowser customerProductBrowser)
     {

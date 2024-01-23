@@ -16,12 +16,11 @@ namespace XWave.Web.Controllers;
 public class ActivityController : ControllerBase
 {
     private readonly IStaffActivityLogger _staffActivityService;
-
-    private readonly AuthenticationHelper _authenticationHelper;
+    private readonly IAuthenticationHelper _authenticationHelper;
 
     public ActivityController(
         IStaffActivityLogger staffActivityService,
-        AuthenticationHelper authenticationHelper)
+        IAuthenticationHelper authenticationHelper)
     {
         _staffActivityService = staffActivityService;
         _authenticationHelper = authenticationHelper;

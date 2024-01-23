@@ -5,11 +5,11 @@ using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using XWave.Core.Configuration;
 using XWave.Core.Data;
 using XWave.Core.Data.Constants;
 using XWave.Core.Extension;
 using XWave.Core.Models;
+using XWave.Core.Options;
 using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.ViewModels.Authentication;
@@ -18,16 +18,16 @@ namespace XWave.Core.Services.Implementations;
 
 internal class JwtAuthenticator : ServiceBase, IAuthenticator
 {
-    private readonly Jwt _jwt;
+    private readonly JwtOptions _jwtOptionsOptions;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public JwtAuthenticator(
         UserManager<ApplicationUser> userManager,
-        IOptions<Jwt> jwt,
+        IOptions<JwtOptions> jwtOptions,
         XWaveDbContext dbContext) : base(dbContext)
     {
         _userManager = userManager;
-        _jwt = jwt.Value;
+        _jwtOptionsOptions = jwtOptions.Value;
     }
 
     public async Task<ServiceResult<string>> SignInAsync(SignInViewModel viewModel)
@@ -94,16 +94,16 @@ internal class JwtAuthenticator : ServiceBase, IAuthenticator
             new Claim(XWaveClaimNames.UserId, userId)
         };
 
-        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptionsOptions.Key));
         var signingCredentials = new SigningCredentials(
             symmetricSecurityKey,
             SecurityAlgorithms.HmacSha256);
 
         var jwtSecurityToken = new JwtSecurityToken(
-            _jwt.Issuer,
-            _jwt.Audience,
+            _jwtOptionsOptions.Issuer,
+            _jwtOptionsOptions.Audience,
             claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwt.DurationInMinutes),
+            expires: DateTime.UtcNow.AddMinutes(_jwtOptionsOptions.DurationInMinutes),
             signingCredentials: signingCredentials);
 
         return jwtSecurityToken;

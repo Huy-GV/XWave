@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace XWave.Core.Configuration;
+namespace XWave.Web.Options;
 
-public class JwtCookie
+public class JwtCookieOptions
 {
     [Required]
     public required string Name { get; init; }

@@ -15,12 +15,12 @@ namespace XWave.Web.Controllers;
 [ApiController]
 public class OrderController : ControllerBase
 {
-    private readonly AuthenticationHelper _authenticationHelper;
+    private readonly IAuthenticationHelper _authenticationHelper;
     private readonly IOrderService _orderService;
 
     public OrderController(
         IOrderService orderService,
-        AuthenticationHelper authenticationHelper)
+        IAuthenticationHelper authenticationHelper)
     {
         _orderService = orderService;
         _authenticationHelper = authenticationHelper;

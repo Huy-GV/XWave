@@ -2,15 +2,19 @@
 using System.Security.Claims;
 using System.Security.Principal;
 using Microsoft.AspNetCore.Http;
-using XWave.Core.Configuration;
+using Microsoft.Extensions.Options;
 using XWave.Core.Data.Constants;
+using XWave.Web.Options;
 
 namespace XWave.Web.Utils;
 
-public class AuthenticationHelper
+public class AuthenticationHelper : IAuthenticationHelper
 {
-    public AuthenticationHelper()
+    private readonly JwtCookieOptions _jwtCookieOptions;
+    
+    public AuthenticationHelper(IOptions<JwtCookieOptions> jwtCookieOptions)
     {
+        _jwtCookieOptions = jwtCookieOptions.Value;
     }
 
     public string GetUserId(IIdentity? identity)
@@ -25,13 +29,13 @@ public class AuthenticationHelper
         return claimsIdentity?.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
     }
 
-    public CookieOptions CreateCookieOptions(JwtCookie cookieOptions)
+    public CookieOptions CreateCookieOptions()
     {
         return new CookieOptions
         {
-            Expires = DateTime.UtcNow.AddDays(cookieOptions.DurationInDays),
+            Expires = DateTime.UtcNow.AddDays(_jwtCookieOptions.DurationInDays),
             Secure = true,
-            HttpOnly = cookieOptions.HttpOnly
+            HttpOnly = _jwtCookieOptions.HttpOnly
         };
     }
 }

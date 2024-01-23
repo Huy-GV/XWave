@@ -1,12 +1,12 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using XWave.Core.Configuration;
 using XWave.Core.DTOs.Shared;
 using XWave.Core.Services.Communication;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.ViewModels.Authentication;
 using XWave.Web.Extensions;
+using XWave.Web.Options;
 using XWave.Web.Utils;
 
 namespace XWave.Web.Controllers;
@@ -15,16 +15,16 @@ namespace XWave.Web.Controllers;
 [Route("api/auth")]
 public class AuthenticationController : ControllerBase
 {
-    private readonly AuthenticationHelper _authenticationHelper;
+    private readonly IAuthenticationHelper _authenticationHelper;
     private readonly IAuthenticator _authenticator;
-    private readonly JwtCookie _jwtCookieOptions;
+    private readonly JwtCookieOptions _jwtCookieOptionsOptions;
 
     public AuthenticationController(
         IAuthenticator authenticator,
-        AuthenticationHelper authenticationHelper,
-        IOptions<JwtCookie> jwtCookieOptions)
+        IAuthenticationHelper authenticationHelper,
+        IOptions<JwtCookieOptions> jwtCookieOptions)
     {
-        _jwtCookieOptions = jwtCookieOptions.Value;
+        _jwtCookieOptionsOptions = jwtCookieOptions.Value;
         _authenticator = authenticator;
         _authenticationHelper = authenticationHelper;
     }
@@ -38,9 +38,9 @@ public class AuthenticationController : ControllerBase
             return result.Error.MapToHttpResult();
         }
 
-        Response.Cookies.Delete(_jwtCookieOptions.Name);
-        var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieOptions);
-        Response.Cookies.Append(_jwtCookieOptions.Name, result.Value, cookieOptions);
+        Response.Cookies.Delete(_jwtCookieOptionsOptions.Name);
+        var cookieOptions = _authenticationHelper.CreateCookieOptions();
+        Response.Cookies.Append(_jwtCookieOptionsOptions.Name, result.Value, cookieOptions);
 
         return Ok(new JwtTokenDto { Token = result.Value });
     }
@@ -48,7 +48,7 @@ public class AuthenticationController : ControllerBase
     [HttpPost]
     public ActionResult SignOutAsync()
     {
-        Response.Cookies.Delete(_jwtCookieOptions.Name);
+        Response.Cookies.Delete(_jwtCookieOptionsOptions.Name);
 
         return NoContent();
     }

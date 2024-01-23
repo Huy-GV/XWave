@@ -11,12 +11,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using XWave.Core.Configuration;
 using XWave.Core.Data.Constants;
 using XWave.Core.Extension;
+using XWave.Core.Options;
 using XWave.Web.Data;
 using XWave.Web.Extensions;
 using XWave.Web.Middleware;
+using XWave.Web.Options;
 using XWave.Web.Utils;
 
 namespace XWave.Web;
@@ -81,21 +82,21 @@ public class Program
 
         // configure JWT
         builder.Services
-            .AddOptions<Jwt>()
+            .AddOptions<JwtOptions>()
             .BindConfiguration("Jwt")
             .ValidateDataAnnotations()
             .ValidateOnStart();
         
         builder.Services
-            .AddOptions<JwtCookie>()
+            .AddOptions<JwtCookieOptions>()
             .BindConfiguration("JwtCookie")
             .ValidateDataAnnotations()
             .ValidateOnStart();
         
         // configure core services and controllers
-        builder.Services.AddTransient<AuthenticationHelper>();
+        builder.Services.AddTransient<IAuthenticationHelper, AuthenticationHelper>();
         builder.Services.AddControllers();
-        builder.Services.AddDefaultXWaveServices();
+        builder.Services.AddCoreServices();
 
         // configure databases
         var dbConnectionString = GetDbConnectionString();
@@ -117,7 +118,7 @@ public class Program
                     {
                         var cookieName = builder.Configuration["JwtCookie:Name"]!;
 
-                        // try populating token using value from cookie
+                        // try populating token using the value from cookie
                         if (string.IsNullOrEmpty(context.Token) &&
                             context.Request.Cookies.ContainsKey(cookieName))
                         {

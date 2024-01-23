@@ -14,7 +14,7 @@ namespace XWave.Core.Extension;
 
 public static class ServiceCollectionExtension
 {
-    public static void AddDefaultXWaveServices(this IServiceCollection services)
+    public static void AddCoreServices(this IServiceCollection services)
     {
         services.AddScoped<IStaffActivityLogger, StaffActivityLogger>();
         services.AddScoped<IOrderService, OrderService>();

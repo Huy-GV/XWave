@@ -18,11 +18,11 @@ namespace XWave.Web.Controllers;
 public class StaffAccountController : ControllerBase
 {
     private readonly IStaffAccountService _staffAccountService;
-    private readonly AuthenticationHelper _authenticationHelper;
+    private readonly IAuthenticationHelper _authenticationHelper;
 
     public StaffAccountController(
         IStaffAccountService staffAccountService,
-        AuthenticationHelper authenticationHelper)
+        IAuthenticationHelper authenticationHelper)
     {
         _staffAccountService = staffAccountService;
         _authenticationHelper = authenticationHelper;

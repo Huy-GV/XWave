@@ -2,13 +2,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using XWave.Core.Configuration;
 using XWave.Core.Data.Constants;
 using XWave.Core.Services.Interfaces;
 using XWave.Core.ViewModels.Authentication;
 using XWave.Web.Utils;
 using XWave.Core.Services.Communication;
 using XWave.Web.Extensions;
+using XWave.Web.Options;
 
 namespace XWave.Web.Controllers;
 
@@ -16,16 +16,16 @@ namespace XWave.Web.Controllers;
 [ApiController]
 public class CustomerAccountController : ControllerBase
 {
-    private readonly AuthenticationHelper _authenticationHelper;
+    private readonly IAuthenticationHelper _authenticationHelper;
     private readonly ICustomerAccountService _customerAccountService;
-    private readonly JwtCookie _jwtCookieOptions;
+    private readonly JwtCookieOptions _jwtCookieOptionsOptions;
 
     public CustomerAccountController(
-        AuthenticationHelper authenticationHelper,
+        IAuthenticationHelper authenticationHelper,
         ICustomerAccountService customerAccountService,
-        IOptions<JwtCookie> jwtCookieOptions)
+        IOptions<JwtCookieOptions> jwtCookieOptions)
     {
-        _jwtCookieOptions = jwtCookieOptions.Value;
+        _jwtCookieOptionsOptions = jwtCookieOptions.Value;
         _authenticationHelper = authenticationHelper;
         _customerAccountService = customerAccountService;
     }
@@ -41,13 +41,13 @@ public class CustomerAccountController : ControllerBase
             return BadRequest(result.Error);
         }
 
-        if (Request.Cookies.ContainsKey(_jwtCookieOptions.Name))
+        if (Request.Cookies.ContainsKey(_jwtCookieOptionsOptions.Name))
         {
-            Response.Cookies.Delete(_jwtCookieOptions.Name);
+            Response.Cookies.Delete(_jwtCookieOptionsOptions.Name);
         }
 
-        var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieOptions);
-        Response.Cookies.Append(_jwtCookieOptions.Name, result.Value!, cookieOptions);
+        var cookieOptions = _authenticationHelper.CreateCookieOptions();
+        Response.Cookies.Append(_jwtCookieOptionsOptions.Name, result.Value!, cookieOptions);
 
         return Ok(result.Value);
     }

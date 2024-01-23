@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using XWave.Core.Data.Constants;
-using XWave.Core.Data.DatabaseSeeding.Seeders;
 using XWave.Core.Models;
 
-namespace XWave.Core.Data.DatabaseSeeding;
+namespace XWave.Core.Data.DatabaseSeeding.Seeders;
 
 internal class StaffActivitySeeder
 {

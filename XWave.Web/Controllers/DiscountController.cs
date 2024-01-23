@@ -16,12 +16,12 @@ namespace XWave.Web.Controllers;
 [ApiController]
 public class DiscountController : ControllerBase
 {
-    private readonly AuthenticationHelper _authenticationHelper;
+    private readonly IAuthenticationHelper _authenticationHelper;
     private readonly IDiscountService _discountService;
 
     public DiscountController(
         IDiscountService discountService,
-        AuthenticationHelper authenticationHelper)
+        IAuthenticationHelper authenticationHelper)
     {
         _discountService = discountService;
         _authenticationHelper = authenticationHelper;

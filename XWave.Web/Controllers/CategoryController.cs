@@ -16,12 +16,12 @@ namespace XWave.Web.Controllers;
 [ApiController]
 public class CategoryController : ControllerBase
 {
-    private readonly AuthenticationHelper _authenticationHelper;
+    private readonly IAuthenticationHelper _authenticationHelper;
     private readonly ICategoryService _categoryService;
 
     public CategoryController(
         ICategoryService categoryService,
-        AuthenticationHelper authenticationHelper)
+        IAuthenticationHelper authenticationHelper)
     {
         _authenticationHelper = authenticationHelper;
         _categoryService = categoryService;

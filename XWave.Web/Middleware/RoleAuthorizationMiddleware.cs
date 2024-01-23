@@ -4,21 +4,21 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using XWave.Core.Configuration;
+using XWave.Web.Options;
 
 namespace XWave.Web.Middleware;
 
 public class RoleAuthorizationMiddleware : IMiddleware
 {
-    private readonly JwtCookie _jwtCookieOptions;
+    private readonly JwtCookieOptions _jwtCookieOptionsOptions;
     private readonly Core.Services.Interfaces.IRoleAuthorizer _roleAuthorizer;
 
     public RoleAuthorizationMiddleware(
         Core.Services.Interfaces.IRoleAuthorizer roleAuthorizer,
-        IOptions<JwtCookie> jwtCookieOptions)
+        IOptions<JwtCookieOptions> jwtCookieOptions)
     {
         _roleAuthorizer = roleAuthorizer;
-        _jwtCookieOptions = jwtCookieOptions.Value;
+        _jwtCookieOptionsOptions = jwtCookieOptions.Value;
     }
 
     // todo: why does ASP erase sub and name claims and add name id claim?
@@ -26,7 +26,7 @@ public class RoleAuthorizationMiddleware : IMiddleware
     {
         if (!context.User.Identity?.IsAuthenticated ?? true)
         {
-            context.Response.Cookies.Delete(_jwtCookieOptions.Name);
+            context.Response.Cookies.Delete(_jwtCookieOptionsOptions.Name);
             await next.Invoke(context);
             return;
         }
@@ -34,7 +34,7 @@ public class RoleAuthorizationMiddleware : IMiddleware
         var userName = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userName))
         {
-            context.Response.Cookies.Delete(_jwtCookieOptions.Name);
+            context.Response.Cookies.Delete(_jwtCookieOptionsOptions.Name);
             await context.ChallengeAsync();
             return;
         }

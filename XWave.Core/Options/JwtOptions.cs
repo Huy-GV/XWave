@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace XWave.Core.Configuration;
+namespace XWave.Core.Options;
 
-public class Jwt
+public class JwtOptions
 {
     [Required]
     [MinLength(32)]

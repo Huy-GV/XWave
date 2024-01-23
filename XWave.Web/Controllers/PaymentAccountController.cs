@@ -16,12 +16,12 @@ namespace XWave.Web.Controllers;
 [ApiController]
 public class PaymentAccountController : ControllerBase
 {
-    private readonly AuthenticationHelper _authenticationHelper;
+    private readonly IAuthenticationHelper _authenticationHelper;
     private readonly IPaymentAccountService _paymentService;
 
     public PaymentAccountController(
         IPaymentAccountService paymentService,
-        AuthenticationHelper authenticationHelper)
+        IAuthenticationHelper authenticationHelper)
     {
         _paymentService = paymentService;
         _authenticationHelper = authenticationHelper;
