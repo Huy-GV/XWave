@@ -46,7 +46,7 @@ public class CustomerAccountController : ControllerBase
             Response.Cookies.Delete(_jwtCookieOptions.Name);
         }
 
-        var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieOptions.DurationInDays);
+        var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieOptions);
         Response.Cookies.Append(_jwtCookieOptions.Name, result.Value!, cookieOptions);
 
         return Ok(result.Value);

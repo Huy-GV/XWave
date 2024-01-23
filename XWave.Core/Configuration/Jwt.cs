@@ -1,9 +1,19 @@
-﻿namespace XWave.Core.Configuration;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace XWave.Core.Configuration;
 
 public class Jwt
 {
-    public string Key { get; set; } = string.Empty;
-    public string Issuer { get; set; } = string.Empty;
-    public string Audience { get; set; } = string.Empty;
-    public double DurationInMinutes { get; set; }
+    [Required]
+    [MinLength(32)]
+    public required string Key { get; init; } 
+    
+    [Required]
+    public required string  Issuer { get; init; } 
+    
+    [Required]
+    public required string Audience { get; init; }
+
+    [Required]
+    public required double DurationInMinutes { get; init; }
 }

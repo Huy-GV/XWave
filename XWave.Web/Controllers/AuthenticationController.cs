@@ -17,14 +17,14 @@ public class AuthenticationController : ControllerBase
 {
     private readonly AuthenticationHelper _authenticationHelper;
     private readonly IAuthenticator _authenticator;
-    private readonly JwtCookie _jwtCookieConfig;
+    private readonly JwtCookie _jwtCookieOptions;
 
     public AuthenticationController(
         IAuthenticator authenticator,
         AuthenticationHelper authenticationHelper,
         IOptions<JwtCookie> jwtCookieOptions)
     {
-        _jwtCookieConfig = jwtCookieOptions.Value;
+        _jwtCookieOptions = jwtCookieOptions.Value;
         _authenticator = authenticator;
         _authenticationHelper = authenticationHelper;
     }
@@ -38,9 +38,9 @@ public class AuthenticationController : ControllerBase
             return result.Error.MapToHttpResult();
         }
 
-        Response.Cookies.Delete(_jwtCookieConfig.Name);
-        var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieConfig.DurationInDays);
-        Response.Cookies.Append(_jwtCookieConfig.Name, result.Value, cookieOptions);
+        Response.Cookies.Delete(_jwtCookieOptions.Name);
+        var cookieOptions = _authenticationHelper.CreateCookieOptions(_jwtCookieOptions);
+        Response.Cookies.Append(_jwtCookieOptions.Name, result.Value, cookieOptions);
 
         return Ok(new JwtTokenDto { Token = result.Value });
     }
@@ -48,7 +48,7 @@ public class AuthenticationController : ControllerBase
     [HttpPost]
     public ActionResult SignOutAsync()
     {
-        Response.Cookies.Delete(_jwtCookieConfig.Name);
+        Response.Cookies.Delete(_jwtCookieOptions.Name);
 
         return NoContent();
     }

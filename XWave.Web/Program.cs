@@ -80,9 +80,18 @@ public class Program
         builder.Services.AddDataSeeder(builder.Environment.EnvironmentName);
 
         // configure JWT
-        builder.Services.Configure<Jwt>(builder.Configuration.GetSection("Jwt"));
-        builder.Services.Configure<JwtCookie>(builder.Configuration.GetSection("JwtCookie"));
-
+        builder.Services
+            .AddOptions<Jwt>()
+            .BindConfiguration("Jwt")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        
+        builder.Services
+            .AddOptions<JwtCookie>()
+            .BindConfiguration("JwtCookie")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        
         // configure core services and controllers
         builder.Services.AddTransient<AuthenticationHelper>();
         builder.Services.AddControllers();

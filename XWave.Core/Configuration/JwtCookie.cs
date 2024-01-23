@@ -1,8 +1,15 @@
-﻿namespace XWave.Core.Configuration;
+using System.ComponentModel.DataAnnotations;
+
+namespace XWave.Core.Configuration;
 
 public class JwtCookie
 {
-    public string Name { get; set; } = string.Empty;
-    public bool HttpOnly { get; set; }
-    public int DurationInDays { get; set; }
+    [Required]
+    public required string Name { get; init; }
+
+    [Required] 
+    public required bool HttpOnly { get; init; } = true;
+    
+    [Required]
+    public required int DurationInDays { get; init; }
 }
